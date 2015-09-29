@@ -10,9 +10,20 @@
 
 #include "TextureView.h"
 
+#ifndef HID_USAGE_PAGE_GENERIC
+#define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
+#endif
+#ifndef HID_USAGE_GENERIC_MOUSE
+#define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
+#endif
+
 WiimoteInterface wiimote_interface;
 WiimoteHandler* wiimote;
 VRBackendBasics graphics_objects;
+const float movement_scale = 0.001f;
+const float mouse_theta_scale = 0.001f;
+const float mouse_phi_scale = 0.001f;
+const float pi = 3.141593;
 
 Entity makewiimote(const VRBackendBasics& graphics_objects) {
 	std::vector<Vertex> vertices;
@@ -110,7 +121,17 @@ void GraphicsLoop() {
 
 	graphics_objects.entity_handler->FinishUpdate();
 
+	RAWINPUTDEVICE Rid[1];
+	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
+	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
+	Rid[0].dwFlags = RIDEV_INPUTSINK;
+	Rid[0].hwndTarget = graphics_objects.view_state->window_handler;
+	RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+
 	Quaternion obj_orient;
+	std::array<float, 3> player_location = { { 0, 0, 0 } };
+	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
+	std::array<float, 2> player_orientation_angles = { { 0, 0 } };
 
 	while (TRUE)
 	{
@@ -140,6 +161,37 @@ void GraphicsLoop() {
 		}
 		TimeTracker::FrameEvent("Windows Message Handling");
 
+		int new_time = timeGetTime();
+		int time_delta_ms = new_time - prev_time;
+		prev_time = new_time;
+
+		graphics_objects.input_handler->UpdateStates(frame_index);
+
+		TimeTracker::FrameEvent("Update states");
+
+		if (graphics_objects.input_handler->GetKeyPressed('W')) {
+			player_location[2] -= time_delta_ms * movement_scale;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('S')) {
+			player_location[2] += time_delta_ms * movement_scale;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('A')) {
+			player_location[0] -= time_delta_ms * movement_scale;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('D')) {
+			player_location[0] += time_delta_ms * movement_scale;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('Q')) {
+			player_location[1] -= time_delta_ms * movement_scale;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('E')) {
+			player_location[1] += time_delta_ms * movement_scale;
+		}
+		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
+		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
+		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		TimeTracker::FrameEvent("Update Game Objects");
+
 		if (wiimote) {
 			obj_orient = wiimote->GetCurrentState().orientation;
 		}
@@ -161,22 +213,18 @@ void GraphicsLoop() {
 			DirectX::XMMatrixTranslation(0, -1.75, -1)));
 
 		TimeTracker::FrameEvent("Load Wiimote information");
-
+		
 		graphics_objects.entity_handler->FinishUpdate();
 		
 		TimeTracker::FrameEvent("Finalize object position stuff");
 
-		int new_time = timeGetTime();
-		int time_delta = new_time - prev_time;
-		prev_time = new_time;
 
-		graphics_objects.input_handler->UpdateStates(frame_index);
-		graphics_objects.world->UpdateLogic(time_delta);
-
-		TimeTracker::FrameEvent("Update states");
-
-		graphics_objects.render_pipeline->Render();
-
+		if (graphics_objects.input_handler->IsOculusActive()) {
+			Quaternion combined_orientation = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation)*Quaternion();
+			graphics_objects.render_pipeline->Render({ player_location, combined_orientation });
+		} else {
+			graphics_objects.render_pipeline->Render({ player_location, Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]) });
+		}
 		TimeTracker::FrameEvent("Actual rendering");
 
 		++frame_index;
