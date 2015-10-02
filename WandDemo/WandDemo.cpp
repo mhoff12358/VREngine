@@ -7,8 +7,9 @@
 
 #include "BeginDirectx.h"
 #include "TimeTracker.h"
-
 #include "TextureView.h"
+
+#include "LightDetails.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -90,7 +91,7 @@ Entity makewiimote(const VRBackendBasics& graphics_objects) {
 }
 
 Entity makeconsole(const VRBackendBasics& graphics_objects) {
-	Model model = graphics_objects.resource_pool->LoadModel("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f } }, ObjLoader::vertex_type_all });
+	Model model = graphics_objects.resource_pool->LoadModel("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
 
 	ConstantBufferTyped<TransformationMatrixAndInvTransData>* object_settings = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
 	object_settings->CreateBuffer(graphics_objects.view_state->device_interface);
@@ -100,13 +101,31 @@ Entity makeconsole(const VRBackendBasics& graphics_objects) {
 	Texture texture = graphics_objects.resource_pool->LoadTexture("console.png");
 	TextureView texture_view(0, 0, texture);
 
-	return Entity(ES_NORMAL,
-		graphics_objects.resource_pool->LoadPixelShader("texturednormaledshader.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("texturednormaledshader.hlsl", ObjLoader::vertex_type_all.GetVertexType(), ObjLoader::vertex_type_all.GetSizeVertexType()),
+	return Entity(
+		ES_NORMAL,
+		PixelShader(),
+		VertexShader(),
 		ShaderSettings(NULL),
 		model,
 		object_settings,
 		texture_view);
+}
+
+Entity makeshaderselection(const VRBackendBasics& graphics_objects) {
+	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
+	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
+	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
+	light_details.SetLightDirection({ { 1, -1, 0 } });
+	light_details.ambient_light = 0.2f;
+	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
+
+	return Entity(
+		ES_SETTINGS,
+		graphics_objects.resource_pool->LoadPixelShader("texturedspecular.hlsl"),
+		graphics_objects.resource_pool->LoadVertexShader("texturedspecular.hlsl", ObjLoader::vertex_type_all.GetVertexType(), ObjLoader::vertex_type_all.GetSizeVertexType()),
+		ShaderSettings(shader_settings_buffer),
+		Model(),
+		NULL);
 }
 
 void GraphicsLoop() {
@@ -117,6 +136,8 @@ void GraphicsLoop() {
 	unsigned int wiimote_entity_id = graphics_objects.entity_handler->AddEntity(makewiimote(graphics_objects));
 	graphics_objects.entity_handler->DisableEntity(wiimote_entity_id);
 
+	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
+
 	unsigned int console_entity_id = graphics_objects.entity_handler->AddEntity(makeconsole(graphics_objects));
 
 	graphics_objects.entity_handler->FinishUpdate();
@@ -126,7 +147,9 @@ void GraphicsLoop() {
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
 	Rid[0].dwFlags = RIDEV_INPUTSINK;
 	Rid[0].hwndTarget = graphics_objects.view_state->window_handler;
-	RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+	if (RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE) {
+		std::cout << "Error registering raw input device" << std::endl;
+	}
 
 	Quaternion obj_orient;
 	std::array<float, 3> player_location = { { 0, 0, 0 } };
@@ -240,8 +263,9 @@ void GraphicsLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	wiimote_interface.Startup();
-	wiimote = wiimote_interface.GetHandler();
+	//wiimote_interface.Startup();
+	//wiimote = wiimote_interface.GetHandler();
+	wiimote = NULL;
 
 	graphics_objects = BeginDirectx(false, "");
 	TimeTracker::PreparePerformanceCounter();

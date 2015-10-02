@@ -27,6 +27,9 @@
     <ClInclude Include="WiimoteInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="LightDetails.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -38,6 +41,9 @@
     <ClCompile Include="WiimoteInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LightDetails.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="objshader.hlsl">
@@ -47,6 +53,12 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="texturednormaledshader.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="normaldump.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="texturedspecular.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>
