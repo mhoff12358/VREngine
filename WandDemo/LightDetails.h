@@ -12,7 +12,11 @@ struct LightDetails {
 	DirectX::XMFLOAT3 light_direction;
 	float ambient_light;
 
+	// Sets the direction that the light shines in. This is a vector from the light source to the object.
+	// This is scaled by -1 in order to be in the proper form for the shader.
 	void SetLightDirection(std::array<float, 3> direction);
+	// Sets the direction to the light source. This is a vector from the object the the light source.
+	void SetLightSourceDirection(std::array<float, 3> direction);
 };
 
 template <>

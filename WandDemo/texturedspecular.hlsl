@@ -32,7 +32,7 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD0, float2 tex_c
 	output.position = mul(model, position);
 	output.position = mul(view_projection, output.position);
 	output.tex_coord = tex_coord;
-	output.light_scale = dot(mul(model_inv_trans, normal).xyz, light_direction) * (1 - ambient_light) + ambient_light;
+	output.light_scale = max(dot(mul(model_inv_trans, normal).xyz, light_direction) * (1 - ambient_light), 0.0f) + ambient_light;
 
     return output;
 }

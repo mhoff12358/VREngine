@@ -115,7 +115,7 @@ Entity makeshaderselection(const VRBackendBasics& graphics_objects) {
 	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
 	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
 	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
-	light_details.SetLightDirection({ { 1, -1, 0 } });
+	light_details.SetLightSourceDirection({ { 1, -1, 0 } });
 	light_details.ambient_light = 0.2f;
 	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
 
@@ -155,6 +155,8 @@ void GraphicsLoop() {
 	std::array<float, 3> player_location = { { 0, 0, 0 } };
 	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
 	std::array<float, 2> player_orientation_angles = { { 0, 0 } };
+
+	std::array<float, 3> infinite_light_direction = { { 1, 1, 0 } };
 
 	while (TRUE)
 	{
@@ -213,6 +215,12 @@ void GraphicsLoop() {
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
 		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
 		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		
+		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
+		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
+		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
+		infinite_light_buffer->PushBuffer(graphics_objects.view_state->device_context);
+		
 		TimeTracker::FrameEvent("Update Game Objects");
 
 		if (wiimote) {
