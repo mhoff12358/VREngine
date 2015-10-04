@@ -10,6 +10,7 @@
 #include "TextureView.h"
 
 #include "LightDetails.h"
+#include "Component.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -121,13 +122,17 @@ Entity makeshaderselection(const VRBackendBasics& graphics_objects) {
 	light_details.ambient_light = 0.2f;
 	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
 
+	Texture texture = graphics_objects.resource_pool->LoadTexture("console.png");
+	TextureView texture_view(0, 0, texture);
+
 	return Entity(
 		ES_SETTINGS,
 		graphics_objects.resource_pool->LoadPixelShader("texturedspecular.hlsl"),
 		graphics_objects.resource_pool->LoadVertexShader("texturedspecular.hlsl", ObjLoader::vertex_type_all.GetVertexType(), ObjLoader::vertex_type_all.GetSizeVertexType()),
 		ShaderSettings(shader_settings_buffer),
 		Model(),
-		NULL);
+		NULL,
+		texture_view);
 }
 
 void GraphicsLoop() {
@@ -144,11 +149,18 @@ void GraphicsLoop() {
 
 	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
 
-	std::vector<Entity> console_entities = makeconsole(graphics_objects);
-	std::vector<unsigned int> console_entity_ids;
-	for (const Entity& entity_to_add : console_entities) {
-		console_entity_ids.push_back(graphics_objects.entity_handler->AddEntity(entity_to_add));
+	//std::vector<Entity> console_entities = makeconsole(graphics_objects);
+	//std::vector<unsigned int> console_entity_ids;
+	//for (const Entity& entity_to_add : console_entities) {
+	//	console_entity_ids.push_back(graphics_objects.entity_handler->AddEntity(entity_to_add));
+	//}
+
+	std::map<std::string, Model> models = graphics_objects.resource_pool->LoadModelAsParts("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
+	std::vector<Model> model_vec;
+	for (const auto& model : models) {
+		model_vec.push_back(model.second);
 	}
+	Component console_component(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_vec);
 
 	graphics_objects.entity_handler->FinishUpdate();
 
@@ -229,7 +241,7 @@ void GraphicsLoop() {
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
 		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
-		infinite_light_buffer->PushBuffer(graphics_objects.view_state->device_context);
+		//infinite_light_buffer->PushBuffer(graphics_objects.view_state->device_context);
 		
 		TimeTracker::FrameEvent("Update Game Objects");
 
@@ -239,9 +251,10 @@ void GraphicsLoop() {
 		// Convert orientation from wiimote coord system to screen coord system
 		std::swap(obj_orient.y, obj_orient.z);
 		obj_orient.x = -obj_orient.x;
-		ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_ids[0]);
-		wiimote_settings->SetBothTransformations(
-			DirectX::XMMatrixMultiply(
+		//ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_ids[0]);
+		//wiimote_settings->SetBothTransformations(
+		console_component.SetLocalTransformation(
+		DirectX::XMMatrixMultiply(
 			DirectX::XMMatrixRotationQuaternion(
 			DirectX::XMVectorSet(
 			obj_orient.x,
