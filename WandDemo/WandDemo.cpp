@@ -90,8 +90,8 @@ Entity makewiimote(const VRBackendBasics& graphics_objects) {
 		object_settings);
 }
 
-Entity makeconsole(const VRBackendBasics& graphics_objects) {
-	Model model = graphics_objects.resource_pool->LoadModel("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
+std::vector<Entity> makeconsole(const VRBackendBasics& graphics_objects) {
+	std::map<std::string, Model> models = graphics_objects.resource_pool->LoadModelAsParts("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
 
 	ConstantBufferTyped<TransformationMatrixAndInvTransData>* object_settings = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
 	object_settings->CreateBuffer(graphics_objects.view_state->device_interface);
@@ -101,14 +101,16 @@ Entity makeconsole(const VRBackendBasics& graphics_objects) {
 	Texture texture = graphics_objects.resource_pool->LoadTexture("console.png");
 	TextureView texture_view(0, 0, texture);
 
-	return Entity(
-		ES_NORMAL,
-		PixelShader(),
-		VertexShader(),
-		ShaderSettings(NULL),
-		model,
-		object_settings,
-		texture_view);
+	std::vector<Entity> entities;
+
+	for (const std::pair<const std::string, Model>& model : models) {
+		Entity new_entity(ES_NORMAL, PixelShader(), VertexShader(), ShaderSettings(NULL), model.second, NULL, texture_view);
+		entities.push_back(new_entity);
+	}
+
+	entities[0].object_settings = object_settings;
+
+	return entities;
 }
 
 Entity makeshaderselection(const VRBackendBasics& graphics_objects) {
@@ -133,12 +135,20 @@ void GraphicsLoop() {
 	int prev_time = timeGetTime();
 	int frame_index = 0;
 
+	//std::map<std::string, Model> model_map = ObjLoader::CreateModelsFromFile(
+	//	graphics_objects.view_state->device_interface, graphics_objects.view_state->device_context, "console.obj",
+	//	{ { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
+
 	unsigned int wiimote_entity_id = graphics_objects.entity_handler->AddEntity(makewiimote(graphics_objects));
 	graphics_objects.entity_handler->DisableEntity(wiimote_entity_id);
 
 	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
 
-	unsigned int console_entity_id = graphics_objects.entity_handler->AddEntity(makeconsole(graphics_objects));
+	std::vector<Entity> console_entities = makeconsole(graphics_objects);
+	std::vector<unsigned int> console_entity_ids;
+	for (const Entity& entity_to_add : console_entities) {
+		console_entity_ids.push_back(graphics_objects.entity_handler->AddEntity(entity_to_add));
+	}
 
 	graphics_objects.entity_handler->FinishUpdate();
 
@@ -228,11 +238,8 @@ void GraphicsLoop() {
 		}
 		// Convert orientation from wiimote coord system to screen coord system
 		std::swap(obj_orient.y, obj_orient.z);
-		//float tmp = obj_orient.y;
-		//obj_orient.y = obj_orient.z;
-		//obj_orient.z = tmp;
 		obj_orient.x = -obj_orient.x;
-		ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_id);
+		ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_ids[0]);
 		wiimote_settings->SetBothTransformations(
 			DirectX::XMMatrixMultiply(
 			DirectX::XMMatrixRotationQuaternion(
