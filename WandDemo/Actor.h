@@ -2,14 +2,10 @@
 
 #include "stdafx.h"
 
-#include <string>
-#include <map>
-
 #include "ResourcePool.h"
 #include "ObjLoader.h"
 
-using std::string;
-using std::map;
+#include "Component.h"
 
 class Actor
 {
@@ -18,12 +14,14 @@ public:
 	~Actor();
 
 	void LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format);
+	map<string, unsigned int> CreateComponents(EntityHandler& entity_handler, ID3D11Device* device_interface, const multimap<string, vector<string>>& parentage);
 
-	void CreateComponents();
+	void XM_CALLCONV SetComponentTransformation(unsigned int component_index, DirectX::FXMMATRIX new_transformation);
 
 private:
 	ResourcePool& resource_pool_;
 
-	std::map<std::string, Model> models;
+	map<string, Model> models_;
+	vector<Component> components_;
 };
 

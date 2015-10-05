@@ -1,7 +1,6 @@
 #pragma once
 
-#include <vector>
-using std::vector;
+#include "stdafx.h"
 
 #include "EntityHandler.h"
 #include "Entity.h"
@@ -11,10 +10,15 @@ using std::vector;
 class Component
 {
 public:
-	Component(EntityHandler& entity_handler, ID3D11Device* device_interface, const vector<Model>& models);
+	Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models);
+	Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model> models);
 	~Component();
 
-	void SetChildren(Component* children, unsigned int num_children);
+	Component(const Component& other) = delete;
+	Component operator=(const Component& other) = delete;
+	Component(Component&& other);
+
+	void SetChildren(Component* children, int num_children);
 	
 	void XM_CALLCONV SetLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
 	void UpdateTransformation();

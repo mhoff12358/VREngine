@@ -8,9 +8,11 @@
 #include "BeginDirectx.h"
 #include "TimeTracker.h"
 #include "TextureView.h"
+#include "my_math.h"
 
 #include "LightDetails.h"
 #include "Component.h"
+#include "Actor.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -155,12 +157,24 @@ void GraphicsLoop() {
 	//	console_entity_ids.push_back(graphics_objects.entity_handler->AddEntity(entity_to_add));
 	//}
 
+	/*
 	std::map<std::string, Model> models = graphics_objects.resource_pool->LoadModelAsParts("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
 	std::vector<Model> model_vec;
 	for (const auto& model : models) {
 		model_vec.push_back(model.second);
 	}
-	Component console_component(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_vec);
+	Component console_component(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_vec.begin(), model_vec.end());
+	*/
+
+	Actor console_actor = (*graphics_objects.resource_pool);
+	console_actor.LoadModelsFromFile("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
+	multimap<string, vector<string>> console_parentage = {
+			{ "", { "terminal_Plane.001", "grate_Plane" } },
+			{ "terminal_Plane.001", { "button2_Circle.001" } },
+			{ "terminal_Plane.001", { "button1_Circle" } },
+	};
+	map<string, unsigned int> console_component_locations = console_actor.CreateComponents(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, console_parentage);
+
 
 	graphics_objects.entity_handler->FinishUpdate();
 
@@ -234,15 +248,28 @@ void GraphicsLoop() {
 		if (graphics_objects.input_handler->GetKeyPressed('E')) {
 			player_location[1] += time_delta_ms * movement_scale;
 		}
+
+		if (graphics_objects.input_handler->GetKeyToggled('B')) {
+			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+				ComposeMatrices<3>({ {
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
+				DirectX::XMMatrixTranslation(0, 0, -0.099f),
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
+		}
+		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
+			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+				DirectX::XMMatrixIdentity());
+		}
+
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
 		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
 		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
-		
+
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
 		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 		//infinite_light_buffer->PushBuffer(graphics_objects.view_state->device_context);
-		
+
 		TimeTracker::FrameEvent("Update Game Objects");
 
 		if (wiimote) {
@@ -253,15 +280,18 @@ void GraphicsLoop() {
 		obj_orient.x = -obj_orient.x;
 		//ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_ids[0]);
 		//wiimote_settings->SetBothTransformations(
-		console_component.SetLocalTransformation(
-		DirectX::XMMatrixMultiply(
+		//console_component.SetLocalTransformation(
+		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
+			//DirectX::XMMatrixMultiply(
+			ComposeMatrices<2>({ {
 			DirectX::XMMatrixRotationQuaternion(
 			DirectX::XMVectorSet(
 			obj_orient.x,
 			obj_orient.y,
 			obj_orient.z,
 			obj_orient.w)),
-			DirectX::XMMatrixTranslation(0, -1.75, -1)));
+			DirectX::XMMatrixTranslation(0, -1.75, -1)
+					} }));//);
 
 		TimeTracker::FrameEvent("Load Wiimote information");
 		
