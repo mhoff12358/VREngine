@@ -13,6 +13,10 @@
 #include "LightDetails.h"
 #include "Component.h"
 #include "Actor.h"
+#include "LookInteractable.h"
+#include "InteractableTriangle.h"
+#include "InteractableQuad.h"
+#include "InteractableCircle.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -24,7 +28,7 @@
 WiimoteInterface wiimote_interface;
 WiimoteHandler* wiimote;
 VRBackendBasics graphics_objects;
-const float movement_scale = 0.001f;
+const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
 const float pi = 3.141593;
@@ -177,7 +181,26 @@ void GraphicsLoop() {
 
 
 	graphics_objects.entity_handler->FinishUpdate();
+	
+	Camera player_look_camera;
+	//InteractableTriangle test_triangle({ { 0, 1, 1 } }, { { 0, -1, 1 } }, { { 1, 0, 1 } });
+	InteractableTriangle test_triangle =
+		InteractableTriangle(
+	{ { -0.75, 1.5, 0 } },
+	{ { .75, 1.5, 0 } },
+	{ { 0.75, 2.207107, -0.707107 } });
+	InteractableQuad test_quad =
+		InteractableQuad(
+	{ { -0.75, 1.5, 0 } },
+	{ { .75, 1.5, 0 } },
+	{ { -0.75, 2.207107, -0.707107 } });
+	InteractableCircle test_circ =
+		InteractableCircle(
+	{ { -0.3125, 1.9243, -0.2828 } },
+	{ { 0, 1, 1 } },
+	0.188f);
 
+	player_look_camera.BuildViewMatrix();
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
@@ -188,6 +211,7 @@ void GraphicsLoop() {
 	}
 
 	Quaternion obj_orient;
+
 	std::array<float, 3> player_location = { { 0, 0, 0 } };
 	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
 	std::array<float, 2> player_orientation_angles = { { 0, 0 } };
@@ -268,7 +292,8 @@ void GraphicsLoop() {
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
 		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
-		//infinite_light_buffer->PushBuffer(graphics_objects.view_state->device_context);
+
+
 
 		TimeTracker::FrameEvent("Update Game Objects");
 
@@ -278,12 +303,7 @@ void GraphicsLoop() {
 		// Convert orientation from wiimote coord system to screen coord system
 		std::swap(obj_orient.y, obj_orient.z);
 		obj_orient.x = -obj_orient.x;
-		//ConstantBufferTyped<TransformationMatrixAndInvTransData>* wiimote_settings = graphics_objects.entity_handler->GetEntityObjectSettings<TransformationMatrixAndInvTransData>(console_entity_ids[0]);
-		//wiimote_settings->SetBothTransformations(
-		//console_component.SetLocalTransformation(
-		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
-			//DirectX::XMMatrixMultiply(
-			ComposeMatrices<2>({ {
+		DirectX::XMMATRIX terminal_transformation = ComposeMatrices<2>({ {
 			DirectX::XMMatrixRotationQuaternion(
 			DirectX::XMVectorSet(
 			obj_orient.x,
@@ -291,7 +311,11 @@ void GraphicsLoop() {
 			obj_orient.z,
 			obj_orient.w)),
 			DirectX::XMMatrixTranslation(0, -1.75, -1)
-					} }));//);
+				} });
+		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
+			terminal_transformation);
+		test_triangle.SetModelTransformation(terminal_transformation);
+		test_quad.SetModelTransformation(terminal_transformation);
 
 		TimeTracker::FrameEvent("Load Wiimote information");
 		
@@ -299,13 +323,21 @@ void GraphicsLoop() {
 		
 		TimeTracker::FrameEvent("Finalize object position stuff");
 
-
+		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		if (graphics_objects.input_handler->IsOculusActive()) {
 			Quaternion combined_orientation = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation)*Quaternion();
 			graphics_objects.render_pipeline->Render({ player_location, combined_orientation });
 		} else {
-			graphics_objects.render_pipeline->Render({ player_location, Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]) });
+			graphics_objects.render_pipeline->Render({ player_location,  player_orientation_quaternion});
 		}
+
+		player_look_camera.location = player_location;
+		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
+		player_look_camera.InvalidateViewMatrices();
+		float look_distance = test_triangle.IsLookedAt(player_look_camera.GetViewMatrix());
+		float look_quad_distance = test_quad.IsLookedAt(player_look_camera.GetViewMatrix());
+		float look_circ_distance = test_circ.IsLookedAt(player_look_camera.GetViewMatrix());
+		std::cout << "TRIANGLE LOOKED AT: " << look_circ_distance << "\t" << look_distance << "\t" << look_quad_distance << std::endl;
 		TimeTracker::FrameEvent("Actual rendering");
 
 		++frame_index;
@@ -321,6 +353,14 @@ void GraphicsLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+
+
+	//InteractableTriangle test_triangle({ { 1, 1, 2 } }, { { -1, 1, 2 } }, { { 0, -1, 2 } });
+	//std::cout << "IS_LOOKED_AT: " << test_triangle.IsLookedAt(DirectX::XMMatrixIdentity()) << std::endl;
+
+
+
+
 	//wiimote_interface.Startup();
 	//wiimote = wiimote_interface.GetHandler();
 	wiimote = NULL;

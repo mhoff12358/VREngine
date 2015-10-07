@@ -13,6 +13,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <array>
 #include <utility>
 #include <iostream>
 
@@ -21,5 +22,4 @@ using std::map;
 using std::multimap;
 using std::vector;
 using std::pair;
-
-// TODO: reference additional headers your program requires here
+using std::array;

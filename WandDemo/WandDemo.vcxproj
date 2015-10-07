@@ -147,7 +147,11 @@
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="InteractableCircle.h" />
+    <ClInclude Include="InteractableQuad.h" />
+    <ClInclude Include="InteractableTriangle.h" />
     <ClInclude Include="LightDetails.h" />
+    <ClInclude Include="LookInteractable.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="WiimoteInterface.h" />
@@ -155,7 +159,11 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="InteractableCircle.cpp" />
+    <ClCompile Include="InteractableQuad.cpp" />
+    <ClCompile Include="InteractableTriangle.cpp" />
     <ClCompile Include="LightDetails.cpp" />
+    <ClCompile Include="LookInteractable.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
