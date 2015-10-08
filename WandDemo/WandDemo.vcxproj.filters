@@ -48,6 +48,12 @@
     <ClInclude Include="InteractableCircle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Identifier.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractableCollection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -78,6 +84,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InteractableCircle.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Identifier.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractableCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

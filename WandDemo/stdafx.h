@@ -16,6 +16,8 @@
 #include <array>
 #include <utility>
 #include <iostream>
+#include <tuple>
+#include <cmath>
 
 using std::string;
 using std::map;
@@ -23,3 +25,6 @@ using std::multimap;
 using std::vector;
 using std::pair;
 using std::array;
+using std::tuple;
+
+const float pi = 3.141593;

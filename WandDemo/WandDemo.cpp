@@ -17,6 +17,8 @@
 #include "InteractableTriangle.h"
 #include "InteractableQuad.h"
 #include "InteractableCircle.h"
+#include "Identifier.h"
+#include "InteractableCollection.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
@@ -31,7 +33,8 @@ VRBackendBasics graphics_objects;
 const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
-const float pi = 3.141593;
+
+InteractableCollection interactable_objects;
 
 Entity makewiimote(const VRBackendBasics& graphics_objects) {
 	std::vector<Vertex> vertices;
@@ -184,21 +187,26 @@ void GraphicsLoop() {
 	
 	Camera player_look_camera;
 	//InteractableTriangle test_triangle({ { 0, 1, 1 } }, { { 0, -1, 1 } }, { { 1, 0, 1 } });
-	InteractableTriangle test_triangle =
-		InteractableTriangle(
-	{ { -0.75, 1.5, 0 } },
-	{ { .75, 1.5, 0 } },
-	{ { 0.75, 2.207107, -0.707107 } });
-	InteractableQuad test_quad =
-		InteractableQuad(
-	{ { -0.75, 1.5, 0 } },
-	{ { .75, 1.5, 0 } },
-	{ { -0.75, 2.207107, -0.707107 } });
-	InteractableCircle test_circ =
-		InteractableCircle(
-	{ { -0.3125, 1.9243, -0.2828 } },
-	{ { 0, 1, 1 } },
-	0.188f);
+	InteractableQuad terminal_interact =
+		InteractableQuad("terminal",
+		{ { -0.75, 1.5, 0 } },
+		{ { .75, 1.5, 0 } },
+		{ { -0.75, 2.207107, -0.707107 } });
+	InteractableCircle red_button_interact =
+		InteractableCircle("red_button",
+		0.188f,
+		{ { -0.3125, 1.9243, -0.2828 } },
+		{ { 0, 1, 1 } },
+		{ { 1, 0, 0 } });
+	InteractableCircle green_button_interact =
+		InteractableCircle("green_button",
+		0.188f,
+		{ { 0.3125, 1.9243, -0.2828 } },
+		{ { 0, 1, 1 } },
+		{ { 1, 0, 0 } });
+	interactable_objects.AddObject(&terminal_interact);
+	interactable_objects.AddObject(&red_button_interact);
+	interactable_objects.AddObject(&green_button_interact);
 
 	player_look_camera.BuildViewMatrix();
 	RAWINPUTDEVICE Rid[1];
@@ -273,18 +281,6 @@ void GraphicsLoop() {
 			player_location[1] += time_delta_ms * movement_scale;
 		}
 
-		if (graphics_objects.input_handler->GetKeyToggled('B')) {
-			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
-				ComposeMatrices<3>({ {
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
-				DirectX::XMMatrixTranslation(0, 0, -0.099f),
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
-		}
-		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
-			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
-				DirectX::XMMatrixIdentity());
-		}
-
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
 		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
 		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
@@ -293,16 +289,7 @@ void GraphicsLoop() {
 		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
-
-
 		TimeTracker::FrameEvent("Update Game Objects");
-
-		if (wiimote) {
-			obj_orient = wiimote->GetCurrentState().orientation;
-		}
-		// Convert orientation from wiimote coord system to screen coord system
-		std::swap(obj_orient.y, obj_orient.z);
-		obj_orient.x = -obj_orient.x;
 		DirectX::XMMATRIX terminal_transformation = ComposeMatrices<2>({ {
 			DirectX::XMMatrixRotationQuaternion(
 			DirectX::XMVectorSet(
@@ -314,16 +301,45 @@ void GraphicsLoop() {
 				} });
 		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
 			terminal_transformation);
-		test_triangle.SetModelTransformation(terminal_transformation);
-		test_quad.SetModelTransformation(terminal_transformation);
+		terminal_interact.SetModelTransformation(terminal_transformation);
+		red_button_interact.SetModelTransformation(terminal_transformation);
+		green_button_interact.SetModelTransformation(terminal_transformation);
 
-		TimeTracker::FrameEvent("Load Wiimote information");
+		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
+		player_look_camera.location = player_location;
+		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
+		player_look_camera.InvalidateViewMatrices();
+		Identifier id_of_object;
+		float distance_to_object;
+		array<float, 2> where_on_object;
+		std::tie(id_of_object, distance_to_object, where_on_object) = interactable_objects.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
+		std::cout << id_of_object << ",\t" << distance_to_object << ",\t" << where_on_object[0] << ",\t" << where_on_object[1] << std::endl;
+
+		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "red_button") {
+			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+				ComposeMatrices<3>({ {
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
+				DirectX::XMMatrixTranslation(0, 0, -0.099f),
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
+		}
+		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "green_button") {
+			console_actor.SetComponentTransformation(console_component_locations["button1_Circle"],
+				ComposeMatrices<3>({ {
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
+				DirectX::XMMatrixTranslation(0, 0, -0.099f),
+				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
+		}
+		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
+			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+				DirectX::XMMatrixIdentity());
+			console_actor.SetComponentTransformation(console_component_locations["button1_Circle"],
+				DirectX::XMMatrixIdentity());
+		}
 		
 		graphics_objects.entity_handler->FinishUpdate();
 		
 		TimeTracker::FrameEvent("Finalize object position stuff");
 
-		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		if (graphics_objects.input_handler->IsOculusActive()) {
 			Quaternion combined_orientation = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation)*Quaternion();
 			graphics_objects.render_pipeline->Render({ player_location, combined_orientation });
@@ -331,13 +347,6 @@ void GraphicsLoop() {
 			graphics_objects.render_pipeline->Render({ player_location,  player_orientation_quaternion});
 		}
 
-		player_look_camera.location = player_location;
-		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
-		player_look_camera.InvalidateViewMatrices();
-		float look_distance = test_triangle.IsLookedAt(player_look_camera.GetViewMatrix());
-		float look_quad_distance = test_quad.IsLookedAt(player_look_camera.GetViewMatrix());
-		float look_circ_distance = test_circ.IsLookedAt(player_look_camera.GetViewMatrix());
-		std::cout << "TRIANGLE LOOKED AT: " << look_circ_distance << "\t" << look_distance << "\t" << look_quad_distance << std::endl;
 		TimeTracker::FrameEvent("Actual rendering");
 
 		++frame_index;
@@ -353,14 +362,6 @@ void GraphicsLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-
-
-	//InteractableTriangle test_triangle({ { 1, 1, 2 } }, { { -1, 1, 2 } }, { { 0, -1, 2 } });
-	//std::cout << "IS_LOOKED_AT: " << test_triangle.IsLookedAt(DirectX::XMMatrixIdentity()) << std::endl;
-
-
-
-
 	//wiimote_interface.Startup();
 	//wiimote = wiimote_interface.GetHandler();
 	wiimote = NULL;

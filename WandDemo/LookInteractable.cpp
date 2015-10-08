@@ -2,7 +2,7 @@
 #include "LookInteractable.h"
 
 
-LookInteractable::LookInteractable()
+LookInteractable::LookInteractable(Identifier id) : id_(id)
 {
 	model_transformation_ = DirectX::XMMatrixIdentity();
 }
@@ -14,4 +14,8 @@ LookInteractable::~LookInteractable()
 
 void XM_CALLCONV LookInteractable::SetModelTransformation(const DirectX::FXMMATRIX& model_transformation) {
 	model_transformation_ = model_transformation;
+}
+
+const Identifier& LookInteractable::GetId() {
+	return id_;
 }
