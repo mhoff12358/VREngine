@@ -20,6 +20,9 @@
 #include "Identifier.h"
 #include "InteractableCollection.h"
 
+#include "LuaGameScripting/Environment.h"
+#include "LuaGameScripting/InteractableObject.h"
+
 #ifndef HID_USAGE_PAGE_GENERIC
 #define HID_USAGE_PAGE_GENERIC         ((USHORT) 0x01)
 #endif
@@ -149,29 +152,10 @@ void GraphicsLoop() {
 	int prev_time = timeGetTime();
 	int frame_index = 0;
 
-	//std::map<std::string, Model> model_map = ObjLoader::CreateModelsFromFile(
-	//	graphics_objects.view_state->device_interface, graphics_objects.view_state->device_context, "console.obj",
-	//	{ { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
-
 	unsigned int wiimote_entity_id = graphics_objects.entity_handler->AddEntity(makewiimote(graphics_objects));
 	graphics_objects.entity_handler->DisableEntity(wiimote_entity_id);
 
 	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
-
-	//std::vector<Entity> console_entities = makeconsole(graphics_objects);
-	//std::vector<unsigned int> console_entity_ids;
-	//for (const Entity& entity_to_add : console_entities) {
-	//	console_entity_ids.push_back(graphics_objects.entity_handler->AddEntity(entity_to_add));
-	//}
-
-	/*
-	std::map<std::string, Model> models = graphics_objects.resource_pool->LoadModelAsParts("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
-	std::vector<Model> model_vec;
-	for (const auto& model : models) {
-		model_vec.push_back(model.second);
-	}
-	Component console_component(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_vec.begin(), model_vec.end());
-	*/
 
 	Actor console_actor = (*graphics_objects.resource_pool);
 	console_actor.LoadModelsFromFile("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
@@ -182,11 +166,7 @@ void GraphicsLoop() {
 	};
 	map<string, unsigned int> console_component_locations = console_actor.CreateComponents(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, console_parentage);
 
-
-	graphics_objects.entity_handler->FinishUpdate();
-	
 	Camera player_look_camera;
-	//InteractableTriangle test_triangle({ { 0, 1, 1 } }, { { 0, -1, 1 } }, { { 1, 0, 1 } });
 	InteractableQuad terminal_interact =
 		InteractableQuad("terminal",
 		{ { -0.75, 1.5, 0 } },
@@ -290,15 +270,7 @@ void GraphicsLoop() {
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
-		DirectX::XMMATRIX terminal_transformation = ComposeMatrices<2>({ {
-			DirectX::XMMatrixRotationQuaternion(
-			DirectX::XMVectorSet(
-			obj_orient.x,
-			obj_orient.y,
-			obj_orient.z,
-			obj_orient.w)),
-			DirectX::XMMatrixTranslation(0, -1.75, -1)
-				} });
+		DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
 		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
 			terminal_transformation);
 		terminal_interact.SetModelTransformation(terminal_transformation);
