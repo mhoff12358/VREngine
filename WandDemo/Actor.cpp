@@ -21,15 +21,24 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 		return;
 	}
 	string model_file_name;
-	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name, Lua::Index(1));
-	lua_environment_.GetFromTableToStack(string("output_format"), Lua::Index(1));
-	lua_environment_.PrintStack("");
+	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name);
+	lua_environment_.GetFromTableToStack(string("output_format"));
 	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
 		ObjLoader::OutputFormat output_format;
-		lua_environment_.GetFromTableToStack(string("model_modifier"), Lua::Index(2));
-		lua_environment_.GetFromTableToStack(string("axis_swap"), Lua::Index(3));
-		// Should actually load thet output format more correctly, but currently I just want to use the default
-		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
+		lua_environment_.GetFromTableToStack(string("model_modifier"));
+		if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
+			if (lua_environment_.LoadArrayFromTable(string("axis_swap"), output_format.model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
+				lua_environment_.LoadArrayFromTable(string("axis_scale"), output_format.model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
+				lua_environment_.LoadArrayFromTable(string("invert_texture_axis"), output_format.model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
+				output_format.vertex_type = ObjLoader::vertex_type_all;
+				LoadModelsFromFile(model_file_name, output_format);
+			} else {
+				LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
+			}
+		} else {
+			LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
+		}
+		lua_environment_.RemoveFromStack();
 	} else {
 		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
 	}

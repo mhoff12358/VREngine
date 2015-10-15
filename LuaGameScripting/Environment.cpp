@@ -85,6 +85,21 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::StoreToStack<bool>(const bool& stored_value) {
+		lua_pushboolean(L, stored_value);
+		return true;
+	}
+
+	template <>
+	bool Environment::PeekFromStack<bool>(bool* loaded_value, Index stack_position) {
+		if (!lua_isboolean(L, stack_position.index_)) {
+			return false;
+		}
+		*loaded_value = lua_toboolean(L, stack_position.index_);
+		return true;
+	}
+
+	template <>
 	bool Environment::StoreToStack<int>(const int& stored_value) {
 		lua_pushinteger(L, stored_value);
 		return true;
