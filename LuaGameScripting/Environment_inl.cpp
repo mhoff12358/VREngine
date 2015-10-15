@@ -17,7 +17,6 @@ namespace Lua {
 
 	template <typename T>
 	bool Environment::LoadGlobal(const string& var_name, T* loaded_value) {
-
 		return GetGlobalToStack(var_name) && LoadFromStack(loaded_value);
 	}
 
@@ -44,8 +43,52 @@ namespace Lua {
 		if (!success) {
 			return false;
 		}
-		lua_remove(L, stack_position);
+		lua_remove(L, stack_position.index_);
 		return true;
+	}
+
+	template <typename T>
+	bool Environment::PeekArrayFromStack(T* loaded_value, Index stack_position, int max_num_loaded) {
+		int num_elements_to_copy = GetArrayLength(stack_position);
+		if (max_num_loaded >= 0) {
+			num_elements_to_copy = min(max_num_loaded, num_elements_to_copy);
+		}
+		bool success = true;
+		for (int i = 0; i < num_elements_to_copy; i++) {
+			success = success && LoadFromTable(i + 1, loaded_value + i, stack_position);
+		}
+		return success;
+	}
+
+	template <typename T>
+	bool Environment::LoadArrayFromStack(T* loaded_value, Index stack_position, int max_num_loaded) {
+		bool success = PeekArrayFromStack(loaded_value, stack_position, max_num_loaded);
+		lua_remove(L, stack_position.index_);
+		return success;
+	}
+
+	template <typename K, typename V>
+	bool Environment::IterateOverTable(K* key, V* value, bool* succesful, Index table_location) {
+		bool finished = lua_next(L, table_location.Offset(1).index_) == 0;
+		if (finished) return false;
+		if (succesful == NULL) {
+			return LoadFromStack(value) && PeekFromStack(key);
+		}
+		*succesful = LoadFromStack(value) && PeekFromStack(key);
+		return *succesful;
+	}
+
+	template <typename K>
+	bool Environment::IterateOverTableLeaveValue(K* key, bool* succesful, Index table_location) {
+		// Pop the key left from last time
+		RemoveFromStack();
+		bool finished = lua_next(L, table_location.Offset(1).index_) == 0;
+		if (finished) return false;
+		if (succesful == NULL) {
+			return PeekFromStack(key, Index(-2));
+		}
+		*succesful = PeekFromStack(key, Index(-2));
+		return *succesful;
 	}
 
 	template <typename... Args>
@@ -65,7 +108,6 @@ namespace Lua {
 
 	template <int num_args_on_stack>
 	bool Environment::CallFunctionWithArgsOnStack() {
-		PrintStack();
 		return lua_pcall(L, num_args_on_stack, LUA_MULTRET, 0) == LUA_OK;
 	}
 

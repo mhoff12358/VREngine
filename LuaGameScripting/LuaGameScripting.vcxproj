@@ -126,7 +126,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Environment.h" />
-    <ClInclude Include="Environment_inl.h" />
+    <ClInclude Include="Environment_inl.cpp" />
     <ClInclude Include="Index.h" />
     <ClInclude Include="InteractableObject.h" />
     <ClInclude Include="stdafx.h" />

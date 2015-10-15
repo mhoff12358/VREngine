@@ -7,6 +7,7 @@
 
 #include <iostream>
 
+/*
 int main()
 {
 	Lua::Environment lua_env(true);
@@ -18,4 +19,4 @@ int main()
 
     return 0;
 }
-
+*/

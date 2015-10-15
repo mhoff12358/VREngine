@@ -7,6 +7,8 @@
 namespace Lua {
 
 	class Environment {
+		static Index stack_top;
+
 	public:
 		Environment();
 		explicit Environment(bool initialize_libs);
@@ -18,21 +20,28 @@ namespace Lua {
 		void PrintStack(const string& debug_msg = "");
 
 		void ClearStack();
-		void RemoveFromStack(Index stack_position = Index(-1));
-		int CheckTypeOfStack(Index stack_position = Index(-1));
+		void RemoveFromStack(Index stack_position = stack_top);
+		int CheckTypeOfStack(Index stack_position = stack_top);
+		int CheckSizeOfStack();
+		int GetArrayLength(Index stack_position = stack_top);
 
 		bool GetGlobalToStack(const string& var_name);
 		bool SetGlobalFromStack(const string& var_name);
 
 		template <typename K>
-		bool GetFromTableToStack(const K& key, Index table_location = Index(-1));
+		bool GetFromTableToStack(const K& key, Index table_location = stack_top);
 
 		template <typename T>
-		bool LoadFromStack(T* loaded_value, Index stack_position = Index(-1));
+		bool LoadFromStack(T* loaded_value, Index stack_position = stack_top);
+		template <typename T>
+		bool LoadArrayFromStack(T* loaded_value, Index stack_position = stack_top, int max_num_loaded = -1);
 		//template <typename... value_types>
 		//bool LoadFromStack(tuple<value_types...>* loaded_values, Index stack_position_start = -1, int num_values_to_load = 1);
 		template <typename T>
-		bool PeekFromStack(T* loaded_value, Index stack_position = Index(-1));
+		bool PeekFromStack(T* loaded_value, Index stack_position = stack_top);
+		template <typename T>
+		bool PeekArrayFromStack(T* loaded_value, Index stack_position = stack_top, int max_num_loaded = -1);
+		bool StoreToStack();
 		template <typename T>
 		bool StoreToStack(const T& stored_value);
 		//template <typename T>
@@ -48,9 +57,24 @@ namespace Lua {
 		bool StoreGlobal(const string& var_name, const T& stored_value);
 
 		template <typename K, typename V>
-		bool LoadFromTable(const K& key, V* loaded_value, Index table_location = Index(-1));
+		bool LoadFromTable(const K& key, V* loaded_value, Index table_location = stack_top);
 		template <typename K, typename V>
-		bool StoreToTable(const K& key, const V& stored_value, Index table_location = Index(-1));
+		bool StoreToTable(const K& key, const V& stored_value, Index table_location = stack_top);
+
+
+		bool BeginToIterateOverTable();
+		bool BeginToIterateOverTableLeaveValue();
+		bool BeginToIterateOverTableLeaveKey();
+		// Note that the table location index is the location after the topmost element is popped.
+		// Returns 
+		template <typename K, typename V>
+		bool IterateOverTable(K* key, V* value, bool* successful, Index table_location = stack_top);
+		template <typename K>
+		bool IterateOverTableLeaveValue(K* key, bool* successful, Index table_location = stack_top);
+		bool IterateOverTableLeaveKey(bool* successful, Index table_location = stack_top);
+		bool EndIteratingOverTable();
+		bool EndIteratingOverTableLeaveValue();
+		bool EndIteratingOverTableLeaveKey();
 
 		bool CallGlobalFunction(const string& function_name);
 		template <typename... Args>
@@ -74,4 +98,4 @@ namespace Lua {
 
 }  // namespace Lua
 
-#include "Environment_inl.h"
+#include "Environment_inl.cpp"

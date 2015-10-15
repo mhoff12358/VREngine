@@ -3,7 +3,8 @@
 
 namespace Lua {
 
-	InteractableObject::InteractableObject(Environment env) : env_(env)
+	InteractableObject::InteractableObject(Environment env, Index interface_table_index)
+		: env_(env), interface_table_index_(interface_table_index)
 	{
 		assert(lua_type(env.L, 1) == LUA_TTABLE);
 		assert(lua_gettop(env.L) == 1);
@@ -12,13 +13,6 @@ namespace Lua {
 
 	InteractableObject::~InteractableObject()
 	{
-	}
-
-	InteractableObject InteractableObject::LoadFromFile(const string& file_name) {
-		Environment lua_env(true);
-		bool load_success = lua_env.RunFile(file_name);
-		lua_env.CallGlobalFunction(string("create_cpp_interface"));
-		return InteractableObject(lua_env);
 	}
 
 	bool InteractableObject::PrepareLuaFunc(const string& func_name) {

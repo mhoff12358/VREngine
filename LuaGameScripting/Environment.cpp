@@ -5,6 +5,8 @@
 
 namespace Lua {
 
+	Index Environment::stack_top = Index(-1);
+
 	Environment::Environment() : L(NULL) {}
 
 	Environment::Environment(bool initialize_libs) {
@@ -45,6 +47,22 @@ namespace Lua {
 		return lua_type(L, stack_position.index_);
 	}
 
+	int Environment::CheckSizeOfStack() {
+		return lua_gettop(L);
+	}
+
+	int Environment::GetArrayLength(Index stack_position) {
+		lua_len(L, stack_position.index_);
+		int length;
+		LoadFromStack(&length);
+		return length;
+	}
+
+	bool Environment::StoreToStack() {
+		lua_pushnil(L);
+		return true;
+	}
+
 	template <>
 	bool Environment::StoreToStack<void*>(void* const& stored_value) {
 		lua_pushlightuserdata(L, stored_value);
@@ -63,6 +81,21 @@ namespace Lua {
 	template <>
 	bool Environment::StoreToStack<lua_CFunction>(const lua_CFunction& stored_value) {
 		lua_pushcfunction(L, stored_value);
+		return true;
+	}
+
+	template <>
+	bool Environment::StoreToStack<int>(const int& stored_value) {
+		lua_pushinteger(L, stored_value);
+		return true;
+	}
+
+	template <>
+	bool Environment::PeekFromStack<int>(int* loaded_value, Index stack_position) {
+		if (!lua_isnumber(L, stack_position.index_)) {
+			return false;
+		}
+		*loaded_value = lua_tointeger(L, stack_position.index_);
 		return true;
 	}
 
@@ -124,6 +157,36 @@ namespace Lua {
 
 	bool Environment::SetGlobalFromStack(const string& var_name) {
 		lua_setglobal(L, var_name.c_str());
+		return true;
+	}
+
+	bool Environment::BeginToIterateOverTable() {
+		return StoreToStack();
+	
+	}
+	bool Environment::BeginToIterateOverTableLeaveValue() {
+		return StoreToStack() && StoreToStack();
+	}
+
+	bool Environment::BeginToIterateOverTableLeaveKey() {
+		return StoreToStack() && StoreToStack();
+	}
+
+	bool Environment::IterateOverTableLeaveKey(bool* successful, Index table_location) {
+		PrintStack("lk");
+		RemoveFromStack();
+		return lua_next(L, table_location.Offset(1).index_) != 0;
+	}
+
+	bool Environment::EndIteratingOverTable() {
+		return true;
+	}
+
+	bool Environment::EndIteratingOverTableLeaveValue() {
+		return true;
+	}
+
+	bool Environment::EndIteratingOverTableLeaveKey() {
 		return true;
 	}
 

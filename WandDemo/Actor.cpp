@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Actor.h"
 
+#include "LuaGameScripting/Index.h"
 
 Actor::Actor(ResourcePool& resource_pool)
 	: resource_pool_(resource_pool), models_(), components_()
@@ -12,16 +13,58 @@ Actor::~Actor()
 {
 }
 
+void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& entity_handler, ID3D11Device* device_interface) {
+	lua_environment_ = Lua::Environment(false);
+	lua_environment_.RunFile(script_name);
+	lua_environment_.CallGlobalFunction(string("create_actor"));
+	string model_file_name;
+	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name, Lua::Index(1));
+	lua_environment_.GetFromTableToStack(string("output_format"), Lua::Index(1));
+	lua_environment_.PrintStack("");
+	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
+		ObjLoader::OutputFormat output_format;
+		lua_environment_.GetFromTableToStack(string("model_modifier"), Lua::Index(2));
+		lua_environment_.GetFromTableToStack(string("axis_swap"), Lua::Index(3));
+		// Should actually load thet output format more correctly, but currently I just want to use the default
+		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
+	} else {
+		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
+	}
+	lua_environment_.RemoveFromStack(Lua::Index(2));
+	// Expects a model_parentage value that determines the parentage for the visual components.
+	// The format for this is a table mapping string keys to lists of lists of strings.
+	// Each element in the value lists represents a vector of strings that should be added
+	// to the multi-map as a vector of strings.
+	multimap<string, vector<string>> model_parentage;
+	lua_environment_.GetFromTableToStack(string("model_parentage"));
+	lua_environment_.BeginToIterateOverTableLeaveValue();
+	string parent_name;
+	bool successful;
+	while (lua_environment_.IterateOverTableLeaveValue(&parent_name, &successful)) {
+		// The list of string lists should now be on the top of the stack.
+		lua_environment_.BeginToIterateOverTableLeaveKey();
+		while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
+			vector<string> children_names(lua_environment_.GetArrayLength());
+			lua_environment_.PeekArrayFromStack(children_names.data());
+			model_parentage.insert(make_pair(parent_name, children_names));
+		}
+		lua_environment_.EndIteratingOverTableLeaveKey();
+	}
+	lua_environment_.EndIteratingOverTableLeaveValue();
+	assert(successful);
+
+	CreateComponents(entity_handler, device_interface, model_parentage);
+}
+
 void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {
 	models_ = resource_pool_.LoadModelAsParts(file_name, output_format);
 }
 
-map<string, unsigned int> Actor::CreateComponents(EntityHandler& entity_handler, ID3D11Device* device_interface, const multimap<string, vector<string>>& parentages) {
+void Actor::CreateComponents(EntityHandler& entity_handler, ID3D11Device* device_interface, const multimap<string, vector<string>>& parentages) {
 	int current_parent_index = -1;
 	int current_children_index = 0;
 	int current_num_children = 0;
 	vector<string> component_names;
-	map<string, unsigned int> component_locations;
 	components_.reserve(parentages.size());
 
 	// This while loop check should be redundant as both of these conditions should become false at the same time.
@@ -40,7 +83,7 @@ map<string, unsigned int> Actor::CreateComponents(EntityHandler& entity_handler,
 				components_.emplace_back(entity_handler, device_interface, current_children);
 				components_.back().SetLocalTransformation(DirectX::XMMatrixIdentity());
 				component_names.push_back(parentage.second.front());
-				component_locations[parentage.second.front()] = components_.size() - 1;
+				component_lookup_[parentage.second.front()] = components_.size() - 1;
 				std::cerr << "Adding component with parent: " << (current_parent_index == -1 ? "" : component_names[current_parent_index]) << " and name: " << parentage.second.front() << std::endl;
 				current_num_children++;
 			}
@@ -54,10 +97,8 @@ map<string, unsigned int> Actor::CreateComponents(EntityHandler& entity_handler,
 		current_num_children = 0;
 		current_parent_index++;
 	}
-
-	return component_locations;
 }
 
-void XM_CALLCONV Actor::SetComponentTransformation(unsigned int component_index, DirectX::FXMMATRIX new_transformation) {
-	components_[component_index].SetLocalTransformation(new_transformation);
+void XM_CALLCONV Actor::SetComponentTransformation(const string& component_index, DirectX::FXMMATRIX new_transformation) {
+	components_[component_lookup_[component_index]].SetLocalTransformation(new_transformation);
 }

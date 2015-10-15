@@ -120,4 +120,9 @@
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="console.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

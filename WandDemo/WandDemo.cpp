@@ -157,14 +157,8 @@ void GraphicsLoop() {
 
 	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
 
-	Actor console_actor = (*graphics_objects.resource_pool);
-	console_actor.LoadModelsFromFile("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
-	multimap<string, vector<string>> console_parentage = {
-			{ "", { "terminal_Plane.001", "grate_Plane" } },
-			{ "terminal_Plane.001", { "button2_Circle.001" } },
-			{ "terminal_Plane.001", { "button1_Circle" } },
-	};
-	map<string, unsigned int> console_component_locations = console_actor.CreateComponents(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, console_parentage);
+	Actor console_actor(*graphics_objects.resource_pool);
+	console_actor.InitializeFromLuaScript("console.lua", *graphics_objects.entity_handler, graphics_objects.view_state->device_interface);
 
 	Camera player_look_camera;
 	InteractableQuad terminal_interact =
@@ -271,7 +265,7 @@ void GraphicsLoop() {
 
 		TimeTracker::FrameEvent("Update Game Objects");
 		DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
-		console_actor.SetComponentTransformation(console_component_locations["terminal_Plane.001"],
+		console_actor.SetComponentTransformation("terminal_Plane.001",
 			terminal_transformation);
 		terminal_interact.SetModelTransformation(terminal_transformation);
 		red_button_interact.SetModelTransformation(terminal_transformation);
@@ -288,23 +282,23 @@ void GraphicsLoop() {
 		std::cout << id_of_object << ",\t" << distance_to_object << ",\t" << where_on_object[0] << ",\t" << where_on_object[1] << std::endl;
 
 		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "red_button") {
-			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+			console_actor.SetComponentTransformation("button2_Circle.001",
 				ComposeMatrices<3>({ {
 				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
 				DirectX::XMMatrixTranslation(0, 0, -0.099f),
 				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
 		}
 		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "green_button") {
-			console_actor.SetComponentTransformation(console_component_locations["button1_Circle"],
+			console_actor.SetComponentTransformation("button1_Circle",
 				ComposeMatrices<3>({ {
 				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
 				DirectX::XMMatrixTranslation(0, 0, -0.099f),
 				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
 		}
 		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
-			console_actor.SetComponentTransformation(console_component_locations["button2_Circle.001"],
+			console_actor.SetComponentTransformation("button2_Circle.001",
 				DirectX::XMMatrixIdentity());
-			console_actor.SetComponentTransformation(console_component_locations["button1_Circle"],
+			console_actor.SetComponentTransformation("button1_Circle",
 				DirectX::XMMatrixIdentity());
 		}
 		
@@ -332,8 +326,36 @@ void GraphicsLoop() {
 
 }
 
+#include "LuaGameScripting/Environment.h"
+void LuaTest() {
+	Lua::Environment env(true);
+	env.RunFile("console.lua");
+
+	env.PrintStack("ran");
+	env.GetGlobalToStack("model_parentage");
+	env.BeginToIterateOverTableLeaveValue();
+	string key;
+	bool successful;
+	env.PrintStack("prepare");
+	while (env.IterateOverTableLeaveValue(&key, &successful)) {
+		env.PrintStack("outer loop");
+		// The list of string lists should now be on the top of the stack.
+		env.BeginToIterateOverTableLeaveKey();
+		while (env.IterateOverTableLeaveKey(NULL, Lua::Index(-1))) {
+			env.PrintStack("inner loop");
+		}
+		env.EndIteratingOverTableLeaveKey();
+		env.PrintStack("outer loop2");
+	}
+
+	env.EndIteratingOverTableLeaveValue();
+	std::cout << "Finish lua test" << std::endl;
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
+	//LuaTest();
+
 	//wiimote_interface.Startup();
 	//wiimote = wiimote_interface.GetHandler();
 	wiimote = NULL;
