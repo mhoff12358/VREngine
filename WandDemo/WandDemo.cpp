@@ -158,10 +158,10 @@ void GraphicsLoop() {
 	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
 
 	Actor console_actor(*graphics_objects.resource_pool);
-	console_actor.InitializeFromLuaScript("console.lua", *graphics_objects.entity_handler, graphics_objects.view_state->device_interface);
+	console_actor.InitializeFromLuaScript("console.lua", *graphics_objects.entity_handler, graphics_objects.view_state->device_interface, interactable_objects);
 
 	Camera player_look_camera;
-	InteractableQuad terminal_interact =
+	/*InteractableQuad terminal_interact =
 		InteractableQuad("terminal",
 		{ { -0.75, 1.5, 0 } },
 		{ { .75, 1.5, 0 } },
@@ -169,18 +169,18 @@ void GraphicsLoop() {
 	InteractableCircle red_button_interact =
 		InteractableCircle("red_button",
 		0.188f,
-		{ { -0.3125, 1.9243, -0.2828 } },
+		{ { 0.3125, 1.9243, -0.2828 } },
 		{ { 0, 1, 1 } },
 		{ { 1, 0, 0 } });
 	InteractableCircle green_button_interact =
 		InteractableCircle("green_button",
 		0.188f,
-		{ { 0.3125, 1.9243, -0.2828 } },
+		{ { -0.3125, 1.9243, -0.2828 } },
 		{ { 0, 1, 1 } },
 		{ { 1, 0, 0 } });
-	interactable_objects.AddObject(&terminal_interact);
+	//interactable_objects.AddObject(&terminal_interact);
 	interactable_objects.AddObject(&red_button_interact);
-	interactable_objects.AddObject(&green_button_interact);
+	interactable_objects.AddObject(&green_button_interact);*/
 
 	player_look_camera.BuildViewMatrix();
 	RAWINPUTDEVICE Rid[1];
@@ -267,9 +267,9 @@ void GraphicsLoop() {
 		DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
 		console_actor.SetComponentTransformation("terminal_Plane.001",
 			terminal_transformation);
-		terminal_interact.SetModelTransformation(terminal_transformation);
-		red_button_interact.SetModelTransformation(terminal_transformation);
-		green_button_interact.SetModelTransformation(terminal_transformation);
+		//terminal_interact.SetModelTransformation(terminal_transformation);
+		//red_button_interact.SetModelTransformation(terminal_transformation);
+		//green_button_interact.SetModelTransformation(terminal_transformation);
 
 		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_look_camera.location = player_location;
@@ -344,11 +344,9 @@ void LuaTest() {
 		while (env.IterateOverTableLeaveKey(NULL, Lua::Index(-1))) {
 			env.PrintStack("inner loop");
 		}
-		env.EndIteratingOverTableLeaveKey();
 		env.PrintStack("outer loop2");
 	}
 
-	env.EndIteratingOverTableLeaveValue();
 	std::cout << "Finish lua test" << std::endl;
 }
 

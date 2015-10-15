@@ -12,7 +12,7 @@ LookInteractable::~LookInteractable()
 {
 }
 
-void XM_CALLCONV LookInteractable::SetModelTransformation(const DirectX::FXMMATRIX& model_transformation) {
+void XM_CALLCONV LookInteractable::SetModelTransformation(DirectX::FXMMATRIX model_transformation) {
 	model_transformation_ = model_transformation;
 }
 

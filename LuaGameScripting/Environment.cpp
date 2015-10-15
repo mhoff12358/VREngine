@@ -100,6 +100,21 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::PeekFromStack<float>(float* loaded_value, Index stack_position) {
+		if (!lua_isnumber(L, stack_position.index_)) {
+			return false;
+		}
+		*loaded_value = (float)lua_tonumber(L, stack_position.index_);
+		return true;
+	}
+
+	template <>
+	bool Environment::StoreToStack<float>(const float& stored_value) {
+		lua_pushnumber(L, stored_value);
+		return true;
+	}
+
+	template <>
 	bool Environment::PeekFromStack<double>(double* loaded_value, Index stack_position) {
 		if (!lua_isnumber(L, stack_position.index_)) {
 			return false;
@@ -176,18 +191,6 @@ namespace Lua {
 		PrintStack("lk");
 		RemoveFromStack();
 		return lua_next(L, table_location.Offset(1).index_) != 0;
-	}
-
-	bool Environment::EndIteratingOverTable() {
-		return true;
-	}
-
-	bool Environment::EndIteratingOverTableLeaveValue() {
-		return true;
-	}
-
-	bool Environment::EndIteratingOverTableLeaveKey() {
-		return true;
 	}
 
 	void Environment::PrintStack(const string& debug_msg) {

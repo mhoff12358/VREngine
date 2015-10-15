@@ -7,9 +7,9 @@
 namespace Lua {
 
 	class Environment {
+	public:
 		static Index stack_top;
 
-	public:
 		Environment();
 		explicit Environment(bool initialize_libs);
 		explicit Environment(lua_State* injected_state);
@@ -59,6 +59,8 @@ namespace Lua {
 		template <typename K, typename V>
 		bool LoadFromTable(const K& key, V* loaded_value, Index table_location = stack_top);
 		template <typename K, typename V>
+		bool LoadArrayFromTable(const K& key, V* loaded_value, Index table_location = stack_top, int max_num_loaded = -1);
+		template <typename K, typename V>
 		bool StoreToTable(const K& key, const V& stored_value, Index table_location = stack_top);
 
 
@@ -72,9 +74,6 @@ namespace Lua {
 		template <typename K>
 		bool IterateOverTableLeaveValue(K* key, bool* successful, Index table_location = stack_top);
 		bool IterateOverTableLeaveKey(bool* successful, Index table_location = stack_top);
-		bool EndIteratingOverTable();
-		bool EndIteratingOverTableLeaveValue();
-		bool EndIteratingOverTableLeaveKey();
 
 		bool CallGlobalFunction(const string& function_name);
 		template <typename... Args>

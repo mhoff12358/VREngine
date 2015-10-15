@@ -13,10 +13,13 @@ Actor::~Actor()
 {
 }
 
-void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& entity_handler, ID3D11Device* device_interface) {
+void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& entity_handler, ID3D11Device* device_interface, InteractableCollection& interactable_collection) {
 	lua_environment_ = Lua::Environment(false);
 	lua_environment_.RunFile(script_name);
-	lua_environment_.CallGlobalFunction(string("create_actor"));
+	if (!lua_environment_.CallGlobalFunction(string("create_actor"))) {
+		lua_environment_.PrintStack("Error loading lua script: " + script_name);
+		return;
+	}
 	string model_file_name;
 	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name, Lua::Index(1));
 	lua_environment_.GetFromTableToStack(string("output_format"), Lua::Index(1));
@@ -30,30 +33,43 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 	} else {
 		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
 	}
-	lua_environment_.RemoveFromStack(Lua::Index(2));
+	lua_environment_.RemoveFromStack();
 	// Expects a model_parentage value that determines the parentage for the visual components.
 	// The format for this is a table mapping string keys to lists of lists of strings.
 	// Each element in the value lists represents a vector of strings that should be added
 	// to the multi-map as a vector of strings.
 	multimap<string, vector<string>> model_parentage;
 	lua_environment_.GetFromTableToStack(string("model_parentage"));
-	lua_environment_.BeginToIterateOverTableLeaveValue();
-	string parent_name;
-	bool successful;
-	while (lua_environment_.IterateOverTableLeaveValue(&parent_name, &successful)) {
-		// The list of string lists should now be on the top of the stack.
+	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
+		lua_environment_.BeginToIterateOverTableLeaveValue();
+		string parent_name;
+		bool successful;
+		while (lua_environment_.IterateOverTableLeaveValue(&parent_name, &successful)) {
+			// The list of string lists should now be on the top of the stack.
+			lua_environment_.BeginToIterateOverTableLeaveKey();
+			while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
+				vector<string> children_names(lua_environment_.GetArrayLength());
+				lua_environment_.PeekArrayFromStack(children_names.data());
+				model_parentage.insert(make_pair(parent_name, children_names));
+			}
+		}
+		assert(successful);
+		CreateComponents(entity_handler, device_interface, model_parentage);
+	}
+	lua_environment_.RemoveFromStack();
+
+	lua_environment_.GetFromTableToStack(string("interactable_objects"));
+	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment_.BeginToIterateOverTableLeaveKey();
 		while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
-			vector<string> children_names(lua_environment_.GetArrayLength());
-			lua_environment_.PeekArrayFromStack(children_names.data());
-			model_parentage.insert(make_pair(parent_name, children_names));
+			LookInteractable* new_interactable = interactable_collection.CreateAndAddLookInteractableFromLua(lua_environment_);
+			string parent_component_name;
+			if (new_interactable != NULL && lua_environment_.LoadFromTable(string("parent_component"), &parent_component_name)) {
+				transformation_mapped_interactables_.insert(make_pair(parent_component_name, new_interactable));
+			}
 		}
-		lua_environment_.EndIteratingOverTableLeaveKey();
 	}
-	lua_environment_.EndIteratingOverTableLeaveValue();
-	assert(successful);
-
-	CreateComponents(entity_handler, device_interface, model_parentage);
+	lua_environment_.RemoveFromStack();
 }
 
 void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {
@@ -101,4 +117,9 @@ void Actor::CreateComponents(EntityHandler& entity_handler, ID3D11Device* device
 
 void XM_CALLCONV Actor::SetComponentTransformation(const string& component_index, DirectX::FXMMATRIX new_transformation) {
 	components_[component_lookup_[component_index]].SetLocalTransformation(new_transformation);
+	auto interactable_range = transformation_mapped_interactables_.equal_range(component_index);
+	while (interactable_range.first != interactable_range.second) {
+		interactable_range.first->second->SetModelTransformation(new_transformation);
+		interactable_range.first++;
+	}
 }

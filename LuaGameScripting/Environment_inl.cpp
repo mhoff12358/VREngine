@@ -27,8 +27,19 @@ namespace Lua {
 
 	template <typename K, typename V>
 	bool Environment::LoadFromTable(const K& key, V* loaded_value, Index table_location) {
-		GetFromTableToStack(key, table_location);
-		return LoadFromStack(loaded_value);
+		bool success = GetFromTableToStack(key, table_location);
+		if (success) {
+			success = LoadFromStack(loaded_value);
+			if (!success) {
+				RemoveFromStack();
+			}
+		}
+		return success;
+	}
+
+	template <typename K, typename V>
+	bool Environment::LoadArrayFromTable(const K& key, V* loaded_value, Index table_location, int max_num_loaded) {
+		return GetFromTableToStack(key, table_location) && LoadArrayFromStack(loaded_value, stack_top, max_num_loaded);
 	}
 
 	template <typename K, typename V>
