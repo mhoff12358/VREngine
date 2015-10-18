@@ -16,6 +16,6 @@ void XM_CALLCONV LookInteractable::SetModelTransformation(DirectX::FXMMATRIX mod
 	model_transformation_ = model_transformation;
 }
 
-const Identifier& LookInteractable::GetId() {
+const Identifier& LookInteractable::GetId() const {
 	return id_;
 }

@@ -13,7 +13,7 @@ Actor::~Actor()
 {
 }
 
-void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& entity_handler, ID3D11Device* device_interface, InteractableCollection& interactable_collection) {
+void Actor::InitializeFromLuaScript(const string& script_name, const VRBackendBasics& graphics_objects, InteractableCollection& interactable_collection, ConstantBuffer* shader_settings) {
 	lua_environment_ = Lua::Environment(false);
 	lua_environment_.RunFile(script_name);
 	if (!lua_environment_.CallGlobalFunction(string("create_actor"))) {
@@ -23,8 +23,8 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 	string model_file_name;
 	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name);
 	lua_environment_.GetFromTableToStack(string("output_format"));
+	ObjLoader::OutputFormat output_format = ObjLoader::default_output_format;
 	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
-		ObjLoader::OutputFormat output_format;
 		lua_environment_.GetFromTableToStack(string("model_modifier"));
 		if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
 			if (lua_environment_.LoadArrayFromTable(string("axis_swap"), output_format.model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
@@ -32,17 +32,28 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 				lua_environment_.LoadArrayFromTable(string("invert_texture_axis"), output_format.model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
 				output_format.vertex_type = ObjLoader::vertex_type_all;
 				LoadModelsFromFile(model_file_name, output_format);
-			} else {
-				LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
 			}
-		} else {
-			LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
 		}
 		lua_environment_.RemoveFromStack();
-	} else {
-		LoadModelsFromFile(model_file_name, ObjLoader::default_output_format);
 	}
+	LoadModelsFromFile(model_file_name, output_format);
 	lua_environment_.RemoveFromStack();
+
+	string shader_file_name;
+	lua_environment_.LoadFromTable(string("shader_file_name"), &shader_file_name);
+	string texture_file_name;
+	lua_environment_.LoadFromTable(string("texture_file_name"), &texture_file_name);
+	Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
+	TextureView texture_view(0, 0, texture);
+	shader_settings_entity_id_ = graphics_objects.entity_handler->AddEntity(Entity(
+		ES_SETTINGS,
+		graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+		graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
+		ShaderSettings(shader_settings),
+		Model(),
+		NULL,
+		texture_view));
+
 	// Expects a model_parentage value that determines the parentage for the visual components.
 	// The format for this is a table mapping string keys to lists of lists of strings.
 	// Each element in the value lists represents a vector of strings that should be added
@@ -63,7 +74,7 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 			}
 		}
 		assert(successful);
-		CreateComponents(entity_handler, device_interface, model_parentage);
+		CreateComponents(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_parentage);
 	}
 	lua_environment_.RemoveFromStack();
 
@@ -71,7 +82,7 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment_.BeginToIterateOverTableLeaveKey();
 		while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
-			LookInteractable* new_interactable = interactable_collection.CreateAndAddLookInteractableFromLua(lua_environment_);
+			LookInteractable* new_interactable = interactable_collection.CreateLookInteractableFromLua(lua_environment_);
 			string parent_component_name;
 			if (new_interactable != NULL && lua_environment_.LoadFromTable(string("parent_component"), &parent_component_name)) {
 				transformation_mapped_interactables_.insert(make_pair(parent_component_name, new_interactable));
@@ -79,6 +90,10 @@ void Actor::InitializeFromLuaScript(const string& script_name, EntityHandler& en
 		}
 	}
 	lua_environment_.RemoveFromStack();
+}
+
+unsigned int Actor::GetShaderSettingsId() {
+	return shader_settings_entity_id_;
 }
 
 void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {

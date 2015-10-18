@@ -24,7 +24,7 @@ public:
 	// object being looked at. The meaning of the location will depend on the class of the object.
 	virtual tuple<float, std::array<float, 2>> XM_CALLCONV WhereLookedAt(const DirectX::FXMMATRIX& view_transformation) const = 0;
 
-	const Identifier& GetId();
+	const Identifier& GetId() const;
 
 protected:
 	Identifier id_;

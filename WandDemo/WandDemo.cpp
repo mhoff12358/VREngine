@@ -37,7 +37,7 @@ const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
 
-InteractableCollection interactable_objects;
+InteractableCollection interactable_objects(50);
 
 Entity makewiimote(const VRBackendBasics& graphics_objects) {
 	std::vector<Vertex> vertices;
@@ -126,27 +126,6 @@ std::vector<Entity> makeconsole(const VRBackendBasics& graphics_objects) {
 	return entities;
 }
 
-Entity makeshaderselection(const VRBackendBasics& graphics_objects) {
-	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
-	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
-	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
-	light_details.SetLightSourceDirection({ { 1, -1, 0 } });
-	light_details.ambient_light = 0.2f;
-	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
-
-	Texture texture = graphics_objects.resource_pool->LoadTexture("console.png");
-	TextureView texture_view(0, 0, texture);
-
-	return Entity(
-		ES_SETTINGS,
-		graphics_objects.resource_pool->LoadPixelShader("texturedspecular.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("texturedspecular.hlsl", ObjLoader::vertex_type_all.GetVertexType(), ObjLoader::vertex_type_all.GetSizeVertexType()),
-		ShaderSettings(shader_settings_buffer),
-		Model(),
-		NULL,
-		texture_view);
-}
-
 void GraphicsLoop() {
 	MSG msg;
 	int prev_time = timeGetTime();
@@ -155,32 +134,16 @@ void GraphicsLoop() {
 	unsigned int wiimote_entity_id = graphics_objects.entity_handler->AddEntity(makewiimote(graphics_objects));
 	graphics_objects.entity_handler->DisableEntity(wiimote_entity_id);
 
-	unsigned int shader_selection_entity_id = graphics_objects.entity_handler->AddEntity(makeshaderselection(graphics_objects));
-
 	Actor console_actor(*graphics_objects.resource_pool);
-	console_actor.InitializeFromLuaScript("console.lua", *graphics_objects.entity_handler, graphics_objects.view_state->device_interface, interactable_objects);
+	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
+	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
+	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
+	light_details.SetLightSourceDirection({ { 1, -1, 0 } });
+	light_details.ambient_light = 0.2f;
+	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
+	console_actor.InitializeFromLuaScript("console.lua", graphics_objects, interactable_objects, shader_settings_buffer);
 
 	Camera player_look_camera;
-	/*InteractableQuad terminal_interact =
-		InteractableQuad("terminal",
-		{ { -0.75, 1.5, 0 } },
-		{ { .75, 1.5, 0 } },
-		{ { -0.75, 2.207107, -0.707107 } });
-	InteractableCircle red_button_interact =
-		InteractableCircle("red_button",
-		0.188f,
-		{ { 0.3125, 1.9243, -0.2828 } },
-		{ { 0, 1, 1 } },
-		{ { 1, 0, 0 } });
-	InteractableCircle green_button_interact =
-		InteractableCircle("green_button",
-		0.188f,
-		{ { -0.3125, 1.9243, -0.2828 } },
-		{ { 0, 1, 1 } },
-		{ { 1, 0, 0 } });
-	//interactable_objects.AddObject(&terminal_interact);
-	interactable_objects.AddObject(&red_button_interact);
-	interactable_objects.AddObject(&green_button_interact);*/
 
 	player_look_camera.BuildViewMatrix();
 	RAWINPUTDEVICE Rid[1];
@@ -260,16 +223,13 @@ void GraphicsLoop() {
 		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
 
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
-		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(shader_selection_entity_id);
+		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(console_actor.GetShaderSettingsId());
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
 		DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
 		console_actor.SetComponentTransformation("terminal_Plane.001",
 			terminal_transformation);
-		//terminal_interact.SetModelTransformation(terminal_transformation);
-		//red_button_interact.SetModelTransformation(terminal_transformation);
-		//green_button_interact.SetModelTransformation(terminal_transformation);
 
 		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_look_camera.location = player_location;

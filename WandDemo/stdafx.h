@@ -18,6 +18,7 @@
 #include <iostream>
 #include <tuple>
 #include <cmath>
+#include <algorithm>
 
 using std::string;
 using std::map;
@@ -26,5 +27,6 @@ using std::vector;
 using std::pair;
 using std::array;
 using std::tuple;
+using std::max;
 
 const float pi = 3.141593;

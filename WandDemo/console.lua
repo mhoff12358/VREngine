@@ -29,6 +29,8 @@ function create_actor()
 		}
 	}
 
+	actor_table.shader_file_name = "texturedspecular.hlsl"
+	actor_table.texture_file_name = "console.png"
 	
 	actor_table.interactable_objects = {
 		{

@@ -9,21 +9,31 @@
 
 #include "LuaGameScripting/Environment.h"
 
+#define CONSTMAX(a, b) (a > b ? a : b)
+
+struct LookInteractableBlock {
+	LookInteractableBlock();
+	~LookInteractableBlock();
+
+	char data[CONSTMAX(sizeof(InteractableTriangle), CONSTMAX(sizeof(InteractableQuad), sizeof(InteractableCircle)))];
+
+	LookInteractable* GetAsLookInteractable();
+	const LookInteractable* GetAsLookInteractable() const;
+};
+
 class InteractableCollection
 {
 public:
-	InteractableCollection();
+	InteractableCollection(unsigned int num_interactable_objects);
 	~InteractableCollection();
 
 	tuple<Identifier, float> XM_CALLCONV GetClosestLookedAt(const DirectX::FXMMATRIX& view_transformation) const;
 	tuple<Identifier, float, array<float, 2>> XM_CALLCONV GetClosestLookedAtAndWhere(const DirectX::FXMMATRIX& view_transformation) const;
 
-	void AddObject(LookInteractable* new_object);
-
-	static LookInteractable* CreateLookInteractableFromLua(Lua::Environment environment_with_table);
-	LookInteractable* CreateAndAddLookInteractableFromLua(Lua::Environment environment_with_table);
-
+	LookInteractable* GetInteractableAtPosition(int index);
+	LookInteractable* GetNewLookInteractableBlock();
+	LookInteractable* CreateLookInteractableFromLua(Lua::Environment environment_with_table);
+	
 private:
-	vector<LookInteractable*> interactable_objects;
+	vector<LookInteractableBlock> interactable_objects_;
 };
-

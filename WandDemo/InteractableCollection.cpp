@@ -1,11 +1,27 @@
 #include "stdafx.h"
 #include "InteractableCollection.h"
 
+#include <new>
 
-InteractableCollection::InteractableCollection()
-{
+LookInteractableBlock::LookInteractableBlock() {
+
 }
 
+LookInteractableBlock::~LookInteractableBlock() {
+}
+
+LookInteractable* LookInteractableBlock::GetAsLookInteractable() {
+	return (LookInteractable*)(data);
+}
+
+const LookInteractable* LookInteractableBlock::GetAsLookInteractable() const {
+	return (const LookInteractable*)(data);
+}
+
+InteractableCollection::InteractableCollection(unsigned int num_interactable_objects)
+{
+	interactable_objects_.reserve(num_interactable_objects);
+}
 
 InteractableCollection::~InteractableCollection()
 {
@@ -17,7 +33,8 @@ tuple<Identifier, float> XM_CALLCONV InteractableCollection::GetClosestLookedAt(
 	std::get<0>(result_tuple) = "";
 	float& current_best = std::get<1>(result_tuple);
 	current_best = std::numeric_limits<float>::infinity();
-	for (LookInteractable* current_interactable : interactable_objects) {
+	for (const LookInteractableBlock& current_interactable_block : interactable_objects_) {
+		const LookInteractable* current_interactable = current_interactable_block.GetAsLookInteractable();
 		float current_looked_at_distance = current_interactable->IsLookedAt(view_transformation);
 		if (current_looked_at_distance >= 0 && current_looked_at_distance < current_best) {
 			current_best = current_looked_at_distance;
@@ -32,7 +49,8 @@ tuple<Identifier, float, array<float, 2>> XM_CALLCONV InteractableCollection::Ge
 	std::get<0>(result_tuple) = "";
 	float& current_best = std::get<1>(result_tuple);
 	current_best = std::numeric_limits<float>::infinity();
-	for (LookInteractable* current_interactable : interactable_objects) {
+	for (const LookInteractableBlock& current_interactable_block : interactable_objects_) {
+		const LookInteractable* current_interactable = current_interactable_block.GetAsLookInteractable();
 		tuple<float, array<float, 2>> current_where_looked_at = current_interactable->WhereLookedAt(view_transformation);
 		if (!std::isnan(std::get<0>(current_where_looked_at)) && std::get<0>(current_where_looked_at) >= 0 && std::get<0>(current_where_looked_at) < current_best) {
 			current_best = std::get<0>(current_where_looked_at);
@@ -43,8 +61,16 @@ tuple<Identifier, float, array<float, 2>> XM_CALLCONV InteractableCollection::Ge
 	return result_tuple;
 }
 
-void InteractableCollection::AddObject(LookInteractable* new_object) {
-	interactable_objects.push_back(new_object);
+LookInteractable* InteractableCollection::GetInteractableAtPosition(int index) {
+	if (index < 0 || index >= interactable_objects_.capacity()) {
+		return NULL;
+	}
+	return interactable_objects_[index].GetAsLookInteractable();
+}
+
+LookInteractable* InteractableCollection::GetNewLookInteractableBlock() {
+	interactable_objects_.push_back(LookInteractableBlock());
+	return GetInteractableAtPosition(interactable_objects_.size() - 1);
 }
 
 LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Environment environment_with_table) {
@@ -65,9 +91,9 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Env
 			return NULL;
 		}
 		if (environment_with_table.LoadArrayFromTable(string("right"), right.data(), Lua::Environment::stack_top, 3)) {
-			return new InteractableCircle(id, radius, center, normal, right);
+			return new (GetNewLookInteractableBlock()) InteractableCircle(id, radius, center, normal, right);
 		} else {
-			return new InteractableCircle(id, radius, center, normal);
+			return new (GetNewLookInteractableBlock()) InteractableCircle(id, radius, center, normal);
 		}
 	}
 	else if (interactable_type == "Quad") {
@@ -81,7 +107,7 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Env
 			environment_with_table.LoadArrayFromTable(string("point_3"), point_3.data(), Lua::Environment::stack_top, 3))) {
 			return NULL;
 		}
-		return new InteractableQuad(id, point_1, point_2, point_3);
+		return new (GetNewLookInteractableBlock()) InteractableQuad(id, point_1, point_2, point_3);
 	} else if (interactable_type == "Triangle") {
 		string id;
 		array<float, 3> point_1;
@@ -93,16 +119,8 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Env
 			environment_with_table.LoadArrayFromTable(string("point_3"), point_3.data(), Lua::Environment::stack_top, 3))) {
 			return NULL;
 		}
-		return new InteractableTriangle(id, point_1, point_2, point_3);
+		return new (GetNewLookInteractableBlock()) InteractableTriangle(id, point_1, point_2, point_3);
 	} else {
 		return NULL;
 	}
-}
-
-LookInteractable* InteractableCollection::CreateAndAddLookInteractableFromLua(Lua::Environment environment_with_table) {
-	LookInteractable* created_object = CreateLookInteractableFromLua(environment_with_table);
-	if (created_object != NULL) {
-		AddObject(created_object);
-	}
-	return created_object;
 }
