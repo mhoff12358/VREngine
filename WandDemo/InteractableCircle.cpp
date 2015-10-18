@@ -35,10 +35,11 @@ InteractableCircle::~InteractableCircle()
 }
 
 float XM_CALLCONV InteractableCircle::IsLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
+	DirectX::XMMATRIX model_transformation = GetModelTransformation();
 	DirectX::XMFLOAT4 center_trans;
 	DirectX::XMFLOAT4 normal_trans;
-	DirectX::XMStoreFloat4(&center_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation_), view_transformation));
-	DirectX::XMStoreFloat4(&normal_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(normal_point_, model_transformation_), view_transformation));
+	DirectX::XMStoreFloat4(&center_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation), view_transformation));
+	DirectX::XMStoreFloat4(&normal_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(normal_point_, model_transformation), view_transformation));
 	
 	normal_trans.x -= center_trans.x;
 	normal_trans.y -= center_trans.y;
@@ -57,11 +58,12 @@ float XM_CALLCONV InteractableCircle::IsLookedAt(const DirectX::FXMMATRIX& view_
 }
 
 tuple<float, std::array<float, 2>> XM_CALLCONV InteractableCircle::WhereLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
+	DirectX::XMMATRIX model_transformation = GetModelTransformation();
 	DirectX::XMFLOAT4 center_trans;
 	DirectX::XMFLOAT4 normal_trans;
-	DirectX::XMVECTOR center_trans_vec = DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation_), view_transformation);
+	DirectX::XMVECTOR center_trans_vec = DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation), view_transformation);
 	DirectX::XMStoreFloat4(&center_trans, center_trans_vec);
-	DirectX::XMStoreFloat4(&normal_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(normal_point_, model_transformation_), view_transformation));
+	DirectX::XMStoreFloat4(&normal_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(normal_point_, model_transformation), view_transformation));
 
 	normal_trans.x -= center_trans.x;
 	normal_trans.y -= center_trans.y;
@@ -80,7 +82,7 @@ tuple<float, std::array<float, 2>> XM_CALLCONV InteractableCircle::WhereLookedAt
 	// between the right vector and this one must be computed.
 
 	DirectX::XMFLOAT4 right_trans;
-	DirectX::XMStoreFloat4(&right_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(right_point_, model_transformation_), view_transformation));
+	DirectX::XMStoreFloat4(&right_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(right_point_, model_transformation), view_transformation));
 	right_trans.x -= center_trans.x;
 	right_trans.y -= center_trans.y;
 	right_trans.z -= center_trans.z;

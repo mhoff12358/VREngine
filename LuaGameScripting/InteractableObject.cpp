@@ -2,9 +2,11 @@
 #include "InteractableObject.h"
 
 namespace Lua {
+	InteractableObject::InteractableObject() {
+	}
 
-	InteractableObject::InteractableObject(Environment env, Index interface_table_index)
-		: env_(env), interface_table_index_(interface_table_index)
+	InteractableObject::InteractableObject(Environment env)
+		: env_(env)
 	{
 		assert(lua_type(env.L, 1) == LUA_TTABLE);
 		assert(lua_gettop(env.L) == 1);
@@ -25,7 +27,7 @@ namespace Lua {
 	}
 
 	bool InteractableObject::CallLuaFunc(const string& func_name) {
-		return PrepareLuaFunc(func_name) && env_.CallFunctionOnStackTop();
+		return PrepareLuaFunc(func_name) && env_.StoreToStack(Index(1)) && env_.CallFunctionWithArgsOnStack<1>();
 	}
 
 }  // namespace Lua

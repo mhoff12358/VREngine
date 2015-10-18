@@ -143,9 +143,12 @@ void GraphicsLoop() {
 	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
 	console_actor.InitializeFromLuaScript("console.lua", graphics_objects, interactable_objects, shader_settings_buffer);
 
+	//bool func_called = console_actor.lua_interface_.CallLuaFunc(string("say_hello"));
+
 	Camera player_look_camera;
 
 	player_look_camera.BuildViewMatrix();
+	/*
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
@@ -154,6 +157,7 @@ void GraphicsLoop() {
 	if (RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE) {
 		std::cout << "Error registering raw input device" << std::endl;
 	}
+	*/
 
 	Quaternion obj_orient;
 
@@ -178,13 +182,19 @@ void GraphicsLoop() {
 
 				switch (msg.wParam) {
 				case 'F':
-					wiimote->RequestCalibrateMotionPlus();
+					if (wiimote != NULL) {
+						wiimote->RequestCalibrateMotionPlus();
+					}
 					break;
 				case 'C':
-					wiimote->SendOutputReport(OutputReportTemplates::request_calibration);
+					if (wiimote != NULL) {
+						wiimote->SendOutputReport(OutputReportTemplates::request_calibration);
+					}
 					break;
 				case 'V':
-					wiimote->Rezero();
+					if (wiimote != NULL) {
+						wiimote->Rezero();
+					}
 					break;
 				}
 			}
@@ -233,45 +243,40 @@ void GraphicsLoop() {
 
 		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_look_camera.location = player_location;
+		if (graphics_objects.input_handler->IsOculusActive()) {
+			player_orientation_quaternion = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation) * player_orientation_quaternion;
+			array<float, 3> oculus_offset = OculusHelper::ConvertVector3fToArray(graphics_objects.input_handler->GetHeadOffset());
+			array<float, 3> oculus_eye_offset = OculusHelper::ConvertVector3fToArray(graphics_objects.input_handler->GetEyeOffset(0) + graphics_objects.input_handler->GetEyeOffset(1));
+			for (int i = 0; i < 3; i++) {
+				player_look_camera.location[i] += oculus_offset[i] + oculus_eye_offset[i] / 2.0f;
+			}
+		}
 		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
 		player_look_camera.InvalidateViewMatrices();
 		Identifier id_of_object;
 		float distance_to_object;
 		array<float, 2> where_on_object;
 		std::tie(id_of_object, distance_to_object, where_on_object) = interactable_objects.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
-		std::cout << id_of_object << ",\t" << distance_to_object << ",\t" << where_on_object[0] << ",\t" << where_on_object[1] << std::endl;
+		//std::cout << "Object looked at: " << id_of_object << std::endl;
 
-		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "red_button") {
-			console_actor.SetComponentTransformation("button2_Circle.001",
-				ComposeMatrices<3>({ {
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
-				DirectX::XMMatrixTranslation(0, 0, -0.099f),
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
-		}
-		if (graphics_objects.input_handler->GetKeyToggled('B') && id_of_object == "green_button") {
-			console_actor.SetComponentTransformation("button1_Circle",
-				ComposeMatrices<3>({ {
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), pi / 4.0f),
-				DirectX::XMMatrixTranslation(0, 0, -0.099f),
-				DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(1, 0, 0, 0), -pi / 4.0f) } }));
+		if (graphics_objects.input_handler->GetKeyToggled('B')) {
+			console_actor.lua_interface_.CallLuaFunc(string("look_interacted"), id_of_object.GetId(), where_on_object[0], where_on_object[1]);
 		}
 		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
-			console_actor.SetComponentTransformation("button2_Circle.001",
-				DirectX::XMMatrixIdentity());
-			console_actor.SetComponentTransformation("button1_Circle",
-				DirectX::XMMatrixIdentity());
+			console_actor.lua_interface_.CallLuaFunc(string("look_released"));
 		}
 		
 		graphics_objects.entity_handler->FinishUpdate();
 		
 		TimeTracker::FrameEvent("Finalize object position stuff");
 
-		if (graphics_objects.input_handler->IsOculusActive()) {
+		graphics_objects.render_pipeline->Render({ player_location, player_orientation_quaternion });
+		/*if (graphics_objects.input_handler->IsOculusActive()) {
 			Quaternion combined_orientation = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation)*Quaternion();
 			graphics_objects.render_pipeline->Render({ player_location, combined_orientation });
 		} else {
 			graphics_objects.render_pipeline->Render({ player_location,  player_orientation_quaternion});
-		}
+		}*/
 
 		TimeTracker::FrameEvent("Actual rendering");
 
@@ -287,25 +292,12 @@ void GraphicsLoop() {
 }
 
 #include "LuaGameScripting/Environment.h"
+#include "LuaGameScripting/MemberFunctionWrapper.h"
 void LuaTest() {
+
 	Lua::Environment env(true);
 	env.RunFile("console.lua");
 
-	env.PrintStack("ran");
-	env.GetGlobalToStack("model_parentage");
-	env.BeginToIterateOverTableLeaveValue();
-	string key;
-	bool successful;
-	env.PrintStack("prepare");
-	while (env.IterateOverTableLeaveValue(&key, &successful)) {
-		env.PrintStack("outer loop");
-		// The list of string lists should now be on the top of the stack.
-		env.BeginToIterateOverTableLeaveKey();
-		while (env.IterateOverTableLeaveKey(NULL, Lua::Index(-1))) {
-			env.PrintStack("inner loop");
-		}
-		env.PrintStack("outer loop2");
-	}
 
 	std::cout << "Finish lua test" << std::endl;
 }
@@ -318,7 +310,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//wiimote = wiimote_interface.GetHandler();
 	wiimote = NULL;
 
-	graphics_objects = BeginDirectx(false, "");
+	graphics_objects = BeginDirectx(true, "");
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;

@@ -13,36 +13,37 @@ Actor::~Actor()
 {
 }
 
+
 void Actor::InitializeFromLuaScript(const string& script_name, const VRBackendBasics& graphics_objects, InteractableCollection& interactable_collection, ConstantBuffer* shader_settings) {
-	lua_environment_ = Lua::Environment(false);
-	lua_environment_.RunFile(script_name);
-	if (!lua_environment_.CallGlobalFunction(string("create_actor"))) {
-		lua_environment_.PrintStack("Error loading lua script: " + script_name);
+	Lua::Environment lua_environment = Lua::Environment(true);
+	lua_environment.RunFile(script_name);
+	if (!lua_environment.CallGlobalFunction(string("create_actor"))) {
+		lua_environment.PrintStack("Error loading lua script: " + script_name);
 		return;
 	}
 	string model_file_name;
-	lua_environment_.LoadFromTable(string("model_file_name"), &model_file_name);
-	lua_environment_.GetFromTableToStack(string("output_format"));
+	lua_environment.LoadFromTable(string("model_file_name"), &model_file_name);
+	lua_environment.GetFromTableToStack(string("output_format"));
 	ObjLoader::OutputFormat output_format = ObjLoader::default_output_format;
-	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
-		lua_environment_.GetFromTableToStack(string("model_modifier"));
-		if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
-			if (lua_environment_.LoadArrayFromTable(string("axis_swap"), output_format.model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
-				lua_environment_.LoadArrayFromTable(string("axis_scale"), output_format.model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
-				lua_environment_.LoadArrayFromTable(string("invert_texture_axis"), output_format.model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
+	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+		lua_environment.GetFromTableToStack(string("model_modifier"));
+		if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+			if (lua_environment.LoadArrayFromTable(string("axis_swap"), output_format.model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
+				lua_environment.LoadArrayFromTable(string("axis_scale"), output_format.model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
+				lua_environment.LoadArrayFromTable(string("invert_texture_axis"), output_format.model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
 				output_format.vertex_type = ObjLoader::vertex_type_all;
 				LoadModelsFromFile(model_file_name, output_format);
 			}
 		}
-		lua_environment_.RemoveFromStack();
+		lua_environment.RemoveFromStack();
 	}
 	LoadModelsFromFile(model_file_name, output_format);
-	lua_environment_.RemoveFromStack();
+	lua_environment.RemoveFromStack();
 
 	string shader_file_name;
-	lua_environment_.LoadFromTable(string("shader_file_name"), &shader_file_name);
+	lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
 	string texture_file_name;
-	lua_environment_.LoadFromTable(string("texture_file_name"), &texture_file_name);
+	lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
 	Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
 	TextureView texture_view(0, 0, texture);
 	shader_settings_entity_id_ = graphics_objects.entity_handler->AddEntity(Entity(
@@ -59,37 +60,51 @@ void Actor::InitializeFromLuaScript(const string& script_name, const VRBackendBa
 	// Each element in the value lists represents a vector of strings that should be added
 	// to the multi-map as a vector of strings.
 	multimap<string, vector<string>> model_parentage;
-	lua_environment_.GetFromTableToStack(string("model_parentage"));
-	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
-		lua_environment_.BeginToIterateOverTableLeaveValue();
+	lua_environment.GetFromTableToStack(string("model_parentage"));
+	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+		lua_environment.BeginToIterateOverTableLeaveValue();
 		string parent_name;
 		bool successful;
-		while (lua_environment_.IterateOverTableLeaveValue(&parent_name, &successful)) {
+		while (lua_environment.IterateOverTableLeaveValue(&parent_name, &successful)) {
 			// The list of string lists should now be on the top of the stack.
-			lua_environment_.BeginToIterateOverTableLeaveKey();
-			while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
-				vector<string> children_names(lua_environment_.GetArrayLength());
-				lua_environment_.PeekArrayFromStack(children_names.data());
+			lua_environment.BeginToIterateOverTableLeaveKey();
+			while (lua_environment.IterateOverTableLeaveKey(NULL)) {
+				vector<string> children_names(lua_environment.GetArrayLength());
+				lua_environment.PeekArrayFromStack(children_names.data());
 				model_parentage.insert(make_pair(parent_name, children_names));
 			}
 		}
 		assert(successful);
 		CreateComponents(*graphics_objects.entity_handler, graphics_objects.view_state->device_interface, model_parentage);
 	}
-	lua_environment_.RemoveFromStack();
+	lua_environment.RemoveFromStack();
 
-	lua_environment_.GetFromTableToStack(string("interactable_objects"));
-	if (lua_environment_.CheckTypeOfStack() != LUA_TNIL) {
-		lua_environment_.BeginToIterateOverTableLeaveKey();
-		while (lua_environment_.IterateOverTableLeaveKey(NULL)) {
-			LookInteractable* new_interactable = interactable_collection.CreateLookInteractableFromLua(lua_environment_);
+	lua_environment.GetFromTableToStack(string("interactable_objects"));
+	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+		lua_environment.BeginToIterateOverTableLeaveKey();
+		while (lua_environment.IterateOverTableLeaveKey(NULL)) {
+			LookInteractable* new_interactable = interactable_collection.CreateLookInteractableFromLua(lua_environment);
 			string parent_component_name;
-			if (new_interactable != NULL && lua_environment_.LoadFromTable(string("parent_component"), &parent_component_name)) {
-				transformation_mapped_interactables_.insert(make_pair(parent_component_name, new_interactable));
+			if (new_interactable != NULL && lua_environment.LoadFromTable(string("parent_component"), &parent_component_name)) {
+				new_interactable->SetModelTransformation(&components_[component_lookup_[parent_component_name]].GetTransformationData()->transformation);
 			}
 		}
 	}
-	lua_environment_.RemoveFromStack();
+	lua_environment.RemoveFromStack();
+
+	lua_environment.GetFromTableToStack(string("interaction_callbacks"));
+
+	lua_environment.RemoveFromStack(Lua::Index(1));
+	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ClearComponentTransformation >, 1 }));
+	lua_environment.StoreToTable(string("clear_component_transformation"), Lua::Index(2), Lua::Index(1));
+	lua_environment.RemoveFromStack();
+	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ApplyToComponentTransformation >, 1 }));
+	lua_environment.StoreToTable(string("apply_to_component_transformation"), Lua::Index(2), Lua::Index(1));
+	lua_environment.RemoveFromStack();
+	lua_environment.PrintStack("End");
+
+	lua_interface_ = Lua::InteractableObject(lua_environment);
+	// Ends with the lua_environment containing only the callbacks
 }
 
 unsigned int Actor::GetShaderSettingsId() {
@@ -139,11 +154,24 @@ void Actor::CreateComponents(EntityHandler& entity_handler, ID3D11Device* device
 	}
 }
 
-void XM_CALLCONV Actor::SetComponentTransformation(const string& component_index, DirectX::FXMMATRIX new_transformation) {
-	components_[component_lookup_[component_index]].SetLocalTransformation(new_transformation);
-	auto interactable_range = transformation_mapped_interactables_.equal_range(component_index);
-	while (interactable_range.first != interactable_range.second) {
-		interactable_range.first->second->SetModelTransformation(new_transformation);
-		interactable_range.first++;
-	}
+void XM_CALLCONV Actor::SetComponentTransformation(const string& component_name, DirectX::FXMMATRIX new_transformation) {
+	components_[component_lookup_[component_name]].SetLocalTransformation(new_transformation);
+}
+
+int Actor::ClearComponentTransformation(lua_State* L) {
+	Lua::Environment env(L);
+	string component_name;
+	env.LoadFromStack(&component_name, Lua::Index(1));
+	SetComponentTransformation(component_name, DirectX::XMMatrixIdentity());
+	env.RemoveFromStack(Lua::Index(1));
+	return 0;
+}
+
+int Actor::ApplyToComponentTransformation(lua_State* L) {
+	Lua::Environment env(L);
+	string component_name;
+	env.LoadFromStack(&component_name, Lua::Index(1));
+	components_[component_lookup_[component_name]].LeftComposeLocalTransformation(LuaTableToMatrix(env));
+	env.RemoveFromStack(Lua::Index(1));
+	return 0;
 }

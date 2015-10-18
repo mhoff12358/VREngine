@@ -13,7 +13,8 @@ public:
 	LookInteractable(Identifier id);
 	virtual ~LookInteractable();
 
-	void XM_CALLCONV SetModelTransformation(DirectX::FXMMATRIX model_transformation);
+	void SetModelTransformation(const DirectX::XMFLOAT4X4* model_transformation);
+	DirectX::XMMATRIX GetModelTransformation() const;
 
 	// This returns a value representing how far on the z-axis post view transformation the
 	// object is. It doesn't return an exact distance, but the value it resturns has the same ordering
@@ -28,6 +29,6 @@ public:
 
 protected:
 	Identifier id_;
-	DirectX::XMMATRIX model_transformation_;
+	const DirectX::XMFLOAT4X4* model_transformation_;
 };
 

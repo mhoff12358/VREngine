@@ -6,10 +6,12 @@
 #include "ObjLoader.h"
 #include "InteractableCollection.h"
 #include "BeginDirectx.h"
-#include "LuaGameScripting/InteractableObject.h"
 #include "LuaGameScripting/Environment.h"
+#include "LuaGameScripting/InteractableObject.h"
+#include "LuaGameScripting/MemberFunctionWrapper.h"
 
 #include "Component.h"
+#include "LuaDirectX.h"
 
 class Actor
 {
@@ -32,9 +34,16 @@ private:
 	map<string, Model> models_;
 	map<string, unsigned int> component_lookup_;
 	unsigned int shader_settings_entity_id_;
-	multimap<string, LookInteractable*> transformation_mapped_interactables_;
+	//multimap<string, LookInteractable*> transformation_mapped_interactables_;
 	vector<Component> components_;
-	Lua::Environment lua_environment_;
-	vector<Lua::InteractableObject> lua_interfaces_;
+
+public:
+	// All the lua interaction callbacks, as well as the interface
+	Lua::InteractableObject lua_interface_;
+
+	// Arguments are <string component_name>
+	int ClearComponentTransformation(lua_State* L);
+	// Arguments are <string component_name, table matrix_description>
+	int ApplyToComponentTransformation(lua_State* L);
 };
 

@@ -44,8 +44,12 @@ namespace Lua {
 
 	template <typename K, typename V>
 	bool Environment::StoreToTable(const K& key, const V& stored_value, Index table_location) {
-		StoreToStack(stored_value);
-		return StoreToTableFromStack(key, table_location);
+		bool success = StoreToStack(key) && StoreToStack(stored_value);
+		if (success) {
+			PrintStack("Adding to table");
+			lua_settable(L, table_location.Offset(2).index_);
+		}
+		return success;
 	}
 
 	template <typename T>
@@ -119,7 +123,11 @@ namespace Lua {
 
 	template <int num_args_on_stack>
 	bool Environment::CallFunctionWithArgsOnStack() {
-		return lua_pcall(L, num_args_on_stack, LUA_MULTRET, 0) == LUA_OK;
+		int call_status = lua_pcall(L, num_args_on_stack, LUA_MULTRET, 0);
+		if (call_status != LUA_OK) {
+			PrintStack("Call function error");
+		}
+		return call_status == LUA_OK;
 	}
 
 	template <typename... Args>

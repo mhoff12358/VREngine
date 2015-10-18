@@ -129,6 +129,7 @@
     <ClInclude Include="Environment_inl.cpp" />
     <ClInclude Include="Index.h" />
     <ClInclude Include="InteractableObject.h" />
+    <ClInclude Include="MemberFunctionWrapper.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>

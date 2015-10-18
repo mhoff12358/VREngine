@@ -47,7 +47,7 @@ function create_actor()
 			["center"] = { 0.3125, 1.9243, -0.2828 },
 			["normal"] = { 0, 1, 1 },
 			["right"] = { 1, 0, 0 },
-			["parent_component"] = "terminal_Plane.001"
+			["parent_component"] = "button1_Circle"
 		}, {
 			["interactable_type"] = "Circle",
 			["id"] = "red_button",
@@ -55,8 +55,49 @@ function create_actor()
 			["center"] = { -0.3125, 1.9243, -0.2828 },
 			["normal"] = { 0, 1, 1 },
 			["right"] = { 1, 0, 0 },
-			["parent_component"] = "terminal_Plane.001"
+			["parent_component"] = "button2_Circle.001"
 		}
 	}
+	
+	actor_table.interaction_callbacks = {}
+	function actor_table.interaction_callbacks.look_interacted (self, object_id, location1, location2)
+		if (object_id == "green_button" or object_id == "red_button") then
+			if (object_id == "green_button") then
+				component_name = "button1_Circle"
+			else
+				component_name = "button2_Circle.001"
+			end	
+			if (self.clear_component_transformation ~= nil) then
+				self.clear_component_transformation(component_name)
+				self.apply_to_component_transformation(component_name, {
+					["matrix_type"] = "axis_rotation",
+					["x"] = 1,
+					["y"] = 0,
+					["z"] = 0,
+					["rotation"] = -3.1415/4.0
+				})
+				self.apply_to_component_transformation(component_name, {
+					["matrix_type"] = "translation",
+					["x"] = 0,
+					["y"] = 0,
+					["z"] = -0.099,
+				})
+				self.apply_to_component_transformation(component_name, {
+					["matrix_type"] = "axis_rotation",
+					["x"] = 1,
+					["y"] = 0,
+					["z"] = 0,
+					["rotation"] = 3.1415/4.0
+				})
+			end
+		end
+	end
+	function actor_table.interaction_callbacks.look_released (self)
+		if (self.clear_component_transformation ~= nil) then
+			self.clear_component_transformation("button1_Circle")
+			self.clear_component_transformation("button2_Circle.001")
+		end
+	end
+
 	return actor_table
 end

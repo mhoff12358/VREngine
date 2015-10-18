@@ -6,6 +6,11 @@
 
 namespace Lua {
 
+	struct CFunctionClosureId {
+		lua_CFunction function;
+		int num_args;
+	};
+
 	class Environment {
 	public:
 		static Index stack_top;

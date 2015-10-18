@@ -19,9 +19,12 @@ public:
 	Component(Component&& other);
 
 	void SetChildren(Component* children, int num_children);
-	
+
 	void XM_CALLCONV SetLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
+	void XM_CALLCONV LeftComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
+	void XM_CALLCONV RightComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
 	void UpdateTransformation();
+	const TransformationMatrixAndInvTransData* GetTransformationData();
 
 private:
 	void SetParent(Component* parent);

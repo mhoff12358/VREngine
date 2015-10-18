@@ -85,6 +85,12 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::StoreToStack<CFunctionClosureId>(const CFunctionClosureId& stored_value) {
+		lua_pushcclosure(L, stored_value.function, stored_value.num_args);
+		return true;
+	}
+
+	template <>
 	bool Environment::StoreToStack<bool>(const bool& stored_value) {
 		lua_pushboolean(L, stored_value);
 		return true;
@@ -203,7 +209,6 @@ namespace Lua {
 	}
 
 	bool Environment::IterateOverTableLeaveKey(bool* successful, Index table_location) {
-		PrintStack("lk");
 		RemoveFromStack();
 		return lua_next(L, table_location.Offset(1).index_) != 0;
 	}

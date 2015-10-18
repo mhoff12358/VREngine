@@ -67,6 +67,20 @@ void XM_CALLCONV Component::SetLocalTransformation(DirectX::FXMMATRIX new_transf
 	}
 }
 
+void XM_CALLCONV Component::RightComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update) {
+	local_transformation_ = DirectX::XMMatrixMultiply(local_transformation_, new_transformation);
+	if (apply_update) {
+		UpdateTransformation();
+	}
+}
+
+void XM_CALLCONV Component::LeftComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update) {
+	local_transformation_ = DirectX::XMMatrixMultiply(new_transformation, local_transformation_);
+	if (apply_update) {
+		UpdateTransformation();
+	}
+}
+
 void Component::UpdateTransformation() {
 	if (parent_transformation_ != NULL) {
 		combined_transformation_ = DirectX::XMMatrixMultiply(local_transformation_, *parent_transformation_);
@@ -78,4 +92,8 @@ void Component::UpdateTransformation() {
 	for (unsigned int i = 0; i < num_children_; i++) {
 		children_[i].UpdateTransformation();
 	}
+}
+
+const TransformationMatrixAndInvTransData* Component::GetTransformationData() {
+	return transformation_buffer_.ReadBufferDataTyped();
 }

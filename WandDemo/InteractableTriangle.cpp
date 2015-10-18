@@ -34,12 +34,13 @@ InteractableTriangle::~InteractableTriangle()
 }
 
 float XM_CALLCONV InteractableTriangle::IsLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
+	DirectX::XMMATRIX model_transformation = GetModelTransformation();
 	DirectX::XMFLOAT4 base_point_trans;
 	DirectX::XMFLOAT4 side_1_trans;
 	DirectX::XMFLOAT4 side_2_trans;
-	DirectX::XMStoreFloat4(&base_point_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(base_point_, model_transformation_), view_transformation));
-	DirectX::XMStoreFloat4(&side_1_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_1_, model_transformation_), view_transformation));
-	DirectX::XMStoreFloat4(&side_2_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_2_, model_transformation_), view_transformation));
+	DirectX::XMStoreFloat4(&base_point_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(base_point_, model_transformation), view_transformation));
+	DirectX::XMStoreFloat4(&side_1_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_1_, model_transformation), view_transformation));
+	DirectX::XMStoreFloat4(&side_2_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_2_, model_transformation), view_transformation));
 
 	side_1_trans.x -= base_point_trans.x;
 	side_1_trans.y -= base_point_trans.y;
@@ -65,12 +66,13 @@ float XM_CALLCONV InteractableTriangle::IsLookedAt(const DirectX::FXMMATRIX& vie
 }
 
 tuple<float, std::array<float, 2>> XM_CALLCONV InteractableTriangle::WhereLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
+	DirectX::XMMATRIX model_transformation = GetModelTransformation();
 	DirectX::XMFLOAT4 base_point_trans;
 	DirectX::XMFLOAT4 side_1_trans;
 	DirectX::XMFLOAT4 side_2_trans;
-	DirectX::XMStoreFloat4(&base_point_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(base_point_, model_transformation_), view_transformation));
-	DirectX::XMStoreFloat4(&side_1_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_1_, model_transformation_), view_transformation));
-	DirectX::XMStoreFloat4(&side_2_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_2_, model_transformation_), view_transformation));
+	DirectX::XMStoreFloat4(&base_point_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(base_point_, model_transformation), view_transformation));
+	DirectX::XMStoreFloat4(&side_1_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_1_, model_transformation), view_transformation));
+	DirectX::XMStoreFloat4(&side_2_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(side_point_2_, model_transformation), view_transformation));
 
 	side_1_trans.x -= base_point_trans.x;
 	side_1_trans.y -= base_point_trans.y;
