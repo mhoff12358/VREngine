@@ -44,6 +44,8 @@ namespace Lua {
 		//bool LoadFromStack(tuple<value_types...>* loaded_values, Index stack_position_start = -1, int num_values_to_load = 1);
 		template <typename T>
 		bool PeekFromStack(T* loaded_value, Index stack_position = stack_top);
+		template <typename... Args>
+		bool PeekFromStack(tuple<Args...>* loaded_value, Index stack_position = stack_top);
 		template <typename T>
 		bool PeekArrayFromStack(T* loaded_value, Index stack_position = stack_top, int max_num_loaded = -1);
 		bool StoreToStack();
@@ -96,8 +98,11 @@ namespace Lua {
 
 		lua_State* L;
 
-	private:
+		template<std::size_t I = 0, std::size_t J, typename... Args>
+		typename std::enable_if<I == J, bool>::type LoadTupleElement(tuple<Args...>& t, Index stack_position);
 
+		template<std::size_t I = 0, std::size_t J, typename... Args>
+		typename std::enable_if<I != J, bool>::type LoadTupleElement(tuple<Args...>& t, Index stack_position);
 	};
 
 }  // namespace Lua

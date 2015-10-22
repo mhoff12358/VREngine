@@ -4,9 +4,10 @@
 
 InteractableTriangle::InteractableTriangle(
 	const Identifier& id,
+	Actor* actor,
 	const array<float, 3>& point1,
 	const array<float, 3>& point2,
-	const array<float, 3>& point3) : LookInteractable(id)
+	const array<float, 3>& point3) : LookInteractable(id, actor)
 {
 	DirectX::XMFLOAT4 base_point;
 	base_point.x = point1[0];

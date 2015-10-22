@@ -1,12 +1,3 @@
-testarray = {}
-testarray[1] = 5
-testarray[2] = 67
-testarray[3] = 52
-
-test2array = {}
-test2array["a"] = 6
-test2array["b"] = 9
-
 function create_actor()
 	actor_table = {}
 	actor_table.model_file_name = "console.obj"
@@ -27,6 +18,10 @@ function create_actor()
 			{ "button2_Circle.001" },
 			{ "button1_Circle" }
 		}
+	}
+
+	actor_table.settings_blocks = {
+	
 	}
 
 	actor_table.shader_file_name = "texturedspecular.hlsl"
@@ -60,14 +55,14 @@ function create_actor()
 	}
 	
 	actor_table.interaction_callbacks = {}
-	function actor_table.interaction_callbacks.look_interacted (self, object_id, location1, location2)
+	function actor_table.interaction_callbacks.look_entered (self, object_id)
 		if (object_id == "green_button" or object_id == "red_button") then
 			if (object_id == "green_button") then
 				component_name = "button1_Circle"
 			else
 				component_name = "button2_Circle.001"
 			end	
-			if (self.clear_component_transformation ~= nil) then
+			if ((self.clear_component_transformation ~= nil) and (self.apply_to_component_transformation ~= nil)) then
 				self.clear_component_transformation(component_name)
 				self.apply_to_component_transformation(component_name, {
 					["matrix_type"] = "axis_rotation",
@@ -92,10 +87,26 @@ function create_actor()
 			end
 		end
 	end
-	function actor_table.interaction_callbacks.look_released (self)
+	function actor_table.interaction_callbacks.look_left (self, object_id, new_object_id)
 		if (self.clear_component_transformation ~= nil) then
 			self.clear_component_transformation("button1_Circle")
 			self.clear_component_transformation("button2_Circle.001")
+		end
+	end
+	function actor_table.interaction_callbacks.look_maintained (self, object_id, location1, location2)
+		if (object_id == "terminal") then
+			actor_interfaces["cone"]:place_at_console_location(1.5 * location1, location2)
+		end
+	end
+	function actor_table.interaction_callbacks.initialize (self)
+		if ((self.clear_component_transformation ~= nil) and (self.apply_to_component_transformation ~= nil)) then
+			self.clear_component_transformation("terminal_Plane.001")
+			self.apply_to_component_transformation("terminal_Plane.001", {
+				["matrix_type"] = "translation",
+				["x"] = 0,
+				["y"] = -1.75,
+				["z"] = -1
+			})
 		end
 	end
 

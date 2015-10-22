@@ -19,6 +19,9 @@
 #include <tuple>
 #include <cmath>
 #include <algorithm>
+#include <atomic>
+#include <thread>
+#include <mutex>
 
 using std::string;
 using std::map;
@@ -28,5 +31,9 @@ using std::pair;
 using std::array;
 using std::tuple;
 using std::max;
+using std::atomic;
+using std::thread;
+using std::mutex;
+using std::unique_lock;
 
 const float pi = 3.141593;

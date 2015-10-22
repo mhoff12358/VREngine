@@ -4,10 +4,11 @@
 
 InteractableCircle::InteractableCircle(
 	const Identifier& id,
+	Actor* actor,
 	float radius,
 	const array<float, 3>& center,
 	const array<float, 3>& normal,
-	const array<float, 3>& right) : LookInteractable(id), radius_(radius)
+	const array<float, 3>& right) : LookInteractable(id, actor), radius_(radius)
 {
 	DirectX::XMFLOAT4 temp_center;
 	temp_center.x = center[0];

@@ -19,6 +19,7 @@
 #include "InteractableCircle.h"
 #include "Identifier.h"
 #include "InteractableCollection.h"
+#include "ActorHandler.h"
 
 #include "LuaGameScripting/Environment.h"
 #include "LuaGameScripting/InteractableObject.h"
@@ -37,117 +38,82 @@ const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
 
-InteractableCollection interactable_objects(50);
+mutex player_position_access;
+array<float, 3> player_location = { { 0, 0, 0 } };
+Quaternion player_orientation_quaternion;
 
-Entity makewiimote(const VRBackendBasics& graphics_objects) {
-	std::vector<Vertex> vertices;
-	VertexType vertex_type = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	}));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f }));
+mutex device_context_access;
 
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f }));
-
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f }));
-
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 0.0f, 1.0f }));
-
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, -1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f }));
-
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, 1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-	vertices.push_back(Vertex(vertex_type, { 1.0f, -1.0f, -1.0f, 0.0f, 1.0f, 1.0f, 1.0f }));
-
-	Model model = graphics_objects.resource_pool->LoadModel("wiimote", vertices, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	ConstantBufferTyped<TransformationMatrixAndInvTransData>* object_settings = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
-	object_settings->CreateBuffer(graphics_objects.view_state->device_interface);
-	object_settings->SetBothTransformations(DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationY(3.14f), DirectX::XMMatrixTranslation(0, 0, -4)));
-	object_settings->PushBuffer(graphics_objects.view_state->device_context);
-
-	return Entity(
-		ES_NORMAL,
-		graphics_objects.resource_pool->LoadPixelShader("shaders.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("shaders.hlsl", vertex_type.GetVertexType(), vertex_type.GetSizeVertexType()),
-		ShaderSettings(NULL),
-		model,
-		object_settings);
-}
-
-std::vector<Entity> makeconsole(const VRBackendBasics& graphics_objects) {
-	std::map<std::string, Model> models = graphics_objects.resource_pool->LoadModelAsParts("console.obj", { { { 0, 1, 2 }, { 1.0f, 1.0f, 1.0f }, { false, true } }, ObjLoader::vertex_type_all });
-
-	ConstantBufferTyped<TransformationMatrixAndInvTransData>* object_settings = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
-	object_settings->CreateBuffer(graphics_objects.view_state->device_interface);
-	object_settings->SetBothTransformations(DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationZ(3.14f/2.0f), DirectX::XMMatrixTranslation(0, 0, -4)));
-	object_settings->PushBuffer(graphics_objects.view_state->device_context);
-
-	Texture texture = graphics_objects.resource_pool->LoadTexture("console.png");
-	TextureView texture_view(0, 0, texture);
-
-	std::vector<Entity> entities;
-
-	for (const std::pair<const std::string, Model>& model : models) {
-		Entity new_entity(ES_NORMAL, PixelShader(), VertexShader(), ShaderSettings(NULL), model.second, NULL, texture_view);
-		entities.push_back(new_entity);
-	}
-
-	entities[0].object_settings = object_settings;
-
-	return entities;
-}
+template <>
+class ConstantBufferTyped<array<float, 4>> : public ConstantBufferTypedTemp<array<float, 4>>{
+public:
+	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
+};
 
 void GraphicsLoop() {
-	MSG msg;
-	int prev_time = timeGetTime();
 	int frame_index = 0;
 
-	unsigned int wiimote_entity_id = graphics_objects.entity_handler->AddEntity(makewiimote(graphics_objects));
-	graphics_objects.entity_handler->DisableEntity(wiimote_entity_id);
+	int prev_sec = timeGetTime();
+	int fps = 0;
 
-	Actor console_actor(*graphics_objects.resource_pool);
+	while (true) {
+		/*int curr_time = timeGetTime();
+		if (curr_time - 1000 >= prev_sec) {
+			std::cout << "FPS: " << fps << std::endl;
+			prev_sec = curr_time;
+			fps = 1;
+		} else {
+			++fps;
+		}*/
+
+		graphics_objects.input_handler->UpdateOculus(frame_index);
+		unique_lock<mutex> device_context_lock(device_context_access);
+
+		unique_lock<mutex> player_position_lock(player_position_access);
+		array<float, 3> player_location_copy = player_location;
+		Quaternion player_orientation_quaternion_copy = player_orientation_quaternion;
+		player_position_lock.unlock();
+
+		graphics_objects.render_pipeline->Render({ player_location, player_orientation_quaternion });
+		frame_index++;
+	}
+}
+
+void UpdateLoop() {
+	MSG msg;
+	int prev_time = timeGetTime();
+	ActorHandler actor_handler(graphics_objects);
+
+	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
+	array<float, 2> player_orientation_angles = { { 0, 0 } };
+
+	LookState previous_look = { Identifier(""), NULL, 0, array<float, 2>({ 0, 0 }) };
+
+	unique_lock<mutex> device_context_lock(device_context_access);
 	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
 	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
 	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
 	light_details.SetLightSourceDirection({ { 1, -1, 0 } });
 	light_details.ambient_light = 0.2f;
 	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
-	console_actor.InitializeFromLuaScript("console.lua", graphics_objects, interactable_objects, shader_settings_buffer);
+	Actor* console_actor = actor_handler.CreateActorFromLuaScript("console.lua", "console", shader_settings_buffer);
 
-	//bool func_called = console_actor.lua_interface_.CallLuaFunc(string("say_hello"));
+	ConstantBufferTyped<array<float, 4>>* color_settings_buffer = new ConstantBufferTyped<array<float, 4>>(CB_PS_PIXEL_SHADER);
+	color_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
+	color_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
+	color_settings_buffer->EditBufferDataRef() = array<float, 4>({ 1.0f, 0.0f, 0.0f, 1.0f });
+	Actor* cone_actor = actor_handler.CreateActorFromLuaScript("cone.lua", "cone", color_settings_buffer);
+
+	ConstantBufferTyped<array<float, 4>>* bottle_settings_buffer = new ConstantBufferTyped<array<float, 4>>(CB_PS_PIXEL_SHADER);
+	bottle_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
+	bottle_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
+	bottle_settings_buffer->EditBufferDataRef() = array<float, 4>({ 0.25f, 1.0f, 0.25f, 1.0f });
+	Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", bottle_settings_buffer);
+	device_context_lock.unlock();
 
 	Camera player_look_camera;
-
 	player_look_camera.BuildViewMatrix();
+
 	/*
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
@@ -158,12 +124,6 @@ void GraphicsLoop() {
 		std::cout << "Error registering raw input device" << std::endl;
 	}
 	*/
-
-	Quaternion obj_orient;
-
-	std::array<float, 3> player_location = { { 0, 0, 0 } };
-	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
-	std::array<float, 2> player_orientation_angles = { { 0, 0 } };
 
 	std::array<float, 3> infinite_light_direction = { { 1, 1, 0 } };
 
@@ -177,27 +137,6 @@ void GraphicsLoop() {
 			if (msg.message == WM_QUIT) {
 				break;
 			}
-			else if (msg.message == WM_KEYDOWN) {
-				graphics_objects.input_handler->HandleKeydown(msg.wParam);
-
-				switch (msg.wParam) {
-				case 'F':
-					if (wiimote != NULL) {
-						wiimote->RequestCalibrateMotionPlus();
-					}
-					break;
-				case 'C':
-					if (wiimote != NULL) {
-						wiimote->SendOutputReport(OutputReportTemplates::request_calibration);
-					}
-					break;
-				case 'V':
-					if (wiimote != NULL) {
-						wiimote->Rezero();
-					}
-					break;
-				}
-			}
 		}
 		TimeTracker::FrameEvent("Windows Message Handling");
 
@@ -205,10 +144,10 @@ void GraphicsLoop() {
 		int time_delta_ms = new_time - prev_time;
 		prev_time = new_time;
 
-		graphics_objects.input_handler->UpdateStates(frame_index);
-
 		TimeTracker::FrameEvent("Update states");
 
+		graphics_objects.input_handler->UpdateKeyboardState();
+		unique_lock<mutex> player_position_lock(player_position_access);
 		if (graphics_objects.input_handler->GetKeyPressed('W')) {
 			player_location[2] -= time_delta_ms * movement_scale;
 		}
@@ -231,17 +170,18 @@ void GraphicsLoop() {
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
 		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
 		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
+		player_position_lock.unlock();
 
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
-		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(console_actor.GetShaderSettingsId());
+		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(console_actor->GetShaderSettingsId());
 		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
-		DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
-		console_actor.SetComponentTransformation("terminal_Plane.001",
-			terminal_transformation);
+		//DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
+		//console_actor.SetComponentTransformation("terminal_Plane.001",
+		//	terminal_transformation);
 
-		Quaternion player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_look_camera.location = player_location;
 		if (graphics_objects.input_handler->IsOculusActive()) {
 			player_orientation_quaternion = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation) * player_orientation_quaternion;
@@ -253,34 +193,26 @@ void GraphicsLoop() {
 		}
 		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
 		player_look_camera.InvalidateViewMatrices();
-		Identifier id_of_object;
-		float distance_to_object;
-		array<float, 2> where_on_object;
-		std::tie(id_of_object, distance_to_object, where_on_object) = interactable_objects.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
+		LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
+		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
 		//std::cout << "Object looked at: " << id_of_object << std::endl;
 
-		if (graphics_objects.input_handler->GetKeyToggled('B')) {
-			console_actor.lua_interface_.CallLuaFunc(string("look_interacted"), id_of_object.GetId(), where_on_object[0], where_on_object[1]);
+		if (previous_look.id_of_object != current_look.id_of_object) {
+			if (previous_look.actor != NULL) {
+				previous_look.actor->lua_interface_.CallLuaFunc(string("look_left"), current_look.id_of_object.GetId(), previous_look.id_of_object.GetId());
+			}
+			if (current_look.actor != NULL) {
+				current_look.actor->lua_interface_.CallLuaFunc(string("look_entered"), current_look.id_of_object.GetId());
+			}
 		}
-		if (graphics_objects.input_handler->GetKeyToggled('B', false)) {
-			console_actor.lua_interface_.CallLuaFunc(string("look_released"));
+		if (current_look.actor != NULL) {
+			current_look.actor->lua_interface_.CallLuaFunc(string("look_maintained"), current_look.id_of_object.GetId(), current_look.where_on_object[0], current_look.where_on_object[1]);
 		}
+		previous_look = current_look;
 		
 		graphics_objects.entity_handler->FinishUpdate();
 		
 		TimeTracker::FrameEvent("Finalize object position stuff");
-
-		graphics_objects.render_pipeline->Render({ player_location, player_orientation_quaternion });
-		/*if (graphics_objects.input_handler->IsOculusActive()) {
-			Quaternion combined_orientation = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation)*Quaternion();
-			graphics_objects.render_pipeline->Render({ player_location, combined_orientation });
-		} else {
-			graphics_objects.render_pipeline->Render({ player_location,  player_orientation_quaternion});
-		}*/
-
-		TimeTracker::FrameEvent("Actual rendering");
-
-		++frame_index;
 	}
 
 	// clean up DirectX and COM
@@ -298,6 +230,9 @@ void LuaTest() {
 	Lua::Environment env(true);
 	env.RunFile("console.lua");
 
+	tuple<float, float, int, string> vals;
+	//env.LoadTupleElement<1, 4, float, float, int, string>(vals, Lua::Index(-1));
+	bool success = env.LoadGlobal(string("bah"), &vals);
 
 	std::cout << "Finish lua test" << std::endl;
 }
@@ -310,7 +245,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//wiimote = wiimote_interface.GetHandler();
 	wiimote = NULL;
 
-	graphics_objects = BeginDirectx(true, "");
+	graphics_objects = BeginDirectx(false, "");
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;
@@ -318,7 +253,8 @@ int _tmain(int argc, _TCHAR* argv[])
 	graphics_objects.input_handler->SetUsePredictiveTiming(true);
 	graphics_objects.input_handler->SetPredictiveTiming(-5);
 
-	GraphicsLoop();
+	thread graphics_thread(GraphicsLoop);
+	UpdateLoop();
 
 	return 0;
 }

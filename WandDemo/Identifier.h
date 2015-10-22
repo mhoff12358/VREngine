@@ -12,6 +12,7 @@ public:
 	const string& GetId() const;
 
 	bool operator==(const Identifier& other);
+	bool operator!=(const Identifier& other);
 
 private:
 	string id_;

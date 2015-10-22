@@ -9,6 +9,7 @@ class InteractableTriangle :
 public:
 	InteractableTriangle(
 		const Identifier& id,
+		Actor* actor,
 		const array<float, 3>& point_1,
 		const array<float, 3>& point_2,
 		const array<float, 3>& point_3);

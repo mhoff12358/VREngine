@@ -25,6 +25,28 @@ namespace Lua {
 		return StoreToStack(stored_value) && SetGlobalFromStack(var_name);
 	}
 
+	template<std::size_t I, std::size_t J, typename... Args>
+	typename std::enable_if<I == J, bool>::type Environment::LoadTupleElement(tuple<Args...>& t, Index stack_position) {
+		return true;
+	}
+
+	template<std::size_t I, std::size_t J, typename... Args>
+	typename std::enable_if<I != J, bool>::type Environment::LoadTupleElement(tuple<Args...>& t, Index stack_position) {
+		std::tuple_element<I, tuple<Args...>>::type val;
+		if (!LoadFromTable(I+1, &val)) {
+			return false;
+		}
+		std::get<I>(t) = val;
+		return LoadTupleElement<I + 1, J>(t, stack_position);
+	}
+
+	template <typename... Args>
+	bool Environment::PeekFromStack(tuple<Args...>* loaded_value, Index stack_position) {
+		std::size_t s = sizeof...(Args);
+		LoadTupleElement<0, sizeof...(Args), Args...>(*loaded_value, stack_position);
+		return false;
+	}
+
 	template <typename K, typename V>
 	bool Environment::LoadFromTable(const K& key, V* loaded_value, Index table_location) {
 		bool success = GetFromTableToStack(key, table_location);
@@ -46,7 +68,6 @@ namespace Lua {
 	bool Environment::StoreToTable(const K& key, const V& stored_value, Index table_location) {
 		bool success = StoreToStack(key) && StoreToStack(stored_value);
 		if (success) {
-			PrintStack("Adding to table");
 			lua_settable(L, table_location.Offset(2).index_);
 		}
 		return success;

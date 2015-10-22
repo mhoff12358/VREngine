@@ -57,6 +57,12 @@
     <ClInclude Include="LuaDirectX.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ActorHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InteractableSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -98,6 +104,12 @@
     <ClCompile Include="LuaDirectX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ActorHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractableSphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="objshader.hlsl">
@@ -115,9 +127,21 @@
     <FxCompile Include="texturedspecular.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="solidcolor.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="solidcolorforceblue.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="console.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+    <Object Include="cone.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+    <Object Include="bottle.obj">
       <Filter>Resource Files</Filter>
     </Object>
   </ItemGroup>
@@ -128,6 +152,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="console.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="cone.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="bottle.lua">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

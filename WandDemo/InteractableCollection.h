@@ -6,6 +6,7 @@
 #include "InteractableCircle.h"
 #include "InteractableTriangle.h"
 #include "InteractableQuad.h"
+#include "InteractableSphere.h"
 
 #include "LuaGameScripting/Environment.h"
 
@@ -15,7 +16,7 @@ struct LookInteractableBlock {
 	LookInteractableBlock();
 	~LookInteractableBlock();
 
-	char data[CONSTMAX(sizeof(InteractableTriangle), CONSTMAX(sizeof(InteractableQuad), sizeof(InteractableCircle)))];
+	char data[CONSTMAX(sizeof(InteractableTriangle), CONSTMAX(sizeof(InteractableQuad), CONSTMAX(sizeof(InteractableCircle), sizeof(InteractableSphere))))];
 
 	LookInteractable* GetAsLookInteractable();
 	const LookInteractable* GetAsLookInteractable() const;
@@ -27,12 +28,12 @@ public:
 	InteractableCollection(unsigned int num_interactable_objects);
 	~InteractableCollection();
 
-	tuple<Identifier, float> XM_CALLCONV GetClosestLookedAt(const DirectX::FXMMATRIX& view_transformation) const;
-	tuple<Identifier, float, array<float, 2>> XM_CALLCONV GetClosestLookedAtAndWhere(const DirectX::FXMMATRIX& view_transformation) const;
+	tuple<Identifier, Actor*, float> XM_CALLCONV GetClosestLookedAt(const DirectX::FXMMATRIX& view_transformation) const;
+	tuple<Identifier, Actor*, float, array<float, 2>> XM_CALLCONV GetClosestLookedAtAndWhere(const DirectX::FXMMATRIX& view_transformation) const;
 
 	LookInteractable* GetInteractableAtPosition(int index);
 	LookInteractable* GetNewLookInteractableBlock();
-	LookInteractable* CreateLookInteractableFromLua(Lua::Environment environment_with_table);
+	LookInteractable* CreateLookInteractableFromLua(Actor* actor, Lua::Environment environment_with_table);
 	
 private:
 	vector<LookInteractableBlock> interactable_objects_;

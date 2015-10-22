@@ -52,6 +52,9 @@ namespace Lua {
 	}
 
 	int Environment::GetArrayLength(Index stack_position) {
+		if (!lua_istable(L, stack_position.index_)) {
+			return -1;
+		}
 		lua_len(L, stack_position.index_);
 		int length;
 		LoadFromStack(&length);
@@ -166,6 +169,21 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::PeekFromStack<std::size_t>(std::size_t* loaded_value, Index stack_position) {
+		if (!lua_isnumber(L, stack_position.index_)) {
+			return false;
+		}
+		*loaded_value = (std::size_t)lua_tonumber(L, stack_position.index_);
+		return true;
+	}
+
+	template <>
+	bool Environment::StoreToStack<std::size_t>(const std::size_t& stored_value) {
+		lua_pushnumber(L, stored_value);
+		return true;
+	}
+
+	template <>
 	bool Environment::PeekFromStack<string>(string* loaded_value, Index stack_position) {
 		if (!lua_isstring(L, stack_position.index_)) {
 			return false;
@@ -180,7 +198,7 @@ namespace Lua {
 		return true;
 	}
 
-	template<>
+	template <>
 	bool Environment::StoreToStack<Index>(const Index& stored_value) {
 		lua_pushvalue(L, stored_value.index_);
 		return true;
@@ -248,5 +266,6 @@ namespace Lua {
 	bool Environment::CallFunctionOnStackTop() {
 		return CallFunctionWithArgsOnStack<0>();
 	}
+
 
 }  // namespace Lua

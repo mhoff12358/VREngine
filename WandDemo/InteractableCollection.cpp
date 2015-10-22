@@ -28,10 +28,10 @@ InteractableCollection::~InteractableCollection()
 }
 
 
-tuple<Identifier, float> XM_CALLCONV InteractableCollection::GetClosestLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
-	tuple<Identifier, float> result_tuple;
+tuple<Identifier, Actor*, float> XM_CALLCONV InteractableCollection::GetClosestLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
+	tuple<Identifier, Actor*, float> result_tuple;
 	std::get<0>(result_tuple) = "";
-	float& current_best = std::get<1>(result_tuple);
+	float& current_best = std::get<2>(result_tuple);
 	current_best = std::numeric_limits<float>::infinity();
 	for (const LookInteractableBlock& current_interactable_block : interactable_objects_) {
 		const LookInteractable* current_interactable = current_interactable_block.GetAsLookInteractable();
@@ -39,15 +39,16 @@ tuple<Identifier, float> XM_CALLCONV InteractableCollection::GetClosestLookedAt(
 		if (current_looked_at_distance >= 0 && current_looked_at_distance < current_best) {
 			current_best = current_looked_at_distance;
 			std::get<0>(result_tuple) = current_interactable->GetId();
+			std::get<1>(result_tuple) = current_interactable->GetActor();
 		}
 	}
 	return result_tuple;
 }
 
-tuple<Identifier, float, array<float, 2>> XM_CALLCONV InteractableCollection::GetClosestLookedAtAndWhere(const DirectX::FXMMATRIX& view_transformation) const {
-	tuple<Identifier, float, array<float, 2>> result_tuple;
+tuple<Identifier, Actor*, float, array<float, 2>> XM_CALLCONV InteractableCollection::GetClosestLookedAtAndWhere(const DirectX::FXMMATRIX& view_transformation) const {
+	tuple<Identifier, Actor*, float, array<float, 2>> result_tuple;
 	std::get<0>(result_tuple) = "";
-	float& current_best = std::get<1>(result_tuple);
+	float& current_best = std::get<2>(result_tuple);
 	current_best = std::numeric_limits<float>::infinity();
 	for (const LookInteractableBlock& current_interactable_block : interactable_objects_) {
 		const LookInteractable* current_interactable = current_interactable_block.GetAsLookInteractable();
@@ -55,7 +56,8 @@ tuple<Identifier, float, array<float, 2>> XM_CALLCONV InteractableCollection::Ge
 		if (!std::isnan(std::get<0>(current_where_looked_at)) && std::get<0>(current_where_looked_at) >= 0 && std::get<0>(current_where_looked_at) < current_best) {
 			current_best = std::get<0>(current_where_looked_at);
 			std::get<0>(result_tuple) = current_interactable->GetId();
-			std::get<2>(result_tuple) = std::get<1>(current_where_looked_at);
+			std::get<1>(result_tuple) = current_interactable->GetActor();
+			std::get<3>(result_tuple) = std::get<1>(current_where_looked_at);
 		}
 	}
 	return result_tuple;
@@ -73,7 +75,7 @@ LookInteractable* InteractableCollection::GetNewLookInteractableBlock() {
 	return GetInteractableAtPosition(interactable_objects_.size() - 1);
 }
 
-LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Environment environment_with_table) {
+LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Actor* actor, Lua::Environment environment_with_table) {
 	string interactable_type;
 	if (!environment_with_table.LoadFromTable(string("interactable_type"), &interactable_type)) {
 		return NULL;
@@ -91,9 +93,9 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Env
 			return NULL;
 		}
 		if (environment_with_table.LoadArrayFromTable(string("right"), right.data(), Lua::Environment::stack_top, 3)) {
-			return new (GetNewLookInteractableBlock()) InteractableCircle(id, radius, center, normal, right);
+			return new (GetNewLookInteractableBlock()) InteractableCircle(id, actor, radius, center, normal, right);
 		} else {
-			return new (GetNewLookInteractableBlock()) InteractableCircle(id, radius, center, normal);
+			return new (GetNewLookInteractableBlock()) InteractableCircle(id, actor, radius, center, normal);
 		}
 	}
 	else if (interactable_type == "Quad") {
@@ -102,24 +104,34 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Lua::Env
 		array<float, 3> point_2;
 		array<float, 3> point_3;
 		if (!(environment_with_table.LoadFromTable(string("id"), &id) &&
-			environment_with_table.LoadArrayFromTable(string("point_1"), point_1.data()) &&
+			environment_with_table.LoadArrayFromTable(string("point_1"), point_1.data(), Lua::Environment::stack_top, 3) &&
 			environment_with_table.LoadArrayFromTable(string("point_2"), point_2.data(), Lua::Environment::stack_top, 3) &&
 			environment_with_table.LoadArrayFromTable(string("point_3"), point_3.data(), Lua::Environment::stack_top, 3))) {
 			return NULL;
 		}
-		return new (GetNewLookInteractableBlock()) InteractableQuad(id, point_1, point_2, point_3);
+		return new (GetNewLookInteractableBlock()) InteractableQuad(id, actor, point_1, point_2, point_3);
 	} else if (interactable_type == "Triangle") {
 		string id;
 		array<float, 3> point_1;
 		array<float, 3> point_2;
 		array<float, 3> point_3;
 		if (!(environment_with_table.LoadFromTable(string("id"), &id) &&
-			environment_with_table.LoadArrayFromTable(string("point_1"), point_1.data()) &&
+			environment_with_table.LoadArrayFromTable(string("point_1"), point_1.data(), Lua::Environment::stack_top, 3) &&
 			environment_with_table.LoadArrayFromTable(string("point_2"), point_2.data(), Lua::Environment::stack_top, 3) &&
 			environment_with_table.LoadArrayFromTable(string("point_3"), point_3.data(), Lua::Environment::stack_top, 3))) {
 			return NULL;
 		}
-		return new (GetNewLookInteractableBlock()) InteractableTriangle(id, point_1, point_2, point_3);
+		return new (GetNewLookInteractableBlock()) InteractableTriangle(id, actor, point_1, point_2, point_3);
+	} else if (interactable_type == "Sphere") {
+		string id;
+		float radius;
+		array<float, 3> center;
+		if (!(environment_with_table.LoadFromTable(string("id"), &id) &&
+			environment_with_table.LoadArrayFromTable(string("center"), center.data()) &&
+			environment_with_table.LoadFromTable(string("radius"), &radius))) {
+			return NULL;
+		}
+		return new (GetNewLookInteractableBlock()) InteractableSphere(id, actor, radius, center);
 	} else {
 		return NULL;
 	}

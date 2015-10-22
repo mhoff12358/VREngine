@@ -2,7 +2,7 @@
 #include "LookInteractable.h"
 
 
-LookInteractable::LookInteractable(Identifier id) : id_(id), model_transformation_(NULL)
+LookInteractable::LookInteractable(Identifier id, Actor* actor) : id_(id), actor_(actor), model_transformation_(NULL)
 {
 }
 
@@ -26,4 +26,8 @@ DirectX::XMMATRIX LookInteractable::GetModelTransformation() const {
 
 const Identifier& LookInteractable::GetId() const {
 	return id_;
+}
+
+Actor* LookInteractable::GetActor() const {
+	return actor_;
 }

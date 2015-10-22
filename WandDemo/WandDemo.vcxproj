@@ -146,11 +146,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="ActorHandler.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
     <ClInclude Include="InteractableQuad.h" />
+    <ClInclude Include="InteractableSphere.h" />
     <ClInclude Include="InteractableTriangle.h" />
     <ClInclude Include="LightDetails.h" />
     <ClInclude Include="LookInteractable.h" />
@@ -161,11 +163,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="ActorHandler.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />
     <ClCompile Include="InteractableQuad.cpp" />
+    <ClCompile Include="InteractableSphere.cpp" />
     <ClCompile Include="InteractableTriangle.cpp" />
     <ClCompile Include="LightDetails.cpp" />
     <ClCompile Include="LookInteractable.cpp" />
@@ -189,6 +193,12 @@
     <FxCompile Include="shaders.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="solidcolor.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="solidcolorforceblue.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="texturednormaledshader.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -197,6 +207,12 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
+    <Object Include="bottle.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
+    <Object Include="cone.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
     <Object Include="console.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
@@ -205,6 +221,8 @@
     <Image Include="console.png" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bottle.lua" />
+    <None Include="cone.lua" />
     <None Include="console.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

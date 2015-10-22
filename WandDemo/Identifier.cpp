@@ -29,6 +29,10 @@ bool Identifier::operator==(const Identifier& other) {
 	return id_ == other.id_;
 }
 
+bool Identifier::operator!=(const Identifier& other) {
+	return id_ != other.id_;
+}
+
 std::ostream& operator<<(std::ostream& os, const Identifier& ident) {
 	return os << ident.GetId();
 }
