@@ -174,8 +174,7 @@ void UpdateLoop() {
 		player_position_lock.unlock();
 
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
-		ConstantBufferTyped<LightDetails>* infinite_light_buffer = graphics_objects.entity_handler->GetShaderSettings<LightDetails>(console_actor->GetShaderSettingsId());
-		infinite_light_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
+		shader_settings_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
 		//DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
@@ -230,8 +229,9 @@ void LuaTest() {
 	Lua::Environment env(true);
 	env.RunFile("console.lua");
 
-	tuple<float, float, int, string> vals;
+	//tuple<float, float, int, string> vals;
 	//env.LoadTupleElement<1, 4, float, float, int, string>(vals, Lua::Index(-1));
+	vector<vector<string>> vals;
 	bool success = env.LoadGlobal(string("bah"), &vals);
 
 	std::cout << "Finish lua test" << std::endl;

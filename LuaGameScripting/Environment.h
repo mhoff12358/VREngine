@@ -40,21 +40,27 @@ namespace Lua {
 		bool LoadFromStack(T* loaded_value, Index stack_position = stack_top);
 		template <typename T>
 		bool LoadArrayFromStack(T* loaded_value, Index stack_position = stack_top, int max_num_loaded = -1);
-		//template <typename... value_types>
-		//bool LoadFromStack(tuple<value_types...>* loaded_values, Index stack_position_start = -1, int num_values_to_load = 1);
 		template <typename T>
 		bool PeekFromStack(T* loaded_value, Index stack_position = stack_top);
 		template <typename... Args>
 		bool PeekFromStack(tuple<Args...>* loaded_value, Index stack_position = stack_top);
+		template <typename T, size_t N>
+		bool PeekFromStack(array<T, N>* loaded_value, Index stack_position = stack_top);
+		template <typename T>
+		bool PeekFromStack(vector<T>* loaded_value, Index stack_position = stack_top);
 		template <typename T>
 		bool PeekArrayFromStack(T* loaded_value, Index stack_position = stack_top, int max_num_loaded = -1);
 		bool StoreToStack();
 		template <typename T>
 		bool StoreToStack(const T& stored_value);
-		//template <typename T>
-		//bool StoreToStack(const T* stored_value);
+		template <typename T, size_t N>
+		bool StoreToStack(const array<T, N>& stored_value);
+		template <typename T>
+		bool StoreToStack(const vector<T>& stored_value);
 		template <typename T, typename... Args>
 		bool StoreToStack(const T& stored_value, Args... args);
+		template <typename T>
+		bool StoreArrayToStack(const T const* stored_value, size_t array_length);
 		//template <typename T, typename... Args>
 		//bool StoreToStack(const T* stored_value, Args... args);
 

@@ -24,7 +24,7 @@ public:
 	void InitializeFromLuaScript(lua_State* L, const string& script_name, const VRBackendBasics& graphics_objects, InteractableCollection& interactable_collection, ActorHandler* actor_handler, ConstantBuffer* shader_settings = NULL);
 
 	void LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format);
-	void CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentage);
+	map<string, vector<Model>> CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentage);
 
 	void XM_CALLCONV SetComponentTransformation(const string& component_name, DirectX::FXMMATRIX new_transformation);
 
@@ -32,14 +32,13 @@ public:
 
 	vector<Component> components_;
 	map<string, unsigned int> component_lookup_;
+	vector<unsigned int> shader_settings_entity_ids_;
 private:
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
 	Identifier ident_;
 	map<string, Model> models_;
-	unsigned int shader_settings_entity_id_;
-	//multimap<string, LookInteractable*> transformation_mapped_interactables_;
-
+	
 public:
 	// All the lua interaction callbacks, as well as the interface
 	Lua::InteractableObject lua_interface_;

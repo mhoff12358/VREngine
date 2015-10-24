@@ -16,6 +16,16 @@ namespace Lua {
 	}
 
 	template <typename T>
+	bool StoreArrayToStack(const T const* stored_value, size_t array_length) {
+		lua_newtable(L);
+		bool success = true;
+		for (int i = 0; i < N; i++) {
+			success = success && StoreToTable(i + 1, stored_value[i], stack_top);
+		}
+		return success;
+	}
+
+	template <typename T>
 	bool Environment::LoadGlobal(const string& var_name, T* loaded_value) {
 		return GetGlobalToStack(var_name) && LoadFromStack(loaded_value);
 	}
@@ -45,6 +55,32 @@ namespace Lua {
 		std::size_t s = sizeof...(Args);
 		LoadTupleElement<0, sizeof...(Args), Args...>(*loaded_value, stack_position);
 		return false;
+	}
+
+	template <typename S, size_t N>
+	bool Environment::PeekFromStack(array<S, N>* loaded_value, Index stack_position) {
+		return PeekArrayFromStack(loaded_value.data(), stack_position, N);
+	}
+
+	template <typename S, size_t N>
+	bool Environment::StoreToStack(const array<S, N>& stored_value) {
+		StoreToStack(stored_value.data(), N);
+	}
+
+	template <typename T>
+	bool Environment::PeekFromStack(vector<T>* loaded_value, Index stack_position) {
+		int num_elements_to_copy = GetArrayLength(stack_position);
+		loaded_value->resize(num_elements_to_copy);
+		bool success = true;
+		for (int i = 0; i < num_elements_to_copy; i++) {
+			success = success && LoadFromTable(i + 1, loaded_value->data() + i, stack_position);
+		}
+		return success;
+	}
+
+	template <typename T>
+	bool Environment::StoreToStack(const vector<T>& stored_value) {
+		StoreToStack(stored_value.data(), stored_value.size());
 	}
 
 	template <typename K, typename V>

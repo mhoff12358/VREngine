@@ -8,9 +8,11 @@
 #include <string>
 #include <vector>
 #include <tuple>
+#include <array>
 #include <cassert>
 #include <algorithm>
 
+using std::array;
 using std::string;
 using std::vector;
 using std::tuple;

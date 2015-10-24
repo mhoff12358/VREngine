@@ -1,31 +1,33 @@
 #include "stdafx.h"
 #include "Component.h"
 
-Component::Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model> models) : Component(entity_handler, device_interface, models.begin(), models.end()) {
-
-}
-
-Component::Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models)
-	: entity_handler_(entity_handler), transformation_buffer_(CB_PS_VERTEX_SHADER), children_(NULL), parent_transformation_(NULL), num_children_(0)
+Component::Component(ID3D11Device* device_interface)
+	: transformation_buffer_(CB_PS_VERTEX_SHADER), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
 	transformation_buffer_.CreateBuffer(device_interface);
+}
 
+void Component::AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model> models) {
+	AddEntitiesToHandler(entity_handler, models.begin(), models.end());
+}
+
+void Component::AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models) {
 	number_of_entities_ = std::distance(first_model, end_of_models);
 	assert(number_of_entities_ > 0);
 
 	//ConstantBufferTyped<TransformationMatrixAndInvTransData>* trans = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
 	//trans->CreateBuffer(device_interface);
 	vector<Model>::iterator current_model = first_model;
-	first_entity_ = entity_handler_.AddEntity(Entity(
+	first_entity_ = entity_handler.AddEntity(Entity(
 		ES_NORMAL,
 		PixelShader(),
 		VertexShader(),
 		ShaderSettings(NULL),
 		*current_model,
 		&transformation_buffer_));
-		//trans));
+	//trans));
 	for (++current_model; current_model != end_of_models; ++current_model) {
-		entity_handler_.AddEntity(Entity(
+		entity_handler.AddEntity(Entity(
 			ES_NORMAL,
 			PixelShader(),
 			VertexShader(),
@@ -40,7 +42,7 @@ Component::~Component()
 }
 
 Component::Component(Component&& other)
-	: entity_handler_(other.entity_handler_), first_entity_(other.first_entity_),
+	: first_entity_(other.first_entity_),
 	number_of_entities_(other.number_of_entities_), children_(other.children_), num_children_(other.num_children_),
 	transformation_buffer_(std::move(other.transformation_buffer_)), local_transformation_(other.local_transformation_),
 	combined_transformation_(other.combined_transformation_), parent_transformation_(other.parent_transformation_)

@@ -32,5 +32,5 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
 float4 PShader(float4 position : SV_POSITION) : SV_TARGET
 {
 	//return color;
-	return float4(0, 0, 1, 1);
+	return float4(1, 1, 1, 0.1);
 }

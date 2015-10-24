@@ -21,11 +21,17 @@ function create_actor()
 	}
 
 	actor_table.settings_blocks = {
-	
+		{
+			["shader_file_name"] = "texturedspecular.hlsl",
+			["texture_file_name"] = "console.png",
+			["components"] = { "terminal_Plane.001", "button2_Circle.001" },
+		},
+		{
+			["shader_file_name"] = "texturedspecular.hlsl",
+			["texture_file_name"] = "console.png",
+			["components"] = { "button1_Circle" },
+		}
 	}
-
-	actor_table.shader_file_name = "texturedspecular.hlsl"
-	actor_table.texture_file_name = "console.png"
 	
 	actor_table.interactable_objects = {
 		{

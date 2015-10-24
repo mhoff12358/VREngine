@@ -10,8 +10,7 @@
 class Component
 {
 public:
-	Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models);
-	Component(EntityHandler& entity_handler, ID3D11Device* device_interface, vector<Model> models);
+	Component(ID3D11Device* device_interface);
 	~Component();
 
 	Component(const Component& other) = delete;
@@ -19,6 +18,9 @@ public:
 	Component(Component&& other);
 
 	void SetChildren(Component* children, int num_children);
+
+	void AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model> models);
+	void AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models);
 
 	void XM_CALLCONV SetLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
 	void XM_CALLCONV LeftComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
@@ -28,8 +30,6 @@ public:
 
 private:
 	void SetParent(Component* parent);
-
-	EntityHandler& entity_handler_;
 	
 	unsigned int first_entity_;
 	unsigned int number_of_entities_;

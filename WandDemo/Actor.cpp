@@ -59,46 +59,18 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	}
 	LoadModelsFromFile(model_file_name, output_format);
 	lua_environment.RemoveFromStack();
-
+	
 	lua_environment.GetFromTableToStack(string("preload_shader_file_names"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTable();
-		lua_environment.PrintStack("Beginning to iterate");
 		int key;
 		string preload_shader_name;
 		while (lua_environment.IterateOverTable(&key, &preload_shader_name, NULL)) {
-			std::cout << "Attempting to preload " << preload_shader_name << std::endl;
 			graphics_objects.resource_pool->LoadPixelShader(preload_shader_name);
 			graphics_objects.resource_pool->LoadVertexShader(preload_shader_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType());
 		}
 	}
 	lua_environment.RemoveFromStack();
-
-	string shader_file_name;
-	lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
-	string texture_file_name;
-	lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
-	if (texture_file_name != "") {
-		Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
-		TextureView texture_view(0, 0, texture);
-		shader_settings_entity_id_ = graphics_objects.entity_handler->AddEntity(Entity(
-			ES_SETTINGS,
-			graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-			graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
-			ShaderSettings(shader_settings),
-			Model(),
-			NULL,
-			texture_view));
-	}
-	else {
-		shader_settings_entity_id_ = graphics_objects.entity_handler->AddEntity(Entity(
-			ES_SETTINGS,
-			graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-			graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
-			ShaderSettings(shader_settings),
-			Model(),
-			NULL));
-	}
 
 	// Expects a model_parentage value that determines the parentage for the visual components.
 	// The format for this is a table mapping string keys to lists of lists of strings.
@@ -106,6 +78,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	// to the multi-map as a vector of strings.
 	multimap<string, vector<string>> model_parentage;
 	lua_environment.GetFromTableToStack(string("model_parentage"));
+	map<string, vector<Model>> component_models;
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTableLeaveValue();
 		string parent_name;
@@ -120,7 +93,54 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 			}
 		}
 		assert(successful);
-		CreateComponents(graphics_objects.view_state->device_interface, model_parentage);
+		component_models = CreateComponents(graphics_objects.view_state->device_interface, model_parentage);
+	}
+	lua_environment.RemoveFromStack();
+	
+	lua_environment.GetFromTableToStack(string("settings_blocks"));
+	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+		lua_environment.BeginToIterateOverTableLeaveValue();
+		int settings_num;
+		while (lua_environment.IterateOverTableLeaveValue(&settings_num, NULL)) {
+			string shader_file_name;
+			string texture_file_name;
+			lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
+			lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
+			if (shader_file_name != "") {
+				if (texture_file_name != "") {
+					Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
+					TextureView texture_view(0, 0, texture);
+					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+						ES_SETTINGS,
+						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
+						ShaderSettings(shader_settings),
+						Model(),
+						NULL,
+						texture_view)));
+				}
+				else {
+					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+						ES_SETTINGS,
+						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
+						ShaderSettings(shader_settings),
+						Model(),
+						NULL)));
+				}
+				lua_environment.GetFromTableToStack(string("components"));
+				if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+					lua_environment.BeginToIterateOverTable();
+					int components_key;
+					string component_name;
+					while (lua_environment.IterateOverTable(&components_key, &component_name, NULL)) {
+						std::cout << components_key << " : " << component_name << std::endl;
+						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, component_models[component_name]);
+					}
+				}
+				lua_environment.RemoveFromStack();
+			}
+		}
 	}
 	lua_environment.RemoveFromStack();
 
@@ -162,19 +182,16 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	// Ends with the lua_environment containing only the callbacks
 }
 
-unsigned int Actor::GetShaderSettingsId() {
-	return shader_settings_entity_id_;
-}
-
 void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {
 	models_ = resource_pool_.LoadModelAsParts(file_name, output_format);
 }
 
-void Actor::CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentages) {
+map<string, vector<Model>> Actor::CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentages) {
 	int current_parent_index = -1;
 	int current_children_index = 0;
 	int current_num_children = 0;
 	vector<string> component_names;
+	map<string, vector<Model>> component_models;
 	components_.reserve(parentages.size());
 
 	// This while loop check should be redundant as both of these conditions should become false at the same time.
@@ -187,10 +204,12 @@ void Actor::CreateComponents(ID3D11Device* device_interface, const multimap<stri
 				vector<Model> current_children;
 				for (const string& child_model_name : parentage.second) {
 					auto child_model = models_.find(child_model_name);
-					assert(child_model != models_.end());
-					current_children.push_back(child_model->second);
+					if (child_model != models_.end()) {
+						current_children.push_back(child_model->second);
+					}
 				}
-				components_.emplace_back(entity_handler_, device_interface, current_children);
+				components_.emplace_back(device_interface);
+				component_models.insert(std::make_pair(parentage.second.front(), current_children));
 				components_.back().SetLocalTransformation(DirectX::XMMatrixIdentity());
 				component_names.push_back(parentage.second.front());
 				component_lookup_[parentage.second.front()] = components_.size() - 1;
@@ -207,6 +226,8 @@ void Actor::CreateComponents(ID3D11Device* device_interface, const multimap<stri
 		current_num_children = 0;
 		current_parent_index++;
 	}
+
+	return component_models;
 }
 
 void XM_CALLCONV Actor::SetComponentTransformation(const string& component_name, DirectX::FXMMATRIX new_transformation) {
@@ -242,10 +263,13 @@ int Actor::SetComponentTransformation(lua_State* L) {
 
 int Actor::SetShader(lua_State* L) {
 	Lua::Environment env(L);
+	size_t shader_number;
+	env.LoadFromStack(&shader_number, Lua::Index(1));
 	string shader_name;
 	env.LoadFromStack(&shader_name, Lua::Index(1));
-	entity_handler_.SetEntityPixelShader(shader_settings_entity_id_, resource_pool_.LoadExistingPixelShader(shader_name));
-	entity_handler_.SetEntityVertexShader(shader_settings_entity_id_, resource_pool_.LoadExistingVertexShader(shader_name));
-	env.RemoveFromStack(Lua::Index(1));
+	entity_handler_.SetEntityPixelShader(shader_settings_entity_ids_[shader_number], resource_pool_.LoadExistingPixelShader(shader_name));
+	entity_handler_.SetEntityVertexShader(shader_settings_entity_ids_[shader_number], resource_pool_.LoadExistingVertexShader(shader_name));
+	env.RemoveFromStack();
+	env.RemoveFromStack();
 	return 0;
 }
