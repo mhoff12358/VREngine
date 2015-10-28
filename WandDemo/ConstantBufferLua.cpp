@@ -48,5 +48,5 @@ const void* ConstantBufferLua::ReadBufferData() {
 }
 
 unsigned int ConstantBufferLua::GetBufferDataSize() {
-	return data.size();
+	return (((data.size() - 1) / 16) + 1) * 16;
 }

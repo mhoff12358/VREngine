@@ -5,6 +5,12 @@ struct VOut
 	float light_scale : TEXCOORD1;
 };
 
+struct POut
+{
+	float4 t1 : SV_Target0;
+	float4 t2 : SV_Target1;
+};
+
 Texture2D model_skin : register(t0);
 sampler skin_sampler : register(s0);
 
@@ -39,9 +45,12 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD0, float2 tex_c
 }
 
 
-float4 PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0, float light_scale : TEXCOORD1) : SV_TARGET
+POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0, float light_scale : TEXCOORD1) : SV_TARGET
 {
     //return float4(0.0f, tex_coord.y, 0.0f, 1.0f);
+	POut result;
 	float4 texture_sample = model_skin.Sample(skin_sampler, tex_coord);
-	return float4(texture_sample.xyz * light_scale, texture_sample.w);
+	result.t1 = float4(texture_sample.xyz * light_scale, texture_sample.w);
+	result.t2 = result.t1;
+	return result;
 }

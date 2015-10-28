@@ -21,12 +21,13 @@ function create_actor()
 
 	actor_table.settings_blocks = {
 		{
-			["shader_file_name"] = "glass.hlsl",
 			["components"] = { "Outer" },
+			["shader_file_name"] = "glass.hlsl",
+			["texture_file_name"] = "|back_buffer",
 			["entity_group_number"] = 1,
 			["shader_settings_format"] = {
 				["pipeline_stage"] = "vertex",
-				["data_format"] = { {"float", 4} }
+				["data_format"] = { { "float", 3 }, { "float", 1 }, { "float", 3 }, { "float", 1 }, { "float", 1 } }
 			},
 		},
 		{
@@ -64,7 +65,7 @@ function create_actor()
 					["z"] = -0.75,
 			}})
 		end
-		self.set_constant_buffer(0, { { 1, 0, 0} })
+		self.set_constant_buffer(0, { { 1, 0, 0 }, { .005 }, { 1, 1, 1 }, { 10 }, { 0.2 } })
 		self.set_constant_buffer(1, { { 0.2, 0.75, 0.2} })
 		if (self.set_shader ~= nil) then
 			--self.set_shader(0, "solidcolorforceblue.hlsl")

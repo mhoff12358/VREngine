@@ -129,16 +129,28 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 			}
 			if (shader_file_name != "") {
 				if (texture_file_name != "") {
-					Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
-					TextureView texture_view(0, 0, texture);
-					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
-						ES_SETTINGS,
-						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
-						ShaderSettings(used_settings),
-						Model(),
-						NULL,
-						texture_view), entity_group_number));
+					if (texture_file_name == "|back_buffer") {
+						TextureView texture_view = TextureView(0, 0, graphics_objects.render_pipeline->GetBackBuffer());
+						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+							ES_SETTINGS,
+							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
+							ShaderSettings(used_settings),
+							Model(),
+							NULL,
+							texture_view), entity_group_number));
+					} else {
+						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
+						TextureView texture_view = TextureView(0, 0, texture);
+						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+							ES_SETTINGS,
+							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
+							ShaderSettings(used_settings),
+							Model(),
+							NULL,
+							texture_view), entity_group_number));
+					}
 				}
 				else {
 					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
