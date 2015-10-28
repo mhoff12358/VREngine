@@ -19,8 +19,8 @@ public:
 
 	void SetChildren(Component* children, int num_children);
 
-	void AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model> models);
-	void AddEntitiesToHandler(EntityHandler& entity_handler, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models);
+	void AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int entity_group_number, vector<Model> models);
+	void AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int entity_group_number, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models);
 
 	void XM_CALLCONV SetLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
 	void XM_CALLCONV LeftComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);

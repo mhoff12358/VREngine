@@ -14,23 +14,30 @@ function create_actor()
 	actor_table.model_parentage = {
 		[""] = { { "empty" } },
 		["empty"] = {
-			{ "OuterBulb", "OuterTube" },
-			{ "InnerBulb", "InnerTube" },
+			{ "Outer", "OuterTube" },
+			{ "Inner", "InnerTube" },
 		}
 	}
 
 	actor_table.settings_blocks = {
 		{
-			["shader_file_name"] = "solidcolorforceblue.hlsl",
-			["components"] = { "OuterBulb" },
+			["shader_file_name"] = "glass.hlsl",
+			["components"] = { "Outer" },
+			["entity_group_number"] = 1,
+			["shader_settings_format"] = {
+				["pipeline_stage"] = "vertex",
+				["data_format"] = { {"float", 4} }
+			},
 		},
 		{
 			["shader_file_name"] = "solidcolor.hlsl",
-			["components"] = { "InnerBulb" },
+			["components"] = { "Inner" },
+			["shader_settings_format"] = {
+				["pipeline_stage"] = "pixel",
+				["data_format"] = { {"float", 4} }
+			},
 		}
 	}
-
-	actor_table.preload_shader_file_names = {"solidcolor.hlsl", "solidcolorforceblue.hlsl"}
 
 	actor_table.interactable_objects = {
 		{
@@ -57,22 +64,10 @@ function create_actor()
 					["z"] = -0.75,
 			}})
 		end
+		self.set_constant_buffer(0, { { 1, 0, 0} })
+		self.set_constant_buffer(1, { { 0.2, 0.75, 0.2} })
 		if (self.set_shader ~= nil) then
 			--self.set_shader(0, "solidcolorforceblue.hlsl")
-		else
-			print("Cannot set shader")
-		end
-	end
-	function actor_table.interaction_callbacks.look_entered (self, object_id)
-		if (self.set_shader ~= nil) then
-			--self.set_shader(0, "solidcolorforceblue.hlsl")
-		else
-			print("Cannot set shader")
-		end
-	end
-	function actor_table.interaction_callbacks.look_left (self, object_id, new_object_id)
-		if (self.set_shader ~= nil) then
-			--self.set_shader(0, "solidcolor.hlsl")
 		else
 			print("Cannot set shader")
 		end

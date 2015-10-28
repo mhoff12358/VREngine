@@ -109,6 +109,8 @@ void UpdateLoop() {
 	bottle_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
 	bottle_settings_buffer->EditBufferDataRef() = array<float, 4>({ 0.25f, 1.0f, 0.25f, 1.0f });
 	Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", bottle_settings_buffer);
+
+	Actor* sun_actor = actor_handler.CreateActorFromLuaScript("sun.lua", "sun", NULL);
 	device_context_lock.unlock();
 
 	Camera player_look_camera;

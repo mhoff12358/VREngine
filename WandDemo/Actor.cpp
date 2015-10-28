@@ -2,6 +2,7 @@
 #include "Actor.h"
 
 #include "LuaGameScripting/Index.h"
+#include "ConstantBufferLua.h"
 #include "ActorHandler.h"
 
 Actor::Actor(const Identifier& ident, ResourcePool& resource_pool, EntityHandler& entity_handler)
@@ -102,10 +103,30 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 		lua_environment.BeginToIterateOverTableLeaveValue();
 		int settings_num;
 		while (lua_environment.IterateOverTableLeaveValue(&settings_num, NULL)) {
-			string shader_file_name;
-			string texture_file_name;
+			string shader_file_name = "";
+			string texture_file_name = "";
+			unsigned int entity_group_number = 0;
 			lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
 			lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
+			lua_environment.LoadFromTable(string("entity_group_number"), &entity_group_number);
+
+			ConstantBuffer* specified_shader_settings = NULL;
+			if (lua_environment.GetFromTableToStack(string("shader_settings_format")) && lua_environment.CheckTypeOfStack() != LUA_TNIL) {
+				string pipeline_stage;
+				LuaConstantBufferFormat data_format;
+				lua_environment.LoadFromTable(string("pipeline_stage"), &pipeline_stage);
+				lua_environment.LoadFromTable(string("data_format"), &data_format);
+				specified_shader_settings = new ConstantBufferLua(ConstantBufferLua::GetStageFromString(pipeline_stage), data_format);
+				specified_shader_settings->CreateBuffer(graphics_objects.view_state->device_interface);
+			}
+			lua_environment.RemoveFromStack();
+
+			ShaderSettings used_settings;
+			if (specified_shader_settings != NULL) {
+				used_settings = ShaderSettings(specified_shader_settings);
+			} else {
+				used_settings = shader_settings;
+			}
 			if (shader_file_name != "") {
 				if (texture_file_name != "") {
 					Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
@@ -114,19 +135,19 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 						ES_SETTINGS,
 						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
 						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
-						ShaderSettings(shader_settings),
+						ShaderSettings(used_settings),
 						Model(),
 						NULL,
-						texture_view)));
+						texture_view), entity_group_number));
 				}
 				else {
 					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 						ES_SETTINGS,
 						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
 						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format.vertex_type.GetVertexType(), output_format.vertex_type.GetSizeVertexType()),
-						ShaderSettings(shader_settings),
+						ShaderSettings(used_settings),
 						Model(),
-						NULL)));
+						NULL), entity_group_number));
 				}
 				lua_environment.GetFromTableToStack(string("components"));
 				if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -135,7 +156,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 					string component_name;
 					while (lua_environment.IterateOverTable(&components_key, &component_name, NULL)) {
 						std::cout << components_key << " : " << component_name << std::endl;
-						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, component_models[component_name]);
+						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number, component_models[component_name]);
 					}
 				}
 				lua_environment.RemoveFromStack();
@@ -172,13 +193,15 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetShader>, 1 }));
 	lua_environment.StoreToTable(string("set_shader"), Lua::Index(2), Lua::Index(1));
 	lua_environment.RemoveFromStack();
+	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetConstantBuffer>, 1 }));
+	lua_environment.StoreToTable(string("set_constant_buffer"), Lua::Index(2), Lua::Index(1));
+	lua_environment.RemoveFromStack();
 
 	lua_environment.GetGlobalToStack(string("actor_interfaces"));
 	lua_environment.StoreToTable(ident_.GetId(), Lua::Index(1));
 	lua_environment.RemoveFromStack();
 
 	lua_interface_ = Lua::InteractableObject(lua_environment);
-	lua_interface_.CallLuaFunc("initialize");
 	// Ends with the lua_environment containing only the callbacks
 }
 
@@ -271,5 +294,23 @@ int Actor::SetShader(lua_State* L) {
 	entity_handler_.SetEntityVertexShader(shader_settings_entity_ids_[shader_number], resource_pool_.LoadExistingVertexShader(shader_name));
 	env.RemoveFromStack();
 	env.RemoveFromStack();
+	return 0;
+}
+
+int Actor::SetConstantBuffer(lua_State* L) {
+	Lua::Environment env(L);
+	size_t shader_number;
+	env.LoadFromStack(&shader_number, Lua::Index(1));
+	vector<vector<float>> new_buffer_data;
+	env.LoadFromStack(&new_buffer_data, Lua::Index(1));
+	ConstantBuffer* buffer = entity_handler_.GetShaderSettings(shader_settings_entity_ids_[shader_number]);
+	float* buffer_data = static_cast<float*>(buffer->EditBufferData());
+	size_t current_buffer_data_index = 0;
+	for (const vector<float>& element : new_buffer_data) {
+		for (float value : element) {
+			buffer_data[current_buffer_data_index] = value;
+			current_buffer_data_index++;
+		}
+	}
 	return 0;
 }

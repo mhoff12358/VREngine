@@ -148,6 +148,7 @@
     <ClInclude Include="Actor.h" />
     <ClInclude Include="ActorHandler.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ConstantBufferLua.h" />
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
@@ -165,6 +166,7 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorHandler.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ConstantBufferLua.cpp" />
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />
@@ -184,6 +186,9 @@
     <ClCompile Include="WiimoteInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="glass.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="normaldump.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -224,6 +229,7 @@
     <None Include="bottle.lua" />
     <None Include="cone.lua" />
     <None Include="console.lua" />
+    <None Include="sun.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

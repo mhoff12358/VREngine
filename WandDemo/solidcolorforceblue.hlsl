@@ -5,6 +5,7 @@ struct VOut
 
 cbuffer shared_matrices : register(b0)
 {
+	matrix <float, 4, 4> view;
 	matrix <float, 4, 4> view_projection;
 };
 

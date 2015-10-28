@@ -10,6 +10,7 @@ sampler skin_sampler : register(s0);
 
 cbuffer shared_matrices : register(b0)
 {
+	matrix <float, 4, 4> view;
 	matrix <float, 4, 4> view_projection;
 };
 

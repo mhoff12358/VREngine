@@ -18,7 +18,9 @@ Actor* ActorHandler::CreateActorFromLuaScript(const string& script_name, Identif
 	Actor* new_actor = new Actor(ident, *graphics_objects_.resource_pool, *graphics_objects_.entity_handler);
 	lua_State* new_lua_thread = lua_newthread(root_environment_.L);
 	new_actor->InitializeFromLuaScript(new_lua_thread, script_name, graphics_objects_, interactable_collection_, this, shader_settings);
-
 	actor_lookup_[ident.GetId()] = new_actor;
+
+	new_actor->lua_interface_.CallLuaFunc("initialize");
+
 	return new_actor;
 }

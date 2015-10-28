@@ -17,4 +17,3 @@ public:
 	map<string, Actor*> actor_lookup_;
 	Lua::Environment root_environment_;
 };
-

@@ -50,6 +50,9 @@
     <ClInclude Include="Environment_inl.cpp">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="MemberFunctionWrapper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="dummy_interactable.lua">

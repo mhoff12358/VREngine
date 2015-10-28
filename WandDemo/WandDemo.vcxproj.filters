@@ -63,6 +63,9 @@
     <ClInclude Include="InteractableSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ConstantBufferLua.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -110,6 +113,9 @@
     <ClCompile Include="InteractableSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConstantBufferLua.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="objshader.hlsl">
@@ -131,6 +137,9 @@
       <Filter>Resource Files</Filter>
     </FxCompile>
     <FxCompile Include="solidcolorforceblue.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="glass.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
   </ItemGroup>
@@ -158,6 +167,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="bottle.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sun.lua">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

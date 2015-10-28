@@ -49,7 +49,9 @@ public:
 	int ApplyToComponentTransformation(lua_State* L);
 	// Arguments are <string component_name, table matrix_description>
 	int SetComponentTransformation(lua_State* L);
-	// Arguments are <string new_shader_name>
+	// Arguments are <size_t settings_number, string new_shader_name>
 	int SetShader(lua_State* L);
+	// Arguments are <size_t settings_number, array of array of floats>
+	int SetConstantBuffer(lua_State* L);
 };
 

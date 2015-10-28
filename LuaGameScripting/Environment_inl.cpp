@@ -53,8 +53,7 @@ namespace Lua {
 	template <typename... Args>
 	bool Environment::PeekFromStack(tuple<Args...>* loaded_value, Index stack_position) {
 		std::size_t s = sizeof...(Args);
-		LoadTupleElement<0, sizeof...(Args), Args...>(*loaded_value, stack_position);
-		return false;
+		return LoadTupleElement<0, sizeof...(Args), Args...>(*loaded_value, stack_position);
 	}
 
 	template <typename S, size_t N>

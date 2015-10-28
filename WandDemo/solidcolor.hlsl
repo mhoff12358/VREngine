@@ -5,6 +5,7 @@ struct VOut
 
 cbuffer shared_matrices : register(b0)
 {
+	matrix <float, 4, 4> view;
 	matrix <float, 4, 4> view_projection;
 };
 
@@ -31,6 +32,6 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
 
 float4 PShader(float4 position : SV_POSITION) : SV_TARGET
 {
-	return color;
+	return float4(color.rgb, 1);
 	//return float4(1, 1, 1, 1);
 }
