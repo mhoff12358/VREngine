@@ -1,6 +1,7 @@
 struct VOut
 {
     float4 position : SV_POSITION;
+	float fluid_height : TEXCOORD;
 };
 
 struct POut
@@ -24,6 +25,7 @@ cbuffer personal_matrices : register(b1)
 cbuffer solid_color : register(b2)
 {
 	float4 color;
+	float fluid_level;
 };
 
 VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
@@ -32,15 +34,16 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
 
 	output.position = mul(model, position);
 	output.position = mul(view_projection, output.position);
+	output.fluid_height = position.y;
 
     return output;
 }
 
-POut PShader(float4 position : SV_POSITION) : SV_TARGET
+POut PShader(float4 position : SV_POSITION, float fluid_height : TEXCOORD) : SV_TARGET
 {
 	POut return_val;
-	return_val.t1 = color.rgba;
-	return_val.t2 = color.rgba;
+	return_val.t1 = color.rgba * ((sign(fluid_level - fluid_height) + 1) / 2);
+	return_val.t2 = return_val.t1;
 	return return_val;
 	//return float4(1, 1, 1, 1);
 }

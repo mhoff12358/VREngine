@@ -16,10 +16,10 @@ namespace Lua {
 	}
 
 	template <typename T>
-	bool StoreArrayToStack(const T const* stored_value, size_t array_length) {
+	bool Environment::StoreArrayToStack(T const* stored_value, size_t array_length) {
 		lua_newtable(L);
 		bool success = true;
-		for (int i = 0; i < N; i++) {
+		for (int i = 0; i < array_length; i++) {
 			success = success && StoreToTable(i + 1, stored_value[i], stack_top);
 		}
 		return success;
@@ -63,7 +63,7 @@ namespace Lua {
 
 	template <typename S, size_t N>
 	bool Environment::StoreToStack(const array<S, N>& stored_value) {
-		StoreToStack(stored_value.data(), N);
+		return StoreArrayToStack(stored_value.data(), N);
 	}
 
 	template <typename T>

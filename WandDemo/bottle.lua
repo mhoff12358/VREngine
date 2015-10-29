@@ -31,11 +31,11 @@ function create_actor()
 			},
 		},
 		{
-			["shader_file_name"] = "solidcolor.hlsl",
+			["shader_file_name"] = "fluid.hlsl",
 			["components"] = { "Inner" },
 			["shader_settings_format"] = {
 				["pipeline_stage"] = "pixel",
-				["data_format"] = { {"float", 4} }
+				["data_format"] = { {"float", 4}, {"float", 1} }
 			},
 		}
 	}
@@ -52,13 +52,16 @@ function create_actor()
 	
 	actor_table.interaction_callbacks = {}
 	function actor_table.interaction_callbacks.initialize (self)
+		self.tip_angle = 0
+		self.fluid_height = 1.0
+		self.fluid_color = { 0.2, 0.75, .02, 1 }
+		self.add_update_tick_listener(self.actor)
 		if (self.set_component_transformation ~= nil) then
 			self.set_component_transformation("empty", {
 			{
 					["matrix_type"] = "scale",
 					["scale"] = {0.0625, 0.0625, 0.0625},
-			},
-			{
+			}, {
 					["matrix_type"] = "translation",
 					["x"] = 0,
 					["y"] = 0,
@@ -66,11 +69,37 @@ function create_actor()
 			}})
 		end
 		self.set_constant_buffer(0, { { 1, 0, 0 }, { .005 }, { 1, 1, 1 }, { 10 }, { 0.2 } })
-		self.set_constant_buffer(1, { { 0.2, 0.75, 0.2} })
-		if (self.set_shader ~= nil) then
-			--self.set_shader(0, "solidcolorforceblue.hlsl")
-		else
-			print("Cannot set shader")
+		self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
+	end
+	function actor_table.interaction_callbacks.look_entered (self)
+		self.add_mouse_movement_listener(self.actor)
+	end
+	function actor_table.interaction_callbacks.look_left (self)
+		self.remove_mouse_movement_listener(self.actor)
+	end
+	function actor_table.interaction_callbacks.mouse_motion (self, mouse_motion)
+		self.tip_angle = self.tip_angle + 0.01 * mouse_motion[2]
+		self.set_component_transformation("empty", {
+		{
+			["matrix_type"] = "scale",
+			["scale"] = {0.0625, 0.0625, 0.0625},
+		}, {
+			["matrix_type"] = "translation",
+			["x"] = 0,
+			["y"] = 0,
+			["z"] = -0.75,
+		}, {
+			["matrix_type"] = "axis_rotation",
+			["x"] = 0,
+			["y"] = 0,
+			["z"] = 1,
+			["rotation"] = self.tip_angle,
+		}})
+	end
+	function actor_table.interaction_callbacks.update_tick (self, tick_duration_ms)
+		if (math.abs(self.tip_angle) > 3.14/2.0) then
+			self.fluid_height = math.max(self.fluid_height - 0.001 * tick_duration_ms, 0.0)
+			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
 		end
 	end
 

@@ -30,4 +30,10 @@ namespace Lua {
 		return PrepareLuaFunc(func_name) && env_.StoreToStack(Index(1)) && env_.CallFunctionWithArgsOnStack<1>();
 	}
 
+	void InteractableObject::AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure) {
+		env_.StoreToStack(object, closure);
+		env_.StoreToTable(func_name, Lua::Index(2), Lua::Index(1));
+		env_.RemoveFromStack();
+	}
+
 }  // namespace Lua

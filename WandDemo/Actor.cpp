@@ -193,27 +193,23 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	lua_environment.GetFromTableToStack(string("interaction_callbacks"));
 
 	lua_environment.RemoveFromStack(Lua::Index(1));
-	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ClearComponentTransformation >, 1 }));
-	lua_environment.StoreToTable(string("clear_component_transformation"), Lua::Index(2), Lua::Index(1));
-	lua_environment.RemoveFromStack();
-	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ApplyToComponentTransformation >, 1 }));
-	lua_environment.StoreToTable(string("apply_to_component_transformation"), Lua::Index(2), Lua::Index(1));
-	lua_environment.RemoveFromStack();
-	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetComponentTransformation >, 1 }));
-	lua_environment.StoreToTable(string("set_component_transformation"), Lua::Index(2), Lua::Index(1));
-	lua_environment.RemoveFromStack();
-	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetShader>, 1 }));
-	lua_environment.StoreToTable(string("set_shader"), Lua::Index(2), Lua::Index(1));
-	lua_environment.RemoveFromStack();
-	lua_environment.StoreToStack((void*)this, Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetConstantBuffer>, 1 }));
-	lua_environment.StoreToTable(string("set_constant_buffer"), Lua::Index(2), Lua::Index(1));
-	lua_environment.RemoveFromStack();
+	lua_interface_ = Lua::InteractableObject(lua_environment);
+	lua_interface_.env_.StoreToTable(string("actor"), (void*)this);
+	lua_interface_.AddCObjectMember("clear_component_transformation", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ClearComponentTransformation >, 1 }));
+	lua_interface_.AddCObjectMember("apply_to_component_transformation", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ApplyToComponentTransformation >, 1 }));
+	lua_interface_.AddCObjectMember("set_component_transformation", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetComponentTransformation >, 1 }));
+	lua_interface_.AddCObjectMember("set_shader", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetShader >, 1 }));
+	lua_interface_.AddCObjectMember("set_constant_buffer", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetConstantBuffer >, 1 }));
 
 	lua_environment.GetGlobalToStack(string("actor_interfaces"));
 	lua_environment.StoreToTable(ident_.GetId(), Lua::Index(1));
 	lua_environment.RemoveFromStack();
 
-	lua_interface_ = Lua::InteractableObject(lua_environment);
 	// Ends with the lua_environment containing only the callbacks
 }
 

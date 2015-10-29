@@ -142,6 +142,12 @@
     <FxCompile Include="glass.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="textured.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="fluid.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="console.obj">
@@ -153,9 +159,15 @@
     <Object Include="bottle.obj">
       <Filter>Resource Files</Filter>
     </Object>
+    <Object Include="tower_inside.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="console.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="walls.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -170,6 +182,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="sun.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="wall.lua">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

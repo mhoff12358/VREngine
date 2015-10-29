@@ -104,11 +104,10 @@ void UpdateLoop() {
 	color_settings_buffer->EditBufferDataRef() = array<float, 4>({ 1.0f, 0.0f, 0.0f, 1.0f });
 	Actor* cone_actor = actor_handler.CreateActorFromLuaScript("cone.lua", "cone", color_settings_buffer);
 
-	ConstantBufferTyped<array<float, 4>>* bottle_settings_buffer = new ConstantBufferTyped<array<float, 4>>(CB_PS_PIXEL_SHADER);
-	bottle_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
-	bottle_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
-	bottle_settings_buffer->EditBufferDataRef() = array<float, 4>({ 0.25f, 1.0f, 0.25f, 1.0f });
-	Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", bottle_settings_buffer);
+	Actor* wall_actor = actor_handler.CreateActorFromLuaScript("wall.lua", "wall", NULL);
+
+	Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", NULL);
+	
 
 	Actor* sun_actor = actor_handler.CreateActorFromLuaScript("sun.lua", "sun", NULL);
 	device_context_lock.unlock();
@@ -116,7 +115,6 @@ void UpdateLoop() {
 	Camera player_look_camera;
 	player_look_camera.BuildViewMatrix();
 
-	/*
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
@@ -125,7 +123,6 @@ void UpdateLoop() {
 	if (RegisterRawInputDevices(Rid, 1, sizeof(Rid[0])) == FALSE) {
 		std::cout << "Error registering raw input device" << std::endl;
 	}
-	*/
 
 	std::array<float, 3> infinite_light_direction = { { 1, 1, 0 } };
 
@@ -170,8 +167,8 @@ void UpdateLoop() {
 		}
 
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
-		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
-		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		//player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
+		//player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
 		player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_position_lock.unlock();
 
@@ -197,6 +194,16 @@ void UpdateLoop() {
 		LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
 		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
 		//std::cout << "Object looked at: " << id_of_object << std::endl;
+
+		for (Actor* update_tick_listener : actor_handler.update_tick_listeners_) {
+			assert(update_tick_listener->lua_interface_.CallLuaFunc(string("update_tick"), time_delta_ms));
+		}
+
+		if ((mouse_motion[0] != 0) && (mouse_motion[1] != 0)) {
+			for (Actor* mouse_motion_listener : actor_handler.mouse_motion_listeners_) {
+				mouse_motion_listener->lua_interface_.CallLuaFunc(string("mouse_motion"), mouse_motion);
+			}
+		}
 
 		if (previous_look.id_of_object != current_look.id_of_object) {
 			if (previous_look.actor != NULL) {

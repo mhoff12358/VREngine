@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 #include <array>
+#include <set>
 #include <utility>
 #include <iostream>
 #include <tuple>
@@ -29,6 +30,7 @@ using std::multimap;
 using std::vector;
 using std::pair;
 using std::array;
+using std::set;
 using std::tuple;
 using std::max;
 using std::atomic;
