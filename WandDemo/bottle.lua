@@ -1,3 +1,5 @@
+require "quaternion"
+
 function create_actor()
 	actor_table = {}
 	actor_table.model_file_name = "bottle.obj"
@@ -14,7 +16,7 @@ function create_actor()
 	actor_table.model_parentage = {
 		[""] = { { "empty" } },
 		["empty"] = {
-			{ "Outer", "OuterTube" },
+			{ "Outer" },
 			{ "Inner", "InnerTube" },
 		}
 	}
@@ -52,7 +54,7 @@ function create_actor()
 	
 	actor_table.interaction_callbacks = {}
 	function actor_table.interaction_callbacks.initialize (self)
-		self.tip_angle = 0
+		self.orientation = quaternion.identity()
 		self.fluid_height = 1.0
 		self.fluid_color = { 0.2, 0.75, .02, 1 }
 		self.add_update_tick_listener(self.actor)
@@ -78,26 +80,27 @@ function create_actor()
 		self.remove_mouse_movement_listener(self.actor)
 	end
 	function actor_table.interaction_callbacks.mouse_motion (self, mouse_motion)
-		self.tip_angle = self.tip_angle + 0.01 * mouse_motion[2]
+		self.orientation = quaternion.mult(quaternion.mult(
+			quaternion.rotation_about_axis(quaternion.AID_Z, 0.01 * mouse_motion[1]),
+			quaternion.rotation_about_axis(quaternion.AID_X, 0.01 * mouse_motion[2])),
+			self.orientation)
 		self.set_component_transformation("empty", {
 		{
 			["matrix_type"] = "scale",
 			["scale"] = {0.0625, 0.0625, 0.0625},
 		}, {
+			["matrix_type"] = "quaternion_rotation",
+			["quaternion"] = self.orientation
+		}, {
 			["matrix_type"] = "translation",
 			["x"] = 0,
 			["y"] = 0,
 			["z"] = -0.75,
-		}, {
-			["matrix_type"] = "axis_rotation",
-			["x"] = 0,
-			["y"] = 0,
-			["z"] = 1,
-			["rotation"] = self.tip_angle,
-		}})
+		}
+		})
 	end
 	function actor_table.interaction_callbacks.update_tick (self, tick_duration_ms)
-		if (math.abs(self.tip_angle) > 3.14/2.0) then
+		if (math.acos(self.orientation[4]) * 2 > 3.14/2.0) then
 			self.fluid_height = math.max(self.fluid_height - 0.001 * tick_duration_ms, 0.0)
 			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
 		end

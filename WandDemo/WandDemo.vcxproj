@@ -143,6 +143,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="quaternion.lua" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -240,6 +241,7 @@
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="sun.lua" />
+    <None Include="tower_scene.lua" />
     <None Include="wall.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

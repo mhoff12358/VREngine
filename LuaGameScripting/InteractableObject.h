@@ -17,8 +17,9 @@ namespace Lua {
 		template <typename... ArgumentTypes>
 		bool CallLuaFunc(const string& func_name, ArgumentTypes... args);
 
-		void AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure);
+		bool AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure);
 
+		Index table_location_;
 		Environment env_;
 	};
 

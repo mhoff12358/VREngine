@@ -9,6 +9,7 @@ namespace Lua {
 		~Index();
 
 		Index Offset(int num_elements_added);
+		Index operator+(int delta);
 
 		int index_;
 	};

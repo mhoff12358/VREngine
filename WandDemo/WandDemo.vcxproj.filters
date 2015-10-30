@@ -13,9 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Lua Libraries">
+      <UniqueIdentifier>{b901ee39-0b68-49f0-99ae-b3c21800f6c6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
+    <Text Include="quaternion.lua">
+      <Filter>Lua Libraries</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -185,6 +191,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="wall.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="tower_scene.lua">
       <Filter>Resource Files</Filter>
     </None>
   </ItemGroup>

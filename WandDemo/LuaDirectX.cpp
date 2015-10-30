@@ -13,8 +13,7 @@ DirectX::XMMATRIX LuaTableToMatrix(Lua::Environment environment_with_table) {
 					environment_with_table.LoadFromTable(string("z"), translation + 2)) {
 					return DirectX::XMMatrixTranslation(translation[0], translation[1], translation[2]);
 				}
-			}
-			else if (matrix_type == "axis_rotation") {
+			} else if (matrix_type == "axis_rotation") {
 				float axis[3];
 				float rotation;
 				if (environment_with_table.LoadFromTable(string("x"), axis) &&
@@ -23,8 +22,14 @@ DirectX::XMMATRIX LuaTableToMatrix(Lua::Environment environment_with_table) {
 					environment_with_table.LoadFromTable(string("rotation"), &rotation)) {
 					return DirectX::XMMatrixRotationAxis(DirectX::XMVectorSet(axis[0], axis[1], axis[2], 0), rotation);
 				}
-			}
-			else if (matrix_type == "scale") {
+			} else if (matrix_type == "quaternion_rotation") {
+				array<float, 4> quaternion_array;
+				if (environment_with_table.LoadFromTable(string("quaternion"), &quaternion_array)) {
+					DirectX::XMFLOAT4 quaternion(quaternion_array.data());
+					return DirectX::XMMatrixRotationQuaternion(
+						DirectX::XMLoadFloat4(&quaternion));
+				}
+			} else if (matrix_type == "scale") {
 				float scales[3];
 				if (environment_with_table.LoadArrayFromTable(string("scale"), scales, environment_with_table.stack_top, 3)) {
 					return DirectX::XMMatrixScaling(scales[0], scales[1], scales[2]);

@@ -10,6 +10,8 @@ public:
 	ActorHandler(VRBackendBasics& graphics_objects);
 	~ActorHandler();
 
+	void LoadSceneFromLuaScript(const string& script_name);
+
 	Actor* CreateActorFromLuaScript(const string& script_name, Identifier ident, ConstantBuffer* shader_settings = NULL);
 
 	VRBackendBasics& graphics_objects_;
@@ -29,4 +31,7 @@ public:
 	int AddUpdateTickListener(lua_State* L);
 	// Arguments are <Actor* actor>
 	int RemoveUpdateTickListener(lua_State* L);
+
+	// Arguments are <Actor* actor>
+	int AddActor(lua_State* L);
 };

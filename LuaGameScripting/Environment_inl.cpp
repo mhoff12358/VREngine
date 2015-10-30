@@ -58,7 +58,7 @@ namespace Lua {
 
 	template <typename S, size_t N>
 	bool Environment::PeekFromStack(array<S, N>* loaded_value, Index stack_position) {
-		return PeekArrayFromStack(loaded_value.data(), stack_position, N);
+		return PeekArrayFromStack(loaded_value->data(), stack_position, N);
 	}
 
 	template <typename S, size_t N>

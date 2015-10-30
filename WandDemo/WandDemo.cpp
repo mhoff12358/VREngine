@@ -90,6 +90,7 @@ void UpdateLoop() {
 	LookState previous_look = { Identifier(""), NULL, 0, array<float, 2>({ 0, 0 }) };
 
 	unique_lock<mutex> device_context_lock(device_context_access);
+	/*
 	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
 	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
 	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
@@ -103,10 +104,11 @@ void UpdateLoop() {
 	color_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
 	color_settings_buffer->EditBufferDataRef() = array<float, 4>({ 1.0f, 0.0f, 0.0f, 1.0f });
 	Actor* cone_actor = actor_handler.CreateActorFromLuaScript("cone.lua", "cone", color_settings_buffer);
+	*/
+	//Actor* wall_actor = actor_handler.CreateActorFromLuaScript("wall.lua", "wall", NULL);
 
-	Actor* wall_actor = actor_handler.CreateActorFromLuaScript("wall.lua", "wall", NULL);
-
-	Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", NULL);
+	//Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", NULL);
+	actor_handler.LoadSceneFromLuaScript("tower_scene.lua");
 	
 
 	Actor* sun_actor = actor_handler.CreateActorFromLuaScript("sun.lua", "sun", NULL);
@@ -173,7 +175,7 @@ void UpdateLoop() {
 		player_position_lock.unlock();
 
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
-		shader_settings_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
+		//shader_settings_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
 		//DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);

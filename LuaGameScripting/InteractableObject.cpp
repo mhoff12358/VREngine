@@ -2,14 +2,15 @@
 #include "InteractableObject.h"
 
 namespace Lua {
-	InteractableObject::InteractableObject() {
+	InteractableObject::InteractableObject()
+		: table_location_(0)
+	{
 	}
 
 	InteractableObject::InteractableObject(Environment env)
-		: env_(env)
+		: env_(env), table_location_(env.CheckSizeOfStack())
 	{
-		assert(lua_type(env.L, 1) == LUA_TTABLE);
-		assert(lua_gettop(env.L) == 1);
+		assert(lua_type(env.L, -1) == LUA_TTABLE);
 	}
 
 
@@ -18,7 +19,7 @@ namespace Lua {
 	}
 
 	bool InteractableObject::PrepareLuaFunc(const string& func_name) {
-		env_.GetFromTableToStack(func_name, Index(1));
+		env_.GetFromTableToStack(func_name, table_location_);
 		if (env_.CheckTypeOfStack(Index(-1)) != LUA_TFUNCTION) {
 			env_.RemoveFromStack();
 			return false;
@@ -27,13 +28,20 @@ namespace Lua {
 	}
 
 	bool InteractableObject::CallLuaFunc(const string& func_name) {
-		return PrepareLuaFunc(func_name) && env_.StoreToStack(Index(1)) && env_.CallFunctionWithArgsOnStack<1>();
+		return PrepareLuaFunc(func_name) && env_.StoreToStack(table_location_) && env_.CallFunctionWithArgsOnStack<1>();
 	}
 
-	void InteractableObject::AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure) {
-		env_.StoreToStack(object, closure);
-		env_.StoreToTable(func_name, Lua::Index(2), Lua::Index(1));
-		env_.RemoveFromStack();
+	bool InteractableObject::AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure) {
+		if (env_.StoreToStack(object, closure)) {
+			if (env_.StoreToTable(func_name, table_location_ + 1, table_location_)) {
+				env_.RemoveFromStack();
+				return true;
+			}
+			env_.RemoveFromStack();
+			env_.RemoveFromStack();
+			return false;
+		}
+		return false;
 	}
 
 }  // namespace Lua

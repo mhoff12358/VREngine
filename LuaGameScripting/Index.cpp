@@ -19,4 +19,8 @@ namespace Lua {
 		return Index(index_);
 	}
 
+	Index Index::operator+(int delta) {
+		return Index(index_ + delta);
+	}
+
 }  // namespace Lua

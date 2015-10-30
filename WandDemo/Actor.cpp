@@ -167,7 +167,6 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 					int components_key;
 					string component_name;
 					while (lua_environment.IterateOverTable(&components_key, &component_name, NULL)) {
-						std::cout << components_key << " : " << component_name << std::endl;
 						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number, component_models[component_name]);
 					}
 				}
@@ -194,6 +193,9 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 
 	lua_environment.RemoveFromStack(Lua::Index(1));
 	lua_interface_ = Lua::InteractableObject(lua_environment);
+
+	lua_environment.PrintStack("PRINTING BEFORE ADDING CALLBACKS");
+
 	lua_interface_.env_.StoreToTable(string("actor"), (void*)this);
 	lua_interface_.AddCObjectMember("clear_component_transformation", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ClearComponentTransformation >, 1 }));
@@ -244,7 +246,6 @@ map<string, vector<Model>> Actor::CreateComponents(ID3D11Device* device_interfac
 				components_.back().SetLocalTransformation(DirectX::XMMatrixIdentity());
 				component_names.push_back(parentage.second.front());
 				component_lookup_[parentage.second.front()] = components_.size() - 1;
-				std::cerr << "Adding component with parent: " << (current_parent_index == -1 ? "" : component_names[current_parent_index]) << " and name: " << parentage.second.front() << std::endl;
 				current_num_children++;
 			}
 		}
