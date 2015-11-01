@@ -67,6 +67,12 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::StoreToStack<EnvironmentTop>(const EnvironmentTop& stored_value) {
+		lua_xmove(stored_value.other_environment->L, L, stored_value.num_elements);
+		return true;
+	}
+
+	template <>
 	bool Environment::StoreToStack<void*>(void* const& stored_value) {
 		lua_pushlightuserdata(L, stored_value);
 		return true;

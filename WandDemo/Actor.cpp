@@ -204,9 +204,9 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 	lua_interface_.AddCObjectMember("set_constant_buffer", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetConstantBuffer >, 1 }));
 
-	lua_environment.GetGlobalToStack(string("actor_interfaces"));
-	lua_environment.StoreToTable(ident_.GetId(), Lua::Index(1));
-	lua_environment.RemoveFromStack();
+	//lua_environment.GetGlobalToStack(string("actor_interfaces"));
+	//lua_environment.StoreToTable(ident_.GetId(), Lua::Index(1));
+	//lua_environment.RemoveFromStack();
 
 	// Ends with the lua_environment containing only the callbacks
 }

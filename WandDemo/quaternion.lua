@@ -27,6 +27,14 @@ function quaternion.rotation_about_axis(axis_id, angle_in_radians)
 	end
 end
 
+function quaternion.invert(q)
+	return { -q[1], -q[2], -q[3], q[4] }
+end
+
+function quaternion.apply(quat, vec)
+	return quaternion.mult(quaternion.mult(quat, {vec[1], vec[2], vec[3], 0}), quaternion.invert(quat))
+end
+
 function quaternion.identity()
 	return { 0, 0, 0, 1 }
 end

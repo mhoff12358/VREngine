@@ -63,6 +63,8 @@ function create_actor(ident)
 
 		self.looked_at = false
 		self.held = false
+
+		self.opening_size_sq = 0.1464439824
 		
 		self.add_listener("update_tick", self.cpp_interface)
 		self.add_listener("wiimote_button", self.cpp_interface)
@@ -72,8 +74,13 @@ function create_actor(ident)
 		self.set_constant_buffer(0, { { 1, 0, 0 }, { .005 }, { 1, 1, 1 }, { 10 }, { 0.2 } })
 		self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
 	end
+	function actor_table.interaction_callbacks.get_opening (self)
+		return quaternion.apply(self.orientation, { 0, 2.5 * self.scale, 0})
+	end
 	function actor_table.interaction_callbacks.set_orientation (self, new_orientation)
 		self.orientation = new_orientation
+		self.opening_location = quaternion.apply(self.orientation, { 0, 2.5 * self.scale, 0 })
+
 		self.set_component_transformation("empty", {
 		{
 			["matrix_type"] = "scale",
@@ -88,6 +95,25 @@ function create_actor(ident)
 			["z"] = self.position[3],
 		}
 		})
+	end
+	function actor_table.interaction_callbacks.fill (self, drain_location, amount)
+		position_difference = { drain_location[1] - self.position[1], drain_location[3] - self.position[3] }
+		if position_difference[1] * position_difference[1] + position_difference[2] * position_difference[2] < self.opening_size_sq * self.scale * self.scale then
+			self.fluid_height = math.min(self.fluid_height + 0.001 * amount, 2.5)
+			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
+		end
+	end
+	function actor_table.interaction_callbacks.drain (self, amount)
+		if (math.acos(self.orientation[4]) > 3.14/4.0) then
+			self.fluid_height = math.max(self.fluid_height - 0.001 * amount, 0.0)
+			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
+
+			for index, bottle in pairs(all_bottles) do
+				if (bottle ~= self) then
+					bottle:fill({ self.opening_location[1] + self.position[1], self.opening_location[2] + self.position[2], self.opening_location[3] + self.position[3] }, amount)
+				end
+			end
+		end
 	end
 	function actor_table.interaction_callbacks.look_entered (self)
 		self.looked_at = true
@@ -126,10 +152,7 @@ function create_actor(ident)
 		self.set_orientation(self, orientation)
 	end
 	function actor_table.interaction_callbacks.update_tick (self, tick_duration_ms)
-		if (math.acos(self.orientation[4]) > 3.14/4.0) then
-			self.fluid_height = math.max(self.fluid_height - 0.001 * tick_duration_ms, 0.0)
-			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
-		end
+		self:drain(tick_duration_ms)
 	end
 
 	return actor_table

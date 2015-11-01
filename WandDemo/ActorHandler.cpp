@@ -49,7 +49,7 @@ Actor* ActorHandler::CreateActorFromLuaScript(const string& script_name, Identif
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::AddListener >, 1 }));
 	new_actor->lua_interface_.AddCObjectMember("remove_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::RemoveListener >, 1 }));
-	new_actor->lua_interface_.CallLuaFunc("initialize");
+	//new_actor->lua_interface_.CallLuaFunc("initialize");
 
 	return new_actor;
 }
@@ -87,7 +87,11 @@ int ActorHandler::AddActor(lua_State* L) {
 	env.LoadFromStack(&script_name, Lua::Index(1));
 	env.LoadFromStack(&actor_name, Lua::Index(1));
 
-	CreateActorFromLuaScript(script_name, Identifier(actor_name), NULL);
+	Actor* new_actor = CreateActorFromLuaScript(script_name, Identifier(actor_name), NULL);
 
-	return 0;
+	// Duplicate the interface so it can be xmove'd over to the other thread.
+	new_actor->lua_interface_.env_.StoreToStack(Lua::Index(1));
+	env.StoreToStack(Lua::EnvironmentTop{ &new_actor->lua_interface_.env_, 1 });
+
+	return 1;
 }

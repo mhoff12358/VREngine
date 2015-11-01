@@ -111,6 +111,11 @@ namespace Lua {
 		typename std::enable_if<I != J, bool>::type LoadTupleElement(tuple<Args...>& t, Index stack_position);
 	};
 
+	struct EnvironmentTop {
+		Environment* other_environment;
+		int num_elements;
+	};
+
 }  // namespace Lua
 
 #include "Environment_inl.cpp"
