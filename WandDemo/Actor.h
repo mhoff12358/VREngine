@@ -21,7 +21,7 @@ public:
 	Actor(const Identifier& ident, ResourcePool& resource_pool, EntityHandler& entity_handler);
 	~Actor();
 
-	void InitializeFromLuaScript(lua_State* L, const string& script_name, const VRBackendBasics& graphics_objects, InteractableCollection& interactable_collection, ActorHandler* actor_handler, ConstantBuffer* shader_settings = NULL);
+	void InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, const string& script_name, const Identifier& ident);
 
 	void LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format);
 	map<string, vector<Model>> CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentage);

@@ -1,6 +1,6 @@
 require "quaternion"
 
-function create_actor()
+function create_actor(ident)
 	actor_table = {}
 	actor_table.model_file_name = "bottle.obj"
 
@@ -17,7 +17,7 @@ function create_actor()
 		[""] = { { "empty" } },
 		["empty"] = {
 			{ "Outer" },
-			{ "Inner", "InnerTube" },
+			{ "Inner" },
 		}
 	}
 
@@ -33,19 +33,19 @@ function create_actor()
 			},
 		},
 		{
-			["shader_file_name"] = "fluid.hlsl",
 			["components"] = { "Inner" },
+			["shader_file_name"] = "fluid.hlsl",
 			["shader_settings_format"] = {
 				["pipeline_stage"] = "pixel",
 				["data_format"] = { {"float", 4}, {"float", 1} }
 			},
-		}
+		},
 	}
 
 	actor_table.interactable_objects = {
 		{
 			["interactable_type"] = "Sphere",
-			["id"] = "bottle",
+			["id"] = ident .. "|bottle",
 			["radius"] = 0.0625,
 			["center"] = { 0, 0, 0 },
 			["parent_component"] = ""
@@ -54,53 +54,79 @@ function create_actor()
 	
 	actor_table.interaction_callbacks = {}
 	function actor_table.interaction_callbacks.initialize (self)
-		self.orientation = quaternion.identity()
-		self.fluid_height = 1.0
-		self.fluid_color = { 0.2, 0.75, .02, 1 }
-		self.add_update_tick_listener(self.actor)
-		if (self.set_component_transformation ~= nil) then
-			self.set_component_transformation("empty", {
-			{
-					["matrix_type"] = "scale",
-					["scale"] = {0.0625, 0.0625, 0.0625},
-			}, {
-					["matrix_type"] = "translation",
-					["x"] = 0,
-					["y"] = 0,
-					["z"] = -0.75,
-			}})
-		end
+		self.fluid_height = 2.5
+		self.fluid_color = { math.random(), math.random(), math.random(), 1 }
+
+		self.position = { 0, 0, -0.75 }
+		self.scale = 0.0625
+		self.move_factor = 0.125
+
+		self.looked_at = false
+		self.held = false
+		
+		self.add_listener("update_tick", self.cpp_interface)
+		self.add_listener("wiimote_button", self.cpp_interface)
+		
+		self.set_orientation(self, quaternion.identity())
+
 		self.set_constant_buffer(0, { { 1, 0, 0 }, { .005 }, { 1, 1, 1 }, { 10 }, { 0.2 } })
 		self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
 	end
-	function actor_table.interaction_callbacks.look_entered (self)
-		self.add_mouse_movement_listener(self.actor)
-	end
-	function actor_table.interaction_callbacks.look_left (self)
-		self.remove_mouse_movement_listener(self.actor)
-	end
-	function actor_table.interaction_callbacks.mouse_motion (self, mouse_motion)
-		self.orientation = quaternion.mult(quaternion.mult(
-			quaternion.rotation_about_axis(quaternion.AID_Z, 0.01 * mouse_motion[1]),
-			quaternion.rotation_about_axis(quaternion.AID_X, 0.01 * mouse_motion[2])),
-			self.orientation)
+	function actor_table.interaction_callbacks.set_orientation (self, new_orientation)
+		self.orientation = new_orientation
 		self.set_component_transformation("empty", {
 		{
 			["matrix_type"] = "scale",
-			["scale"] = {0.0625, 0.0625, 0.0625},
+			["scale"] = { self.scale, self.scale, self.scale },
 		}, {
 			["matrix_type"] = "quaternion_rotation",
 			["quaternion"] = self.orientation
 		}, {
 			["matrix_type"] = "translation",
-			["x"] = 0,
-			["y"] = 0,
-			["z"] = -0.75,
+			["x"] = self.position[1],
+			["y"] = self.position[2],
+			["z"] = self.position[3],
 		}
 		})
 	end
+	function actor_table.interaction_callbacks.look_entered (self)
+		self.looked_at = true
+	end
+	function actor_table.interaction_callbacks.look_left (self)
+		self.looked_at = false
+	end
+	function actor_table.interaction_callbacks.wiimote_button_down (self, pressed)
+		if pressed[11] and self.looked_at then
+			self.held = true
+			self.add_listener("wiimote_position", self.cpp_interface)
+		end
+		if self.held then
+			if pressed[1] then
+				self.position[1] = self.position[1] - self.move_factor
+			end
+			if pressed[2] then
+				self.position[1] = self.position[1] + self.move_factor
+			end
+			if pressed[3] then
+				self.position[2] = self.position[2] - self.move_factor
+			end
+			if pressed[4] then
+				self.position[2] = self.position[2] + self.move_factor
+			end
+		end
+	end
+	function actor_table.interaction_callbacks.wiimote_button_up (self, pressed)
+		if pressed[11] then
+			self.held = false
+			self.remove_listener("wiimote_position", self.cpp_interface)
+			self:set_orientation( { 0, 0, 0, 1 } )
+		end
+	end
+	function actor_table.interaction_callbacks.wiimote_position (self, orientation)
+		self.set_orientation(self, orientation)
+	end
 	function actor_table.interaction_callbacks.update_tick (self, tick_duration_ms)
-		if (math.acos(self.orientation[4]) * 2 > 3.14/2.0) then
+		if (math.acos(self.orientation[4]) > 3.14/4.0) then
 			self.fluid_height = math.max(self.fluid_height - 0.001 * tick_duration_ms, 0.0)
 			self.set_constant_buffer(1, { self.fluid_color, { self.fluid_height } })
 		end

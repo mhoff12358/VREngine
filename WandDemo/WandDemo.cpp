@@ -33,6 +33,7 @@
 
 WiimoteInterface wiimote_interface;
 WiimoteHandler* wiimote;
+ButtonHistory wiimote_buttons;
 VRBackendBasics graphics_objects;
 const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
@@ -168,6 +169,13 @@ void UpdateLoop() {
 			player_location[1] += time_delta_ms * movement_scale;
 		}
 
+		if (wiimote != NULL) {
+			if (graphics_objects.input_handler->GetKeyToggled('F')) {
+				wiimote->RequestCalibrateMotionPlus();
+				wiimote->Rezero();
+			}
+		}
+
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
 		//player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
 		//player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
@@ -178,9 +186,6 @@ void UpdateLoop() {
 		//shader_settings_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
 
 		TimeTracker::FrameEvent("Update Game Objects");
-		//DirectX::XMMATRIX terminal_transformation = DirectX::XMMatrixTranslation(0, -1.75, -1);
-		//console_actor.SetComponentTransformation("terminal_Plane.001",
-		//	terminal_transformation);
 
 		player_look_camera.location = player_location;
 		if (graphics_objects.input_handler->IsOculusActive()) {
@@ -195,15 +200,46 @@ void UpdateLoop() {
 		player_look_camera.InvalidateViewMatrices();
 		LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
 		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
-		//std::cout << "Object looked at: " << id_of_object << std::endl;
-
-		for (Actor* update_tick_listener : actor_handler.update_tick_listeners_) {
-			assert(update_tick_listener->lua_interface_.CallLuaFunc(string("update_tick"), time_delta_ms));
+		
+		for (Lua::InteractableObject* update_tick_listener : actor_handler.LookupListeners("update_tick")) {
+			assert(update_tick_listener->CallLuaFunc(string("update_tick"), time_delta_ms));
 		}
 
 		if ((mouse_motion[0] != 0) && (mouse_motion[1] != 0)) {
-			for (Actor* mouse_motion_listener : actor_handler.mouse_motion_listeners_) {
-				mouse_motion_listener->lua_interface_.CallLuaFunc(string("mouse_motion"), mouse_motion);
+			for (Lua::InteractableObject* mouse_motion_listener : actor_handler.LookupListeners("mouse_motion")) {
+				mouse_motion_listener->CallLuaFunc(string("mouse_motion"), mouse_motion);
+			}
+		}
+
+		if (wiimote != NULL) {
+			WiimoteState wiimote_state = wiimote->GetCurrentState();
+			wiimote_buttons.previous_button_state = wiimote_buttons.current_button_state;
+			wiimote_buttons.current_button_state = wiimote_state.current_button_state;
+
+			array<bool, 16> buttons_toggle_down = wiimote_buttons.GetAllButtonsToggled();
+			array<bool, 16> buttons_toggle_up = wiimote_buttons.GetAllButtonsToggled(false);
+			
+			if (wiimote_buttons.GetButtonToggled(HOME_MASK)) {
+				wiimote->RequestCalibrateMotionPlus();
+				wiimote->Rezero();
+			}
+
+			for (Lua::InteractableObject* wiimote_button_listener : actor_handler.LookupListeners("wiimote_button")) {
+				wiimote_button_listener->CallLuaFunc(string("wiimote_button_down"), buttons_toggle_down);
+				wiimote_button_listener->CallLuaFunc(string("wiimote_button_up"), buttons_toggle_up);
+			}
+
+			for (Lua::InteractableObject* wiimote_position_listener : actor_handler.LookupListeners("wiimote_position")) {
+				array<float, 4> raw_wiimote_orientation = (wiimote_state.orientation * Quaternion::RotationAboutAxis(AID_X, 3.14 / 2)).GetArray();
+				std::swap(raw_wiimote_orientation[1], raw_wiimote_orientation[2]);
+				raw_wiimote_orientation[0] *= -1;
+				wiimote_position_listener->CallLuaFunc(string("wiimote_position"), raw_wiimote_orientation);
+			}
+		}
+
+		if (graphics_objects.input_handler->GetKeyToggled(' ')) {
+			for (Lua::InteractableObject* keydown_listener : actor_handler.LookupListeners("space_down")) {
+				assert(keydown_listener->CallLuaFunc(string("space_down")));
 			}
 		}
 
@@ -252,10 +288,9 @@ int _tmain(int argc, _TCHAR* argv[])
 {
 	//LuaTest();
 
-	//wiimote_interface.Startup();
-	//wiimote = wiimote_interface.GetHandler();
-	wiimote = NULL;
-
+	wiimote_interface.Startup();
+	wiimote = wiimote_interface.GetHandler();
+	
 	graphics_objects = BeginDirectx(false, "");
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;

@@ -19,8 +19,11 @@ namespace Lua {
 	}
 
 	bool InteractableObject::PrepareLuaFunc(const string& func_name) {
-		env_.GetFromTableToStack(func_name, table_location_);
-		if (env_.CheckTypeOfStack(Index(-1)) != LUA_TFUNCTION) {
+		if (!env_.GetFromTableToStack(func_name, table_location_)) {
+			return false;
+		}
+		int found_type = env_.CheckTypeOfStack(Index(-1));
+		if (found_type != LUA_TFUNCTION) {
 			env_.RemoveFromStack();
 			return false;
 		}

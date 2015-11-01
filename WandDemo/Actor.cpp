@@ -16,7 +16,7 @@ Actor::~Actor()
 }
 
 
-void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, const VRBackendBasics& graphics_objects, InteractableCollection& interactable_collection, ActorHandler* actor_handler, ConstantBuffer* shader_settings) {
+void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, const string& script_name, const Identifier& ident) {
 	Lua::Environment lua_environment;
 	if (L == NULL) {
 		lua_environment = Lua::Environment(true);
@@ -27,7 +27,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	if (lua_environment.CheckSizeOfStack() != 0) {
 		lua_environment.PrintStack("ERROR RUNNING FILE");
 	}
-	if (!lua_environment.CallGlobalFunction(string("create_actor"))) {
+	if (!lua_environment.CallGlobalFunction(string("create_actor"), ident.GetId())) {
 		lua_environment.PrintStack("Error loading lua script: " + script_name);
 		return;
 	}
@@ -124,8 +124,6 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 			ShaderSettings used_settings;
 			if (specified_shader_settings != NULL) {
 				used_settings = ShaderSettings(specified_shader_settings);
-			} else {
-				used_settings = shader_settings;
 			}
 			if (shader_file_name != "") {
 				if (texture_file_name != "") {
@@ -180,7 +178,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTableLeaveKey();
 		while (lua_environment.IterateOverTableLeaveKey(NULL)) {
-			LookInteractable* new_interactable = interactable_collection.CreateLookInteractableFromLua(this, lua_environment);
+			LookInteractable* new_interactable = actor_handler->interactable_collection_.CreateLookInteractableFromLua(this, lua_environment);
 			string parent_component_name;
 			if (new_interactable != NULL && lua_environment.LoadFromTable(string("parent_component"), &parent_component_name)) {
 				new_interactable->SetModelTransformation(&components_[component_lookup_[parent_component_name]].GetTransformationData()->transformation);
@@ -194,9 +192,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const string& script_name, con
 	lua_environment.RemoveFromStack(Lua::Index(1));
 	lua_interface_ = Lua::InteractableObject(lua_environment);
 
-	lua_environment.PrintStack("PRINTING BEFORE ADDING CALLBACKS");
-
-	lua_interface_.env_.StoreToTable(string("actor"), (void*)this);
+	lua_interface_.env_.StoreToTable(string("cpp_interface"), (void*)&lua_interface_);
 	lua_interface_.AddCObjectMember("clear_component_transformation", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::ClearComponentTransformation >, 1 }));
 	lua_interface_.AddCObjectMember("apply_to_component_transformation", this,

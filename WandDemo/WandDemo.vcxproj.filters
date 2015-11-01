@@ -16,6 +16,9 @@
     <Filter Include="Lua Libraries">
       <UniqueIdentifier>{b901ee39-0b68-49f0-99ae-b3c21800f6c6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Actor Scripts">
+      <UniqueIdentifier>{a6cacabc-3d8c-474f-b5e7-5c6c1950892c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -178,23 +181,23 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="console.lua">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="cone.lua">
+    <None Include="tower_scene.lua">
       <Filter>Resource Files</Filter>
     </None>
     <None Include="bottle.lua">
-      <Filter>Resource Files</Filter>
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="cone.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="console.lua">
+      <Filter>Actor Scripts</Filter>
     </None>
     <None Include="sun.lua">
-      <Filter>Resource Files</Filter>
+      <Filter>Actor Scripts</Filter>
     </None>
     <None Include="wall.lua">
-      <Filter>Resource Files</Filter>
-    </None>
-    <None Include="tower_scene.lua">
-      <Filter>Resource Files</Filter>
+      <Filter>Actor Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>
