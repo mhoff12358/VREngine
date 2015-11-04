@@ -153,6 +153,7 @@
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
+    <ClInclude Include="InteractableFrustum.h" />
     <ClInclude Include="InteractableQuad.h" />
     <ClInclude Include="InteractableSphere.h" />
     <ClInclude Include="InteractableTriangle.h" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />
+    <ClCompile Include="InteractableFrustum.cpp" />
     <ClCompile Include="InteractableQuad.cpp" />
     <ClCompile Include="InteractableSphere.cpp" />
     <ClCompile Include="InteractableTriangle.cpp" />
@@ -240,6 +242,7 @@
     <None Include="bottle.lua" />
     <None Include="cone.lua" />
     <None Include="console.lua" />
+    <None Include="funnel.lua" />
     <None Include="sun.lua" />
     <None Include="tower_scene.lua" />
     <None Include="wall.lua" />

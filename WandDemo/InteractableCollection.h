@@ -7,6 +7,7 @@
 #include "InteractableTriangle.h"
 #include "InteractableQuad.h"
 #include "InteractableSphere.h"
+#include "InteractableFrustum.h"
 
 #include "LuaGameScripting/Environment.h"
 
@@ -16,7 +17,7 @@ struct LookInteractableBlock {
 	LookInteractableBlock();
 	~LookInteractableBlock();
 
-	char data[CONSTMAX(sizeof(InteractableTriangle), CONSTMAX(sizeof(InteractableQuad), CONSTMAX(sizeof(InteractableCircle), sizeof(InteractableSphere))))];
+	char data[CONSTMAX(sizeof(InteractableTriangle), CONSTMAX(sizeof(InteractableQuad), CONSTMAX(sizeof(InteractableCircle), CONSTMAX(sizeof(InteractableSphere), sizeof(InteractableFrustum)))))];
 
 	LookInteractable* GetAsLookInteractable();
 	const LookInteractable* GetAsLookInteractable() const;

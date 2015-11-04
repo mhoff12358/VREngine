@@ -132,6 +132,22 @@ LookInteractable* InteractableCollection::CreateLookInteractableFromLua(Actor* a
 			return NULL;
 		}
 		return new (GetNewLookInteractableBlock()) InteractableSphere(id, actor, radius, center);
+	} else if (interactable_type == "Frustum") {
+		string id;
+		float base_radius;
+		float top_radius;
+		array<float, 3> base_center;
+		array<float, 3> top_center;
+		array<float, 3> right_radius;
+		if (!(environment_with_table.LoadFromTable(string("id"), &id) &&
+			environment_with_table.LoadFromTable(string("base_radius"), &base_radius) &&
+			environment_with_table.LoadFromTable(string("top_radius"), &top_radius) &&
+			environment_with_table.LoadFromTable(string("base_center"), &base_center) &&
+			environment_with_table.LoadFromTable(string("top_center"), &top_center) &&
+			environment_with_table.LoadFromTable(string("right_radius"), &right_radius))) {
+			return NULL;
+		}
+		return new (GetNewLookInteractableBlock()) InteractableFrustum(id, actor, base_radius, top_radius, base_center, top_center, right_radius);
 	} else {
 		return NULL;
 	}

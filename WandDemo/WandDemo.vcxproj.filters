@@ -75,6 +75,9 @@
     <ClInclude Include="ConstantBufferLua.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="InteractableFrustum.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -123,6 +126,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ConstantBufferLua.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InteractableFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -197,6 +203,9 @@
       <Filter>Actor Scripts</Filter>
     </None>
     <None Include="wall.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="funnel.lua">
       <Filter>Actor Scripts</Filter>
     </None>
   </ItemGroup>
