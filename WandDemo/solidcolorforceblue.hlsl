@@ -3,6 +3,12 @@ struct VOut
     float4 position : SV_POSITION;
 };
 
+struct POut
+{
+	float4 t1 : SV_Target0;
+	float4 t2 : SV_Target1;
+};
+
 cbuffer shared_matrices : register(b0)
 {
 	matrix <float, 4, 4> view;
@@ -15,12 +21,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer solid_color : register(b2)
-{
-	float4 color;
-};
-
-VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
+VOut VShader(float4 position : POSITION)
 {
     VOut output;
 
@@ -30,8 +31,10 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
     return output;
 }
 
-float4 PShader(float4 position : SV_POSITION) : SV_TARGET
+POut PShader(float4 position : SV_POSITION) : SV_TARGET
 {
-	//return color;
-	return float4(1, 1, 1, 0.1);
+	POut result;
+	result.t1 = float4(0, 0, 1, 1);
+	result.t2 = result.t1;
+	return result;
 }

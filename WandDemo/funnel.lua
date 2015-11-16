@@ -2,15 +2,17 @@ require "quaternion"
 
 function create_actor(ident)
 	actor_table = {}
-	actor_table.model_file_name = "funnel.obj"
-
-	actor_table.output_format = {
-		["model_modifier"] = {
-			["axis_swap"] = { 0, 1, 2 },
-			["axis_scale"] = { 1, 1, 1 },
-			["invert_texture_axis"] = { true, true }
-		},
-		["vertex_type"] = "normal"
+	
+	actor_table.model_definition = {
+		["model_file_name"] = "funnel.obj",
+		["output_format"] = {
+			["model_modifier"] = {
+				["axis_swap"] = { 0, 1, 2 },
+				["axis_scale"] = { 1, 1, 1 },
+				["invert_texture_axis"] = { true, true }
+			},
+			["vertex_type"] = "normal"
+		}
 	}
 
 	actor_table.model_parentage = {

@@ -1,12 +1,16 @@
 function create_actor()
 	actor_table = {}
-	actor_table.model_file_name = "console.obj"
 
-	actor_table.output_format = {
-		["model_modifier"] = {
-			["axis_swap"] = { 0, 1, 2 },
-			["axis_scale"] = { 1, 1, 1 },
-			["invert_texture_axis"] = { false, true }
+	actor_table.model_definition = {
+		["model_file_name"] = "console.obj",
+		["load_model_as_dynamic"] = true,
+		["output_format"] = {
+			["model_modifier"] = {
+				["axis_swap"] = { 0, 1, 2 },
+				["axis_scale"] = { 1, 1, 1 },
+				["invert_texture_axis"] = { false, true }
+			},
+			["load_as_dynamic"] = true
 		}
 	}
 
@@ -100,9 +104,6 @@ function create_actor()
 		end
 	end
 	function actor_table.interaction_callbacks.look_maintained (self, object_id, location1, location2)
-		if (object_id == "terminal") then
-			actor_interfaces["cone"]:place_at_console_location(1.5 * location1, location2)
-		end
 	end
 	function actor_table.interaction_callbacks.initialize (self)
 		if ((self.clear_component_transformation ~= nil) and (self.apply_to_component_transformation ~= nil)) then

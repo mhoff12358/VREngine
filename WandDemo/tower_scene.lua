@@ -6,16 +6,24 @@ function create_scene ()
 
 	function scene_table.initialize(self)
 		self.bottle_count = 1
-		wall_interface = self.add_actor("wall.lua", "wall")
-		wall_interface:initialize()
-		table.insert(actor_interfaces, wall_interface)
+		wall_interface = self:add_actor_and_init("wall.lua", "wall")
 
-		funnel_interface = self.add_actor("funnel.lua", "funnel")
-		funnel_interface:initialize()
-		table.insert(actor_interfaces, funnel_interface)
+		console_interface = self:add_actor_and_init("console.lua", "console")
+		
+		water_flow_interface = self:add_actor_and_init("water_flow.lua", "water_flow")
+
+		funnel_interface = self:add_actor_and_init("funnel.lua", "funnel")
 		table.insert(all_bottles, funnel_interface)
 
+
 		self.add_listener("space_down", self.cpp_interface)
+	end
+
+	function scene_table.add_actor_and_init(self, script_name, actor_name)
+		interface = self.add_actor(script_name, actor_name)
+		interface:initialize()
+		table.insert(actor_interfaces, interface)
+		return interface
 	end
 
 	function scene_table.space_down(self)

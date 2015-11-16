@@ -208,5 +208,14 @@
     <None Include="funnel.lua">
       <Filter>Actor Scripts</Filter>
     </None>
+    <None Include="LiquidContainer.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
+    <None Include="lua_test.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
+    <None Include="water_flow.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
   </ItemGroup>
 </Project>

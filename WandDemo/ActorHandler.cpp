@@ -35,7 +35,6 @@ void ActorHandler::LoadSceneFromLuaScript(const string& script_name) {
 	scene_interactable_.AddCObjectMember("remove_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::RemoveListener >, 1 }));
 
-	scene_interactable_.env_.PrintStack("root environment");
 	scene_interactable_.CallLuaFunc("initialize");
 }
 
@@ -64,7 +63,6 @@ int ActorHandler::AddListener(lua_State* L) {
 	assert(env.LoadFromStack(&listener_set_name, Lua::Index(1)));
 	void* actor_ptr;
 	assert(env.LoadFromStack(&actor_ptr, Lua::Index(1)));
-	std::cout << "Adding listener: " << listener_set_name << " : " << actor_ptr << std::endl;
 	LookupListeners(listener_set_name).insert((Lua::InteractableObject*)actor_ptr);
 	return 0;
 }

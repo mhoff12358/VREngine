@@ -1,12 +1,14 @@
 function create_actor()
 	actor_table = {}
-	actor_table.model_file_name = "tower_inside.obj"
 
-	actor_table.output_format = {
-		["model_modifier"] = {
-			["axis_swap"] = { 0, 1, 2 },
-			["axis_scale"] = { 1, 1, 1 },
-			["invert_texture_axis"] = { false, true }
+	actor_table.model_definition = {
+		["model_file_name"] = "tower_inside.obj",
+		["output_format"] = {
+			["model_modifier"] = {
+				["axis_swap"] = { 0, 1, 2 },
+				["axis_scale"] = { 1, 1, 1 },
+				["invert_texture_axis"] = { false, true }
+			}
 		}
 	}
 

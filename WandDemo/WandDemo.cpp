@@ -58,15 +58,6 @@ void GraphicsLoop() {
 	int fps = 0;
 
 	while (true) {
-		/*int curr_time = timeGetTime();
-		if (curr_time - 1000 >= prev_sec) {
-			std::cout << "FPS: " << fps << std::endl;
-			prev_sec = curr_time;
-			fps = 1;
-		} else {
-			++fps;
-		}*/
-
 		graphics_objects.input_handler->UpdateOculus(frame_index);
 		unique_lock<mutex> device_context_lock(device_context_access);
 
@@ -74,6 +65,11 @@ void GraphicsLoop() {
 		array<float, 3> player_location_copy = player_location;
 		Quaternion player_orientation_quaternion_copy = player_orientation_quaternion;
 		player_position_lock.unlock();
+
+		RenderGroup* drawing_groups = graphics_objects.entity_handler->GetRenderGroupForDrawing();
+		for (int render_group_number = 0; render_group_number < 2; render_group_number++) {
+			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
+		}
 
 		graphics_objects.render_pipeline->Render({ player_location, player_orientation_quaternion });
 		frame_index++;
@@ -91,28 +87,7 @@ void UpdateLoop() {
 	LookState previous_look = { Identifier(""), NULL, 0, array<float, 2>({ 0, 0 }) };
 
 	unique_lock<mutex> device_context_lock(device_context_access);
-	/*
-	ConstantBufferTyped<LightDetails>* shader_settings_buffer = new ConstantBufferTyped<LightDetails>(CB_PS_VERTEX_SHADER);
-	shader_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
-	LightDetails& light_details = shader_settings_buffer->EditBufferDataRef();
-	light_details.SetLightSourceDirection({ { 1, -1, 0 } });
-	light_details.ambient_light = 0.2f;
-	shader_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
-	Actor* console_actor = actor_handler.CreateActorFromLuaScript("console.lua", "console", shader_settings_buffer);
-
-	ConstantBufferTyped<array<float, 4>>* color_settings_buffer = new ConstantBufferTyped<array<float, 4>>(CB_PS_PIXEL_SHADER);
-	color_settings_buffer->CreateBuffer(graphics_objects.view_state->device_interface);
-	color_settings_buffer->PushBuffer(graphics_objects.view_state->device_context);
-	color_settings_buffer->EditBufferDataRef() = array<float, 4>({ 1.0f, 0.0f, 0.0f, 1.0f });
-	Actor* cone_actor = actor_handler.CreateActorFromLuaScript("cone.lua", "cone", color_settings_buffer);
-	*/
-	//Actor* wall_actor = actor_handler.CreateActorFromLuaScript("wall.lua", "wall", NULL);
-
-	//Actor* bottle_actor = actor_handler.CreateActorFromLuaScript("bottle.lua", "bottle", NULL);
 	actor_handler.LoadSceneFromLuaScript("tower_scene.lua");
-	
-
-	Actor* sun_actor = actor_handler.CreateActorFromLuaScript("sun.lua", "sun", NULL);
 	device_context_lock.unlock();
 
 	Camera player_look_camera;
@@ -177,8 +152,8 @@ void UpdateLoop() {
 		}
 
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
-		//player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
-		//player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
+		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
 		player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_position_lock.unlock();
 
@@ -274,12 +249,14 @@ void UpdateLoop() {
 void LuaTest() {
 
 	Lua::Environment env(true);
-	env.RunFile("console.lua");
+	env.RunFile("lua_test.lua");
 
 	//tuple<float, float, int, string> vals;
 	//env.LoadTupleElement<1, 4, float, float, int, string>(vals, Lua::Index(-1));
-	vector<vector<string>> vals;
-	bool success = env.LoadGlobal(string("bah"), &vals);
+	//vector<vector<string>> vals;
+	//bool success = env.LoadGlobal(string("bah"), &vals);
+
+	env.PrintStack();
 
 	std::cout << "Finish lua test" << std::endl;
 }

@@ -243,9 +243,12 @@
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="funnel.lua" />
+    <None Include="LiquidContainer.lua" />
+    <None Include="lua_test.lua" />
     <None Include="sun.lua" />
     <None Include="tower_scene.lua" />
     <None Include="wall.lua" />
+    <None Include="water_flow.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

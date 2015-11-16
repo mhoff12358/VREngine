@@ -33,11 +33,14 @@ public:
 	vector<Component> components_;
 	map<string, unsigned int> component_lookup_;
 	vector<unsigned int> shader_settings_entity_ids_;
+
 private:
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
 	Identifier ident_;
 	map<string, Model> models_;
+	string model_resource_id_;
+	ObjLoader::OutputFormat output_format_;
 	
 public:
 	// All the lua interaction callbacks, as well as the interface
@@ -53,5 +56,9 @@ public:
 	int SetShader(lua_State* L);
 	// Arguments are <size_t settings_number, array of array of floats>
 	int SetConstantBuffer(lua_State* L);
+	// Arguments are <string component_name, bool draw>
+	int SetEnabled(lua_State* L);
+	// Arguments are
+	int SetVertices(lua_State* L);
 };
 

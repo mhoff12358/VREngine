@@ -28,11 +28,11 @@ public:
 	void UpdateTransformation();
 	const TransformationMatrixAndInvTransData* GetTransformationData();
 
-private:
-	void SetParent(Component* parent);
-	
 	unsigned int first_entity_;
 	unsigned int number_of_entities_;
+
+private:
+	void SetParent(Component* parent);
 
 	Component* children_;
 	unsigned int num_children_;

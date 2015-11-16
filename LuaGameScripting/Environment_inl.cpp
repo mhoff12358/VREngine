@@ -69,6 +69,9 @@ namespace Lua {
 	template <typename T>
 	bool Environment::PeekFromStack(vector<T>* loaded_value, Index stack_position) {
 		int num_elements_to_copy = GetArrayLength(stack_position);
+		if (num_elements_to_copy < 0) {
+			return false;
+		}
 		loaded_value->resize(num_elements_to_copy);
 		bool success = true;
 		for (int i = 0; i < num_elements_to_copy; i++) {
