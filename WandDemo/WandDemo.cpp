@@ -87,7 +87,7 @@ void UpdateLoop() {
 	LookState previous_look = { Identifier(""), NULL, 0, array<float, 2>({ 0, 0 }) };
 
 	unique_lock<mutex> device_context_lock(device_context_access);
-	actor_handler.LoadSceneFromLuaScript("tower_scene.lua");
+	actor_handler.LoadSceneFromLuaScript("cockpit_scene.lua");
 	device_context_lock.unlock();
 
 	Camera player_look_camera;
@@ -268,7 +268,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	wiimote_interface.Startup();
 	wiimote = wiimote_interface.GetHandler();
 	
-	graphics_objects = BeginDirectx(false, "");
+	graphics_objects = BeginDirectx(true, "");
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;

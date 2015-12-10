@@ -23,7 +23,7 @@ function create_actor(ident)
 		{
 			["components"] = { "Funnel" },
 			["shader_file_name"] = "glass.hlsl",
-			["texture_file_name"] = "|back_buffer",
+			["texture_file_name"] = "|first_stage_buffer",
 			["entity_group_number"] = 1,
 			["shader_settings_format"] = {
 				["pipeline_stage"] = "vertex",

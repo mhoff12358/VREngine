@@ -8,13 +8,10 @@ function create_scene ()
 		self.bottle_count = 1
 		wall_interface = self:add_actor_and_init("wall.lua", "wall")
 
-		console_interface = self:add_actor_and_init("console.lua", "console")
-		
 		water_flow_interface = self:add_actor_and_init("water_flow.lua", "water_flow")
 
 		funnel_interface = self:add_actor_and_init("funnel.lua", "funnel")
 		table.insert(all_bottles, funnel_interface)
-
 
 		self.add_listener("space_down", self.cpp_interface)
 	end

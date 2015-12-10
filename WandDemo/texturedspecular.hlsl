@@ -47,8 +47,7 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD0, float2 tex_c
 
 POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0, float light_scale : TEXCOORD1) : SV_TARGET
 {
-    //return float4(0.0f, tex_coord.y, 0.0f, 1.0f);
-	POut result;
+    POut result;
 	float4 texture_sample = model_skin.Sample(skin_sampler, tex_coord);
 	result.t1 = float4(texture_sample.xyz * light_scale, texture_sample.w);
 	result.t2 = result.t1;

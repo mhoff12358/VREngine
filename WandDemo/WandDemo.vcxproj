@@ -72,7 +72,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>..\;C:\Users\Matt\Documents\WiimoteTest\WiimoteTest\WiimoteHandler;C:\OculusSDK\LibOVR\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Users\Matt\Documents\VRBackend\VRBackend;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;C:\OculusSDK\LibOVR\Lib\x64\VS2013;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
+    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration)\;C:\OculusSDK\LibOVR\Lib\Windows\x64\Debug\VS2013;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -104,7 +104,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>Lua52.lib;LuaGameScripting.lib;libovr64d.lib;VRBackend.lib;WiimoteHandler.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>Lua52.lib;LuaGameScripting.lib;LibOVR.lib;VRBackend.lib;WiimoteHandler.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -210,6 +210,12 @@
     <FxCompile Include="solidcolorforceblue.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="terrain.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">VShader</EntryPointName>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="textured.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
@@ -219,9 +225,15 @@
     <FxCompile Include="texturedspecular.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="texturedspecularlightsource.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="bottle.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
+    <Object Include="cockpit_bars.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
     <Object Include="cone.obj">
@@ -236,16 +248,21 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="console.png" />
+    <Image Include="metal_bars.png" />
+    <Image Include="terrain.png" />
     <Image Include="walls.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bottle.lua" />
+    <None Include="cockpit.lua" />
+    <None Include="cockpit_scene.lua" />
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="funnel.lua" />
     <None Include="LiquidContainer.lua" />
     <None Include="lua_test.lua" />
     <None Include="sun.lua" />
+    <None Include="terrain.lua" />
     <None Include="tower_scene.lua" />
     <None Include="wall.lua" />
     <None Include="water_flow.lua" />

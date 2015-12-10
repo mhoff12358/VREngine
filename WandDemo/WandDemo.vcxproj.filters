@@ -163,6 +163,12 @@
     <FxCompile Include="fluid.hlsl">
       <Filter>Resource Files</Filter>
     </FxCompile>
+    <FxCompile Include="texturedspecularlightsource.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
+    <FxCompile Include="terrain.hlsl">
+      <Filter>Resource Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="console.obj">
@@ -177,12 +183,21 @@
     <Object Include="tower_inside.obj">
       <Filter>Resource Files</Filter>
     </Object>
+    <Object Include="cockpit_bars.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="console.png">
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="walls.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="metal_bars.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="terrain.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -215,6 +230,15 @@
       <Filter>Lua Libraries</Filter>
     </None>
     <None Include="water_flow.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="cockpit.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="cockpit_scene.lua">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="terrain.lua">
       <Filter>Actor Scripts</Filter>
     </None>
   </ItemGroup>

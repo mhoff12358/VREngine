@@ -84,7 +84,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 					}
 					ModelStorageDescription model_description;
 					if (output_format_.load_as_dynamic) {
-						model_description = { false, true, true };
+						model_description = { false, true, false };
 					}
 					else {
 						model_description = { true, false, false, };
@@ -143,9 +143,11 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		while (lua_environment.IterateOverTableLeaveValue(&settings_num, NULL)) {
 			string shader_file_name = "";
 			string texture_file_name = "";
+			array<bool, 2> texture_stage_usage = { false, true };
 			unsigned int entity_group_number = 0;
 			lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
 			lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
+			lua_environment.LoadFromTable(string("texture_stage_usage"), &texture_stage_usage);
 			lua_environment.LoadFromTable(string("entity_group_number"), &entity_group_number);
 
 			ConstantBuffer* specified_shader_settings = NULL;
@@ -165,8 +167,8 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 			}
 			if (shader_file_name != "") {
 				if (texture_file_name != "") {
-					if (texture_file_name == "|back_buffer") {
-						TextureView texture_view = TextureView(0, 0, graphics_objects.render_pipeline->GetBackBuffer());
+					if (texture_file_name == "|first_stage_buffer") {
+						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], graphics_objects.render_pipeline->GetFirstStageBuffer());
 						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 							ES_SETTINGS,
 							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
@@ -177,7 +179,7 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 							texture_view), entity_group_number));
 					} else {
 						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
-						TextureView texture_view = TextureView(0, 0, texture);
+						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], texture);
 						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 							ES_SETTINGS,
 							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
@@ -380,11 +382,20 @@ int Actor::SetEnabled(lua_State* L) {
 
 int Actor::SetVertices(lua_State* L) {
 	Lua::Environment env(L);
-	string component_name;
-	env.LoadFromStack(&component_name, Lua::Index(1));
-	ModelMutation mutation;
-	Vertex new_vertex(ObjLoader::vertex_type_location, { { 0, 0, 0 } });
-	mutation.AddVertexBlock(0, &new_vertex, 1);
-	entity_handler_.AddModelMutation(model_resource_id_, mutation);
+	if (env.CheckTypeOfStack() != LUA_TTABLE) {
+		std::cout << "DID NOT FIND TABLE FOR SETTING VERTICES" << std::endl;
+	}
+	env.BeginToIterateOverTable();
+	int first_vertex_index;
+	vector<vector<float>> new_vertices;
+	ModelMutation new_mutation;
+	while (env.IterateOverTable(&first_vertex_index, &new_vertices, NULL)) {
+		vector<Vertex> vertices;
+		for (const vector<float>& new_vertex : new_vertices) {
+			vertices.push_back(Vertex(output_format_.vertex_type, new_vertex));
+		}
+		new_mutation.AddVertexBlock(first_vertex_index, vertices.data(), vertices.size());
+	}
+	entity_handler_.AddModelMutation(model_resource_id_, new_mutation);
 	return 0;
 }

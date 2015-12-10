@@ -1,6 +1,8 @@
 require "quaternion"
 
 function create_actor(ident)
+	points_per_end = 8
+
 	actor_table = {}
 	
 	actor_table.model_definition = {
@@ -14,21 +16,21 @@ function create_actor(ident)
 			["vertex_type"] = "location",
 		},
 		["model_vertices"] = {
-			["square"] = {
-				{ -1, -1, 0 },
-				{  1,  1, 0 },
-				{  1, -1, 0 },
-			}
+			["cylinder"] = {}
 		}
 	}
 
+	for i=0,2*points_per_end,1 do
+		table.insert(actor_table.model_definition.model_vertices.cylinder, {0, 0, 0})
+	end
+
 	actor_table.model_parentage = {
-		[""] = { { "square" } },
+		[""] = { { "cylinder" } },
 	}
 
 	actor_table.settings_blocks = {
 		{
-			["components"] = { "square" },
+			["components"] = { "cylinder" },
 			["shader_file_name"] = "solidcolorforceblue.hlsl",
 		},
 	}
@@ -49,8 +51,17 @@ function create_actor(ident)
 			["z"] = self.position[3],
 		}
 		})
-		
-		self.set_vertices()
+
+		self:make_flow()
+	end
+	function actor_table.interaction_callbacks.make_flow (self)
+		self.set_vertices({
+			[0] = {
+				{ -1, -1, 0 },
+				{ 1, 1, 0 },
+				{ 1, -1, 0 },
+			}
+		})
 	end
 
 	return actor_table

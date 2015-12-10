@@ -49,5 +49,4 @@ float4 PShader(float4 position : SV_POSITION, float light_scale : TEXCOORD0, flo
 	float4 back_buffer_value = existing_back_buffer.Sample(back_buffer_sampler, float2(position.x / 800.0 + refraction_offset.x, position.y / 600 + refraction_offset.y));
 	float alpha_value = 0.15 + max((1-0.15) * light_scale, 0);
 	return float4(back_buffer_value.xyz, 1.0) * (1 - alpha_value) + float4(float3(1, 1, 1), 1) * alpha_value;
-	//return float4(refraction_offset.xy*(-1), 0, 1);
 }
