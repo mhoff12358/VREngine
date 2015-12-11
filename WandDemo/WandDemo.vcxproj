@@ -242,11 +242,15 @@
     <Object Include="console.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
+    <Object Include="laser.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
     <Object Include="tower_inside.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
   </ItemGroup>
   <ItemGroup>
+    <Image Include="cannon.png" />
     <Image Include="console.png" />
     <Image Include="metal_bars.png" />
     <Image Include="terrain.png" />
@@ -259,6 +263,7 @@
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="funnel.lua" />
+    <None Include="laser.lua" />
     <None Include="LiquidContainer.lua" />
     <None Include="lua_test.lua" />
     <None Include="sun.lua" />

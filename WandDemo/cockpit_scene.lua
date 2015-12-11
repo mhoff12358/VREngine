@@ -6,6 +6,8 @@ function create_scene ()
 
 	function scene_table.initialize(self)
 		self:add_actor_and_init("cockpit.lua", "cockpit")
+		self:add_actor_and_init("laser.lua", "right_laser"):initialize_sided(true)
+		self:add_actor_and_init("laser.lua", "left_laser"):initialize_sided(false)
 		self:add_actor_and_init("terrain.lua", "terrain")
 	end
 

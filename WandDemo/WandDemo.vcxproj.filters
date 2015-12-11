@@ -186,6 +186,9 @@
     <Object Include="cockpit_bars.obj">
       <Filter>Resource Files</Filter>
     </Object>
+    <Object Include="laser.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="console.png">
@@ -198,6 +201,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="terrain.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="cannon.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -239,6 +245,9 @@
       <Filter>Resource Files</Filter>
     </None>
     <None Include="terrain.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="laser.lua">
       <Filter>Actor Scripts</Filter>
     </None>
   </ItemGroup>

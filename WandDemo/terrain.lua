@@ -50,7 +50,7 @@ function create_actor(ident)
 	
 	actor_table.interaction_callbacks = {}
 	function actor_table.interaction_callbacks.initialize (self)
-		self.set_constant_buffer(0, { { terrain_resolution }, { 5, 1, 0.1 } })
+		self.set_constant_buffer(0, { { terrain_resolution }, { 4, 1, 0.25 } })
 		self.set_component_transformation("ground", {
 		{
 			["matrix_type"] = "axis_rotation",
@@ -58,6 +58,11 @@ function create_actor(ident)
 			["y"] = 0,
 			["z"] = 0,
 			["rotation"] = 3.14/2
+		}, {
+			["matrix_type"] = "translation",
+			["x"] = 0,
+			["y"] = -1.5,
+			["z"] = 0,
 		}
 		})
 	end

@@ -18,6 +18,7 @@ function create_actor()
 		[""] = {
 			{ "MetalBars" },
 			{ "LightBulb" },
+			{ "Seat" },
 		}
 	}
 
@@ -26,6 +27,15 @@ function create_actor()
 			["shader_file_name"] = "texturedspecularlightsource.hlsl",
 			["texture_file_name"] = "metal_bars.png",
 			["components"] = { "MetalBars" },
+			["shader_settings_format"] = {
+				["pipeline_stage"] = "vertex",
+				["data_format"] = { { "float", 3 }, { "float", 1 } }
+			},
+		},
+		{
+			["shader_file_name"] = "texturedspecularlightsource.hlsl",
+			["texture_file_name"] = "seat.png",
+			["components"] = { "Seat" },
 			["shader_settings_format"] = {
 				["pipeline_stage"] = "vertex",
 				["data_format"] = { { "float", 3 }, { "float", 1 } }
@@ -46,11 +56,12 @@ function create_actor()
 	actor_table.interaction_callbacks = {}
 	function actor_table.interaction_callbacks.initialize (self)
 		self:set_light_location({ 0, 0.5, 0 })
-		self.set_constant_buffer(1, { { 1, 1, 1, 1 } })
+		self.set_constant_buffer(2, { { 1, 1, 1, 1 } })
 	end
 	function actor_table.interaction_callbacks.set_light_location(self, new_light_location)
 		self.light_location = new_light_location
 		self.set_constant_buffer(0, { self.light_location, { 0 } })
+		self.set_constant_buffer(1, { self.light_location, { 0 } })
 		self.set_component_transformation("LightBulb", {
 		{
 			["matrix_type"] = "translation",
