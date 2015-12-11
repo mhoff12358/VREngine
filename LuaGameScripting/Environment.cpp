@@ -88,6 +88,12 @@ namespace Lua {
 	}
 
 	template <>
+	bool Environment::StoreToStack<tuple<>>(const tuple<>& stored_value) {
+		lua_newtable(L);
+		return true;
+	}
+
+	template <>
 	bool Environment::StoreToStack<lua_CFunction>(const lua_CFunction& stored_value) {
 		lua_pushcfunction(L, stored_value);
 		return true;

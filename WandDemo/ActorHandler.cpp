@@ -5,8 +5,8 @@
 ActorHandler::ActorHandler(VRBackendBasics& graphics_objects)
 	: graphics_objects_(graphics_objects), interactable_collection_(50), root_environment_(true)
 {
-	lua_newtable(root_environment_.L);
-	root_environment_.SetGlobalFromStack(string("actor_interfaces"));
+	//lua_newtable(root_environment_.L);
+	//root_environment_.SetGlobalFromStack(string("actor_interfaces"));
 }
 
 

@@ -2,7 +2,9 @@ function create_scene ()
 	scene_table = {}
 
 	actor_interfaces = {}
-	all_bottles = {}
+	user_input = {
+		aim_movement = { 0, 0 }
+	}
 
 	function scene_table.initialize(self)
 		self:add_actor_and_init("cockpit.lua", "cockpit")

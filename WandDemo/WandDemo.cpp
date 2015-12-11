@@ -144,6 +144,23 @@ void UpdateLoop() {
 			player_location[1] += time_delta_ms * movement_scale;
 		}
 
+		array<float, 2> aim_movement = { 0, 0 };
+		if (graphics_objects.input_handler->GetKeyPressed('J')) {
+			aim_movement[1] += 1;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('L')) {
+			aim_movement[1] -= 1;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('I')) {
+			aim_movement[0] += 1;
+		}
+		if (graphics_objects.input_handler->GetKeyPressed('K')) {
+			aim_movement[0] -= 1;
+		}
+		actor_handler.root_environment_.StoreToStack(tuple<>());
+		actor_handler.root_environment_.StoreToTable(string("aim_movement"), aim_movement);
+		actor_handler.root_environment_.SetGlobalFromStack(string("user_input"));
+
 		if (wiimote != NULL) {
 			if (graphics_objects.input_handler->GetKeyToggled('F')) {
 				wiimote->RequestCalibrateMotionPlus();
