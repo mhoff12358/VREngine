@@ -37,11 +37,15 @@ InteractableCircle::~InteractableCircle()
 
 float XM_CALLCONV InteractableCircle::IsLookedAt(const DirectX::FXMMATRIX& view_transformation) const {
 	DirectX::XMMATRIX model_transformation = GetModelTransformation();
+	DirectX::XMVECTOR center_trans_vec;
 	DirectX::XMFLOAT4 center_trans;
 	DirectX::XMFLOAT4 normal_trans;
-	DirectX::XMStoreFloat4(&center_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation), view_transformation));
+	DirectX::XMVECTOR right_trans_vec;
+	center_trans_vec = DirectX::XMVector4Transform(DirectX::XMVector4Transform(center_, model_transformation), view_transformation);
+	right_trans_vec = DirectX::XMVector4Transform(DirectX::XMVector4Transform(right_point_, model_transformation), view_transformation);
+	DirectX::XMStoreFloat4(&center_trans, center_trans_vec);
 	DirectX::XMStoreFloat4(&normal_trans, DirectX::XMVector4Transform(DirectX::XMVector4Transform(normal_point_, model_transformation), view_transformation));
-	
+
 	normal_trans.x -= center_trans.x;
 	normal_trans.y -= center_trans.y;
 	normal_trans.z -= center_trans.z;
@@ -51,7 +55,7 @@ float XM_CALLCONV InteractableCircle::IsLookedAt(const DirectX::FXMMATRIX& view_
 	//std::cout << center_trans.x << ", " << center_trans.y << ", " << center_trans.z << std::endl;
 	//std::cout << normal_trans.x << ", " << normal_trans.y << ", " << normal_trans.z << std::endl;
 	float distance_from_center_squared = center_trans.x * center_trans.x + center_trans.y * center_trans.y + (center_trans.z - distance_from_viewer) * (center_trans.z - distance_from_viewer);
-	if (distance_from_center_squared > radius_ * radius_) {
+	if (distance_from_center_squared > DirectX::XMVectorGetX(DirectX::XMVector3LengthSq(DirectX::XMVectorSubtract(center_trans_vec, right_trans_vec)))) {
 		return std::nanf("");
 	}
 

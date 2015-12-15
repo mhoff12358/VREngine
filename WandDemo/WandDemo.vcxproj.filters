@@ -189,6 +189,12 @@
     <Object Include="laser.obj">
       <Filter>Resource Files</Filter>
     </Object>
+    <Object Include="projectile.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
+    <Object Include="reticle.obj">
+      <Filter>Resource Files</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="console.png">
@@ -204,6 +210,9 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="cannon.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="reticle.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
@@ -248,6 +257,18 @@
       <Filter>Actor Scripts</Filter>
     </None>
     <None Include="laser.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="projectile.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="reticle.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="weapons.lua">
+      <Filter>Actor Scripts</Filter>
+    </None>
+    <None Include="target.lua">
       <Filter>Actor Scripts</Filter>
     </None>
   </ItemGroup>

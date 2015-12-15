@@ -48,8 +48,9 @@ Actor* ActorHandler::CreateActorFromLuaScript(const string& script_name, Identif
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::AddListener >, 1 }));
 	new_actor->lua_interface_.AddCObjectMember("remove_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::RemoveListener >, 1 }));
-	//new_actor->lua_interface_.CallLuaFunc("initialize");
-
+	new_actor->lua_interface_.AddCObjectMember("raycast", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::Raycast >, 1 }));
+	
 	return new_actor;
 }
 
@@ -92,4 +93,14 @@ int ActorHandler::AddActor(lua_State* L) {
 	env.StoreToStack(Lua::EnvironmentTop{ &new_actor->lua_interface_.env_, 1 });
 
 	return 1;
+}
+
+int ActorHandler::Raycast(lua_State* L) {
+	Lua::Environment env(L);
+
+	tuple<Identifier, Actor*, float> intersected_object = interactable_collection_.GetClosestLookedAt(LuaTableToMatrix(env));
+	env.StoreToStack(std::get<0>(intersected_object).GetId());
+	env.StoreToStack(std::get<2>(intersected_object));
+
+	return 2;
 }

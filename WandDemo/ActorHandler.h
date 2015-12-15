@@ -30,6 +30,8 @@ public:
 	int AddListener(lua_State* L);
 	// Arguments are <Actor* actor>
 	int RemoveListener(lua_State* L);
+	// Arguments are <table representing a matrix to be constructed>
+	int Raycast(lua_State* L);
 	
 	// Arguments are <Actor* actor>
 	int AddActor(lua_State* L);

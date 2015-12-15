@@ -245,6 +245,12 @@
     <Object Include="laser.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
+    <Object Include="projectile.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
+    <Object Include="reticle.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
     <Object Include="tower_inside.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
@@ -253,6 +259,7 @@
     <Image Include="cannon.png" />
     <Image Include="console.png" />
     <Image Include="metal_bars.png" />
+    <Image Include="reticle.png" />
     <Image Include="terrain.png" />
     <Image Include="walls.png" />
   </ItemGroup>
@@ -266,11 +273,15 @@
     <None Include="laser.lua" />
     <None Include="LiquidContainer.lua" />
     <None Include="lua_test.lua" />
+    <None Include="projectile.lua" />
+    <None Include="reticle.lua" />
     <None Include="sun.lua" />
+    <None Include="target.lua" />
     <None Include="terrain.lua" />
     <None Include="tower_scene.lua" />
     <None Include="wall.lua" />
     <None Include="water_flow.lua" />
+    <None Include="weapons.lua" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

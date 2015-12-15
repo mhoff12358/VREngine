@@ -8,9 +8,29 @@ function create_scene ()
 
 	function scene_table.initialize(self)
 		self:add_actor_and_init("cockpit.lua", "cockpit")
-		self:add_actor_and_init("laser.lua", "right_laser"):initialize_sided(true)
-		self:add_actor_and_init("laser.lua", "left_laser"):initialize_sided(false)
+		--self:add_actor_and_init("laser.lua", "left_laser"):initialize_sided(false)
 		self:add_actor_and_init("terrain.lua", "terrain")
+		weapons = self:add_actor_and_init("weapons.lua", "weapons")
+
+		weapons:add_reticle(self:add_actor_and_init("reticle.lua", "reticle"))
+		right_laser = self:add_actor_and_init("laser.lua", "right_laser")
+		right_laser:initialize_sided(true)
+		weapons:add_weapon(right_laser)
+		
+		target1 = self:add_actor_and_init("target.lua", "target1")
+		target1.position = { 0, 0, -50 }
+		target1.radius = 5
+		target1:calc_model_matrix()
+		
+		target2 = self:add_actor_and_init("target.lua", "target1")
+		target2.position = { 10, 30, -80 }
+		target2.radius = 10
+		target2:calc_model_matrix()
+		
+		target3 = self:add_actor_and_init("target.lua", "target1")
+		target3.position = { 0, 20, -40 }
+		target3.radius = 5
+		target3:calc_model_matrix()
 	end
 
 	function scene_table.add_actor_and_init(self, script_name, actor_name)
