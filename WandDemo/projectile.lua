@@ -31,39 +31,20 @@ function create_actor(ident)
 
 	actor_table.interactable_objects = {}
 	
-	actor_table.interaction_callbacks = CppInterface:NEW({
+	actor_table.interaction_callbacks = OwnsPositionables:NEW({
 		initialize = function (self)
-			self.position = { 0, 0, 0 }
-			self.scale = { 1, 1, 1 }
-			self.orientation = quaternion.identity()
+			self:add_positionable("Projectile")
 			self.speed = 0
-			self:calc_model_matrix()
 
 			self.callbacks.add_listener("update_tick", self.cpp_interface)
 			self.callbacks.set_constant_buffer(0, { { 0, 0, 1, 1 } })
 		end,
-		place = function (self, position, orientation, scale, speed)
-			self.position = position
-			self.orientation = orientation
+		place = function (self, location, orientation, scale, speed)
 			self.speed = speed
-			self.scale = { scale, scale, scale }
-			self:calc_model_matrix()
-		end,
-		calc_model_matrix = function (self)
-			self.callbacks.set_component_transformation("Projectile", {
-				{
-					["matrix_type"] = "scale",
-					["scale"] = self.scale,
-				}, {
-					["matrix_type"] = "quaternion_rotation",
-					["quaternion"] = self.orientation,
-				}, {
-					["matrix_type"] = "translation",
-					["x"] = self.position[1],
-					["y"] = self.position[2],
-					["z"] = self.position[3],
-				}
-				})
+			self:get_positionable("Projectile"):position(
+				location,
+				orientation,
+				scale)
 		end,
 		update_tick = function (self, tick_duration_ms)
 		end,

@@ -18,15 +18,16 @@ class ActorHandler;
 class Actor
 {
 public:
-	Actor(const Identifier& ident, ResourcePool& resource_pool, EntityHandler& entity_handler);
+	Actor(const Identifier& ident, ActorHandler& actor_handler, ResourcePool& resource_pool, EntityHandler& entity_handler);
 	~Actor();
 
-	void InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, const string& script_name, const Identifier& ident);
+	void InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, const string& script_name, const Identifier& ident);
 
 	void LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format);
 	map<string, vector<Model>> CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentage);
 
 	void XM_CALLCONV SetComponentTransformation(const string& component_name, DirectX::FXMMATRIX new_transformation);
+	const DirectX::XMMATRIX& GetComponentTransformation(const string& component_name);
 
 	unsigned int GetShaderSettingsId();
 
@@ -35,16 +36,17 @@ public:
 	vector<unsigned int> shader_settings_entity_ids_;
 
 private:
-	void LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	void LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects);
 	void LoadModel(Lua::Environment lua_environment);
-	void LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
-	map<string, vector<Model>> LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
-	void LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, map<string, vector<Model>> component_models);
-	void LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
-	void HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	void LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects);
+	map<string, vector<Model>> LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects);
+	void LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, map<string, vector<Model>> component_models);
+	void LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects);
+	void HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects);
 
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
+	ActorHandler& actor_handler_;
 	Identifier ident_;
 	map<string, Model> models_;
 	string model_resource_id_;
@@ -68,5 +70,7 @@ public:
 	int SetEnabled(lua_State* L);
 	// Arguments are
 	int SetVertices(lua_State* L);
+	// Arguments are <string component_name>
+	int Raycast(lua_State* L);
 };
 

@@ -5,8 +5,8 @@
 #include "ConstantBufferLua.h"
 #include "ActorHandler.h"
 
-Actor::Actor(const Identifier& ident, ResourcePool& resource_pool, EntityHandler& entity_handler)
-	: resource_pool_(resource_pool), entity_handler_(entity_handler), models_(), components_(), ident_(ident)
+Actor::Actor(const Identifier& ident, ActorHandler& actor_handler, ResourcePool& resource_pool, EntityHandler& entity_handler)
+	: actor_handler_(actor_handler), resource_pool_(resource_pool), entity_handler_(entity_handler), models_(), components_(), ident_(ident)
 {
 }
 
@@ -16,7 +16,7 @@ Actor::~Actor()
 }
 
 
-void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, const string& script_name, const Identifier& ident) {
+void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphics_objects, const string& script_name, const Identifier& ident) {
 	Lua::Environment lua_environment;
 	if (L == NULL) {
 		lua_environment = Lua::Environment(true);
@@ -35,15 +35,15 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 
 	std::cout << "Successfully ran script: " << script_name << std::endl;
 
-	LoadModels(lua_environment, graphics_objects, actor_handler);
-	LoadShaders(lua_environment, graphics_objects, actor_handler);
-	map<string, vector<Model>> component_models = LoadComponentHeirarchy(lua_environment, graphics_objects, actor_handler);
-	LoadShaderSettings(lua_environment, graphics_objects, actor_handler, component_models);
-	LoadInteractableObjects(lua_environment, graphics_objects, actor_handler);
-	HookInCallbacks(lua_environment, graphics_objects, actor_handler);
+	LoadModels(lua_environment, graphics_objects);
+	LoadShaders(lua_environment, graphics_objects);
+	map<string, vector<Model>> component_models = LoadComponentHeirarchy(lua_environment, graphics_objects);
+	LoadShaderSettings(lua_environment, graphics_objects, component_models);
+	LoadInteractableObjects(lua_environment, graphics_objects);
+	HookInCallbacks(lua_environment, graphics_objects);
 }
 
-void Actor::LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+void Actor::LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects) {
 	if (lua_environment.GetFromTableToStackFailOnNil(string("model_definition"))) {
 		if (lua_environment.GetFromTableToStackFailOnNil(string("multi_model"))) {
 			int model_index;
@@ -128,7 +128,7 @@ void Actor::LoadModel(Lua::Environment lua_environment) {
 	}
 }
 	
-void Actor::LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+void Actor::LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects) {
 	int model_num = 0;
 	lua_environment.GetFromTableToStack(string("preload_shader_file_names"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -143,7 +143,7 @@ void Actor::LoadShaders(Lua::Environment lua_environment, const VRBackendBasics&
 	lua_environment.RemoveFromStack();
 }
 
-map<string, vector<Model>> Actor::LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+map<string, vector<Model>> Actor::LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects) {
 	// Expects a model_parentage value that determines the parentage for the visual components.
 	// The format for this is a table mapping string keys to lists of lists of strings.
 	// Each element in the value lists represents a vector of strings that should be added
@@ -171,7 +171,7 @@ map<string, vector<Model>> Actor::LoadComponentHeirarchy(Lua::Environment lua_en
 	return component_models;
 }
 
-void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, map<string, vector<Model>> component_models) {
+void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, map<string, vector<Model>> component_models) {
 	int model_num = 0;
 	lua_environment.GetFromTableToStack(string("settings_blocks"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -253,12 +253,12 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 	lua_environment.RemoveFromStack();
 }
 
-void Actor::LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+void Actor::LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects) {
 	lua_environment.GetFromTableToStack(string("interactable_objects"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTableLeaveKey();
 		while (lua_environment.IterateOverTableLeaveKey(NULL)) {
-			LookInteractable* new_interactable = actor_handler->interactable_collection_.CreateLookInteractableFromLua(this, lua_environment);
+			LookInteractable* new_interactable = actor_handler_.interactable_collection_.CreateLookInteractableFromLua(this, lua_environment);
 			string parent_component_name;
 			if (new_interactable != NULL && lua_environment.LoadFromTable(string("parent_component"), &parent_component_name)) {
 				new_interactable->SetModelTransformation(&components_[component_lookup_[parent_component_name]].GetTransformationData()->transformation);
@@ -268,7 +268,7 @@ void Actor::LoadInteractableObjects(Lua::Environment lua_environment, const VRBa
 	lua_environment.RemoveFromStack();
 }
 
-void Actor::HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+void Actor::HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects) {
 	lua_environment.GetFromTableToStack(string("interaction_callbacks"));
 
 	lua_environment.RemoveFromStack(Lua::Index(1));
@@ -289,6 +289,8 @@ void Actor::HookInCallbacks(Lua::Environment lua_environment, const VRBackendBas
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetEnabled>, 1 }));
 	lua_interface_.AddCObjectMember("set_vertices", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetVertices>, 1 }));
+	lua_interface_.AddCObjectMember("raycast", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::Raycast>, 1 }));
 }
 
 void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {
@@ -344,6 +346,10 @@ map<string, vector<Model>> Actor::CreateComponents(ID3D11Device* device_interfac
 
 void XM_CALLCONV Actor::SetComponentTransformation(const string& component_name, DirectX::FXMMATRIX new_transformation) {
 	components_[component_lookup_[component_name]].SetLocalTransformation(new_transformation);
+}
+
+const DirectX::XMMATRIX& Actor::GetComponentTransformation(const string& component_name) {
+	return components_[component_lookup_[component_name]].GetCombinedTransformation();
 }
 
 int Actor::ClearComponentTransformation(lua_State* L) {
@@ -441,4 +447,25 @@ int Actor::SetVertices(lua_State* L) {
 	}
 	entity_handler_.AddModelMutation(model_resource_id_, new_mutation);
 	return 0;
+}
+
+int Actor::Raycast(lua_State* L) {
+	Lua::Environment env(L);
+	string component_name;
+	env.LoadFromStack(&component_name, Lua::Index(1));
+
+	const DirectX::XMMATRIX& component_trans = GetComponentTransformation(component_name);
+	DirectX::XMMATRIX ray_trans;
+	DirectX::XMVECTOR scale;
+	DirectX::XMVECTOR rotation;
+	DirectX::XMVECTOR translation;
+	DirectX::XMMatrixDecompose(&scale, &rotation, &translation, component_trans);
+	rotation = DirectX::XMQuaternionInverse(rotation);
+	translation = DirectX::XMVectorNegate(translation);
+	ray_trans = DirectX::XMMatrixMultiply(DirectX::XMMatrixRotationQuaternion(rotation), DirectX::XMMatrixTranslationFromVector(translation));
+	tuple<Identifier, Actor*, float> result = actor_handler_.interactable_collection_.GetClosestLookedAt(ray_trans);
+	env.StoreToStack(std::get<0>(result).GetId());
+	env.StoreToStack(std::get<2>(result));
+
+	return 2;
 }

@@ -27,6 +27,8 @@ public:
 	void XM_CALLCONV RightComposeLocalTransformation(DirectX::FXMMATRIX new_transformation, bool apply_update = true);
 	void UpdateTransformation();
 	const TransformationMatrixAndInvTransData* GetTransformationData();
+	const DirectX::XMMATRIX& GetLocalTransformation();
+	const DirectX::XMMATRIX& GetCombinedTransformation();
 
 	unsigned int first_entity_;
 	unsigned int number_of_entities_;

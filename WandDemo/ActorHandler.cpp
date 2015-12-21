@@ -39,17 +39,17 @@ void ActorHandler::LoadSceneFromLuaScript(const string& script_name) {
 }
 
 Actor* ActorHandler::CreateActorFromLuaScript(const string& script_name, Identifier ident, ConstantBuffer* shader_settings) {
-	Actor* new_actor = new Actor(ident, *graphics_objects_.resource_pool, *graphics_objects_.entity_handler);
+	Actor* new_actor = new Actor(ident, *this, *graphics_objects_.resource_pool, *graphics_objects_.entity_handler);
 	lua_State* new_lua_thread = lua_newthread(root_environment_.L);
-	new_actor->InitializeFromLuaScript(new_lua_thread, graphics_objects_, this, script_name, ident);
+	new_actor->InitializeFromLuaScript(new_lua_thread, graphics_objects_, script_name, ident);
 	actor_lookup_[ident.GetId()] = new_actor;
 
 	new_actor->lua_interface_.AddCObjectMember("add_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::AddListener >, 1 }));
 	new_actor->lua_interface_.AddCObjectMember("remove_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::RemoveListener >, 1 }));
-	new_actor->lua_interface_.AddCObjectMember("raycast", this,
-		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::Raycast >, 1 }));
+	//new_actor->lua_interface_.AddCObjectMember("raycast", this,
+	//	Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::Raycast >, 1 }));
 	
 	return new_actor;
 }
@@ -94,7 +94,7 @@ int ActorHandler::AddActor(lua_State* L) {
 
 	return 1;
 }
-
+/*
 int ActorHandler::Raycast(lua_State* L) {
 	Lua::Environment env(L);
 
@@ -103,4 +103,4 @@ int ActorHandler::Raycast(lua_State* L) {
 	env.StoreToStack(std::get<2>(intersected_object));
 
 	return 2;
-}
+}*/

@@ -99,3 +99,11 @@ void Component::UpdateTransformation() {
 const TransformationMatrixAndInvTransData* Component::GetTransformationData() {
 	return transformation_buffer_.ReadBufferDataTyped();
 }
+
+const DirectX::XMMATRIX& Component::GetLocalTransformation() {
+	return local_transformation_;
+}
+
+const DirectX::XMMATRIX& Component::GetCombinedTransformation() {
+	return combined_transformation_;
+}

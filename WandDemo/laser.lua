@@ -77,40 +77,18 @@ function create_actor(ident)
 				})
 		end,
 		fire = function (self)
-		--[[
-			name, dist = self.callbacks.raycast({{
-					["matrix_type"] = "translation",
-					["x"] = -self.position[1],
-					["y"] = -self.position[2],
-					["z"] = -self.position[3],
-				}, {
-					["matrix_type"] = "axis_rotation",
-					["x"] = 0,
-					["y"] = 1,
-					["z"] = 0,
-					["rotation"] = -self.yaw,
-				},{
-					["matrix_type"] = "axis_rotation",
-					["x"] = 1,
-					["y"] = 0,
-					["z"] = 0,
-					["rotation"] = -self.pitch,
-				}, 
-				})
-				offset = {
-					-math.cos(self.pitch) * math.sin(self.yaw) * dist,
-					math.sin(self.pitch) * dist,
-					-math.cos(self.pitch) * math.cos(self.yaw) * dist
-				}
-				self.projectile:place(
-					{
-						self.position[1] + offset[1],
-						self.position[2] + offset[2],
-						self.position[3] + offset[3],
-					},
-					quaternion.identity(),
-					dist / 50, 
-					{0, 0, 0}) ]]--
+			name, dist = self.callbacks.raycast("Cannon")
+			location = self:get_positionable("Cannon").location
+			offset = quaternion.apply(self:get_positionable("Cannon").orientation, {0, 0, -dist})
+			self.projectile:place(
+				{
+					location[1] + offset[1],
+					location[2] + offset[2],
+					location[3] + offset[3],
+				},
+				quaternion.identity(),
+				{ dist / 50, dist / 50, dist / 50 }, 
+				{0, 0, 0})
 		end,
 		space_down = function (self)
 			if self.is_right then
