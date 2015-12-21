@@ -271,5 +271,17 @@
     <None Include="target.lua">
       <Filter>Actor Scripts</Filter>
     </None>
+    <None Include="class.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
+    <None Include="cpp_interface.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
+    <None Include="owns_positionables.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
+    <None Include="positionable.lua">
+      <Filter>Lua Libraries</Filter>
+    </None>
   </ItemGroup>
 </Project>

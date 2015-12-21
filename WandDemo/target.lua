@@ -39,29 +39,30 @@ function create_actor(ident)
 		}
 	}
 	
-	actor_table.interaction_callbacks = {}
-	function actor_table.interaction_callbacks.initialize (self)
-		self.position = { 0, 0, 0 }
-		self.orientation = quaternion.identity()
-		self.radius = 1
+	actor_table.interaction_callbacks = CppInterface:NEW({
+		initialize = function (self)
+			self.position = { 0, 0, 0 }
+			self.orientation = quaternion.identity()
+			self.radius = 1
 
-		self:calc_model_matrix()
-	end
-	function actor_table.interaction_callbacks.calc_model_matrix (self)
-		self.set_component_transformation("Plane", {
-        {
-			["matrix_type"] = "scale",
-			["scale"] = { self.radius, self.radius, 1 },
-		},{
-			["matrix_type"] = "quaternion_rotation",
-			["quaternion"] = self.orientation,
-		},{
-			["matrix_type"] = "translation",
-			["x"] = self.position[1],
-			["y"] = self.position[2],
-			["z"] = self.position[3],
-		}})
-	end
+			self:calc_model_matrix()
+		end,
+		calc_model_matrix = function (self)
+			self.callbacks.set_component_transformation("Plane", {
+			{
+				["matrix_type"] = "scale",
+				["scale"] = { self.radius, self.radius, 1 },
+			},{
+				["matrix_type"] = "quaternion_rotation",
+				["quaternion"] = self.orientation,
+			},{
+				["matrix_type"] = "translation",
+				["x"] = self.position[1],
+				["y"] = self.position[2],
+				["z"] = self.position[3],
+			}})
+		end,
+	})
 
 	return actor_table
 end

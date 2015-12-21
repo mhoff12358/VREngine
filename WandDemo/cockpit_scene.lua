@@ -1,5 +1,7 @@
+require "cpp_interface"
+
 function create_scene ()
-	scene_table = {}
+	scene_table = CppInterface:NEW({})
 
 	actor_interfaces = {}
 	user_input = {
@@ -8,14 +10,13 @@ function create_scene ()
 
 	function scene_table.initialize(self)
 		self:add_actor_and_init("cockpit.lua", "cockpit")
-		--self:add_actor_and_init("laser.lua", "left_laser"):initialize_sided(false)
 		self:add_actor_and_init("terrain.lua", "terrain")
-		weapons = self:add_actor_and_init("weapons.lua", "weapons")
-
-		weapons:add_reticle(self:add_actor_and_init("reticle.lua", "reticle"))
+		self.weapons = self:add_actor_and_init("weapons.lua", "weapons")
+		
+		self.weapons:add_reticle(self:add_actor_and_init("reticle.lua", "reticle"))
 		right_laser = self:add_actor_and_init("laser.lua", "right_laser")
 		right_laser:initialize_sided(true)
-		weapons:add_weapon(right_laser)
+		--weapons:add_weapon(right_laser)
 		
 		target1 = self:add_actor_and_init("target.lua", "target1")
 		target1.position = { 0, 0, -50 }
@@ -34,7 +35,7 @@ function create_scene ()
 	end
 
 	function scene_table.add_actor_and_init(self, script_name, actor_name)
-		interface = self.add_actor(script_name, actor_name)
+		interface = self.callbacks.add_actor(script_name, actor_name)
 		interface:initialize()
 		table.insert(actor_interfaces, interface)
 		return interface

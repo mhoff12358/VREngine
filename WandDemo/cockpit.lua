@@ -1,3 +1,5 @@
+require "owns_positionables"
+
 function create_actor()
 	actor_table = {}
 
@@ -72,30 +74,24 @@ function create_actor()
 	
 	actor_table.interactable_objects = {}
 	
-	actor_table.interaction_callbacks = {}
-	function actor_table.interaction_callbacks.initialize (self)
-		self:set_light_location({ 0, 0.5, 0 })
-		self.set_constant_buffer(2, { { 1, 1, 1, 1 } })
+	actor_table.interaction_callbacks = OwnsPositionables:NEW({
+		initialize = function (self)
+			self.callbacks.set_constant_buffer(2, { { 1, 1, 1, 1 } })
+			
+			self:add_positionable("Cannon")
+			self:add_positionable("LightBulb")
 
-		self.set_component_transformation("Cannon", {
-			{
-				["matrix_type"] = "identity",
-			}
-		})
-	end
-	function actor_table.interaction_callbacks.set_light_location(self, new_light_location)
-		self.light_location = new_light_location
-		self.set_constant_buffer(0, { self.light_location, { 0 } })
-		self.set_constant_buffer(1, { self.light_location, { 0 } })
-		self.set_component_transformation("LightBulb", {
-		{
-			["matrix_type"] = "translation",
-			["x"] = self.light_location[1],
-			["y"] = self.light_location[2],
-			["z"] = self.light_location[3],
-		}
-		})
-	end
+			self:get_positionable("Cannon"):position({ -5, 0, 0 })
+
+			self:set_light_location({ 0, 0.5, 0 })
+		end,
+		set_light_location = function (self, new_light_location)
+			self.light_location = new_light_location
+			self.callbacks.set_constant_buffer(0, { self.light_location, { 0 } })
+			self.callbacks.set_constant_buffer(1, { self.light_location, { 0 } })
+			self:get_positionable("LightBulb"):position(self.light_location)
+		end
+	})
 
 	return actor_table
 end

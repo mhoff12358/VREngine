@@ -35,11 +35,13 @@ namespace Lua {
 	}
 
 	bool InteractableObject::AddCObjectMember(const string& func_name, void* object, CFunctionClosureId closure) {
-		if (env_.StoreToStack(object, closure)) {
-			if (env_.StoreToTable(func_name, table_location_ + 1, table_location_)) {
+		if (env_.GetFromTableToStack(string("callbacks"), table_location_) && env_.StoreToStack(object, closure)) {
+			if (env_.StoreToTable(func_name, Lua::Index(env_.CheckSizeOfStack()), Lua::Index(env_.CheckSizeOfStack() - 1))) {
+				env_.RemoveFromStack();
 				env_.RemoveFromStack();
 				return true;
 			}
+			env_.RemoveFromStack();
 			env_.RemoveFromStack();
 			env_.RemoveFromStack();
 			return false;
