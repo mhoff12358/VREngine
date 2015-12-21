@@ -35,12 +35,20 @@ public:
 	vector<unsigned int> shader_settings_entity_ids_;
 
 private:
+	void LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	void LoadModel(Lua::Environment lua_environment);
+	void LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	map<string, vector<Model>> LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	void LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, map<string, vector<Model>> component_models);
+	void LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+	void HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler);
+
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
 	Identifier ident_;
 	map<string, Model> models_;
 	string model_resource_id_;
-	ObjLoader::OutputFormat output_format_;
+	std::vector<ObjLoader::OutputFormat> output_formats_;
 	
 public:
 	// All the lua interaction callbacks, as well as the interface

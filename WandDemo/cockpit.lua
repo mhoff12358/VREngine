@@ -2,16 +2,29 @@ function create_actor()
 	actor_table = {}
 
 	actor_table.model_definition = {
-		["model_file_name"] = "cockpit_bars.obj",
-		["load_model_as_dynamic"] = false,
-		["output_format"] = {
-			["model_modifier"] = {
-				["axis_swap"] = { 0, 1, 2 },
-				["axis_scale"] = { 1, 1, 1 },
-				["invert_texture_axis"] = { false, true }
+		["multi_model"] = {
+			{
+				["model_file_name"] = "cockpit_bars.obj",
+				["load_model_as_dynamic"] = false,
+				["output_format"] = {
+					["model_modifier"] = {
+						["axis_swap"] = { 0, 1, 2 },
+						["axis_scale"] = { 1, 1, 1 },
+						["invert_texture_axis"] = { false, true }
+					},
+					["load_as_dynamic"] = false
+				},
+			}, {
+				["model_file_name"] = "laser.obj",
+				["output_format"] = {
+					["model_modifier"] = {
+						["axis_swap"] = { 0, 1, 2 },
+						["axis_scale"] = { 1, 1, 1 },
+						["invert_texture_axis"] = { false, true }
+					},
+				},
 			},
-			["load_as_dynamic"] = false
-		}
+		},
 	}
 
 	actor_table.model_parentage = {
@@ -19,6 +32,7 @@ function create_actor()
 			{ "MetalBars" },
 			{ "LightBulb" },
 			{ "Seat" },
+			{ "Cannon" },
 		}
 	}
 
@@ -48,6 +62,11 @@ function create_actor()
 				["pipeline_stage"] = "pixel",
 				["data_format"] = { { "float", 4 } }
 			},
+		},
+		{
+			["shader_file_name"] = "textured.hlsl",
+			["components"] = { "Cannon" },
+			["texture_file_name"] = "cannon.png"
 		}
 	}
 	
@@ -57,6 +76,12 @@ function create_actor()
 	function actor_table.interaction_callbacks.initialize (self)
 		self:set_light_location({ 0, 0.5, 0 })
 		self.set_constant_buffer(2, { { 1, 1, 1, 1 } })
+
+		self.set_component_transformation("Cannon", {
+			{
+				["matrix_type"] = "identity",
+			}
+		})
 	end
 	function actor_table.interaction_callbacks.set_light_location(self, new_light_location)
 		self.light_location = new_light_location

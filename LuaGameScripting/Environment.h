@@ -35,6 +35,8 @@ namespace Lua {
 
 		template <typename K>
 		bool GetFromTableToStack(const K& key, Index table_location = stack_top);
+		template <typename K>
+		bool GetFromTableToStackFailOnNil(const K& key, Index table_location = stack_top);
 
 		template <typename T>
 		bool LoadFromStack(T* loaded_value, Index stack_position = stack_top);

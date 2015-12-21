@@ -35,6 +35,9 @@ DirectX::XMMATRIX LuaTableToMatrix(Lua::Environment environment_with_table) {
 					return DirectX::XMMatrixScaling(scales[0], scales[1], scales[2]);
 				}
 			}
+			else if (matrix_type == "identity") {
+				return DirectX::XMMatrixIdentity();
+			}
 		}
 		return DirectX::XMMatrixIdentity();
 	} else {

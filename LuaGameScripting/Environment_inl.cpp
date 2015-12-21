@@ -10,6 +10,19 @@ namespace Lua {
 		return success;
 	}
 
+	template <typename K>
+	bool Environment::GetFromTableToStackFailOnNil(const K& key, Index table_location) {
+		bool success = StoreToStack(key);
+		if (!success) return false;
+		lua_gettable(L, table_location.Offset(1).index_);
+		if (!success) return false;
+		if (CheckTypeOfStack() == LUA_TNIL) {
+			RemoveFromStack();
+			return false;
+		}
+		return success;
+	}
+
 	template <typename T, typename... Args>
 	bool Environment::StoreToStack(const T& stored_value, Args... args) {
 		return StoreToStack(stored_value) && StoreToStack(args...);

@@ -20,7 +20,8 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 	Lua::Environment lua_environment;
 	if (L == NULL) {
 		lua_environment = Lua::Environment(true);
-	} else {
+	}
+	else {
 		lua_environment = Lua::Environment(L);
 	}
 	lua_environment.RunFile(script_name);
@@ -32,46 +33,74 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		return;
 	}
 
-	output_format_ = ObjLoader::default_output_format;
-	lua_environment.GetFromTableToStack(string("model_definition"));
+	std::cout << "Successfully ran script: " << script_name << std::endl;
+
+	LoadModels(lua_environment, graphics_objects, actor_handler);
+	LoadShaders(lua_environment, graphics_objects, actor_handler);
+	map<string, vector<Model>> component_models = LoadComponentHeirarchy(lua_environment, graphics_objects, actor_handler);
+	LoadShaderSettings(lua_environment, graphics_objects, actor_handler, component_models);
+	LoadInteractableObjects(lua_environment, graphics_objects, actor_handler);
+	HookInCallbacks(lua_environment, graphics_objects, actor_handler);
+}
+
+void Actor::LoadModels(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+	if (lua_environment.GetFromTableToStackFailOnNil(string("model_definition"))) {
+		if (lua_environment.GetFromTableToStackFailOnNil(string("multi_model"))) {
+			int model_index;
+			lua_environment.BeginToIterateOverTableLeaveValue();
+			while (lua_environment.IterateOverTableLeaveValue(&model_index, NULL)) {
+				LoadModel(lua_environment);
+			}
+			lua_environment.RemoveFromStack();  // Remove multi_model
+		} else {
+			LoadModel(lua_environment);
+		}
+		lua_environment.RemoveFromStack();  // Remove model_definition
+	}
+}
+
+void Actor::LoadModel(Lua::Environment lua_environment) {
+	output_formats_.push_back(ObjLoader::default_output_format);
+	int model_num = output_formats_.size() - 1;
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.GetFromTableToStack(string("output_format"));
 		if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 			lua_environment.GetFromTableToStack(string("model_modifier"));
 			if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
-				if (lua_environment.LoadArrayFromTable(string("axis_swap"), output_format_.model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
-					lua_environment.LoadArrayFromTable(string("axis_scale"), output_format_.model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
-					lua_environment.LoadArrayFromTable(string("invert_texture_axis"), output_format_.model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
-					output_format_.vertex_type = ObjLoader::vertex_type_all;
+				if (lua_environment.LoadArrayFromTable(string("axis_swap"), output_formats_[model_num].model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
+					lua_environment.LoadArrayFromTable(string("axis_scale"), output_formats_[model_num].model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
+					lua_environment.LoadArrayFromTable(string("invert_texture_axis"), output_formats_[model_num].model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
+					output_formats_[model_num].vertex_type = ObjLoader::vertex_type_all;
 				}
 			}
 			lua_environment.RemoveFromStack();
 			string vertex_type_name;
 			lua_environment.LoadFromTable(string("vertex_type"), &vertex_type_name);
 			if (vertex_type_name == "location") {
-				output_format_.vertex_type = ObjLoader::vertex_type_location;
+				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_location;
 			}
 			else if (vertex_type_name == "texture") {
-				output_format_.vertex_type = ObjLoader::vertex_type_texture;
+				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_texture;
 			}
 			else if (vertex_type_name == "normal") {
-				output_format_.vertex_type = ObjLoader::vertex_type_normal;
+				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_normal;
 			}
 			else if (vertex_type_name == "all") {
-				output_format_.vertex_type = ObjLoader::vertex_type_all;
+				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_all;
 			}
 			bool load_as_dynamic;
 			if (lua_environment.LoadFromTable(string("load_as_dynamic"), &load_as_dynamic)) {
-				output_format_.load_as_dynamic = load_as_dynamic;
+				output_formats_[model_num].load_as_dynamic = load_as_dynamic;
 			}
 		}
 		lua_environment.RemoveFromStack();
-		
+
 		string model_file_name;
 		if (lua_environment.LoadFromTable(string("model_file_name"), &model_file_name)) {
-			LoadModelsFromFile(model_file_name, output_format_);
+			LoadModelsFromFile(model_file_name, output_formats_[model_num]);
 			model_resource_id_ = model_file_name;
-		} else {
+		}
+		else {
 			lua_environment.GetFromTableToStack(string("model_vertices"));
 			if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 				string object_name;
@@ -80,10 +109,10 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 				while (lua_environment.IterateOverTable(&object_name, &vertices_in, NULL)) {
 					vector<Vertex> vertices_for_model;
 					for (const vector<float>& vertex_in : vertices_in) {
-						vertices_for_model.push_back(Vertex(output_format_.vertex_type, vertex_in));
+						vertices_for_model.push_back(Vertex(output_formats_[model_num].vertex_type, vertex_in));
 					}
 					ModelStorageDescription model_description;
-					if (output_format_.load_as_dynamic) {
+					if (output_formats_[model_num].load_as_dynamic) {
 						model_description = { false, true, false };
 					}
 					else {
@@ -97,8 +126,10 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 			lua_environment.RemoveFromStack();
 		}
 	}
-	lua_environment.RemoveFromStack();
+}
 	
+void Actor::LoadShaders(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
+	int model_num = 0;
 	lua_environment.GetFromTableToStack(string("preload_shader_file_names"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTable();
@@ -106,11 +137,13 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		string preload_shader_name;
 		while (lua_environment.IterateOverTable(&key, &preload_shader_name, NULL)) {
 			graphics_objects.resource_pool->LoadPixelShader(preload_shader_name);
-			graphics_objects.resource_pool->LoadVertexShader(preload_shader_name, output_format_.vertex_type.GetVertexType(), output_format_.vertex_type.GetSizeVertexType());
+			graphics_objects.resource_pool->LoadVertexShader(preload_shader_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType());
 		}
 	}
 	lua_environment.RemoveFromStack();
+}
 
+map<string, vector<Model>> Actor::LoadComponentHeirarchy(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
 	// Expects a model_parentage value that determines the parentage for the visual components.
 	// The format for this is a table mapping string keys to lists of lists of strings.
 	// Each element in the value lists represents a vector of strings that should be added
@@ -135,7 +168,11 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		component_models = CreateComponents(graphics_objects.view_state->device_interface, model_parentage);
 	}
 	lua_environment.RemoveFromStack();
-	
+	return component_models;
+}
+
+void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler, map<string, vector<Model>> component_models) {
+	int model_num = 0;
 	lua_environment.GetFromTableToStack(string("settings_blocks"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTableLeaveValue();
@@ -172,28 +209,30 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 							ES_SETTINGS,
 							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format_.vertex_type.GetVertexType(), output_format_.vertex_type.GetSizeVertexType()),
-							ShaderSettings(used_settings),
-							Model(),
-							NULL,
-							texture_view), entity_group_number));
-					} else {
-						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
-						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], texture);
-						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
-							ES_SETTINGS,
-							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format_.vertex_type.GetVertexType(), output_format_.vertex_type.GetSizeVertexType()),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
 							ShaderSettings(used_settings),
 							Model(),
 							NULL,
 							texture_view), entity_group_number));
 					}
-				} else {
+					else {
+						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
+						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], texture);
+						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+							ES_SETTINGS,
+							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
+							ShaderSettings(used_settings),
+							Model(),
+							NULL,
+							texture_view), entity_group_number));
+					}
+				}
+				else {
 					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 						ES_SETTINGS,
 						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_format_.vertex_type.GetVertexType(), output_format_.vertex_type.GetSizeVertexType()),
+						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
 						ShaderSettings(used_settings),
 						Model(),
 						NULL), entity_group_number));
@@ -212,7 +251,9 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		}
 	}
 	lua_environment.RemoveFromStack();
+}
 
+void Actor::LoadInteractableObjects(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
 	lua_environment.GetFromTableToStack(string("interactable_objects"));
 	if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 		lua_environment.BeginToIterateOverTableLeaveKey();
@@ -225,7 +266,9 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		}
 	}
 	lua_environment.RemoveFromStack();
+}
 
+void Actor::HookInCallbacks(Lua::Environment lua_environment, const VRBackendBasics& graphics_objects, ActorHandler* actor_handler) {
 	lua_environment.GetFromTableToStack(string("interaction_callbacks"));
 
 	lua_environment.RemoveFromStack(Lua::Index(1));
@@ -246,16 +289,12 @@ void Actor::InitializeFromLuaScript(lua_State* L, const VRBackendBasics& graphic
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetEnabled>, 1 }));
 	lua_interface_.AddCObjectMember("set_vertices", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < Actor, &Actor::SetVertices>, 1 }));
-
-	//lua_environment.GetGlobalToStack(string("actor_interfaces"));
-	//lua_environment.StoreToTable(ident_.GetId(), Lua::Index(1));
-	//lua_environment.RemoveFromStack();
-
-	// Ends with the lua_environment containing only the callbacks
 }
 
-void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format_) {
-	models_ = resource_pool_.LoadModelAsParts(file_name, output_format_);
+void Actor::LoadModelsFromFile(string file_name, const ObjLoader::OutputFormat& output_format) {
+	for (const pair<string, Model>& kv : resource_pool_.LoadModelAsParts(file_name, output_format)) {
+		models_[kv.first] = kv.second;
+	}
 }
 
 map<string, vector<Model>> Actor::CreateComponents(ID3D11Device* device_interface, const multimap<string, vector<string>>& parentages) {
@@ -278,6 +317,8 @@ map<string, vector<Model>> Actor::CreateComponents(ID3D11Device* device_interfac
 					auto child_model = models_.find(child_model_name);
 					if (child_model != models_.end()) {
 						current_children.push_back(child_model->second);
+					} else {
+						std::cout << "Child model not found" << std::endl;
 					}
 				}
 				components_.emplace_back(device_interface);
@@ -382,6 +423,8 @@ int Actor::SetEnabled(lua_State* L) {
 
 int Actor::SetVertices(lua_State* L) {
 	Lua::Environment env(L);
+	int model_number;
+	env.LoadFromStack(&model_number, Lua::Index(1));
 	if (env.CheckTypeOfStack() != LUA_TTABLE) {
 		std::cout << "DID NOT FIND TABLE FOR SETTING VERTICES" << std::endl;
 	}
@@ -392,7 +435,7 @@ int Actor::SetVertices(lua_State* L) {
 	while (env.IterateOverTable(&first_vertex_index, &new_vertices, NULL)) {
 		vector<Vertex> vertices;
 		for (const vector<float>& new_vertex : new_vertices) {
-			vertices.push_back(Vertex(output_format_.vertex_type, new_vertex));
+			vertices.push_back(Vertex(output_formats_[model_number].vertex_type, new_vertex));
 		}
 		new_mutation.AddVertexBlock(first_vertex_index, vertices.data(), vertices.size());
 	}

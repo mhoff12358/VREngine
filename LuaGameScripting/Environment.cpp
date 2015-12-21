@@ -267,6 +267,9 @@ namespace Lua {
 				PeekFromStack(&value, Index(index));
 				std::cout << "\tValue " << value;
 			}
+			else if (type == LUA_TTABLE) {
+
+			}
 			std::cout << std::endl;
 		}
 	}
