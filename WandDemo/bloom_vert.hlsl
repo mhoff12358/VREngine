@@ -37,8 +37,9 @@ POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_T
 	result.t1 = float4(0, 0, 0, 0);
 	[unroll(kernel_size)]
 	for (int i = 0; i < kernel_size; i++) {
-		float4 adjacent_sample = model_skin.Sample(skin_sampler, float2(tex_coord.x, tex_coord.y - ((trunc(kernel_size / 2) + i) / height.x)));
+		float4 adjacent_sample = model_skin.Sample(skin_sampler, float2(tex_coord.x, tex_coord.y + ((-trunc(kernel_size / 2) + i) / height.x)));
 		result.t1 = result.t1 + kernel[i].x * adjacent_sample.a * adjacent_sample;
 	}
+	result.t1 = result.t1 + model_skin.Sample(skin_sampler, tex_coord);
 	return result;
 }

@@ -54,7 +54,7 @@ public:
 void GraphicsLoop() {
 	ProcessingEffect::CreateProcessingEffectResources(graphics_objects.resource_pool);
 
-	float c = 8.0f;
+	float c = 12.0f;
 	ConstantBufferTypedTemp<array<float, 27 * 4 + 4>> horizontal_kernel(CB_PS_PIXEL_SHADER);
 	horizontal_kernel.CreateBuffer(graphics_objects.view_state->device_interface);
 	array<float, 27 * 4 + 4>& raw_horizontal_kernel = horizontal_kernel.EditBufferDataRef(true);
@@ -73,8 +73,8 @@ void GraphicsLoop() {
 	horiz_effect->Initialize(
 		graphics_objects.view_state->device_interface,
 		graphics_objects.view_state->device_context,
-		graphics_objects.resource_pool->LoadPixelShader("horizontal_conv.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("horizontal_conv.hlsl", ProcessingEffect::squares_vertex_type),
+		graphics_objects.resource_pool->LoadPixelShader("bloom_horiz.hlsl"),
+		graphics_objects.resource_pool->LoadVertexShader("bloom_horiz.hlsl", ProcessingEffect::squares_vertex_type),
 		ShaderSettings(&horizontal_kernel),
 		graphics_objects.render_pipeline->GetStageBufferSize(),
 		graphics_objects.render_pipeline->GetStagingBufferDesc());
@@ -82,11 +82,20 @@ void GraphicsLoop() {
 	vertical_effect->Initialize(
 		graphics_objects.view_state->device_interface,
 		graphics_objects.view_state->device_context,
-		graphics_objects.resource_pool->LoadPixelShader("vertical_conv.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("vertical_conv.hlsl", ProcessingEffect::squares_vertex_type),
+		graphics_objects.resource_pool->LoadPixelShader("bloom_vert.hlsl"),
+		graphics_objects.resource_pool->LoadVertexShader("bloom_vert.hlsl", ProcessingEffect::squares_vertex_type),
 		ShaderSettings(&vertical_kernel),
 		graphics_objects.render_pipeline->GetStageBufferSize(),
 		graphics_objects.render_pipeline->GetStagingBufferDesc());
+	/*ProcessingEffect* alpha_swap = graphics_objects.render_pipeline->AddProcessingEffect();
+	alpha_swap->Initialize(
+		graphics_objects.view_state->device_interface,
+		graphics_objects.view_state->device_context,
+		graphics_objects.resource_pool->LoadPixelShader("alpha_to_rgb.hlsl"),
+		graphics_objects.resource_pool->LoadVertexShader("alpha_to_rgb.hlsl", ProcessingEffect::squares_vertex_type),
+		ShaderSettings(),
+		graphics_objects.render_pipeline->GetStageBufferSize(),
+		graphics_objects.render_pipeline->GetStagingBufferDesc());*/
 
 	int frame_index = 0;
 

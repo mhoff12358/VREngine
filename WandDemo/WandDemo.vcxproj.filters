@@ -205,6 +205,9 @@
     <FxCompile Include="bloom_vert.hlsl">
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="alpha_to_rgb.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">

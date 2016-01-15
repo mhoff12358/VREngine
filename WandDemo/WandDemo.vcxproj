@@ -189,6 +189,9 @@
     <ClCompile Include="WiimoteInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="alpha_to_rgb.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="bloom_horiz.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
