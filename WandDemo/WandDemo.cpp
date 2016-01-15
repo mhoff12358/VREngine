@@ -54,7 +54,6 @@ public:
 void GraphicsLoop() {
 	ProcessingEffect::CreateProcessingEffectResources(graphics_objects.resource_pool);
 
-	/*
 	float c = 8.0f;
 	ConstantBufferTypedTemp<array<float, 27 * 4 + 4>> horizontal_kernel(CB_PS_PIXEL_SHADER);
 	horizontal_kernel.CreateBuffer(graphics_objects.view_state->device_interface);
@@ -88,7 +87,6 @@ void GraphicsLoop() {
 		ShaderSettings(&vertical_kernel),
 		graphics_objects.render_pipeline->GetStageBufferSize(),
 		graphics_objects.render_pipeline->GetStagingBufferDesc());
-	*/
 
 	int frame_index = 0;
 
@@ -322,8 +320,49 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	wiimote_interface.Startup();
 	wiimote = wiimote_interface.GetHandler();
-	
-	graphics_objects = BeginDirectx(false, "", { { "basic", 0 }, { "bloom", 1 }, { "alpha", 2 } });
+
+	D3D11_BLEND_DESC no_alpha_blend_state_desc;
+	no_alpha_blend_state_desc.AlphaToCoverageEnable = false;
+	no_alpha_blend_state_desc.IndependentBlendEnable = false;
+	no_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
+	no_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	no_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	no_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	no_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	no_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	no_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	no_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	D3D11_BLEND_DESC keep_new_alpha_blend_state_desc;
+	keep_new_alpha_blend_state_desc.AlphaToCoverageEnable = false;
+	keep_new_alpha_blend_state_desc.IndependentBlendEnable = false;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	keep_new_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	D3D11_BLEND_DESC drop_alpha_with_alpha_blend_state_desc;
+	drop_alpha_with_alpha_blend_state_desc.AlphaToCoverageEnable = false;
+	drop_alpha_with_alpha_blend_state_desc.IndependentBlendEnable = false;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	graphics_objects = BeginDirectx(false, "",
+		{
+			PipelineStageDesc("basic", no_alpha_blend_state_desc),
+			PipelineStageDesc("bloom", keep_new_alpha_blend_state_desc),
+			PipelineStageDesc("alpha", drop_alpha_with_alpha_blend_state_desc)
+		});
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;
