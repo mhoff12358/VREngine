@@ -19,6 +19,10 @@ function create_scene ()
 		right_laser:initialize_sided(true)
 		--weapons:add_weapon(right_laser)
 		
+		-- The targets are currently drawn after the reticle, and since there is no sorting on the
+		-- rendering side this means that the bounding box of the reticle sees through the
+		-- targets. This could be fixed by putting them before it in initialization order, but a
+		-- more long term fix is preferable.
 		target1 = self:add_actor_and_init("target.lua", "target1")
 		target1.position = { 0, 0, -50 }
 		target1.radius = 5
