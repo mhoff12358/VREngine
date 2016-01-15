@@ -34,6 +34,9 @@
     <Filter Include="Resource Files\Scenes">
       <UniqueIdentifier>{bf1cc2eb-ab14-40fa-a920-727a291c9557}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Old Actor Scripts">
+      <UniqueIdentifier>{7b148793-1072-4f8a-abee-e63d83baceb8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -196,6 +199,12 @@
     <FxCompile Include="textured_bloom.hlsl">
       <Filter>Resource Files\Entity Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="bloom_horiz.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="bloom_vert.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -250,32 +259,11 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bottle.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
-    <None Include="cone.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
-    <None Include="console.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
-    <None Include="sun.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
-    <None Include="wall.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
-    <None Include="funnel.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
-    </None>
     <None Include="LiquidContainer.lua">
       <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="lua_test.lua">
       <Filter>Resource Files\Lua Libraries</Filter>
-    </None>
-    <None Include="water_flow.lua">
-      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="cockpit.lua">
       <Filter>Resource Files\Actor Scripts</Filter>
@@ -318,6 +306,27 @@
     </None>
     <None Include="cockpit_scene.lua">
       <Filter>Resource Files\Scenes</Filter>
+    </None>
+    <None Include="water_flow.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="wall.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="sun.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="funnel.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="console.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="cone.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="bottle.lua">
+      <Filter>Resource Files\Old Actor Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>

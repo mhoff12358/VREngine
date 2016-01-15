@@ -23,6 +23,7 @@ function create_actor(ident)
 			["shader_file_name"] = "textured.hlsl",
 			["components"] = { "Cannon" },
 			["texture_file_name"] = "cannon.png",
+			["entity_group_name"] = "basic",
 		},
 	}
 

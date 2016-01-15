@@ -323,7 +323,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	wiimote_interface.Startup();
 	wiimote = wiimote_interface.GetHandler();
 	
-	graphics_objects = BeginDirectx(false, "");
+	graphics_objects = BeginDirectx(false, "", { { "basic", 0 }, { "bloom", 1 }, { "alpha", 2 } });
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;

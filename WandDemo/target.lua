@@ -23,7 +23,7 @@ function create_actor(ident)
 			["components"] = { "Plane" },
 			["shader_file_name"] = "textured.hlsl",
 			["texture_file_name"] = "target.png",
-			["entity_group_number"] = 1,
+			["entity_group_name"] = "alpha"
 		},
 	}
 

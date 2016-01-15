@@ -26,6 +26,7 @@ function create_actor(ident)
 				["pipeline_stage"] = "pixel",
 				["data_format"] = { { "float", 4 } }
 			},
+			["entity_group_name"] = "basic"
 		}
 	}
 

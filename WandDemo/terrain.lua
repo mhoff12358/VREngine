@@ -46,6 +46,7 @@ function create_actor(ident)
 				["pipeline_stage"] = "vertex",
 				["data_format"] = { { "float", 1 } }
 			},
+			["entity_group_name"] = "basic"
 		}
 	}
 	

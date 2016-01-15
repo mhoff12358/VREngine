@@ -181,11 +181,16 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 			string shader_file_name = "";
 			string texture_file_name = "";
 			array<bool, 2> texture_stage_usage = { false, true };
-			unsigned int entity_group_number = 0;
+			string entity_group_name = "";
 			lua_environment.LoadFromTable(string("shader_file_name"), &shader_file_name);
 			lua_environment.LoadFromTable(string("texture_file_name"), &texture_file_name);
 			lua_environment.LoadFromTable(string("texture_stage_usage"), &texture_stage_usage);
-			lua_environment.LoadFromTable(string("entity_group_number"), &entity_group_number);
+			lua_environment.LoadFromTable(string("entity_group_name"), &entity_group_name);
+
+			auto entity_group_number = graphics_objects.rendering_stages_map.find(entity_group_name);
+			if (entity_group_number == graphics_objects.rendering_stages_map.end()) {
+				std::cout << "Error looking up pipeline stage: " << entity_group_name << std::endl;
+			}
 
 			ConstantBuffer* specified_shader_settings = NULL;
 			if (lua_environment.GetFromTableToStack(string("shader_settings_format")) && lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -213,7 +218,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 							ShaderSettings(used_settings),
 							Model(),
 							NULL,
-							texture_view), entity_group_number));
+							texture_view), entity_group_number->second));
 					}
 					else {
 						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
@@ -225,7 +230,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 							ShaderSettings(used_settings),
 							Model(),
 							NULL,
-							texture_view), entity_group_number));
+							texture_view), entity_group_number->second));
 					}
 				}
 				else {
@@ -235,7 +240,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
 						ShaderSettings(used_settings),
 						Model(),
-						NULL), entity_group_number));
+						NULL), entity_group_number->second));
 				}
 				lua_environment.GetFromTableToStack(string("components"));
 				if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -243,7 +248,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 					int components_key;
 					string component_name;
 					while (lua_environment.IterateOverTable(&components_key, &component_name, NULL)) {
-						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number, component_models[component_name]);
+						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number->second, component_models[component_name]);
 					}
 				}
 				lua_environment.RemoveFromStack();

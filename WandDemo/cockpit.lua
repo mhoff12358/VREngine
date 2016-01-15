@@ -47,6 +47,7 @@ function create_actor()
 				["pipeline_stage"] = "vertex",
 				["data_format"] = { { "float", 3 }, { "float", 1 } }
 			},
+			["entity_group_name"] = "basic"
 		},
 		{
 			["shader_file_name"] = "texturedspecularlightsource.hlsl",
@@ -56,6 +57,7 @@ function create_actor()
 				["pipeline_stage"] = "vertex",
 				["data_format"] = { { "float", 3 }, { "float", 1 } }
 			},
+			["entity_group_name"] = "basic"
 		},
 		{
 			["shader_file_name"] = "solidcolor.hlsl",
@@ -64,11 +66,13 @@ function create_actor()
 				["pipeline_stage"] = "pixel",
 				["data_format"] = { { "float", 4 } }
 			},
+			["entity_group_name"] = "basic"
 		},
 		{
 			["shader_file_name"] = "textured.hlsl",
 			["components"] = { "Cannon" },
-			["texture_file_name"] = "cannon.png"
+			["texture_file_name"] = "cannon.png",
+			["entity_group_name"] = "basic"
 		}
 	}
 	
