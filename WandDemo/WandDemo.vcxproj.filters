@@ -13,17 +13,32 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Lua Libraries">
+    <Filter Include="Resource Files\Models">
+      <UniqueIdentifier>{a060cad0-9679-471d-b588-b2cae48896ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Textures">
+      <UniqueIdentifier>{2a04738d-51a6-4da4-bb0b-8588e03a64a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Processing Effect Shaders">
+      <UniqueIdentifier>{158350c2-98fd-41c0-9c8a-7b9af22f7e2e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Entity Shaders">
+      <UniqueIdentifier>{0a56b74e-219b-4059-bfc9-e9a70d8bf74b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Lua Libraries">
       <UniqueIdentifier>{b901ee39-0b68-49f0-99ae-b3c21800f6c6}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Actor Scripts">
+    <Filter Include="Resource Files\Actor Scripts">
       <UniqueIdentifier>{a6cacabc-3d8c-474f-b5e7-5c6c1950892c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files\Scenes">
+      <UniqueIdentifier>{bf1cc2eb-ab14-40fa-a920-727a291c9557}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="quaternion.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
@@ -133,155 +148,176 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="objshader.hlsl">
-      <Filter>Resource Files</Filter>
+    <FxCompile Include="passthrough.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="shaders.hlsl">
-      <Filter>Resource Files</Filter>
+    <FxCompile Include="horizontal_conv.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="texturednormaledshader.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="normaldump.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="texturedspecular.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="solidcolor.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="solidcolorforceblue.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="glass.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="textured.hlsl">
-      <Filter>Resource Files</Filter>
-    </FxCompile>
-    <FxCompile Include="fluid.hlsl">
-      <Filter>Resource Files</Filter>
+    <FxCompile Include="vertical_conv.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
     <FxCompile Include="texturedspecularlightsource.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="fluid.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="glass.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="normaldump.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="objshader.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="shaders.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="solidcolor.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="solidcolorforceblue.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
     </FxCompile>
     <FxCompile Include="terrain.hlsl">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="textured.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="texturednormaledshader.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="texturedspecular.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="textured_bloom.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <Object Include="console.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-    <Object Include="cone.obj">
-      <Filter>Resource Files</Filter>
+    <Object Include="glowy_console.obj">
+      <Filter>Resource Files\Models</Filter>
     </Object>
     <Object Include="bottle.obj">
-      <Filter>Resource Files</Filter>
-    </Object>
-    <Object Include="tower_inside.obj">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Models</Filter>
     </Object>
     <Object Include="cockpit_bars.obj">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Models</Filter>
+    </Object>
+    <Object Include="cone.obj">
+      <Filter>Resource Files\Models</Filter>
+    </Object>
+    <Object Include="console.obj">
+      <Filter>Resource Files\Models</Filter>
     </Object>
     <Object Include="laser.obj">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Models</Filter>
     </Object>
     <Object Include="projectile.obj">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Models</Filter>
     </Object>
     <Object Include="reticle.obj">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Models</Filter>
+    </Object>
+    <Object Include="tower_inside.obj">
+      <Filter>Resource Files\Models</Filter>
     </Object>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="console.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="walls.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="metal_bars.png">
-      <Filter>Resource Files</Filter>
+    <Image Include="glowy_console.png">
+      <Filter>Resource Files\Textures</Filter>
     </Image>
     <Image Include="terrain.png">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Textures</Filter>
     </Image>
-    <Image Include="cannon.png">
-      <Filter>Resource Files</Filter>
+    <Image Include="walls.png">
+      <Filter>Resource Files\Textures</Filter>
     </Image>
     <Image Include="reticle.png">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="metal_bars.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="console.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="cannon.png">
+      <Filter>Resource Files\Textures</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <None Include="tower_scene.lua">
-      <Filter>Resource Files</Filter>
-    </None>
     <None Include="bottle.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="cone.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="console.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="sun.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="wall.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="funnel.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="LiquidContainer.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="lua_test.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="water_flow.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="cockpit.lua">
-      <Filter>Actor Scripts</Filter>
-    </None>
-    <None Include="cockpit_scene.lua">
-      <Filter>Resource Files</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="terrain.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="laser.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="projectile.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="reticle.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="weapons.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="target.lua">
-      <Filter>Actor Scripts</Filter>
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
     <None Include="class.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="cpp_interface.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="owns_positionables.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
     </None>
     <None Include="positionable.lua">
-      <Filter>Lua Libraries</Filter>
+      <Filter>Resource Files\Lua Libraries</Filter>
+    </None>
+    <None Include="glowy_console.lua">
+      <Filter>Resource Files\Actor Scripts</Filter>
+    </None>
+    <None Include="tower_scene.lua">
+      <Filter>Resource Files\Scenes</Filter>
+    </None>
+    <None Include="cockpit_scene.lua">
+      <Filter>Resource Files\Scenes</Filter>
     </None>
   </ItemGroup>
 </Project>

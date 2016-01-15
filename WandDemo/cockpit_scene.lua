@@ -11,6 +11,7 @@ function create_scene ()
 	function scene_table.initialize(self)
 		self:add_actor_and_init("cockpit.lua", "cockpit")
 		self:add_actor_and_init("terrain.lua", "terrain")
+		self:add_actor_and_init("glowy_console.lua", "glowy_console")
 		self.weapons = self:add_actor_and_init("weapons.lua", "weapons")
 		
 		self.weapons:add_reticle(self:add_actor_and_init("reticle.lua", "reticle"))
