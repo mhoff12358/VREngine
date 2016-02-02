@@ -42,7 +42,7 @@ POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_T
 	//return float4(0.0f, tex_coord.y, 0.0f, 1.0f);
 	POut result;
 	result.t1 = model_skin.Sample(skin_sampler, tex_coord);
-	result.t1.a = trunc(result.t1.a);
-	result.t1 = result.t1.a * result.t1;
+	result.t2.rgb = float3(0, 0, 0);
+	result.t2.a = trunc(result.t1.a);
 	return result;
 }

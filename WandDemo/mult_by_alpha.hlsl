@@ -14,14 +14,6 @@ sampler color_source : register(s0);
 Texture2D alpha_source_tex : register(t1);
 sampler alpha_source : register(s1);
 
-static int kernel_size = 51;
-
-cbuffer kernel : register(b2)
-{
-	float4 height;
-	float kernel[51];
-};
-
 VOut VShader(float4 position : POSITION, float2 tex_coord : TEXCOORD0)
 {
 	VOut output;
@@ -36,12 +28,7 @@ VOut VShader(float4 position : POSITION, float2 tex_coord : TEXCOORD0)
 POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_TARGET
 {
 	POut result;
-	result.t1 = float4(0, 0, 0, 0);
-	[unroll(kernel_size)]
-	for (int i = 0; i < kernel_size; i++) {
-		float4 adjacent_sample = color_source_tex.Sample(color_source, float2(tex_coord.x, tex_coord.y + ((-trunc(kernel_size / 2) + i) / height.x)));
-		float4 adjacent_alpha_sample = alpha_source_tex.Sample(alpha_source, float2(tex_coord.x, tex_coord.y + ((-trunc(kernel_size / 2) + i) / height.x)));
-		result.t1 = max(result.t1, kernel[i].x * adjacent_sample);
-	}
+	result.t1.rgb = color_source_tex.Sample(color_source, tex_coord).rgb * alpha_source_tex.Sample(alpha_source, tex_coord).a;
+	result.t1.a = alpha_source_tex.Sample(alpha_source, tex_coord).a;
 	return result;
 }

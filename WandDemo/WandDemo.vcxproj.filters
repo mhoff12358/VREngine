@@ -208,6 +208,9 @@
     <FxCompile Include="alpha_to_rgb.hlsl">
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="mult_by_alpha.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">

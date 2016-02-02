@@ -1,6 +1,9 @@
 // WandDemo.cpp : Defines the entry point for the console application.
 //
 
+#include <memory>
+using std::unique_ptr;
+
 #include "stdafx.h"
 
 #include "WiimoteInterface.h"
@@ -20,6 +23,8 @@
 #include "Identifier.h"
 #include "InteractableCollection.h"
 #include "ActorHandler.h"
+
+#include "gaussian.h"
 
 #include "LuaGameScripting/Environment.h"
 #include "LuaGameScripting/InteractableObject.h"
@@ -52,51 +57,6 @@ public:
 };
 
 void GraphicsLoop() {
-	ProcessingEffect::CreateProcessingEffectResources(graphics_objects.resource_pool);
-
-	float c = 12.0f;
-	ConstantBufferTypedTemp<array<float, 27 * 4 + 4>> horizontal_kernel(CB_PS_PIXEL_SHADER);
-	horizontal_kernel.CreateBuffer(graphics_objects.view_state->device_interface);
-	array<float, 27 * 4 + 4>& raw_horizontal_kernel = horizontal_kernel.EditBufferDataRef(true);
-	raw_horizontal_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[0];
-	for (int i = 0; i < 27; i++) {
-		raw_horizontal_kernel[i * 4 + 4] = (1.0f / (c * sqrtf(2 * pi))) * exp(-pow(i - (27 / 2), 2) / (2 * pow(c, 2)));
-	}
-	ConstantBufferTypedTemp<array<float, 27 * 4 + 4>> vertical_kernel(CB_PS_PIXEL_SHADER);
-	vertical_kernel.CreateBuffer(graphics_objects.view_state->device_interface);
-	array<float, 27 * 4 + 4>& raw_vertical_kernel = vertical_kernel.EditBufferDataRef(true);
-	raw_vertical_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[1];
-	for (int i = 0; i < 27; i++) {
-		raw_vertical_kernel[i * 4 + 4] = (1.0f / (c * sqrtf(2 * pi))) * exp(-pow(i - (27 / 2), 2) / (2 * pow(c, 2)));
-	}
-	ProcessingEffect* horiz_effect = graphics_objects.render_pipeline->AddProcessingEffect();
-	horiz_effect->Initialize(
-		graphics_objects.view_state->device_interface,
-		graphics_objects.view_state->device_context,
-		graphics_objects.resource_pool->LoadPixelShader("bloom_horiz.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("bloom_horiz.hlsl", ProcessingEffect::squares_vertex_type),
-		ShaderSettings(&horizontal_kernel),
-		graphics_objects.render_pipeline->GetStageBufferSize(),
-		graphics_objects.render_pipeline->GetStagingBufferDesc());
-	ProcessingEffect* vertical_effect = graphics_objects.render_pipeline->AddProcessingEffect();
-	vertical_effect->Initialize(
-		graphics_objects.view_state->device_interface,
-		graphics_objects.view_state->device_context,
-		graphics_objects.resource_pool->LoadPixelShader("bloom_vert.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("bloom_vert.hlsl", ProcessingEffect::squares_vertex_type),
-		ShaderSettings(&vertical_kernel),
-		graphics_objects.render_pipeline->GetStageBufferSize(),
-		graphics_objects.render_pipeline->GetStagingBufferDesc());
-	/*ProcessingEffect* alpha_swap = graphics_objects.render_pipeline->AddProcessingEffect();
-	alpha_swap->Initialize(
-		graphics_objects.view_state->device_interface,
-		graphics_objects.view_state->device_context,
-		graphics_objects.resource_pool->LoadPixelShader("alpha_to_rgb.hlsl"),
-		graphics_objects.resource_pool->LoadVertexShader("alpha_to_rgb.hlsl", ProcessingEffect::squares_vertex_type),
-		ShaderSettings(),
-		graphics_objects.render_pipeline->GetStageBufferSize(),
-		graphics_objects.render_pipeline->GetStagingBufferDesc());*/
-
 	int frame_index = 0;
 
 	int prev_sec = timeGetTime();
@@ -112,7 +72,7 @@ void GraphicsLoop() {
 		player_position_lock.unlock();
 
 		RenderGroup* drawing_groups = graphics_objects.entity_handler->GetRenderGroupForDrawing();
-		for (int render_group_number = 0; render_group_number < 2; render_group_number++) {
+		for (int render_group_number = 0; render_group_number < graphics_objects.entity_handler->GetNumEntitySets(); render_group_number++) {
 			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
 		}
 
@@ -323,6 +283,9 @@ void LuaTest() {
 	std::cout << "Finish lua test" << std::endl;
 }
 
+#include "PipelineStage.h"
+#include "RenderEntities.h"
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//LuaTest();
@@ -366,12 +329,40 @@ int _tmain(int argc, _TCHAR* argv[])
 	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	graphics_objects = BeginDirectx(false, "",
-		{
-			PipelineStageDesc("basic", no_alpha_blend_state_desc),
-			PipelineStageDesc("bloom", keep_new_alpha_blend_state_desc),
-			PipelineStageDesc("alpha", drop_alpha_with_alpha_blend_state_desc)
-		});
+	D3D11_BLEND_DESC additative_for_all_blend_state_desc;
+	additative_for_all_blend_state_desc.AlphaToCoverageEnable = false;
+	additative_for_all_blend_state_desc.IndependentBlendEnable = false;
+	additative_for_all_blend_state_desc.RenderTarget[0].BlendEnable = true;
+	additative_for_all_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	additative_for_all_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	additative_for_all_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	additative_for_all_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	additative_for_all_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
+	additative_for_all_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	additative_for_all_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	graphics_objects = BeginDirectx(false, "");
+
+	TextureSignature back_buffer_signature(graphics_objects.render_pipeline->GetStagingBufferDesc());
+	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, no_alpha_blend_state_desc));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, "normal_depth", {}, keep_new_alpha_blend_state_desc));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, drop_alpha_with_alpha_blend_state_desc));
+	pipeline_stages.emplace_back(new TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer", back_buffer_signature) }, { "objects" }));
+	auto bloom_horiz_kernel = FillHLSLKernel<51>(Generate1DGausian<51>(1, 0, 6));
+	bloom_horiz_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[0];
+	auto bloom_vert_kernel = FillHLSLKernel<51>(Generate1DGausian<51>(1, 0, 6));
+	bloom_vert_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[1];
+	pipeline_stages.emplace_back(new ProcessingEffectDesc("horiz_bloom_applied", { std::make_tuple("horiz_bloom", back_buffer_signature) }, { "objects", "bloom" }, keep_new_alpha_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_horiz.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_horiz.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_horiz_kernel, sizeof(bloom_horiz_kernel)));
+	pipeline_stages.emplace_back(new ProcessingEffectDesc("vert_bloom_applied", { std::make_tuple("back_buffer", back_buffer_signature) }, { "horiz_bloom", "bloom" }, additative_for_all_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_vert.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_vert.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_vert_kernel, sizeof(bloom_vert_kernel)));
+	
+	graphics_objects.render_pipeline->SetPipelineStages(pipeline_stages);
+	for (const unique_ptr<PipelineStageDesc>& desc : pipeline_stages) {
+		if (desc->entity_handler_set_ != -1) {
+			graphics_objects.entity_handler_set_lookup[desc->name_] = desc->entity_handler_set_;
+		}
+	}
+
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
 	TimeTracker::track_time = false;
