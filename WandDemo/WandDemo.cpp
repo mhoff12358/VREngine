@@ -283,12 +283,29 @@ void LuaTest() {
 	std::cout << "Finish lua test" << std::endl;
 }
 
+#include "PipelineCamera.h"
+
+void OtherTest() {
+	PipelineCamera<1> a;
+	a.SetLocation({ { 1.0f, 0.0f, 0.0f } });
+	a.SetOrientation(Quaternion::Identity().GetArray());
+	a.BuildMatrices();
+	DirectX::XMFLOAT4X4 output1;
+	DirectX::XMStoreFloat4x4(&output1, a.GetViewProjectionMatrix(0));
+	a.SetOrientation(Quaternion::RotationAboutAxis(AID_Y, 3.14).GetArray());
+	a.BuildMatrices();
+	DirectX::XMFLOAT4X4 output2;
+	DirectX::XMStoreFloat4x4(&output2, a.GetViewProjectionMatrix(0));
+	std::cout << "feafse";
+}
+
 #include "PipelineStage.h"
 #include "RenderEntities.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	//LuaTest();
+	//OtherTest();
 
 	wiimote_interface.Startup();
 	wiimote = wiimote_interface.GetHandler();
@@ -358,8 +375,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	
 	graphics_objects.render_pipeline->SetPipelineStages(pipeline_stages);
 	for (const unique_ptr<PipelineStageDesc>& desc : pipeline_stages) {
-		if (desc->entity_handler_set_ != -1) {
-			graphics_objects.entity_handler_set_lookup[desc->name_] = desc->entity_handler_set_;
+		for (BasePipelineStageDesc* stage : desc->GetBaseStages()) {
+			if (stage->entity_handler_set_ != -1) {
+				graphics_objects.entity_handler_set_lookup[stage->name_] = stage->entity_handler_set_;
+			}
 		}
 	}
 
