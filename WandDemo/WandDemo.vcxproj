@@ -144,6 +144,9 @@
   <ItemGroup>
     <Text Include="ReadMe.txt" />
     <Text Include="quaternion.lua" />
+    <Text Include="skybox_textured.hlsl">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -269,6 +272,9 @@
     <Object Include="glowy_console.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
+    <Object Include="inversed_cube.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </Object>
     <Object Include="laser.obj">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </Object>
@@ -288,6 +294,7 @@
     <Image Include="glowy_console.png" />
     <Image Include="metal_bars.png" />
     <Image Include="reticle.png" />
+    <Image Include="sky_cubemap.jpg" />
     <Image Include="terrain.png" />
     <Image Include="walls.png" />
   </ItemGroup>
@@ -308,6 +315,7 @@
     <None Include="positionable.lua" />
     <None Include="projectile.lua" />
     <None Include="reticle.lua" />
+    <None Include="skybox.lua" />
     <None Include="sun.lua" />
     <None Include="target.lua" />
     <None Include="terrain.lua" />

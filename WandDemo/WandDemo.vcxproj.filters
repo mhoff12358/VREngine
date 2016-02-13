@@ -43,6 +43,9 @@
     <Text Include="quaternion.lua">
       <Filter>Resource Files\Lua Libraries</Filter>
     </Text>
+    <Text Include="skybox_textured.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </Text>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -240,6 +243,9 @@
     <Object Include="tower_inside.obj">
       <Filter>Resource Files\Models</Filter>
     </Object>
+    <Object Include="inversed_cube.obj">
+      <Filter>Resource Files\Models</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="glowy_console.png">
@@ -261,6 +267,9 @@
       <Filter>Resource Files\Textures</Filter>
     </Image>
     <Image Include="cannon.png">
+      <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="sky_cubemap.jpg">
       <Filter>Resource Files\Textures</Filter>
     </Image>
   </ItemGroup>
@@ -333,6 +342,9 @@
     </None>
     <None Include="bottle.lua">
       <Filter>Resource Files\Old Actor Scripts</Filter>
+    </None>
+    <None Include="skybox.lua">
+      <Filter>Resource Files\Actor Scripts</Filter>
     </None>
   </ItemGroup>
 </Project>

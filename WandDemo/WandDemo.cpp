@@ -340,7 +340,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	additative_for_all_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	additative_for_all_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	bool run_in_oculus_mode = true;
+	bool run_in_oculus_mode = false;
 	graphics_objects = BeginDirectx(run_in_oculus_mode, "");
 
 	int stage_repetition = run_in_oculus_mode ? 2 : 0;
@@ -368,6 +368,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	TextureSignature back_buffer_signature(graphics_objects.render_pipeline->GetStagingBufferDesc());
 	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "", {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head")));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, "normal_depth", {}, keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, drop_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
