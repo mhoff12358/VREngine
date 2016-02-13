@@ -42,6 +42,12 @@ function create_actor(ident)
 				["z"] = 0,
 				["rotation"] = 3.14/2,
 			}, {
+				["matrix_type"] = "axis_rotation",
+				["x"] = 0,
+				["y"] = 1,
+				["z"] = 0,
+				["rotation"] = 3.14/2,
+			}, {
 				["matrix_type"] = "translation",
 				["x"] = 0,
 				["y"] = 0,

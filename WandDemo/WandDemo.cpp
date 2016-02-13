@@ -284,29 +284,11 @@ void LuaTest() {
 }
 
 #include "PipelineCamera.h"
-
-void OtherTest() {
-	PipelineCamera<1> a;
-	a.SetLocation({ { 1.0f, 0.0f, 0.0f } });
-	a.SetOrientation(Quaternion::Identity().GetArray());
-	a.BuildMatrices();
-	DirectX::XMFLOAT4X4 output1;
-	DirectX::XMStoreFloat4x4(&output1, a.GetViewProjectionMatrix(0));
-	a.SetOrientation(Quaternion::RotationAboutAxis(AID_Y, 3.14).GetArray());
-	a.BuildMatrices();
-	DirectX::XMFLOAT4X4 output2;
-	DirectX::XMStoreFloat4x4(&output2, a.GetViewProjectionMatrix(0));
-	std::cout << "feafse";
-}
-
 #include "PipelineStage.h"
 #include "RenderEntities.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	//LuaTest();
-	//OtherTest();
-
 	wiimote_interface.Startup();
 	wiimote = wiimote_interface.GetHandler();
 
@@ -358,43 +340,46 @@ int _tmain(int argc, _TCHAR* argv[])
 	additative_for_all_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
 	additative_for_all_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	graphics_objects = BeginDirectx(false, "");
+	bool run_in_oculus_mode = true;
+	graphics_objects = BeginDirectx(run_in_oculus_mode, "");
 
-	map<string, AbstractPipelineCamera*> pipeline_cameras;
-	pipeline_cameras["player_head"] = dynamic_cast<AbstractPipelineCamera*>(new PipelineCamera<3>());
-	for (unsigned int i = 0; i < 3; i++) {
-		pipeline_cameras["player_head"]->SetLensOffset(i, { { 0, 0, 0 } });
+	int stage_repetition = run_in_oculus_mode ? 2 : 0;
+
+	map<string, PipelineCamera> pipeline_cameras;
+	if (run_in_oculus_mode) {
+		pipeline_cameras["player_head|0"].SetPerspectiveProjection(
+			graphics_objects.oculus->eye_fovs[0],
+			0.001f,
+			100.0f);
+		pipeline_cameras["player_head|1"].SetPerspectiveProjection(
+			graphics_objects.oculus->eye_fovs[1],
+			0.001f,
+			100.0f);
 	}
-	pipeline_cameras["player_head"]->SetPerspectiveProjection(
-		60.0f / 180.0f*3.1415f,
-		((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
-		0.001f,
-		100.0f);
+	else {
+		pipeline_cameras["player_head"].SetPerspectiveProjection(
+			60.0f / 180.0f*3.1415f,
+			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
+			0.001f,
+			100.0f);
+		pipeline_cameras["player_head"].BuildMatrices();
+	}
 	graphics_objects.render_pipeline->SetPipelineCameras(pipeline_cameras);
 
 	TextureSignature back_buffer_signature(graphics_objects.render_pipeline->GetStagingBufferDesc());
 	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
-	pipeline_stages.emplace_back(new RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head", 0)));
-	pipeline_stages.emplace_back(new RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, "normal_depth", {}, keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head", 0)));
-	pipeline_stages.emplace_back(new RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, drop_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head", 0)));
-	pipeline_stages.emplace_back(new TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer", back_buffer_signature) }, { "objects" }));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, "normal_depth", {}, keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, "normal_depth", {}, drop_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<TextureCopyDesc>(stage_repetition, TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer", back_buffer_signature) }, { "objects" })));
 	auto bloom_horiz_kernel = FillHLSLKernel<51>(Generate1DGausian<51>(1, 0, 6));
 	bloom_horiz_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[0];
 	auto bloom_vert_kernel = FillHLSLKernel<51>(Generate1DGausian<51>(1, 0, 6));
 	bloom_vert_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[1];
-	pipeline_stages.emplace_back(new ProcessingEffectDesc("horiz_bloom_applied", { std::make_tuple("horiz_bloom", back_buffer_signature) }, { "objects", "bloom" }, keep_new_alpha_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_horiz.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_horiz.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_horiz_kernel, sizeof(bloom_horiz_kernel)));
-	pipeline_stages.emplace_back(new ProcessingEffectDesc("vert_bloom_applied", { std::make_tuple("back_buffer", back_buffer_signature) }, { "horiz_bloom", "bloom" }, additative_for_all_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_vert.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_vert.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_vert_kernel, sizeof(bloom_vert_kernel)));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<ProcessingEffectDesc>(stage_repetition, ProcessingEffectDesc("horiz_bloom_applied", { std::make_tuple("horiz_bloom", back_buffer_signature) }, { "objects", "bloom" }, keep_new_alpha_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_horiz.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_horiz.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_horiz_kernel, sizeof(bloom_horiz_kernel))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<ProcessingEffectDesc>(stage_repetition, ProcessingEffectDesc("vert_bloom_applied", { std::make_tuple("back_buffer", back_buffer_signature) }, { "horiz_bloom", "bloom" }, additative_for_all_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("bloom_vert.hlsl"), graphics_objects.resource_pool->LoadVertexShader("bloom_vert.hlsl", ProcessingEffect::squares_vertex_type), (char*)&bloom_vert_kernel, sizeof(bloom_vert_kernel))));
 	
-
-
 	graphics_objects.render_pipeline->SetPipelineStages(pipeline_stages);
-	for (const unique_ptr<PipelineStageDesc>& desc : pipeline_stages) {
-		for (BasePipelineStageDesc* stage : desc->GetBaseStages()) {
-			if (stage->entity_handler_set_ != -1) {
-				graphics_objects.entity_handler_set_lookup[stage->name_] = stage->entity_handler_set_;
-			}
-		}
-	}
 
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;

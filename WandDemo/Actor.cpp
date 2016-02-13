@@ -187,9 +187,9 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 			lua_environment.LoadFromTable(string("texture_stage_usage"), &texture_stage_usage);
 			lua_environment.LoadFromTable(string("entity_group_name"), &entity_group_name);
 
-			auto entity_group_number_iter = graphics_objects.entity_handler_set_lookup.find(entity_group_name);
+			auto entity_group_number_iter = graphics_objects.render_pipeline->entity_group_associations_.find(entity_group_name);
 			int entity_group_number;
-			if (entity_group_number_iter == graphics_objects.entity_handler_set_lookup.end()) {
+			if (entity_group_number_iter == graphics_objects.render_pipeline->entity_group_associations_.end()) {
 				std::cout << "Error looking up pipeline stage: " << entity_group_name << std::endl;
 				entity_group_number = 0;
 			} else {
