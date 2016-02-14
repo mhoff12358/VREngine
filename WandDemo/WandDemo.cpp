@@ -350,18 +350,18 @@ int _tmain(int argc, _TCHAR* argv[])
 		pipeline_cameras["player_head|0"].SetPerspectiveProjection(
 			graphics_objects.oculus->eye_fovs[0],
 			0.001f,
-			100.0f);
+			500.0f);
 		pipeline_cameras["player_head|1"].SetPerspectiveProjection(
 			graphics_objects.oculus->eye_fovs[1],
 			0.001f,
-			100.0f);
+			500.0f);
 	}
 	else {
 		pipeline_cameras["player_head"].SetPerspectiveProjection(
 			60.0f / 180.0f*3.1415f,
 			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
 			0.001f,
-			100.0f);
+			500.0f);
 		pipeline_cameras["player_head"].BuildMatrices();
 	}
 	graphics_objects.render_pipeline->SetPipelineCameras(pipeline_cameras);

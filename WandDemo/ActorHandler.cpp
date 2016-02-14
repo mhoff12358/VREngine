@@ -48,8 +48,8 @@ Actor* ActorHandler::CreateActorFromLuaScript(const string& script_name, Identif
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::AddListener >, 1 }));
 	new_actor->lua_interface_.AddCObjectMember("remove_listener", this,
 		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::RemoveListener >, 1 }));
-	//new_actor->lua_interface_.AddCObjectMember("raycast", this,
-	//	Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::Raycast >, 1 }));
+	new_actor->lua_interface_.AddCObjectMember("lookup_resource", this,
+		Lua::CFunctionClosureId({ (lua_CFunction)&Lua::MemberCallback < ActorHandler, &ActorHandler::LookupResource >, 1 }));
 	
 	return new_actor;
 }
@@ -92,8 +92,39 @@ int ActorHandler::AddActor(lua_State* L) {
 	new_actor->lua_interface_.env_.StoreToStack(Lua::Index(1));
 	env.StoreToStack(Lua::EnvironmentTop{ &new_actor->lua_interface_.env_, 1 });
 
+	if (env.CheckSizeOfStack() != 1) {
+		env.PrintStack();
+	}
+
 	return 1;
 }
+
+int ActorHandler::LookupResource(lua_State* L) {
+	Lua::Environment env(L);
+
+	int resource_type;
+	string resource_name;
+	string resource_request;
+	env.LoadFromStack(&resource_type, Lua::Index(1));
+	env.LoadFromStack(&resource_name, Lua::Index(1));
+	env.LoadFromStack(&resource_request, Lua::Index(1));
+
+	if (resource_request == "data") {
+		vector<float> resource_data = graphics_objects_.resource_pool->AccessDataFromResource(ResourceIdent(static_cast<ResourceIdent::ResourceType>(resource_type), resource_name));
+		env.StoreToStack(resource_data);
+		return 1;
+	}
+	else if (resource_request == "size") {
+		switch (resource_type) {
+		case ResourceIdent::TEXTURE:
+			env.StoreToStack(graphics_objects_.resource_pool->LoadExistingTexture(resource_name).GetSize());
+			return 1;
+		default:
+			return 0;
+		}
+	}
+}
+
 /*
 int ActorHandler::Raycast(lua_State* L) {
 	Lua::Environment env(L);

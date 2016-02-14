@@ -95,7 +95,7 @@ namespace Lua {
 
 	template <typename T>
 	bool Environment::StoreToStack(const vector<T>& stored_value) {
-		StoreToStack(stored_value.data(), stored_value.size());
+		return StoreArrayToStack(stored_value.data(), stored_value.size());
 	}
 
 	template <typename K, typename V>

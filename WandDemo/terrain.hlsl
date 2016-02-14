@@ -27,7 +27,7 @@ cbuffer personal_matrices : register(b1)
 
 cbuffer terrain_details : register(b2)
 {
-	float terrain_resolution;
+	float terrain_plane_scale;
 	float3 terrain_height_scale;
 }
 
@@ -35,14 +35,13 @@ VOut VShader(float4 position : POSITION)
 {
 	VOut output;
 
-	output.tex_coord = ((position.xy / terrain_resolution) + 1) / 2;
+	output.tex_coord = (position.xy + 1) / 2;
 	float3 texture_sample = float3(0, 0, 0);
 	texture_sample.x = model_skin.GatherRed(skin_sampler, output.tex_coord);
 	texture_sample.y = model_skin.GatherGreen(skin_sampler, output.tex_coord);
 	texture_sample.z = model_skin.GatherBlue(skin_sampler, output.tex_coord);
 	float height = dot((float3(0.5, 0.5, 0.5) - texture_sample), terrain_height_scale);
-	//output.position = float4(position.xy, , position.w);
-	output.position = float4(position.x, position.y, height, position.w);
+	output.position = float4(position.x * terrain_plane_scale, position.y * terrain_plane_scale, height, position.w);
 
 
 	output.position = mul(model, output.position);
