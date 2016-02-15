@@ -70,6 +70,7 @@ function create_actor(ident)
 				["z"] = 0,
 			}
 			})
+			
 			self.height_data = self.callbacks.lookup_resource(4, "terrain.png", "data")
 			self.height_data_size = self.callbacks.lookup_resource(4, "terrain.png", "size")
 			print(self.height_data_size[1])
@@ -78,6 +79,7 @@ function create_actor(ident)
 			print(self:lookup_grid_height(self.height_data_size[1]-1, 0))
 			print(self:lookup_grid_height(0, self.height_data_size[2]-1))
 			print(self:lookup_grid_height(self.height_data_size[1]-1, self.height_data_size[2]-1))
+			
 		end,
 		lookup_grid_height = function(self, x, y)
 			-- Requires x in [0, self.height_data_size[1]-1] and y in x in [0, self.height_data_size[2]-1]

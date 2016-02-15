@@ -3,6 +3,7 @@
 
 #include <memory>
 using std::unique_ptr;
+#include <chrono>
 
 #include "stdafx.h"
 
@@ -35,6 +36,8 @@ using std::unique_ptr;
 #ifndef HID_USAGE_GENERIC_MOUSE
 #define HID_USAGE_GENERIC_MOUSE        ((USHORT) 0x02)
 #endif
+
+using std::chrono::high_resolution_clock;
 
 WiimoteInterface wiimote_interface;
 WiimoteHandler* wiimote;
@@ -81,6 +84,13 @@ void GraphicsLoop() {
 	}
 }
 
+high_resolution_clock::time_point frame_start;
+void PrintTime(string time_ident) {
+	high_resolution_clock::time_point new_time = high_resolution_clock::now();
+	std::cout << "TIME AT " << time_ident << ": " << std::chrono::duration_cast<std::chrono::duration<double>>(new_time - frame_start).count() << std::endl;
+	frame_start = new_time;
+}
+
 void UpdateLoop() {
 	MSG msg;
 	int prev_time = timeGetTime();
@@ -111,8 +121,7 @@ void UpdateLoop() {
 
 	while (TRUE)
 	{
-		TimeTracker::FrameStart();
-		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 
@@ -120,13 +129,10 @@ void UpdateLoop() {
 				break;
 			}
 		}
-		TimeTracker::FrameEvent("Windows Message Handling");
 
 		int new_time = timeGetTime();
 		int time_delta_ms = new_time - prev_time;
 		prev_time = new_time;
-
-		TimeTracker::FrameEvent("Update states");
 
 		graphics_objects.input_handler->UpdateKeyboardState();
 		unique_lock<mutex> player_position_lock(player_position_access);
@@ -162,6 +168,7 @@ void UpdateLoop() {
 		if (graphics_objects.input_handler->GetKeyPressed('K')) {
 			aim_movement[0] -= 1;
 		}
+
 		actor_handler.root_environment_.StoreToStack(tuple<>());
 		actor_handler.root_environment_.StoreToTable(string("aim_movement"), aim_movement);
 		actor_handler.root_environment_.SetGlobalFromStack(string("user_input"));
@@ -180,10 +187,7 @@ void UpdateLoop() {
 		player_position_lock.unlock();
 
 		infinite_light_direction = Quaternion::RotationAboutAxis(AID_Y, time_delta_ms * movement_scale).ApplyToVector(infinite_light_direction);
-		//shader_settings_buffer->EditBufferDataRef().SetLightSourceDirection(infinite_light_direction);
-
-		TimeTracker::FrameEvent("Update Game Objects");
-
+		
 		player_look_camera.location = player_location;
 		if (graphics_objects.input_handler->IsOculusActive()) {
 			player_orientation_quaternion = OculusHelper::ConvertOculusQuaternionToQuaternion(graphics_objects.input_handler->GetHeadPose().ThePose.Orientation) * player_orientation_quaternion;
@@ -197,7 +201,7 @@ void UpdateLoop() {
 		player_look_camera.InvalidateViewMatrices();
 		LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
 		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
-		
+
 		for (Lua::InteractableObject* update_tick_listener : actor_handler.LookupListeners("update_tick")) {
 			assert(update_tick_listener->CallLuaFunc(string("update_tick"), time_delta_ms));
 		}
@@ -252,10 +256,8 @@ void UpdateLoop() {
 			current_look.actor->lua_interface_.CallLuaFunc(string("look_maintained"), current_look.id_of_object.GetId(), current_look.where_on_object[0], current_look.where_on_object[1]);
 		}
 		previous_look = current_look;
-		
+
 		graphics_objects.entity_handler->FinishUpdate();
-		
-		TimeTracker::FrameEvent("Finalize object position stuff");
 	}
 
 	// clean up DirectX and COM
@@ -384,7 +386,7 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;
-	TimeTracker::track_time = false;
+	TimeTracker::track_time = true;
 
 	graphics_objects.input_handler->SetUsePredictiveTiming(true);
 	graphics_objects.input_handler->SetPredictiveTiming(-5);
