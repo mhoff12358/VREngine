@@ -47,7 +47,7 @@ function create_actor(ident)
 				["pipeline_stage"] = "vertex",
 				["data_format"] = { { "float", 1 } }
 			},
-			["entity_group_name"] = "basic"
+			["entity_group_name"] = "terrain"
 		}
 	}
 	
@@ -72,6 +72,20 @@ function create_actor(ident)
 			})
 			
 			self.height_data = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data0 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data1 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data2 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data3 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data4 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data5 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data6 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data7 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data8 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data9 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data10 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data11 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data12 = self.callbacks.lookup_resource(4, "terrain.png", "data")
+			self.height_data13 = self.callbacks.lookup_resource(4, "terrain.png", "data")
 			self.height_data_size = self.callbacks.lookup_resource(4, "terrain.png", "size")
 			print(self.height_data_size[1])
 			print(self.height_data_size[2])
