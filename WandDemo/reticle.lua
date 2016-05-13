@@ -21,7 +21,7 @@ function create_actor(ident)
 	actor_table.settings_blocks = {
 		{
 			["components"] = { "Plane" },
-			["shader_file_name"] = "textured.hlsl",
+			["shader_file_name"] = "textured_alphanodepth.hlsl",
 			["texture_file_name"] = "reticle.png",
 			["entity_group_name"] = "alpha"
 		},

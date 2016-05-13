@@ -62,7 +62,7 @@ int ActorHandler::AddListener(lua_State* L) {
 	Lua::Environment env(L);
 	string listener_set_name;
 	assert(env.LoadFromStack(&listener_set_name, Lua::Index(1)));
-	void* actor_ptr;
+	void* actor_ptr = NULL;
 	assert(env.LoadFromStack(&actor_ptr, Lua::Index(1)));
 	LookupListeners(listener_set_name).insert((Lua::InteractableObject*)actor_ptr);
 	return 0;
@@ -72,7 +72,7 @@ int ActorHandler::RemoveListener(lua_State* L) {
 	Lua::Environment env(L);
 	string listener_set_name;
 	assert(env.LoadFromStack(&listener_set_name, Lua::Index(1)));
-	void* actor_ptr;
+	void* actor_ptr = NULL;
 	assert(env.LoadFromStack(&actor_ptr, Lua::Index(1)));
 	LookupListeners(listener_set_name).erase((Lua::InteractableObject*)actor_ptr);
 	return 0;

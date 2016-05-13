@@ -23,6 +23,9 @@
 #include <atomic>
 #include <thread>
 #include <mutex>
+#include <memory>
+#include <list>
+#include <queue>
 
 using std::string;
 using std::map;
@@ -37,5 +40,11 @@ using std::atomic;
 using std::thread;
 using std::mutex;
 using std::unique_lock;
+using std::unique_ptr;
+using std::list;
+using std::queue;
+using std::move;
+using std::swap;
+using std::make_unique;
 
 const float pi = 3.141593;

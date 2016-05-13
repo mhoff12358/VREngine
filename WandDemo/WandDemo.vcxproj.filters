@@ -37,6 +37,15 @@
     <Filter Include="Resource Files\Old Actor Scripts">
       <UniqueIdentifier>{7b148793-1072-4f8a-abee-e63d83baceb8}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Scene System">
+      <UniqueIdentifier>{fe1b4d6f-c892-44c6-99be-38b45bf4f985}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene System\Source Files">
+      <UniqueIdentifier>{9ec44dab-01a2-45cc-a0fa-7b42e079b9d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene System\Header Files">
+      <UniqueIdentifier>{7d68d671-aada-44e4-9b5a-131e1c220d82}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -52,9 +61,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="targetver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WiimoteInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="LightDetails.h">
@@ -99,15 +105,48 @@
     <ClInclude Include="InteractableFrustum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryArgs.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandArgs.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shmactor.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QueryResult.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Target.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CommandQueue.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Command.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorId.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ActorGroups.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecializedActors.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecializedCommandArgs.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WandDemo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="WiimoteInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LightDetails.cpp">
@@ -151,6 +190,39 @@
     </ClCompile>
     <ClCompile Include="InteractableFrustum.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandArgs.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryArgs.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Shmactor.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QueryResult.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Target.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CommandQueue.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Command.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorId.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ActorGroups.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SpecializedActors.cpp">
+      <Filter>Scene System\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +284,12 @@
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
     <FxCompile Include="mult_by_alpha.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="textured_alphanodepth.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="depth_to_white.hlsl">
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
   </ItemGroup>
