@@ -23,11 +23,13 @@ public:
 	virtual void PrepareToDie();
 	virtual void DependencyDying(const ActorId& dying_id);
 
+	void FailToHandleCommand(const CommandArgs& args);
+
 	void SetId(ActorId id);
 
 	static void SetScene(Scene* scene);
 
-private:
+protected:
 	void RegisterDependency(const Target& target);
 	CommandQueueLocation MakeCommandAfter(CommandQueueLocation location, const Target& target, unique_ptr<CommandArgs> args);
 	unique_ptr<QueryResult> AskQuery(const Target& target, unique_ptr<QueryArgs> args);

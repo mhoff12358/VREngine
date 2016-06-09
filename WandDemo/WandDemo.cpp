@@ -31,6 +31,7 @@ using std::unique_ptr;
 #include "Scene.h"
 #include "SpecializedActors.h"
 #include "SpecializedCommandArgs.h"
+#include "GraphicsObject.h"
 
 #include "openvr.h"
 
@@ -90,7 +91,6 @@ void GraphicsLoop() {
 }
 
 void UpdateLoop() {
-	Sleep(10000);
 	MSG msg;
 	int prev_time = timeGetTime();
 	ActorHandler actor_handler(graphics_objects);
@@ -100,9 +100,9 @@ void UpdateLoop() {
 
 	LookState previous_look = { Identifier(""), NULL, 0, { { 0, 0 } } };
 
-	unique_lock<mutex> device_context_lock(device_context_access);
+	//unique_lock<mutex> device_context_lock(device_context_access);
 	//actor_handler.LoadSceneFromLuaScript("cockpit_scene.lua");
-	device_context_lock.unlock();
+	//device_context_lock.unlock();
 
 	Camera player_look_camera;
 	player_look_camera.BuildViewMatrix();
@@ -121,9 +121,49 @@ void UpdateLoop() {
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.AddActorGroup();
+	game_scene::ActorId tick_registry = scene.AddActorGroup();
 	game_scene::ActorId camera_movement = scene.AddActor(
 		make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
 	scene.AddActorToGroup(camera_movement, controls_registry);
+	game_scene::ActorId graphics_resources = scene.AddActor(
+		make_unique<game_scene::actors::GraphicsResources>(
+			*graphics_objects.resource_pool,
+			*graphics_objects.entity_handler,
+			graphics_objects.view_state->device_interface));
+	scene.RegisterByName("GraphicsResources", graphics_resources);
+	game_scene::ActorId cockpit = scene.AddActor(
+		make_unique<game_scene::actors::GraphicsObject>());
+
+	game_scene::actors::GraphicsObjectDetails cockpit_details;
+	cockpit_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
+		"bars",
+		{
+			{"cockpit_bars.obj|MetalBars",
+			ObjLoader::OutputFormat(
+				ModelModifier(
+					{0, 1, 2},
+					{1, 1, 1},
+					{false, true}),
+				ObjLoader::vertex_type_all,
+				false)}
+		},
+		{});
+	cockpit_details.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
+	cockpit_details.shader_name_ = "texturedspecularlightsource.hlsl";
+	cockpit_details.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
+	cockpit_details.shader_settings_ = {
+		{0.0f, 0.5f, 0.0f},
+		{1.0f}
+	};
+	scene.ExecuteCommand(game_scene::Command(
+		game_scene::Target(cockpit),
+		make_unique<game_scene::CommandArgsWrapper<game_scene::actors::GraphicsObjectDetails>>(
+			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			cockpit_details)));
+	scene.ExecuteCommand(game_scene::Command(
+		game_scene::Target(cockpit),
+		make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixIdentity())));
+	scene.FlushCommandQueue();
 
 	while (TRUE)
 	{
@@ -232,13 +272,15 @@ void UpdateLoop() {
 		// Scene logic
 		game_scene::CommandQueueLocation tick_command = scene.MakeCommandAfter(
 			scene.FrontOfCommands(),
-			game_scene::Target::AllActors(),
-			make_unique<game_scene::commands::TimeTick>(time_delta_ms));
+			game_scene::Command(
+				game_scene::Target(tick_registry),
+				make_unique<game_scene::commands::TimeTick>(time_delta_ms)));
 		scene.MakeCommandAfter(
 			tick_command,
-			game_scene::Target(controls_registry),
-			make_unique<game_scene::commands::InputUpdate>(
-				graphics_objects.input_handler));
+			game_scene::Command(
+				game_scene::Target(controls_registry),
+				make_unique<game_scene::commands::InputUpdate>(
+					graphics_objects.input_handler)));
 		scene.FlushCommandQueue();
 
 		graphics_objects.entity_handler->FinishUpdate();
@@ -249,7 +291,6 @@ void UpdateLoop() {
 	if (graphics_objects.input_handler->IsHeadsetActive()) {
 		graphics_objects.oculus->Cleanup();
 	}
-
 }
 
 #include "LuaGameScripting/Environment.h"

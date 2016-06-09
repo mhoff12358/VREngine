@@ -7,17 +7,32 @@
 namespace game_scene {
 class Command {
 public:
-	Command(Command&& command);
-	Command(const Target& target, unique_ptr<CommandArgs> args) : target_(target), args_(move(args)) {}
+	Command(const Target& target, unique_ptr<CommandArgs> args)
+		: target_(target), owned_args_(move(args)), unowned_args_(nullptr) {}
+	Command(const Target& target, CommandArgs* args)
+		: target_(target), owned_args_(nullptr), unowned_args_() {}
+	Command(Command&& command)
+		: Command(command.target_, move(command.owned_args_), command.unowned_args_) {
+		command.target_ = Target(ActorId(-1));
+		command.unowned_args_ = nullptr;
+	}
+	~Command() {}
 	Command(const Command& command) = delete;
 
-	Command& operator=(Command other);
+	Command& operator=(Command&& other);
 
 	const Target& GetTarget() const;
 	const CommandArgs& GetArgs() const;
 
 private:
+	Command(
+		const Target& target,
+		unique_ptr<CommandArgs> owned_args,
+		CommandArgs* unowned_args)
+		: target_(target), owned_args_(move(owned_args)), unowned_args_(unowned_args) {}
+
 	Target target_;
-	unique_ptr<CommandArgs> args_;
+	unique_ptr<CommandArgs> owned_args_;
+	CommandArgs* unowned_args_;
 };
 }  // game_scene

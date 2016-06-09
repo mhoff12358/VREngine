@@ -67,30 +67,30 @@ void Actor::LoadModel(Lua::Environment lua_environment) {
 		if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
 			lua_environment.GetFromTableToStack(string("model_modifier"));
 			if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
-				if (lua_environment.LoadArrayFromTable(string("axis_swap"), output_formats_[model_num].model_modifier.axis_swap, Lua::Environment::stack_top, 3) &&
-					lua_environment.LoadArrayFromTable(string("axis_scale"), output_formats_[model_num].model_modifier.axis_scale, Lua::Environment::stack_top, 3) &&
-					lua_environment.LoadArrayFromTable(string("invert_texture_axis"), output_formats_[model_num].model_modifier.invert_texture_axis, Lua::Environment::stack_top, 2)) {
-					output_formats_[model_num].vertex_type = ObjLoader::vertex_type_all;
+				if (lua_environment.LoadArrayFromTable(string("axis_swap"), output_formats_[model_num].model_modifier_.axis_swap_.data(), Lua::Environment::stack_top, 3) &&
+					lua_environment.LoadArrayFromTable(string("axis_scale"), output_formats_[model_num].model_modifier_.axis_scale_.data(), Lua::Environment::stack_top, 3) &&
+					lua_environment.LoadArrayFromTable(string("invert_texture_axis"), output_formats_[model_num].model_modifier_.invert_texture_axis_.data(), Lua::Environment::stack_top, 2)) {
+					output_formats_[model_num].vertex_type_ = ObjLoader::vertex_type_all;
 				}
 			}
 			lua_environment.RemoveFromStack();
 			string vertex_type_name;
 			lua_environment.LoadFromTable(string("vertex_type"), &vertex_type_name);
 			if (vertex_type_name == "location") {
-				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_location;
+				output_formats_[model_num].vertex_type_ = ObjLoader::vertex_type_location;
 			}
 			else if (vertex_type_name == "texture") {
-				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_texture;
+				output_formats_[model_num].vertex_type_ = ObjLoader::vertex_type_texture;
 			}
 			else if (vertex_type_name == "normal") {
-				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_normal;
+				output_formats_[model_num].vertex_type_ = ObjLoader::vertex_type_normal;
 			}
 			else if (vertex_type_name == "all") {
-				output_formats_[model_num].vertex_type = ObjLoader::vertex_type_all;
+				output_formats_[model_num].vertex_type_ = ObjLoader::vertex_type_all;
 			}
 			bool load_as_dynamic;
 			if (lua_environment.LoadFromTable(string("load_as_dynamic"), &load_as_dynamic)) {
-				output_formats_[model_num].load_as_dynamic = load_as_dynamic;
+				output_formats_[model_num].load_as_dynamic_ = load_as_dynamic;
 			}
 		}
 		lua_environment.RemoveFromStack();
@@ -109,10 +109,10 @@ void Actor::LoadModel(Lua::Environment lua_environment) {
 				while (lua_environment.IterateOverTable(&object_name, &vertices_in, NULL)) {
 					vector<Vertex> vertices_for_model;
 					for (const vector<float>& vertex_in : vertices_in) {
-						vertices_for_model.push_back(Vertex(output_formats_[model_num].vertex_type, vertex_in));
+						vertices_for_model.push_back(Vertex(output_formats_[model_num].vertex_type_, vertex_in));
 					}
 					ModelStorageDescription model_description;
-					if (output_formats_[model_num].load_as_dynamic) {
+					if (output_formats_[model_num].load_as_dynamic_) {
 						model_description = { false, true, false };
 					}
 					else {
@@ -137,7 +137,7 @@ void Actor::LoadShaders(Lua::Environment lua_environment, const VRBackendBasics&
 		string preload_shader_name;
 		while (lua_environment.IterateOverTable(&key, &preload_shader_name, NULL)) {
 			graphics_objects.resource_pool->LoadPixelShader(preload_shader_name);
-			graphics_objects.resource_pool->LoadVertexShader(preload_shader_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType());
+			graphics_objects.resource_pool->LoadVertexShader(preload_shader_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType());
 		}
 	}
 	lua_environment.RemoveFromStack();
@@ -218,7 +218,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 							ES_SETTINGS,
 							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
 							ShaderSettings(used_settings),
 							Model(),
 							NULL,
@@ -230,7 +230,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 							ES_SETTINGS,
 							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
+							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
 							ShaderSettings(used_settings),
 							Model(),
 							NULL,
@@ -241,7 +241,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
 						ES_SETTINGS,
 						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type.GetVertexType(), output_formats_[model_num].vertex_type.GetSizeVertexType()),
+						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
 						ShaderSettings(used_settings),
 						Model(),
 						NULL), entity_group_number));
@@ -450,7 +450,7 @@ int Actor::SetVertices(lua_State* L) {
 	while (env.IterateOverTable(&first_vertex_index, &new_vertices, NULL)) {
 		vector<Vertex> vertices;
 		for (const vector<float>& new_vertex : new_vertices) {
-			vertices.push_back(Vertex(output_formats_[model_number].vertex_type, new_vertex));
+			vertices.push_back(Vertex(output_formats_[model_number].vertex_type_, new_vertex));
 		}
 		new_mutation.AddVertexBlock(first_vertex_index, vertices.data(), vertices.size());
 	}

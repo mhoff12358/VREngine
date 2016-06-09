@@ -141,6 +141,15 @@
     <ClInclude Include="SpecializedCommandArgs.h">
       <Filter>Scene System\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsObject.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SpecializedQueries.h">
+      <Filter>Scene System\Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConstantBufferDescribed.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -223,6 +232,12 @@
     </ClCompile>
     <ClCompile Include="SpecializedActors.cpp">
       <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GraphicsObject.cpp">
+      <Filter>Scene System\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ConstantBufferDescribed.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

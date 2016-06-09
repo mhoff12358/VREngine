@@ -7,6 +7,10 @@ ActorId::ActorId(int id)
 {
 }
 
+ActorId::ActorId() : id_(UNSET_ID)
+{
+}
+
 ActorId::~ActorId()
 {
 }

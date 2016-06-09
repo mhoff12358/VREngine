@@ -173,8 +173,10 @@
     <ClInclude Include="CommandArgs.h" />
     <ClInclude Include="CommandQueue.h" />
     <ClInclude Include="Component.h" />
+    <ClInclude Include="ConstantBufferDescribed.h" />
     <ClInclude Include="ConstantBufferLua.h" />
     <ClInclude Include="Command.h" />
+    <ClInclude Include="GraphicsObject.h" />
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
@@ -191,6 +193,7 @@
     <ClInclude Include="Shmactor.h" />
     <ClInclude Include="SpecializedActors.h" />
     <ClInclude Include="SpecializedCommandArgs.h" />
+    <ClInclude Include="SpecializedQueries.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Target.h" />
     <ClInclude Include="targetver.h" />
@@ -204,7 +207,9 @@
     <ClCompile Include="CommandArgs.cpp" />
     <ClCompile Include="CommandQueue.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="ConstantBufferDescribed.cpp" />
     <ClCompile Include="ConstantBufferLua.cpp" />
+    <ClCompile Include="GraphicsObject.cpp" />
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />

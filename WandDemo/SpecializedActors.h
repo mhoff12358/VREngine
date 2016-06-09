@@ -24,19 +24,28 @@ private:
 	Camera* camera_;
 };
 
+enum class GraphicsResourceId {
+	RESOURCE_POOL,
+	ENTITY_HANDLER,
+	DEVICE_INTERFACE,
+};
+
 class GraphicsResources : public Shmactor {
 public:
-	GraphicsResources(ResourcePool& resource_pool, EntityHandler& entity_handler)
-		: resource_pool_(resource_pool), entity_handler_(entity_handler) {}
+	GraphicsResources(
+		ResourcePool& resource_pool, EntityHandler& entity_handler, ID3D11Device* device_interface)
+		: resource_pool_(resource_pool),
+		  entity_handler_(entity_handler),
+		  device_interface_(device_interface) {}
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
+	void HandleCommand(const CommandArgs& args) override;
+
+	void RequireResource(ResourceIdent resource_ident);
 
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
-};
-
-class GraphicsEntity {
-
+	ID3D11Device* device_interface_;
 };
 
 }  // actors

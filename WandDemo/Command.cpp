@@ -2,9 +2,7 @@
 #include "Command.h"
 
 namespace game_scene {
-Command::Command(Command&& command) : Command(command.target_, move(command.args_)) {} 
-
-Command& Command::operator=(Command other)
+Command& Command::operator=(Command&& other)
 {
 	swap(*this, other);
 	return *this;
@@ -15,7 +13,10 @@ const Target& Command::GetTarget() const {
 }
 
 const CommandArgs& Command::GetArgs() const {
-	return *args_;
+	if (unowned_args_) {
+		return *unowned_args_;
+	}
+	return *owned_args_;
 }
 
 }  // game_scene

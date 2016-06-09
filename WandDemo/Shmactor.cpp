@@ -37,6 +37,12 @@ unique_ptr<QueryResult> Shmactor::AskQuery(const Target& target, unique_ptr<Quer
 	return scene_->AskQuery(target, move(args));
 }
 
+void Shmactor::FailToHandleCommand(const CommandArgs& args) {
+	std::cout <<
+		"ACTOR ID: " << id_.id_ <<
+		" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
+}
+
 void Shmactor::SetId(ActorId id) {
 	id_ = id;
 }

@@ -14,6 +14,7 @@ class ActorId
 {
 public:
 	explicit ActorId(int id);
+	ActorId();
 	~ActorId();
 
 	static ActorId AllActors;
