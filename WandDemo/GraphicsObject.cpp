@@ -138,7 +138,8 @@ void GraphicsObject::CreateSettingsEntity(
 					graphics_resources.resource_pool_.LoadExistingVertexShader(details.shader_name_),
 					ShaderSettings(shader_settings_buffer_.get()),
 					Model(),
-					NULL), details.entity_group_));
+					NULL,
+					texture_view), details.entity_group_));
 		}
 	}
 }

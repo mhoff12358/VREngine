@@ -40,8 +40,7 @@ VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD0, float2 tex_c
 	float3 light_direction = light_location - output.position.xyz;
 	output.position = mul(view_projection, output.position);
 	output.tex_coord = tex_coord;
-	output.light_scale = max(dot(mul(model_inv_trans, normal).xyz, light_direction) * (1 - ambient_light), 0.0f) + ambient_light;
-	output.light_scale = ambient_light;
+	output.light_scale = max(dot(normalize(mul(model_inv_trans, normal).xyz), normalize(light_direction)) * (1 - ambient_light), 0.0f) + ambient_light;
 
     return output;
 }
@@ -53,8 +52,5 @@ POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0, float 
 	float4 texture_sample = model_skin.Sample(skin_sampler, tex_coord);
 	result.t1 = float4(texture_sample.xyz * light_scale, texture_sample.w);
 	result.t2 = result.t1;
-	//result.t1 = float4(light_scale, 0, 0, 1.0);
-	//result.t1 = float4(light_location, 1.0);
-	//result.t2 = float4(light_location, 1.0);
 	return result;
 }

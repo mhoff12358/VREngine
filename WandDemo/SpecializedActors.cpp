@@ -19,7 +19,6 @@ void MovableCamera::HandleCommand(const CommandArgs& args) {
 
 void MovableCamera::HandleInput(const commands::InputUpdate& args) {
 	if (args.input_.GetKeyPressed('W')) {
-		std::cout << "W is pressed!" << std::endl;
 	}
 }
 

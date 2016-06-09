@@ -153,7 +153,7 @@ void UpdateLoop() {
 	cockpit_details.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
 	cockpit_details.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
-		{1.0f}
+		{0.2f}
 	};
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
