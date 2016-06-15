@@ -35,6 +35,15 @@ public:
 	vector<vector<float>> GetValue() const { return *this; };
 };
 
+class TextureDetails {
+public:
+	TextureDetails(string name, bool use_in_vertex, bool use_in_pixel)
+		: name_(name), use_in_vertex_(use_in_vertex), use_in_pixel_(use_in_pixel) {}
+	string name_;
+	bool use_in_vertex_;
+	bool use_in_pixel_;
+};
+
 class ComponentHeirarchy {
 public:
 	ComponentHeirarchy() {}
@@ -50,24 +59,15 @@ public:
 	
 	// Component values
 	vector<tuple<string, ObjLoader::OutputFormat>> models_;
-};
-
-class TextureDetails {
-public:
-	TextureDetails(string name, bool use_in_vertex, bool use_in_pixel)
-		: name_(name), use_in_vertex_(use_in_vertex), use_in_pixel_(use_in_pixel) {}
-	string name_;
-	bool use_in_vertex_;
-	bool use_in_pixel_;
+	vector<TextureDetails> textures_;
+	string shader_name_;
+	ShaderSettingsValue shader_settings_;
+	unsigned int entity_group_;
 };
 
 class GraphicsObjectDetails {
 public:
 	ComponentHeirarchy heirarchy_;
-	vector<TextureDetails> textures_;
-	string shader_name_;
-	ShaderSettingsValue shader_settings_;
-	unsigned int entity_group_;
 };
 
 class GraphicsObject : public Shmactor {
@@ -78,19 +78,20 @@ public:
 	void RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details);
 	void CreateSettingsEntity(
 		actors::GraphicsResources& graphics_resources,
-		const GraphicsObjectDetails& details);
+		const ComponentHeirarchy& heirarchy, unsigned int reserved_space);
 	void CreateComponents(const GraphicsObjectDetails& details);
 	void CreateIndividualComponent(
-		actors::GraphicsResources& graphics_resources, const GraphicsObjectDetails& details,
-		const ComponentHeirarchy& component_heirarchy, unsigned int reserved_space);
+		actors::GraphicsResources& graphics_resources,
+		const ComponentHeirarchy& heirarchy, unsigned int reserved_space);
 
 	// Update methods.
 	void PlaceComponent(const commands::ComponentPlacement& placement);
 
-	vector<Component> components_;
+	// Each tuple is a component, an unsigned int that is the entity numbers of
+	// the settings entities, and a unique_ptr holding the settings' constant
+	// buffer.
+	vector<tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>> components_;
 	map<string, unsigned int> component_lookup_;
-	vector<unsigned int> settings_entities_;
-	unique_ptr<ConstantBuffer> shader_settings_buffer_;
 };
 
 }  // actors

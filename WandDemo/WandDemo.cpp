@@ -148,10 +148,10 @@ void UpdateLoop() {
 				false)}
 		},
 		{});
-	cockpit_details.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
-	cockpit_details.shader_name_ = "texturedspecularlightsource.hlsl";
-	cockpit_details.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
-	cockpit_details.shader_settings_ = {
+	cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
+	cockpit_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
+	cockpit_details.heirarchy_.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
+	cockpit_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
 		{0.2f}
 	};
@@ -316,8 +316,15 @@ void LuaTest() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
-	vr::EVRInitError eError = vr::VRInitError_None;
-	vr::IVRSystem* system = vr::VR_Init( &eError, vr::VRApplication_Scene );
+	bool hmd_active = false;
+	bool hmd_desired = false;
+	bool hmd_found = vr::VR_IsHmdPresent();
+	vr::IVRSystem* system = nullptr;
+	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
+		vr::EVRInitError eError = vr::VRInitError_None;
+		system = vr::VR_Init( &eError, vr::VRApplication_Scene );
+		hmd_active = true;
+	}
 	D3D11_BLEND_DESC no_alpha_blend_state_desc;
 	no_alpha_blend_state_desc.AlphaToCoverageEnable = false;
 	no_alpha_blend_state_desc.IndependentBlendEnable = false;
@@ -382,13 +389,12 @@ int _tmain(int argc, _TCHAR* argv[])
 	keep_nearer_depth_test.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	keep_nearer_depth_test.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	bool run_in_oculus_mode = false;
-	graphics_objects = BeginDirectx(run_in_oculus_mode, "");
+	graphics_objects = BeginDirectx(hmd_active, "");
 
-	int stage_repetition = run_in_oculus_mode ? 2 : 0;
+	int stage_repetition = hmd_active ? 2 : 0;
 
 	map<string, PipelineCamera> pipeline_cameras;
-	if (run_in_oculus_mode) {
+	if (hmd_active) {
 		array<float, 2> fov_0 = graphics_objects.oculus->GetEyeFov(0);
 		array<float, 2> fov_1 = graphics_objects.oculus->GetEyeFov(1);
 		pipeline_cameras["player_head|0"].SetPerspectiveProjection(
