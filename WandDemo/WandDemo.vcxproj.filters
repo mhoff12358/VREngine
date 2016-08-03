@@ -339,6 +339,9 @@
     <Object Include="inversed_cube.obj">
       <Filter>Resource Files\Models</Filter>
     </Object>
+    <Object Include="square.obj">
+      <Filter>Resource Files\Models</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="glowy_console.png">
