@@ -19,6 +19,9 @@ unique_ptr<QueryResult> Shmactor::AnswerQuery(const QueryArgs& args) {
 	return make_unique<QueryResult>(ResultType::EMPTY);
 }
 
+void Shmactor::AddedToScene() {
+}
+
 void Shmactor::PrepareToDie() {
 }
 

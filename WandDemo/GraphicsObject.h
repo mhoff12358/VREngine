@@ -62,7 +62,7 @@ public:
 	vector<TextureDetails> textures_;
 	string shader_name_;
 	ShaderSettingsValue shader_settings_;
-	unsigned int entity_group_;
+	string entity_group_;
 };
 
 class GraphicsObjectDetails {
@@ -74,6 +74,7 @@ class GraphicsObject : public Shmactor {
 public:
 	void HandleCommand(const CommandArgs& args);
 
+private:
 	// Creation methods.
 	void RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details);
 	void CreateSettingsEntity(

@@ -20,6 +20,7 @@ public:
 	// Overridable behaviors
 	virtual void HandleCommand(const CommandArgs& args);
 	virtual unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
+	virtual void AddedToScene();
 	virtual void PrepareToDie();
 	virtual void DependencyDying(const ActorId& dying_id);
 

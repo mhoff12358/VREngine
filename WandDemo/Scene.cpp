@@ -93,6 +93,7 @@ ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor) {
 	ActorId new_id = ActorId::GetNewId();
 	new_actor->SetId(new_id);
 	actor_lookup_.emplace(new_id, move(new_actor));
+	actor_lookup_[new_id]->AddedToScene();
 	return new_id;
 }
 

@@ -32,6 +32,7 @@ using std::unique_ptr;
 #include "SpecializedActors.h"
 #include "SpecializedCommandArgs.h"
 #include "GraphicsObject.h"
+#include "HeadsetInterface.h"
 
 #include "openvr.h"
 
@@ -132,6 +133,12 @@ void UpdateLoop() {
 	game_scene::ActorId weird_wall = scene.AddActor(
 		make_unique<game_scene::actors::GraphicsObject>());
 
+	if (graphics_objects.oculus->IsInitialized()) {
+		game_scene::ActorId headset_interface = scene.AddActor(
+			make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus));
+		scene.AddActorToGroup(headset_interface, tick_registry);
+	}
+
 	game_scene::actors::GraphicsObjectDetails square_details;
 	square_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
 		"square",
@@ -148,7 +155,7 @@ void UpdateLoop() {
 		{});
 	square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
 	square_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
-	square_details.heirarchy_.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
+	square_details.heirarchy_.entity_group_ = "basic";
 	square_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
 		{0.2f}
@@ -169,7 +176,7 @@ void UpdateLoop() {
 		{});
 	cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
 	cockpit_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
-	cockpit_details.heirarchy_.entity_group_ = graphics_objects.render_pipeline->entity_group_associations_["basic"];
+	cockpit_details.heirarchy_.entity_group_ = "basic";
 	cockpit_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
 		{0.2f}
@@ -217,12 +224,24 @@ void UpdateLoop() {
 			}
 		}
 
-		while (graphics_objects.oculus->IsInitialized() && graphics_objects.oculus->GetLatestEvent(&vr_msg)) {
-			switch (vr_msg.eventType) {
-			case vr::VREvent_InputFocusCaptured:
-				std::cout << "Input focus captured" << std::endl;
-				break;
+		if (graphics_objects.oculus->IsInitialized()) {
+			while (graphics_objects.oculus->ProcessAndReturnLatestEvent(&vr_msg)) {
+				switch (vr_msg.eventType) {
+				case vr::VREvent_InputFocusCaptured:
+					std::cout << "Input focus captured" << std::endl;
+					break;
+				case vr::VREvent_TrackedDeviceActivated:
+					graphics_objects.oculus->RegisterTrackedObject(vr_msg.trackedDeviceIndex);
+					break;
+				case vr::VREvent_TrackedDeviceDeactivated:
+					graphics_objects.oculus->UnregisterTrackedObject(vr_msg.trackedDeviceIndex);
+					break;
+				default:
+					break;
+				}
 			}
+
+			graphics_objects.oculus->UpdateGamePoses();
 		}
 
 		int new_time = timeGetTime();

@@ -7,11 +7,11 @@ Component::Component(ID3D11Device* device_interface)
 	transformation_buffer_.CreateBuffer(device_interface);
 }
 
-void Component::AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int entity_group_number, vector<Model> models) {
-	AddEntitiesToHandler(entity_handler, entity_group_number, models.begin(), models.end());
+void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entity_group_name, vector<Model> models) {
+	AddEntitiesToHandler(entity_handler, entity_group_name, models.begin(), models.end());
 }
 
-void Component::AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int entity_group_number, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models) {
+void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entity_group_name, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models) {
 	number_of_entities_ = std::distance(first_model, end_of_models);
 	assert(number_of_entities_ > 0);
 
@@ -24,7 +24,7 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int
 		VertexShader(),
 		ShaderSettings(NULL),
 		*current_model,
-		&transformation_buffer_), entity_group_number);
+		&transformation_buffer_), entity_group_name);
 	//trans));
 	for (++current_model; current_model != end_of_models; ++current_model) {
 		entity_handler.AddEntity(Entity(
@@ -33,7 +33,7 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, unsigned int
 			VertexShader(),
 			ShaderSettings(NULL),
 			*current_model,
-			NULL), entity_group_number);
+			NULL), entity_group_name);
 	}
 }
 
