@@ -15,6 +15,7 @@ public:
 		MULTIPLE = 1,
 
 		GRAPHICS_RESOURCES = 100,
+		LUA_RUNTIME = 200,
 	};
 
 	int Type() {return id_;}

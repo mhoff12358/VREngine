@@ -2,6 +2,7 @@
 
 #include "SpecializedActors.h"
 #include "SpecializedQueries.h"
+#include "Scene.h"
 
 namespace game_scene {
 namespace actors {
@@ -20,6 +21,14 @@ void MovableCamera::HandleCommand(const CommandArgs& args) {
 void MovableCamera::HandleInput(const commands::InputUpdate& args) {
 	if (args.input_.GetKeyPressed('W')) {
 	}
+}
+
+void GraphicsResources::AddedToScene() {
+	if (scene_->FindByName("GraphicsResources") != ActorId::UnsetId) {
+		std::cout << "Attempting to register a second GraphicsResources instance" << std::endl;
+		return;
+	}
+	scene_->RegisterByName("GraphicsResources", id_);
 }
 
 void GraphicsResources::HandleCommand(const CommandArgs& args) {

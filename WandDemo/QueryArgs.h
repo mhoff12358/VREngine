@@ -10,6 +10,7 @@ public:
 
 	enum QueryTypeId : int {
 		GRAPHICS_RESOURCES = 100,
+		LUA_RUNTIME = 200,
 	};
 
 	int Type() {return id_;}
@@ -37,4 +38,11 @@ public:
 
 	WrappedType data_;
 };
+
+class EmptyQuery : public QueryArgs {
+public:
+	EmptyQuery(QueryType type) : QueryArgs(type) {}
+	virtual ~EmptyQuery() {}
+};
+
 }  // game_scene

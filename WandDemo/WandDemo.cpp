@@ -25,14 +25,14 @@ using std::unique_ptr;
 
 #include "gaussian.h"
 
-#include "LuaGameScripting/Environment.h"
-#include "LuaGameScripting/InteractableObject.h"
-
 #include "Scene.h"
 #include "SpecializedActors.h"
 #include "SpecializedCommandArgs.h"
 #include "GraphicsObject.h"
 #include "HeadsetInterface.h"
+#include "NichijouGraph.h"
+
+#include "BoostPythonWrapper.h"
 
 #include "openvr.h"
 
@@ -113,6 +113,8 @@ void UpdateLoop() {
 		std::cout << "Error registering raw input device" << std::endl;
 	}
 
+	Py_Initialize();
+
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.AddActorGroup();
@@ -125,13 +127,14 @@ void UpdateLoop() {
 			*graphics_objects.resource_pool,
 			*graphics_objects.entity_handler,
 			graphics_objects.view_state->device_interface));
-	scene.RegisterByName("GraphicsResources", graphics_resources);
 	game_scene::ActorId cockpit = scene.AddActor(
 		make_unique<game_scene::actors::GraphicsObject>());
 	game_scene::ActorId floor = scene.AddActor(
 		make_unique<game_scene::actors::GraphicsObject>());
 	game_scene::ActorId weird_wall = scene.AddActor(
 		make_unique<game_scene::actors::GraphicsObject>());
+	game_scene::ActorId nichijou_graph = scene.AddActor(
+		make_unique<game_scene::actors::NichijouGraph>());
 
 	if (graphics_objects.oculus->IsInitialized()) {
 		game_scene::ActorId headset_interface = scene.AddActor(
@@ -360,23 +363,6 @@ void UpdateLoop() {
 	if (graphics_objects.input_handler->IsHeadsetActive()) {
 		graphics_objects.oculus->Cleanup();
 	}
-}
-
-#include "LuaGameScripting/Environment.h"
-#include "LuaGameScripting/MemberFunctionWrapper.h"
-void LuaTest() {
-
-	Lua::Environment env(true);
-	env.RunFile("lua_test.lua");
-
-	//tuple<float, float, int, string> vals;
-	//env.LoadTupleElement<1, 4, float, float, int, string>(vals, Lua::Index(-1));
-	//vector<vector<string>> vals;
-	//bool success = env.LoadGlobal(string("bah"), &vals);
-
-	env.PrintStack();
-
-	std::cout << "Finish lua test" << std::endl;
 }
 
 #include "PipelineCamera.h"
