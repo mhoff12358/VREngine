@@ -3,14 +3,10 @@
 
 namespace game_scene {
 
-QueryResult::QueryResult(ResultType type) : type_(type) {
+QueryResult::QueryResult(QueryType type) : type_(type) {
 }
 
-QueryResult QueryResult::EmptyResult() {
-	return QueryResult(ResultType::EMPTY);
-}
-
-MultipleQueryResult::MultipleQueryResult() : QueryResult(ResultType::MULTIPLE) {
+MultipleQueryResult::MultipleQueryResult() : QueryResult(QueryType::MULTIPLE) {
 }
 
 void MultipleQueryResult::AddResult(ActorId actor_id, unique_ptr<QueryResult> result) {

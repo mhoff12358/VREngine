@@ -28,6 +28,9 @@ public:
 
 	// Universal interface
 	ActorId AddActor(unique_ptr<Shmactor> new_actor);
+	ActorId AddActor(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after);
+	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(unique_ptr<Shmactor> new_actor);
+	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after);
 	ActorId AddActorGroup();
 	void AddActorToGroup(ActorId actor, ActorId group);
 

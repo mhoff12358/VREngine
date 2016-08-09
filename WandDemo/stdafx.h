@@ -46,5 +46,6 @@ using std::queue;
 using std::move;
 using std::swap;
 using std::make_unique;
+using std::get;
 
 const float pi = 3.141593;

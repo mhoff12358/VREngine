@@ -10,12 +10,28 @@ namespace game_scene {
 namespace actors {
 
 void HeadsetInterface::AddedToScene() {
+	if (scene_->FindByName("HeadsetInterface") != ActorId::UnsetId) {
+		std::cout << "Attempting to register a second HeadsetInterface instance" << std::endl;
+		return;
+	}
+	scene_->RegisterByName("HeadsetInterface", id_);
+
 	controller_graphics_[0] = CreateControllerActor();
 	controller_graphics_[1] = CreateControllerActor();
 }
 
 void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
+	case CommandType::ADDED_TO_SCENE:
+	{
+		controller_listeners_ = scene_->AddActorGroup();
+	}
+	break;
+	case commands::HeadsetInterfaceCommandType::REGISTER_CONTROLLER_LISTENER:
+	{
+		scene_->AddActorToGroup(dynamic_cast<const WrappedCommandArgs<ActorId>&>(args).data_, controller_listeners_);
+	}
+	break;
 	case commands::InputCommandType::TICK:
 		for (unsigned int i = 0; i < 2; i++) {
 			vr::TrackedDeviceIndex_t controller_index = headset_.GetDeviceIndex(vr::TrackedDeviceClass_Controller, i);
@@ -30,13 +46,17 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 				// Should make the actor visible here.
 			}
 			controller_connectedness_[i] = true;
-			controller_positions_[i] = headset_.GetGamePose(controller_index);
-			auto a = controller_positions_[i].GetMatrix();
+			Pose new_controller_position = headset_.GetGamePose(controller_index);
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-				game_scene::Target(controller_graphics_[i]),
-				make_unique<game_scene::commands::ComponentPlacement>("Sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
+				Target(controller_listeners_),
+				make_unique<WrappedCommandArgs<Location>>(
+					commands::HeadsetInterfaceCommandType::LISTEN_CONTROLLER_MOVEMENT,
+					new_controller_position.location_ + (controller_positions_[i].location_ * -1))));
+			controller_positions_[i] = new_controller_position;
+			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+				Target(controller_graphics_[i]),
+				make_unique<commands::ComponentPlacement>("Sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
 		}
-		//std::cout << controller_positions_[0].location_[0] << "\t|\t" << controller_positions_[0].location_[1] << "\t|\t" << controller_positions_[0].location_[2] << "\t|\t" << std::endl;
 	}
 }
 
@@ -64,7 +84,7 @@ ActorId HeadsetInterface::CreateControllerActor() {
 	ActorId new_controller = scene_->AddActor(make_unique<game_scene::actors::GraphicsObject>());
 	CommandQueueLocation created_actor =
 	scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(new_controller), 
-		make_unique<game_scene::CommandArgsWrapper<game_scene::actors::GraphicsObjectDetails>>(
+		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
 			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
 			sphere_details)));
 	scene_->MakeCommandAfter(created_actor, Command(

@@ -6,13 +6,6 @@
 namespace game_scene {
 namespace queries {
 
-class GraphicsResourceResultType : public ResultType {
-public:
-	enum GraphicsResourceResultTypeId : int {
-		GRAPHICS_RESOURCE_REQUEST = GRAPHICS_RESOURCES,
-	};
-};
-
 class GraphicsResourceQueryType : public QueryType {
 public:
 	enum GraphicsResourceQueryTypeId : int {

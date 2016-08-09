@@ -9,8 +9,11 @@ public:
 	CommandType(int id) : id_(id) {}
 
 	enum CommandTypeId : int {
-		INPUT = 0,
-		GRAPHICS = 100,
+		ADDED_TO_SCENE = 1,
+		INPUT = 100,
+		GRAPHICS = 200,
+		HEADSET_INTERFACE = 300,
+		NICHIJOU_GRAPH = 400,
 	};
 
 	int Type() {return id_;}
@@ -29,9 +32,9 @@ private:
 };
 
 template <typename WrappedType>
-class CommandArgsWrapper : public CommandArgs {
+class WrappedCommandArgs : public CommandArgs {
 public:
-	CommandArgsWrapper(CommandType type, WrappedType data)
+	WrappedCommandArgs(CommandType type, WrappedType data)
 		: CommandArgs(type), data_(data) {}
 
 	WrappedType data_;

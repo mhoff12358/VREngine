@@ -35,11 +35,11 @@ void GraphicsObject::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case commands::GraphicsCommandType::CREATE_COMPONENTS:
 		RequestResourcesAndCreateComponents(
-			dynamic_cast<const CommandArgsWrapper<GraphicsObjectDetails>&>(args).data_);
+			dynamic_cast<const WrappedCommandArgs<GraphicsObjectDetails>&>(args).data_);
 		break;
 	case commands::GraphicsCommandType::CREATE_COMPONENTS_ASSUME_RESOURCES:
 		CreateComponents(
-			dynamic_cast<const CommandArgsWrapper<GraphicsObjectDetails>&>(args).data_);
+			dynamic_cast<const WrappedCommandArgs<GraphicsObjectDetails>&>(args).data_);
 		break;
 	case commands::GraphicsCommandType::PLACE_COMPONENT:
 		PlaceComponent(
@@ -61,7 +61,7 @@ void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDet
 			last_resource_load,
 			Command(
 				Target(scene_->FindByName("GraphicsResources")),
-				make_unique<CommandArgsWrapper<ResourceIdent>>(
+				make_unique<WrappedCommandArgs<ResourceIdent>>(
 					commands::GraphicsCommandType::REQUIRE_RESOURCE, resource)));
 	}
 	// Create a new commands for this actor doing the actual component creation
@@ -70,7 +70,7 @@ void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDet
 		last_resource_load,
 		Command(
 			Target(id_),
-			make_unique<CommandArgsWrapper<GraphicsObjectDetails>>(
+			make_unique<WrappedCommandArgs<GraphicsObjectDetails>>(
 				commands::GraphicsCommandType::CREATE_COMPONENTS_ASSUME_RESOURCES,
 				details)));
 }

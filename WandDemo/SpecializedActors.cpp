@@ -34,7 +34,7 @@ void GraphicsResources::AddedToScene() {
 void GraphicsResources::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case commands::GraphicsCommandType::REQUIRE_RESOURCE:
-		RequireResource(dynamic_cast<const CommandArgsWrapper<ResourceIdent>&>(args).data_);
+		RequireResource(dynamic_cast<const WrappedCommandArgs<ResourceIdent>&>(args).data_);
 		break;
 	default:
 		FailToHandleCommand(args);

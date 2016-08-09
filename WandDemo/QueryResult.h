@@ -3,37 +3,20 @@
 #include "stdafx.h"
 
 #include "ActorId.h"
+#include "QueryArgs.h"
 
 namespace game_scene {
-
-class ResultType {
-public:
-	ResultType(int id) : id_(id) {}
-
-	enum ResultTypeId : int {
-		EMPTY = 0,
-		MULTIPLE = 1,
-
-		GRAPHICS_RESOURCES = 100,
-		LUA_RUNTIME = 200,
-	};
-
-	int Type() {return id_;}
-	int id_;
-};
 
 class QueryResult
 {
 public:
-	explicit QueryResult(ResultType type);
+	explicit QueryResult(QueryType type);
 	virtual ~QueryResult() {}
-
-	static QueryResult EmptyResult();
 
 	int Type() const {return type_.id_;}
 
 private:
-	ResultType type_;
+	QueryType type_;
 };
 
 class MultipleQueryResult : public QueryResult {
@@ -49,11 +32,16 @@ private:
 template <typename WrappedType>
 class QueryResultWrapped : public QueryResult {
 public:
-	QueryResultWrapped(ResultType type, WrappedType data)
+	QueryResultWrapped(QueryType type, WrappedType data)
 		: QueryResult(type), data_(data) {}
 	virtual ~QueryResultWrapped() {}
 
 	WrappedType data_;
+};
+
+class EmptyQueryResult : public QueryResult {
+public:
+	EmptyQueryResult() : QueryResult(QueryType::EMPTY) {}
 };
 
 }  // game_scene

@@ -16,7 +16,7 @@ void Shmactor::HandleCommand(const CommandArgs& args) {
 }
 
 unique_ptr<QueryResult> Shmactor::AnswerQuery(const QueryArgs& args) {
-	return make_unique<QueryResult>(ResultType::EMPTY);
+	return make_unique<QueryResult>(QueryType::EMPTY);
 }
 
 void Shmactor::AddedToScene() {
@@ -41,9 +41,12 @@ unique_ptr<QueryResult> Shmactor::AskQuery(const Target& target, unique_ptr<Quer
 }
 
 void Shmactor::FailToHandleCommand(const CommandArgs& args) {
-	std::cout <<
-		"ACTOR ID: " << id_.id_ <<
-		" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
+	// The ADDED_TO_SCENE command is expected to be allowed to be unhandled.
+	if (args.Type() != CommandType::ADDED_TO_SCENE) {
+		std::cout <<
+			"ACTOR ID: " << id_.id_ <<
+			" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
+	}
 }
 
 void Shmactor::SetId(ActorId id) {

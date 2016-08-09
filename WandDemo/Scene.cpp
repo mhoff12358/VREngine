@@ -33,7 +33,7 @@ CommandQueueLocation Scene::FrontOfCommands() {
 unique_ptr<QueryResult> Scene::AskQuery(const Target& target, unique_ptr<QueryArgs> args) {
 	vector<ActorId> actors_to_query = ExpandTarget(target);
 	if (actors_to_query.size() == 0) {
-		return make_unique<QueryResult>(ResultType::EMPTY);
+		return make_unique<QueryResult>(QueryType::EMPTY);
 	}
 	if (actors_to_query.size() == 1) {
 		return FindActor(actors_to_query[0])->AnswerQuery(*args);
@@ -90,11 +90,23 @@ vector<ActorId> Scene::ExpandTarget(const Target& target) {
 }
 
 ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor) {
+	return get<0>(AddActorReturnInitialize(move(new_actor)));
+}
+
+ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after) {
+	return get<0>(AddActorReturnInitialize(move(new_actor), initialize_after));
+}
+
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor) {
+	return AddActorReturnInitialize(move(new_actor), FrontOfCommands());
+}
+
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after) {
 	ActorId new_id = ActorId::GetNewId();
 	new_actor->SetId(new_id);
 	actor_lookup_.emplace(new_id, move(new_actor));
 	actor_lookup_[new_id]->AddedToScene();
-	return new_id;
+	return tuple<ActorId, CommandQueueLocation>(new_id, MakeCommandAfter(initialize_after, Command(Target(new_id), make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE))));
 }
 
 ActorId Scene::AddActorGroup() {

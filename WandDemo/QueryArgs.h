@@ -9,8 +9,14 @@ public:
 	QueryType(int id) : id_(id) {}
 
 	enum QueryTypeId : int {
+		// Common query types.
+		EMPTY = 0,
+		MULTIPLE = 1,
+
+		// Ranges of query types that can be used by other systems.
 		GRAPHICS_RESOURCES = 100,
 		LUA_RUNTIME = 200,
+		NICHIJOU_GRAPH = 300,
 	};
 
 	int Type() {return id_;}
@@ -30,11 +36,11 @@ private:
 };
 
 template <typename WrappedType>
-class QueryArgsWrapped : public QueryArgs {
+class WrappedQueryArgs : public QueryArgs {
 public:
-	QueryArgsWrapped(QueryType type, WrappedType data)
+	WrappedQueryArgs(QueryType type, WrappedType data)
 		: QueryArgs(type), data_(data) {}
-	virtual ~QueryArgsWrapped() {}
+	virtual ~WrappedQueryArgs() {}
 
 	WrappedType data_;
 };

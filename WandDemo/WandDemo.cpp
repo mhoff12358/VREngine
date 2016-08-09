@@ -187,7 +187,7 @@ void UpdateLoop() {
 
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(floor),
-		make_unique<game_scene::CommandArgsWrapper<game_scene::actors::GraphicsObjectDetails>>(
+		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
 			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
@@ -196,7 +196,7 @@ void UpdateLoop() {
 
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(weird_wall),
-		make_unique<game_scene::CommandArgsWrapper<game_scene::actors::GraphicsObjectDetails>>(
+		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
 			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
@@ -205,7 +205,7 @@ void UpdateLoop() {
 
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
-		make_unique<game_scene::CommandArgsWrapper<game_scene::actors::GraphicsObjectDetails>>(
+		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
 			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
 			cockpit_details)));
 	scene.ExecuteCommand(game_scene::Command(
