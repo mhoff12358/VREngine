@@ -9,6 +9,12 @@
 namespace game_scene {
 namespace actors {
 
+namespace HeadsetHelpers {
+bool IsTriggerPulled(const vr::VRControllerState_t& state) {
+	return state.rAxis[1].x > 0.1f;
+}
+}  // HeadsetHelpers
+
 void HeadsetInterface::AddedToScene() {
 	if (scene_->FindByName("HeadsetInterface") != ActorId::UnsetId) {
 		std::cout << "Attempting to register a second HeadsetInterface instance" << std::endl;
@@ -24,12 +30,19 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		controller_listeners_ = scene_->AddActorGroup();
+		for (ActorId& listener_group : listener_groups_) {
+			listener_group = scene_->AddActorGroup();
+		}
 	}
 	break;
-	case commands::HeadsetInterfaceCommandType::REGISTER_CONTROLLER_LISTENER:
+	case commands::HeadsetInterfaceCommandType::REGISTER_LISTENER:
 	{
-		scene_->AddActorToGroup(dynamic_cast<const WrappedCommandArgs<ActorId>&>(args).data_, controller_listeners_);
+		const commands::ListenerRegistration& registration = dynamic_cast<const commands::ListenerRegistration&>(args);
+		if (registration.register_not_unregister_) {
+			scene_->AddActorToGroup(registration.actor_to_register_, listener_groups_[static_cast<size_t>(registration.listener_id_)]);
+		} else {
+			scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_groups_[static_cast<size_t>(registration.listener_id_)]);
+		} 
 	}
 	break;
 	case commands::InputCommandType::TICK:
@@ -46,16 +59,30 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 				// Should make the actor visible here.
 			}
 			controller_connectedness_[i] = true;
+
+			// Update the controller pose.
 			Pose new_controller_position = headset_.GetGamePose(controller_index);
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-				Target(controller_listeners_),
-				make_unique<WrappedCommandArgs<Location>>(
-					commands::HeadsetInterfaceCommandType::LISTEN_CONTROLLER_MOVEMENT,
-					new_controller_position.location_ + (controller_positions_[i].location_ * -1))));
+				Target(listener_groups_[static_cast<size_t>(ListenerId::CONTROLLER_MOVEMENT)]),
+				make_unique<commands::ControllerMovement>(
+					i, new_controller_position.location_ + (controller_positions_[i].location_ * -1))));
 			controller_positions_[i] = new_controller_position;
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 				Target(controller_graphics_[i]),
 				make_unique<commands::ComponentPlacement>("Sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
+
+			// Update the button state of the controller.
+			vr::VRControllerState_t new_controller_state = headset_.GetGameControllerState(controller_index);
+			bool trigger_is_pulled = HeadsetHelpers::IsTriggerPulled(new_controller_state);
+			bool trigger_was_pulled = HeadsetHelpers::IsTriggerPulled(controller_states_[i]);
+			// If the trigger's state has changed, alert all listeners.
+			if (trigger_is_pulled != trigger_was_pulled) {
+				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+					Target(listener_groups_[static_cast<size_t>(ListenerId::TRIGGER_STATE_CHANGE)]),
+					make_unique<commands::TriggerStateChange>(
+						i, trigger_is_pulled)));
+			}
+			controller_states_[i] = new_controller_state;
 		}
 	}
 }

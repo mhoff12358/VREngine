@@ -52,7 +52,9 @@ void Scene::OwnCommandArgsForFlushDuration(CommandArgs* args_to_own) {
 void Scene::FlushCommandQueue() {
 	while (!commands_.IsEmpty()) {
 		Command active_command = commands_.PopActiveCommand();
-		ExecuteCommand(active_command);
+		for (const ActorId& actor_id : ExpandTarget(active_command.GetTarget())) {
+			FindActor(actor_id)->HandleCommand(active_command.GetArgs());
+		}
 	}
 	command_flush_arg_storage_.clear();
 }
@@ -117,6 +119,10 @@ ActorId Scene::AddActorGroup() {
 
 void Scene::AddActorToGroup(ActorId actor, ActorId group) {
 	actor_groups_.AddActorToGroup(actor, group);
+}
+
+void Scene::RemoveActorFromGroup(ActorId actor, ActorId group) {
+	actor_groups_.RemoveActorFromGroup(actor, group);
 }
 
 void Scene::RegisterByName(string name, ActorId actor_or_group) {

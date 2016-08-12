@@ -118,7 +118,7 @@ void Actor::LoadModel(Lua::Environment lua_environment) {
 					else {
 						model_description = { true, false, false, };
 					}
-					string model_name = resource_pool_.GetNewModelName();
+					string model_name = ResourcePool::GetNewModelName();
 					models_[object_name] = resource_pool_.LoadModel(model_name, vertices_for_model, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST, model_description);
 					model_resource_id_ = model_name;
 				}

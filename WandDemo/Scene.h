@@ -33,6 +33,7 @@ public:
 	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after);
 	ActorId AddActorGroup();
 	void AddActorToGroup(ActorId actor, ActorId group);
+	void RemoveActorFromGroup(ActorId actor, ActorId group);
 
 	void RegisterByName(string name, ActorId actor_or_group);
 	ActorId FindByName(string name);
