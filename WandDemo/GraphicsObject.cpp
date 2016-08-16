@@ -20,7 +20,10 @@ void ComponentHeirarchy::GetRequiredResources(vector<ResourceIdent>* resources) 
 			ResourceIdent::TEXTURE,
 			texture_details.name_));
 	}
-	resources->push_back(ResourceIdent(ResourceIdent::PIXEL_SHADER, shader_name_, ObjLoader::vertex_type_all));
+	resources->push_back(ResourceIdent(ResourceIdent::SHADER_FILE, shader_name_, vertex_shader_input_type_));
+	if (!geometry_shader_name_.empty()) {
+		resources->push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, geometry_shader_name_));
+	}
 }
 
 int ComponentHeirarchy::GetNumberOfComponents() const {
@@ -107,14 +110,13 @@ void GraphicsObject::CreateSettingsEntity(
 	VertexShader vertex_shader = graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_);
 	
 	unique_ptr<ConstantBuffer>& shader_settings_buffer = get<1>(components_[reserved_space]);
-	shader_settings_buffer = make_unique<ConstantBufferDescribed>(
-		CB_PS_VERTEX_AND_PIXEL_SHADER,
-		heirarchy.shader_settings_.GetFormat());
-	shader_settings_buffer->CreateBuffer(graphics_resources.device_interface_);
-	float* raw_buffer = static_cast<float*>(shader_settings_buffer->EditBufferData(true));
-	for (const vector<float>& next_data_chunk : heirarchy.shader_settings_.GetValue()) {
-		memcpy(raw_buffer, next_data_chunk.data(), sizeof(float) * next_data_chunk.size());
-		raw_buffer = raw_buffer + next_data_chunk.size();
+	ShaderSettingsFormat settings_format = heirarchy.shader_settings_.GetFormat();
+	if (settings_format.ShouldCreateBuffer()) {
+		shader_settings_buffer = make_unique<ConstantBufferDescribed>(
+			CB_PS_VERTEX_AND_GEOMETRY_AND_PIXEL_SHADER,
+			settings_format);
+		shader_settings_buffer->CreateBuffer(graphics_resources.device_interface_);
+		heirarchy.shader_settings_.SetIntoConstantBuffer(shader_settings_buffer.get());
 	}
 
 	vector<unsigned int>& settings_entities = get<2>(components_[reserved_space]);
@@ -122,8 +124,12 @@ void GraphicsObject::CreateSettingsEntity(
 		settings_entities.push_back(
 			graphics_resources.entity_handler_.AddEntity(Entity(
 				ES_SETTINGS,
-				graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
-				graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
+				Shaders(
+					graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
+					graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
+					!heirarchy.geometry_shader_name_.empty() ?
+						graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.geometry_shader_name_) :
+						GeometryShader(false)),
 				ShaderSettings(shader_settings_buffer.get()),
 				Model(),
 				NULL), heirarchy.entity_group_));
@@ -138,8 +144,12 @@ void GraphicsObject::CreateSettingsEntity(
 			settings_entities.push_back(
 				graphics_resources.entity_handler_.AddEntity(Entity(
 					ES_SETTINGS,
-					graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
-					graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
+					Shaders(
+						graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
+						graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
+						!heirarchy.geometry_shader_name_.empty() ?
+							graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.geometry_shader_name_) :
+							GeometryShader(false)),
 					ShaderSettings(shader_settings_buffer.get()),
 					Model(),
 					NULL,
@@ -182,9 +192,22 @@ void GraphicsObject::CreateIndividualComponent(
 		models);
 }
 
+tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>&
+		GraphicsObject::LookupComponent(string component_name) {
+	auto component_iter = component_lookup_.find(component_name);
+	if (component_iter == component_lookup_.end()) {
+		std::cout << "Attempting to look up a nonexistent component" << std::endl;
+	}
+	return components_[component_iter->second];
+}
+
 void GraphicsObject::PlaceComponent(const commands::ComponentPlacement& placement) {
-	get<0>(components_[component_lookup_[placement.component_name_]]).
+	get<0>(LookupComponent(placement.component_name_)).
 		SetLocalTransformation(placement.transformation_);
+}
+	
+void GraphicsObject::SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value) {
+	value.SetIntoConstantBuffer(get<1>(LookupComponent(component_name)).get());
 }
 
 }  // actors

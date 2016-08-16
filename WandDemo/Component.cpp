@@ -2,7 +2,7 @@
 #include "Component.h"
 
 Component::Component(ID3D11Device* device_interface)
-	: transformation_buffer_(CB_PS_VERTEX_SHADER), children_(NULL), parent_transformation_(NULL), num_children_(0)
+	: transformation_buffer_(CB_PS_VERTEX_AND_GEOMETRY_SHADER), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
 	transformation_buffer_.CreateBuffer(device_interface);
 }
@@ -20,8 +20,7 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entit
 	vector<Model>::iterator current_model = first_model;
 	first_entity_ = entity_handler.AddEntity(Entity(
 		ES_NORMAL,
-		PixelShader(),
-		VertexShader(),
+		Shaders(),
 		ShaderSettings(NULL),
 		*current_model,
 		&transformation_buffer_), entity_group_name);
@@ -29,8 +28,7 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entit
 	for (++current_model; current_model != end_of_models; ++current_model) {
 		entity_handler.AddEntity(Entity(
 			ES_NORMAL,
-			PixelShader(),
-			VertexShader(),
+			Shaders(),
 			ShaderSettings(NULL),
 			*current_model,
 			NULL), entity_group_name);

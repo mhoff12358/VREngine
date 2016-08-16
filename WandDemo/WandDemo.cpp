@@ -31,6 +31,7 @@ using std::unique_ptr;
 #include "GraphicsObject.h"
 #include "HeadsetInterface.h"
 #include "NichijouGraph.h"
+#include "Sprite.h"
 
 #include "BoostPythonWrapper.h"
 
@@ -115,6 +116,13 @@ void UpdateLoop() {
 
 	Py_Initialize();
 
+	game_scene::actors::Sprite::Init();
+	ModelGenerator point_gen(ObjLoader::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
+	point_gen.AddVertex(Vertex(ObjLoader::vertex_type_location, {0.0f, 0.0f, 0.0f}));
+	point_gen.Finalize(graphics_objects.view_state->device_interface, nullptr, ModelStorageDescription::Immutable());
+	point_gen.parts = {{"Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0)}};
+	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourcePool::GetConstantModelName("point"), point_gen));
+
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.AddActorGroup();
@@ -136,11 +144,26 @@ void UpdateLoop() {
 	game_scene::ActorId nichijou_graph = scene.AddActor(
 		make_unique<game_scene::actors::NichijouGraph>());
 
+	game_scene::ActorId sprite = scene.AddActor(
+		make_unique<game_scene::actors::Sprite>());
+
 	if (graphics_objects.oculus->IsInitialized()) {
 		game_scene::ActorId headset_interface = scene.AddActor(
 			make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus));
 		scene.AddActorToGroup(headset_interface, tick_registry);
 	}
+
+	/*game_scene::CommandQueueLocation sprite_command =
+		scene.MakeCommandAfter(
+			scene.FrontOfCommands(),
+			game_scene::Command(
+				game_scene::Target(sprite),
+				make_unique<game_scene::commands::SpriteDetails>("terrain.png")));
+	sprite_command = scene.MakeCommandAfter(
+			sprite_command,
+			game_scene::Command(
+				game_scene::Target(sprite),
+				make_unique<game_scene::commands::SpritePlacement>(Location(0, 1.5, -0.5), array<float, 2>({1.0f, 1.0f}))));*/
 
 	game_scene::actors::GraphicsObjectDetails square_details;
 	square_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
@@ -158,6 +181,7 @@ void UpdateLoop() {
 		{});
 	square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
 	square_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
+	square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 	square_details.heirarchy_.entity_group_ = "basic";
 	square_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
@@ -179,6 +203,7 @@ void UpdateLoop() {
 		{});
 	cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
 	cockpit_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
+	cockpit_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 	cockpit_details.heirarchy_.entity_group_ = "basic";
 	cockpit_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.5f, 0.0f},
@@ -192,7 +217,7 @@ void UpdateLoop() {
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(floor),
-		make_unique<game_scene::commands::ComponentPlacement>("Square", DirectX::XMMatrixIdentity())));
+		make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixIdentity())));
 
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(weird_wall),
@@ -201,16 +226,16 @@ void UpdateLoop() {
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(weird_wall),
-		make_unique<game_scene::commands::ComponentPlacement>("Square", DirectX::XMMatrixTranslation(0, 0, -2))));
+		make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixTranslation(0, 0, -2))));
 
-	scene.ExecuteCommand(game_scene::Command(
+	/*scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
 		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
 			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
 			cockpit_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
-		make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));
+		make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));*/
 	scene.FlushCommandQueue();
 
 	MSG msg;

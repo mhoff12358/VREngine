@@ -2,8 +2,9 @@
 import random
 
 class Vertex(object):
-    def __init__(self, name):
+    def __init__(self, name, texture_name):
         self.name = name
+        self.texture_name = texture_name
 
 class Edge(object):
     def __init__(self, u_name, v_name):
@@ -11,22 +12,25 @@ class Edge(object):
         self.v_name = v_name
 
 def load_graph():
-    num_vertices = 50
-    edge_list = []
-    for i in range(num_vertices):
-        edge_list.append(Edge("v"+str(random.randrange(num_vertices)), "v"+str(random.randrange(num_vertices))))
+    character_names = [
+        "hakase",
+        "mai",
+        "mio",
+        "misato",
+        "nano",
+        "yuuko",
+        ]
     return {
         "configuration" : {
             "graph_radius" : 1,
             "vertex_configuration" : {
-                "radius" : 0.025,
+                "radius" : 0.25,
                 },
             "edge_configuration" : {
-                "width" : 0.0125
+                "width" : 0.0125,
+                "vertex_spacing" : 0.075,
                 },
             },
-        "vertices" : list(Vertex("v" + str(i)) for i in range(num_vertices)),
-        "edges" : list(
-            edge_list
-            #Edge("v" + str(random.randrange(num_vertices)), "v" + str(random.randrange(num_vertices))) for i in range(num_vertices)
-        )}
+        "vertices" : list(Vertex(name, "nichijou_images/"+name+".png") for name in character_names),
+        "edges" : [ Edge("nano", "hakase") ]
+        }

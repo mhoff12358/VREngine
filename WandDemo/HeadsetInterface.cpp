@@ -69,7 +69,7 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 			controller_positions_[i] = new_controller_position;
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 				Target(controller_graphics_[i]),
-				make_unique<commands::ComponentPlacement>("Sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
+				make_unique<commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
 
 			// Update the button state of the controller.
 			vr::VRControllerState_t new_controller_state = headset_.GetGameControllerState(controller_index);
@@ -116,7 +116,7 @@ ActorId HeadsetInterface::CreateControllerActor() {
 			sphere_details)));
 	scene_->MakeCommandAfter(created_actor, Command(
 		game_scene::Target(new_controller),
-		make_unique<game_scene::commands::ComponentPlacement>("Sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f))));
+		make_unique<game_scene::commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f))));
 	return new_controller;
 }
 

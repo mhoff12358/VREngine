@@ -13,6 +13,8 @@ class ShaderSettingsFormat : public vector<tuple<string, int>> {
 public:
 	template<typename... Args>
 	ShaderSettingsFormat(Args... args) : vector<tuple<string, int>>(args...) {}
+
+	bool ShouldCreateBuffer() { return !empty(); }
 };
 
 class ShaderSettingsValue : public vector<vector<float>> {
@@ -30,9 +32,17 @@ public:
 			format.push_back(tuple<string, int>("float", sub_array.size()));
 		}
 		return format;
-	};
+	}
 
-	vector<vector<float>> GetValue() const { return *this; };
+	vector<vector<float>> GetValue() const { return *this; }
+
+	void SetIntoConstantBuffer(ConstantBuffer* buffer) const {
+		float* raw_buffer = static_cast<float*>(buffer->EditBufferData(true));
+		for (const vector<float>& next_data_chunk : GetValue()) {
+			memcpy(raw_buffer, next_data_chunk.data(), sizeof(float) * next_data_chunk.size());
+			raw_buffer = raw_buffer + next_data_chunk.size();
+		}
+	}
 };
 
 class TextureDetails {
@@ -61,20 +71,25 @@ public:
 	vector<tuple<string, ObjLoader::OutputFormat>> models_;
 	vector<TextureDetails> textures_;
 	string shader_name_;
+	VertexType vertex_shader_input_type_;
+	string geometry_shader_name_ = "";
 	ShaderSettingsValue shader_settings_;
 	string entity_group_;
 };
 
 class GraphicsObjectDetails {
 public:
+	GraphicsObjectDetails() {}
+	GraphicsObjectDetails(ComponentHeirarchy heirarchy) : heirarchy_(heirarchy) {}
+
 	ComponentHeirarchy heirarchy_;
 };
 
 class GraphicsObject : public Shmactor {
 public:
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(const CommandArgs& args) override;
 
-private:
+protected:
 	// Creation methods.
 	void RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details);
 	void CreateSettingsEntity(
@@ -87,12 +102,15 @@ private:
 
 	// Update methods.
 	void PlaceComponent(const commands::ComponentPlacement& placement);
+	void SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value);
 
 	// Each tuple is a component, an unsigned int that is the entity numbers of
 	// the settings entities, and a unique_ptr holding the settings' constant
 	// buffer.
 	vector<tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>> components_;
 	map<string, unsigned int> component_lookup_;
+	tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>&
+		LookupComponent(string component_name);
 };
 
 }  // actors

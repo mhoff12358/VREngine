@@ -58,6 +58,9 @@
     <Filter Include="Nichijou Graph\Python Files">
       <UniqueIdentifier>{677b2fb8-4e85-4a18-ba8c-db7630b2b275}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Nichijou Graph\Textures">
+      <UniqueIdentifier>{71a1ff0a-d8e4-46ee-a5bd-3c3fe21708f8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -171,6 +174,9 @@
     <ClInclude Include="BoostPythonWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Sprite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -266,6 +272,9 @@
     <ClCompile Include="NichijouGraph.cpp">
       <Filter>Nichijou Graph\Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Sprite.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="passthrough.hlsl">
@@ -334,6 +343,12 @@
     <FxCompile Include="depth_to_white.hlsl">
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="sprite_geo.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="sprite_textured.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -397,6 +412,24 @@
     </Image>
     <Image Include="sky_cubemap.jpg">
       <Filter>Resource Files\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\hakase.png">
+      <Filter>Nichijou Graph\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\mai.png">
+      <Filter>Nichijou Graph\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\mio.png">
+      <Filter>Nichijou Graph\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\misato.png">
+      <Filter>Nichijou Graph\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\nano.png">
+      <Filter>Nichijou Graph\Textures</Filter>
+    </Image>
+    <Image Include="nichijou_images\yuuko.png">
+      <Filter>Nichijou Graph\Textures</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>

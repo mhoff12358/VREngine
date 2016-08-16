@@ -6,6 +6,7 @@
 #include "GraphicsObject.h"
 #include "SpecializedQueries.h"
 #include "HeadsetInterface.h"
+#include "Sprite.h"
 
 #include <cstdlib>
 
@@ -160,7 +161,7 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		game_scene::actors::GraphicsObjectDetails sphere_details;
+		/*game_scene::actors::GraphicsObjectDetails sphere_details;
 		sphere_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
 			"sphere",
 			{
@@ -175,6 +176,7 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 			},
 			{});
 		sphere_details.heirarchy_.shader_name_ = "solidcolor.hlsl";
+		sphere_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 		sphere_details.heirarchy_.entity_group_ = "basic";
 		sphere_details.heirarchy_.shader_settings_ = {
 			{0.0f, 0.0f, 0.5f},
@@ -190,7 +192,13 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 		last_command = scene_->MakeCommandAfter(last_command, Command(
 			game_scene::Target(vertex_graphics_),
 			make_unique<game_scene::commands::ComponentPlacement>(
-				"Sphere", DirectX::XMMatrixScaling(radius, radius, radius))));
+				"sphere", DirectX::XMMatrixScaling(radius, radius, radius))));*/
+		CommandQueueLocation sprite_command;
+		std::tie(vertex_graphics_, sprite_command) = scene_->AddActorReturnInitialize(make_unique<Sprite>());
+		sprite_command = scene_->MakeCommandAfter(sprite_command,
+			Command(Target(vertex_graphics_), make_unique<commands::SpriteDetails>(string(extract<string>(vertex_.attr("texture_name"))))));
+		sprite_command = scene_->MakeCommandAfter(sprite_command,
+			Command(Target(vertex_graphics_), make_unique<commands::SpritePlacement>(Location(0, 0, 0), array<float, 2>{1.0f, 1.0f})));
 	}
 	break;
 	case commands::NichijouGraphCommandType::TELL_VERTEX_ABOUT_EDGE:
@@ -205,9 +213,8 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 		float radius = extract<float>(configuration_["radius"]);
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			game_scene::Target(vertex_graphics_),
-			make_unique<game_scene::commands::ComponentPlacement>(
-				"Sphere",
-				DirectX::XMMatrixScaling(radius, radius, radius) * Pose(location_, Quaternion::Identity()).GetMatrix())));
+			make_unique<commands::SpritePlacement>(
+				location_, array<float, 2>{ radius, radius })));
 	}
 	break;
 	case commands::NichijouGraphCommandType::MOVE_VERTEX_LOCATION:
@@ -217,9 +224,8 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 		float radius = extract<float>(configuration_["radius"]);
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			game_scene::Target(vertex_graphics_),
-			make_unique<game_scene::commands::ComponentPlacement>(
-				"Sphere",
-				DirectX::XMMatrixScaling(radius, radius, radius) * Pose(location_, Quaternion::Identity()).GetMatrix())));
+			make_unique<commands::SpritePlacement>(
+				location_, array<float, 2>{ radius, radius })));
 	}
 	break;
 	default:
@@ -263,6 +269,7 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 			},
 			{});
 		line_details.heirarchy_.shader_name_ = "solidcolor.hlsl";
+		line_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 		line_details.heirarchy_.entity_group_ = "basic";
 		line_details.heirarchy_.shader_settings_ = {
 			{1.0f, 0.0f, 0.5f},
@@ -277,7 +284,7 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 		last_command = scene_->MakeCommandAfter(last_command, Command(
 			game_scene::Target(edge_graphics_),
 			make_unique<game_scene::commands::ComponentPlacement>(
-				"Line", DirectX::XMMatrixTranslation(0, 1, 0) * DirectX::XMMatrixScaling(10, 1, 1))));
+				"line", DirectX::XMMatrixTranslation(0, 1, 0) * DirectX::XMMatrixScaling(10, 1, 1))));
 	}
 	break;
 	case commands::NichijouGraphCommandType::SET_EDGE_LOCATION:
@@ -289,14 +296,17 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 			v_location_ = get<1>(new_location);
 		}
 
-		Location edge_vector = v_location_ - u_location_;
-		Pose edge_pose(u_location_, Quaternion::RotationBetweenVectors({1, 0, 0}, edge_vector.location_));
 		float line_width = extract<float>(configuration_["width"]);
+		float vertex_spacing = extract<float>(configuration_["vertex_spacing"]);
+		Location edge_vector = v_location_ - u_location_;
+		float edge_vector_length = edge_vector.GetLength();
+		Pose edge_pose(u_location_ + edge_vector * vertex_spacing / edge_vector_length,
+			Quaternion::RotationBetweenVectors({1, 0, 0}, edge_vector.location_));
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			game_scene::Target(edge_graphics_),
 			make_unique<game_scene::commands::ComponentPlacement>(
-				"Line",
-				DirectX::XMMatrixScaling(edge_vector.GetLength(), line_width, line_width) * edge_pose.GetMatrix())));
+				"line",
+				DirectX::XMMatrixScaling(edge_vector.GetLength() - vertex_spacing * 2, line_width, line_width) * edge_pose.GetMatrix())));
 	}
 	break;
 	default:

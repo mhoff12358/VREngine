@@ -13,7 +13,8 @@ public:
 		INPUT = 100,
 		GRAPHICS = 200,
 		HEADSET_INTERFACE = 300,
-		NICHIJOU_GRAPH = 400,
+		SPRITES = 400,
+		NICHIJOU_GRAPH = 500,
 	};
 
 	int Type() {return id_;}
