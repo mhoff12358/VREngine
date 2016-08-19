@@ -180,7 +180,7 @@ void UpdateLoop() {
 		},
 		{});
 	square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
-	square_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
+	square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
 	square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 	square_details.heirarchy_.entity_group_ = "basic";
 	square_details.heirarchy_.shader_settings_ = {
@@ -202,7 +202,7 @@ void UpdateLoop() {
 		},
 		{});
 	cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
-	cockpit_details.heirarchy_.shader_name_ = "texturedspecularlightsource.hlsl";
+	cockpit_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
 	cockpit_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
 	cockpit_details.heirarchy_.entity_group_ = "basic";
 	cockpit_details.heirarchy_.shader_settings_ = {

@@ -102,7 +102,8 @@ ActorId HeadsetInterface::CreateControllerActor() {
 				false)}
 		},
 		{});
-	sphere_details.heirarchy_.shader_name_ = "solidcolor.hlsl";
+	sphere_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("solidcolor.hlsl");
+	sphere_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_texture;
 	sphere_details.heirarchy_.entity_group_ = "basic";
 	sphere_details.heirarchy_.shader_settings_ = {
 		{0.0f, 0.0f, 0.5f},

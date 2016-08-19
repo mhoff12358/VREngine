@@ -27,10 +27,10 @@ def load_graph():
                 "radius" : 0.25,
                 },
             "edge_configuration" : {
-                "width" : 0.0125,
+                "width" : 0.025,
                 "vertex_spacing" : 0.075,
                 },
             },
         "vertices" : list(Vertex(name, "nichijou_images/"+name+".png") for name in character_names),
-        "edges" : [ Edge("nano", "hakase") ]
+        "edges" : [ Edge("nano", "hakase") ],
         }

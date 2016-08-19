@@ -54,6 +54,28 @@ public:
 	bool use_in_pixel_;
 };
 
+class ShaderFileDefinition {
+public:
+	ShaderFileDefinition() {}
+	explicit ShaderFileDefinition(string filename) : ShaderFileDefinition(filename, {true, false, true}) {}
+	ShaderFileDefinition(string filename, array<bool, 3> add_stage) {
+		shader_definitions_.resize(static_cast<unsigned char>(ShaderStage::NUM_STAGES));
+		shader_definitions_[static_cast<unsigned char>(ShaderStage::VERTEX)] =
+			pair<string, string>(filename, add_stage[static_cast<unsigned char>(ShaderStage::VERTEX)] ? "VShader" : "");
+		shader_definitions_[static_cast<unsigned char>(ShaderStage::GEOMETRY)] =
+			pair<string, string>(filename, add_stage[static_cast<unsigned char>(ShaderStage::GEOMETRY)] ? "GShader" : "");
+		shader_definitions_[static_cast<unsigned char>(ShaderStage::PIXEL)] =
+			pair<string, string>(filename, add_stage[static_cast<unsigned char>(ShaderStage::PIXEL)] ? "PShader" : "");
+	}
+
+	bool ShouldLoadStage(ShaderStage shader_stage) const { return !shader_definitions_[static_cast<unsigned char>(shader_stage)].second.empty(); }
+	string StageFileName(ShaderStage shader_stage) const { return shader_definitions_[static_cast<unsigned char>(shader_stage)].first; }
+	string StageFunctionName(ShaderStage shader_stage) const { return shader_definitions_[static_cast<unsigned char>(shader_stage)].second; }
+
+private:
+	vector<pair<string, string>> shader_definitions_;
+};
+
 class ComponentHeirarchy {
 public:
 	ComponentHeirarchy() {}
@@ -70,9 +92,8 @@ public:
 	// Component values
 	vector<tuple<string, ObjLoader::OutputFormat>> models_;
 	vector<TextureDetails> textures_;
-	string shader_name_;
+	ShaderFileDefinition shader_file_definition_;
 	VertexType vertex_shader_input_type_;
-	string geometry_shader_name_ = "";
 	ShaderSettingsValue shader_settings_;
 	string entity_group_;
 };

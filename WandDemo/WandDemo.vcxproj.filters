@@ -349,6 +349,9 @@
     <FxCompile Include="sprite_textured.hlsl">
       <Filter>Resource Files\Entity Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="solidline.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">

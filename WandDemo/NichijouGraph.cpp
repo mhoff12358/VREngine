@@ -38,8 +38,8 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 
 			object edges = graph_["edges"];
 			object edge_configuration = configuration_["edge_configuration"];
-			//edge_model_name_ = ResourcePool::GetNewModelName("EdgeLine");
-			edge_model_name_ = "Line.obj";
+			edge_model_name_ = ResourcePool::GetNewModelName("EdgeLine");
+			//edge_model_name_ = "Line.obj";
 			for (ssize_t i = 0; i < len(edges); i++) {
 				object edge = edges[i];
 				ActorId new_actor;
@@ -136,15 +136,14 @@ unique_ptr<QueryResult> NichijouGraph::AnswerQuery(const QueryArgs& args) {
 }
 
 void NichijouGraph::CreateGraphicsResources() {
-	/*actors::GraphicsResources& resources =
+	actors::GraphicsResources& resources =
 		dynamic_cast<const QueryResultWrapped<actors::GraphicsResources&>&>(*scene_->AskQuery(
 			Target(scene_->FindByName("GraphicsResources")),
 			make_unique<EmptyQuery>(queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST))).data_;
 	ModelGenerator gen(ObjLoader::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 	gen.AddVertexBatch(vector<Vertex>({
-		Vertex(ObjLoader::vertex_type_texture, {0.0f, 0.0f, 0.0f, 0.0f, 0.0f}),
-		Vertex(ObjLoader::vertex_type_texture, {1.0f, 0.0f, 0.0f, 1.0f, 0.0f}),
-		//Vertex(ObjLoader::vertex_type_texture, {1.0f, 1.0f, 0.0f, 1.0f, 0.0f}),
+		Vertex(ObjLoader::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
+		Vertex(ObjLoader::vertex_type_texture, {1.0f, 0.0f, 0.0f}),
 	}));
 	gen.Finalize(resources.device_interface_, nullptr, ModelStorageDescription::Immutable());
 	gen.parts = {{"Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0)}};
@@ -154,7 +153,7 @@ void NichijouGraph::CreateGraphicsResources() {
 		Command(
 			Target(scene_->FindByName("GraphicsResources")),
 			make_unique<WrappedCommandArgs<ResourceIdent>>(
-				commands::GraphicsCommandType::REQUIRE_RESOURCE, edge_model_ident)));*/
+				commands::GraphicsCommandType::REQUIRE_RESOURCE, edge_model_ident)));
 }
 
 void NichijouVertex::HandleCommand(const CommandArgs& args) {
@@ -264,15 +263,16 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 						{0, 1, 2},
 						{1, 1, 1},
 						{false, true}),
-					ObjLoader::vertex_type_all,
+					ObjLoader::vertex_type_location,
 					false)}
 			},
 			{});
-		line_details.heirarchy_.shader_name_ = "solidcolor.hlsl";
-		line_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+		line_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("solidline.hlsl", {true, true, true});
+		line_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_location;
 		line_details.heirarchy_.entity_group_ = "basic";
 		line_details.heirarchy_.shader_settings_ = {
-			{1.0f, 0.0f, 0.5f},
+			{1.0f, 0.0f, 0.0f, 1.0f},
+			{ 1.0f }
 		};
 
 		CommandQueueLocation last_command;
@@ -284,7 +284,7 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 		last_command = scene_->MakeCommandAfter(last_command, Command(
 			game_scene::Target(edge_graphics_),
 			make_unique<game_scene::commands::ComponentPlacement>(
-				"line", DirectX::XMMatrixTranslation(0, 1, 0) * DirectX::XMMatrixScaling(10, 1, 1))));
+				"line", DirectX::XMMatrixIdentity())));
 	}
 	break;
 	case commands::NichijouGraphCommandType::SET_EDGE_LOCATION:
@@ -306,7 +306,14 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 			game_scene::Target(edge_graphics_),
 			make_unique<game_scene::commands::ComponentPlacement>(
 				"line",
-				DirectX::XMMatrixScaling(edge_vector.GetLength() - vertex_spacing * 2, line_width, line_width) * edge_pose.GetMatrix())));
+				DirectX::XMMatrixScaling(edge_vector.GetLength() - vertex_spacing * 2, 1, 1) * edge_pose.GetMatrix())));
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+			game_scene::Target(edge_graphics_),
+			make_unique<WrappedCommandArgs<tuple<string, ShaderSettingsValue>>>(
+				commands::GraphicsCommandType::SET_SHADER_VALUES,
+				tuple<string, ShaderSettingsValue>(
+					"line",
+					ShaderSettingsValue(vector<vector<float>>({{1.0f, 0.0f, 0.0f, 1.0f}, {line_width}}))))));
 	}
 	break;
 	default:

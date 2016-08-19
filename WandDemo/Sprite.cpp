@@ -51,9 +51,8 @@ void Sprite::Init() {
 		},
 		{}
 		));
-	generic_details_.heirarchy_.shader_name_ = "sprite_textured.hlsl";
+	generic_details_.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("sprite_textured.hlsl", {true, true, true});
 	generic_details_.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_location;
-	generic_details_.heirarchy_.geometry_shader_name_ = "sprite_geo.hlsl";
 	generic_details_.heirarchy_.entity_group_ = "basic";
 	generic_details_.heirarchy_.shader_settings_ = {
 		{1.0f},

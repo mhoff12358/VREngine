@@ -20,9 +20,14 @@ void ComponentHeirarchy::GetRequiredResources(vector<ResourceIdent>* resources) 
 			ResourceIdent::TEXTURE,
 			texture_details.name_));
 	}
-	resources->push_back(ResourceIdent(ResourceIdent::SHADER_FILE, shader_name_, vertex_shader_input_type_));
-	if (!geometry_shader_name_.empty()) {
-		resources->push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, geometry_shader_name_));
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::VERTEX)) {
+		resources->push_back(ResourceIdent(ResourceIdent::VERTEX_SHADER, shader_file_definition_.StageFileName(ShaderStage::VERTEX), vertex_shader_input_type_));
+	}
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::GEOMETRY)) {
+		resources->push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, shader_file_definition_.StageFileName(ShaderStage::GEOMETRY)));
+	}
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::PIXEL)) {
+		resources->push_back(ResourceIdent(ResourceIdent::PIXEL_SHADER, shader_file_definition_.StageFileName(ShaderStage::PIXEL)));
 	}
 }
 
@@ -47,6 +52,12 @@ void GraphicsObject::HandleCommand(const CommandArgs& args) {
 	case commands::GraphicsCommandType::PLACE_COMPONENT:
 		PlaceComponent(
 			dynamic_cast<const commands::ComponentPlacement&>(args));
+		break;
+	case commands::GraphicsCommandType::SET_SHADER_VALUES:
+	{
+		const auto& shader_value_data = dynamic_cast<const WrappedCommandArgs<tuple<string, ShaderSettingsValue>>&>(args).data_;
+		SetShaderSettingsValue(get<0>(shader_value_data), get<1>(shader_value_data));
+	}
 		break;
 	default:
 		FailToHandleCommand(args);
@@ -106,8 +117,18 @@ void GraphicsObject::CreateComponents(const GraphicsObjectDetails& details) {
 void GraphicsObject::CreateSettingsEntity(
 	actors::GraphicsResources& graphics_resources,
 	const ComponentHeirarchy& heirarchy, unsigned int reserved_space) {
-	PixelShader pixel_shader = graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_);
-	VertexShader vertex_shader = graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_);
+	VertexShader vertex_shader;
+	GeometryShader geometry_shader(false);
+	PixelShader pixel_shader;
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::VERTEX)) {
+		vertex_shader = graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::VERTEX));
+	}
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::GEOMETRY)) {
+		geometry_shader = graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::GEOMETRY));
+	}
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::PIXEL)) {
+		pixel_shader = graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::PIXEL));
+	}
 	
 	unique_ptr<ConstantBuffer>& shader_settings_buffer = get<1>(components_[reserved_space]);
 	ShaderSettingsFormat settings_format = heirarchy.shader_settings_.GetFormat();
@@ -124,12 +145,7 @@ void GraphicsObject::CreateSettingsEntity(
 		settings_entities.push_back(
 			graphics_resources.entity_handler_.AddEntity(Entity(
 				ES_SETTINGS,
-				Shaders(
-					graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
-					graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
-					!heirarchy.geometry_shader_name_.empty() ?
-						graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.geometry_shader_name_) :
-						GeometryShader(false)),
+				Shaders(vertex_shader, pixel_shader, geometry_shader),
 				ShaderSettings(shader_settings_buffer.get()),
 				Model(),
 				NULL), heirarchy.entity_group_));
@@ -144,12 +160,7 @@ void GraphicsObject::CreateSettingsEntity(
 			settings_entities.push_back(
 				graphics_resources.entity_handler_.AddEntity(Entity(
 					ES_SETTINGS,
-					Shaders(
-						graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_name_),
-						graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_name_),
-						!heirarchy.geometry_shader_name_.empty() ?
-							graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.geometry_shader_name_) :
-							GeometryShader(false)),
+					Shaders(vertex_shader, pixel_shader, geometry_shader),
 					ShaderSettings(shader_settings_buffer.get()),
 					Model(),
 					NULL,

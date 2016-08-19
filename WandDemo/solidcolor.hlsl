@@ -6,7 +6,6 @@ struct VOut
 struct POut
 {
 	float4 t1 : SV_Target0;
-	float4 t2 : SV_Target1;
 };
 
 cbuffer shared_matrices : register(b0)
@@ -40,7 +39,6 @@ POut PShader(float4 position : SV_POSITION) : SV_TARGET
 {
 	POut return_val;
 	return_val.t1 = color.rgba;
-	return_val.t2 = color.rgba;
 	return return_val;
 	//return float4(1, 1, 1, 1);
 }
