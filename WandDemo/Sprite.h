@@ -20,9 +20,12 @@ namespace commands {
 
 class SpriteDetails : public CommandArgs {
 public:
+	SpriteDetails(string shader_name, string texture_name) :
+		CommandArgs(SpriteCommand::CREATE_SPRITE), shader_name_(shader_name), texture_name_(texture_name) {}
 	SpriteDetails(string texture_name) :
-		CommandArgs(SpriteCommand::CREATE_SPRITE), texture_name_(texture_name) {}
+		CommandArgs(SpriteCommand::CREATE_SPRITE), shader_name_(""), texture_name_(texture_name) {}
 
+	string shader_name_;
 	string texture_name_;
 };
 

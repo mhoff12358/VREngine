@@ -25,6 +25,7 @@ def load_graph():
             "graph_radius" : 1,
             "vertex_configuration" : {
                 "radius" : 0.25,
+                "shader_name" : "sprite_textured_circle.hlsl",
                 },
             "edge_configuration" : {
                 "width" : 0.025,

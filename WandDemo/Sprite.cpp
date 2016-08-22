@@ -32,6 +32,9 @@ void Sprite::HandleCommand(const CommandArgs& args) {
 void Sprite::CreateSprite(const commands::SpriteDetails& details) {
 	GraphicsObjectDetails specific_details = generic_details_;
 	specific_details.heirarchy_.textures_ = {game_scene::actors::TextureDetails(details.texture_name_, false, true)};
+	if (!details.shader_name_.empty()) {
+		specific_details.heirarchy_.shader_file_definition_ = ShaderFileDefinition(details.shader_name_, {true, true, true});
+	}
 	RequestResourcesAndCreateComponents(specific_details);
 }
 

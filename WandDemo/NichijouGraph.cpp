@@ -169,44 +169,18 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		/*actors::GraphicsObjectDetails sphere_details;
-		sphere_details.heirarchy_ = actors::ComponentHeirarchy(
-			"sphere",
-			{
-				{"sphere.obj|Sphere",
-				ObjLoader::OutputFormat(
-					ModelModifier(
-						{0, 1, 2},
-						{1, 1, 1},
-						{false, true}),
-					ObjLoader::vertex_type_all,
-					false)}
-			},
-			{});
-		sphere_details.heirarchy_.shader_name_ = "solidcolor.hlsl";
-		sphere_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
-		sphere_details.heirarchy_.entity_group_ = "basic";
-		sphere_details.heirarchy_.shader_settings_ = {
-			{0.0f, 0.0f, 0.5f},
-		};
-
-		CommandQueueLocation last_command;
-		std::tie(vertex_graphics_, last_command) = scene_->AddActorReturnInitialize(make_unique<actors::GraphicsObject>());
-		last_command = scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(vertex_graphics_), 
-			make_unique<WrappedCommandArgs<actors::GraphicsObjectDetails>>(
-				GraphicsObjectCommand::CREATE_COMPONENTS,
-				sphere_details)));
-		float radius = extract<float>(configuration_["radius"]);
-		last_command = scene_->MakeCommandAfter(last_command, Command(
-			Target(vertex_graphics_),
-			make_unique<commands::ComponentPlacement>(
-				"sphere", DirectX::XMMatrixScaling(radius, radius, radius))));*/
-		CommandQueueLocation sprite_command;
-		std::tie(vertex_graphics_, sprite_command) = scene_->AddActorReturnInitialize(make_unique<Sprite>());
-		sprite_command = scene_->MakeCommandAfter(sprite_command,
-			Command(Target(vertex_graphics_), make_unique<commands::SpriteDetails>(string(extract<string>(vertex_.attr("texture_name"))))));
-		sprite_command = scene_->MakeCommandAfter(sprite_command,
-			Command(Target(vertex_graphics_), make_unique<commands::SpritePlacement>(Location(0, 0, 0), array<float, 2>{1.0f, 1.0f})));
+		try {
+			CommandQueueLocation sprite_command;
+			std::tie(vertex_graphics_, sprite_command) = scene_->AddActorReturnInitialize(make_unique<Sprite>());
+			sprite_command = scene_->MakeCommandAfter(sprite_command,
+				Command(Target(vertex_graphics_), make_unique<commands::SpriteDetails>(
+					string(extract<string>(configuration_["shader_name"])),
+					string(extract<string>(vertex_.attr("texture_name"))))));
+			sprite_command = scene_->MakeCommandAfter(sprite_command,
+				Command(Target(vertex_graphics_), make_unique<commands::SpritePlacement>(Location(0, 0, 0), array<float, 2>{1.0f, 1.0f})));
+		} catch (error_already_set) {
+			PyErr_Print();
+		}
 	}
 	break;
 	case NichijouCommand::TELL_VERTEX_ABOUT_EDGE:
