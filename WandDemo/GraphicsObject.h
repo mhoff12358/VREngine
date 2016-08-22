@@ -7,6 +7,31 @@
 #include "SpecializedActors.h"
 
 namespace game_scene {
+
+class GraphicsObjectCommand {
+public:
+	DECLARE_COMMAND(GraphicsObjectCommand, REQUIRE_RESOURCE);
+	DECLARE_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS);
+	DECLARE_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS_ASSUME_RESOURCES);
+	DECLARE_COMMAND(GraphicsObjectCommand, PLACE_COMPONENT);
+	DECLARE_COMMAND(GraphicsObjectCommand, SET_SHADER_VALUES);
+};
+
+namespace commands {
+
+class ComponentPlacement : public CommandArgs {
+public:
+	ComponentPlacement(string component_name, DirectX::XMMATRIX transformation) :
+		CommandArgs(GraphicsObjectCommand::PLACE_COMPONENT),
+		component_name_(component_name),
+		transformation_(transformation) {}
+
+	string component_name_;
+	DirectX::XMMATRIX transformation_;
+};
+
+}  // commands
+
 namespace actors {
 
 class ShaderSettingsFormat : public vector<tuple<string, int>> {

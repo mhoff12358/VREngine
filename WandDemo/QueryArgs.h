@@ -1,26 +1,20 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Registry.h"
 
 namespace game_scene {
 
 class QueryType {
 public:
-	QueryType(int id) : id_(id) {}
+	QueryType(int64_t id) : id_(id) {}
+	QueryType(QueryRegistry id) : id_(id.value_) {}
 
-	enum QueryTypeId : int {
-		// Common query types.
-		EMPTY = 0,
-		MULTIPLE = 1,
+	DECLARE_QUERY(QueryType, EMPTY);
+	DECLARE_QUERY(QueryType, MULTIPLE);
 
-		// Ranges of query types that can be used by other systems.
-		GRAPHICS_RESOURCES = 100,
-		LUA_RUNTIME = 200,
-		NICHIJOU_GRAPH = 300,
-	};
-
-	int Type() {return id_;}
-	int id_;
+	int64_t Type() {return id_;}
+	int64_t id_;
 };
 
 class QueryArgs
@@ -29,7 +23,7 @@ public:
 	QueryArgs(QueryType type);
 	virtual ~QueryArgs() {}
 
-	int Type() const {return type_.id_;}
+	int64_t Type() const {return type_.id_;}
 
 private:
 	QueryType type_;

@@ -213,7 +213,7 @@ void UpdateLoop() {
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(floor),
 		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(floor),
@@ -222,7 +222,7 @@ void UpdateLoop() {
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(weird_wall),
 		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
 			square_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(weird_wall),
@@ -231,7 +231,7 @@ void UpdateLoop() {
 	/*scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
 		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
 			cockpit_details)));
 	scene.ExecuteCommand(game_scene::Command(
 		game_scene::Target(cockpit),
@@ -397,7 +397,7 @@ void UpdateLoop() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_active = false;
-	bool hmd_desired = true;
+	bool hmd_desired = false;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {

@@ -43,23 +43,21 @@ private:
 
 }  // actors
 
-namespace commands {
-class HeadsetInterfaceCommandType : public CommandType {
+class HeadsetInterfaceCommand {
 public:
-	enum HeadsetInterfaceCommandTypeId : int {
-		REGISTER_LISTENER = HEADSET_INTERFACE,
-		LISTEN_TRIGGER_STATE_CHANGE,
-		LISTEN_CONTROLLER_MOVEMENT,
-	};
+	DECLARE_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);
+	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TRIGGER_STATE_CHANGE);
+	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_CONTROLLER_MOVEMENT);
 };
 
+namespace commands {
 class ListenerRegistration : public CommandArgs {
 public:
 	ListenerRegistration(
 		bool register_not_unregister,
 		ActorId actor_to_register,
 		actors::HeadsetInterface::ListenerId listener_id) : 
-		CommandArgs(HeadsetInterfaceCommandType::REGISTER_LISTENER),
+		CommandArgs(HeadsetInterfaceCommand::REGISTER_LISTENER),
 		register_not_unregister_(register_not_unregister),
 		actor_to_register_(actor_to_register),
 		listener_id_(listener_id) {}
@@ -72,7 +70,7 @@ public:
 class ControllerMovement : public CommandArgs {
 public:
 	ControllerMovement(unsigned char controller_number, Location movement_vector) :
-		CommandArgs(HeadsetInterfaceCommandType::LISTEN_CONTROLLER_MOVEMENT),
+		CommandArgs(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT),
 		controller_number_(controller_number),
 		movement_vector_(movement_vector) {}
 
@@ -83,7 +81,7 @@ public:
 class TriggerStateChange : public CommandArgs {
 public:
 	TriggerStateChange(unsigned char controller_number, bool is_pulled) :
-		CommandArgs(HeadsetInterfaceCommandType::LISTEN_TRIGGER_STATE_CHANGE),
+		CommandArgs(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE),
 		controller_number_(controller_number),
 		is_pulled_(is_pulled) {}
 

@@ -7,6 +7,11 @@
 #include "SpecializedQueries.h"
 
 namespace game_scene {
+
+REGISTER_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);
+REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_TRIGGER_STATE_CHANGE);
+REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_CONTROLLER_MOVEMENT);
+
 namespace actors {
 
 namespace HeadsetHelpers {
@@ -35,7 +40,7 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 		}
 	}
 	break;
-	case commands::HeadsetInterfaceCommandType::REGISTER_LISTENER:
+	case HeadsetInterfaceCommand::REGISTER_LISTENER:
 	{
 		const commands::ListenerRegistration& registration = dynamic_cast<const commands::ListenerRegistration&>(args);
 		if (registration.register_not_unregister_) {
@@ -113,7 +118,7 @@ ActorId HeadsetInterface::CreateControllerActor() {
 	CommandQueueLocation created_actor =
 	scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(new_controller), 
 		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
 			sphere_details)));
 	scene_->MakeCommandAfter(created_actor, Command(
 		game_scene::Target(new_controller),

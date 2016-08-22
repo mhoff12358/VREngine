@@ -1,24 +1,19 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Registry.h"
 
 namespace game_scene {
 
 class CommandType {
 public:
-	CommandType(int id) : id_(id) {}
+	CommandType(int64_t id) : id_(id) {}
+	CommandType(const CommandRegistry& id) : id_(id.value_) {}
 
-	enum CommandTypeId : int {
-		ADDED_TO_SCENE = 1,
-		INPUT = 100,
-		GRAPHICS = 200,
-		HEADSET_INTERFACE = 300,
-		SPRITES = 400,
-		NICHIJOU_GRAPH = 500,
-	};
+	DECLARE_COMMAND(CommandType, ADDED_TO_SCENE);
 
-	int Type() {return id_;}
-	int id_;
+	int64_t Type() {return id_;}
+	int64_t id_;
 };
 
 class CommandArgs {
@@ -26,7 +21,7 @@ public:
 	CommandArgs(CommandType type);
 	virtual ~CommandArgs();
 
-	int Type() const {return type_.id_;}
+	int64_t Type() const {return type_.id_;}
 
 private:
 	CommandType type_;

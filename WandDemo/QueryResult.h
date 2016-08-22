@@ -13,7 +13,7 @@ public:
 	explicit QueryResult(QueryType type);
 	virtual ~QueryResult() {}
 
-	int Type() const {return type_.id_;}
+	int64_t Type() const {return type_.id_;}
 
 private:
 	QueryType type_;

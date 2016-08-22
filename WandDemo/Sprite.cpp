@@ -3,18 +3,22 @@
 #include "Sprite.h"
 
 namespace game_scene {
+
+REGISTER_COMMAND(SpriteCommand, CREATE_SPRITE);
+REGISTER_COMMAND(SpriteCommand, PLACE_SPRITE);
+
 namespace actors {
 
 GraphicsObjectDetails Sprite::generic_details_;
 
 void Sprite::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
-	case commands::SpriteCommandType::CREATE_SPRITE:
+	case SpriteCommand::CREATE_SPRITE:
 	{
 		CreateSprite(dynamic_cast<const commands::SpriteDetails&>(args));
 	}
 		break;
-	case commands::SpriteCommandType::PLACE_SPRITE:
+	case SpriteCommand::PLACE_SPRITE:
 	{
 		PlaceSprite(dynamic_cast<const commands::SpritePlacement&>(args));
 	}

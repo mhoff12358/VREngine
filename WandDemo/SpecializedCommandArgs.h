@@ -10,7 +10,7 @@ namespace commands {
 class InputCommandType : public CommandType {
 public:
 	enum InputCommandTypeId : int {
-		TICK = INPUT,
+		TICK = 999,
 		INPUT_UPDATE,
 	};
 };
@@ -30,28 +30,6 @@ public:
 		: CommandArgs(InputCommandType::INPUT_UPDATE), input_(*input) {
 	}
 	const InputHandler& input_;
-};
-
-class GraphicsCommandType : public CommandType {
-public:
-	enum GraphicsCommandTypeId : int {
-		REQUIRE_RESOURCE = GRAPHICS,
-		CREATE_COMPONENTS,
-		CREATE_COMPONENTS_ASSUME_RESOURCES,
-		PLACE_COMPONENT,
-		SET_SHADER_VALUES,
-	};
-};
-
-class ComponentPlacement : public CommandArgs {
-public:
-	ComponentPlacement(string component_name, DirectX::XMMATRIX transformation) :
-		CommandArgs(GraphicsCommandType::PLACE_COMPONENT),
-		component_name_(component_name),
-		transformation_(transformation) {}
-
-	string component_name_;
-	DirectX::XMMATRIX transformation_;
 };
 
 }  // commands

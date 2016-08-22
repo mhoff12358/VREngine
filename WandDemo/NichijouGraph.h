@@ -8,29 +8,22 @@
 #include "CommandArgs.h"
 #include "BoostPythonWrapper.h"
 #include "Pose.h"
+#include "Registry.h"
 
 namespace game_scene {
 
-namespace queries {
-class NichijouGraphQueryType : public QueryType {
+class NichijouCommand {
 public:
-	enum NichijouGraphQueryTypeId : int {
-		GET_VERTEX = NICHIJOU_GRAPH,
-	};
+	DECLARE_COMMAND(NichijouCommand, TELL_VERTEX_ABOUT_EDGE);
+	DECLARE_COMMAND(NichijouCommand, SET_VERTEX_LOCATION);
+	DECLARE_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
+	DECLARE_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
 };
-}  // queries
 
-namespace commands {
-class NichijouGraphCommandType : public CommandType {
+class NichijouQuery {
 public:
-	enum NichijouGraphCommandTypeId : int {
-		TELL_VERTEX_ABOUT_EDGE = NICHIJOU_GRAPH,
-		SET_VERTEX_LOCATION,
-		MOVE_VERTEX_LOCATION,
-		SET_EDGE_LOCATION,
-	};
+	DECLARE_QUERY(NichijouQuery, GET_VERTEX);
 };
-}  // commands
 
 namespace actors {
 

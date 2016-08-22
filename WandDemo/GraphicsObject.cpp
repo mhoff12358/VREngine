@@ -9,6 +9,13 @@
 #include "SpecializedQueries.h"
 
 namespace game_scene {
+
+REGISTER_COMMAND(GraphicsObjectCommand, REQUIRE_RESOURCE);
+REGISTER_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS);
+REGISTER_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS_ASSUME_RESOURCES);
+REGISTER_COMMAND(GraphicsObjectCommand, PLACE_COMPONENT);
+REGISTER_COMMAND(GraphicsObjectCommand, SET_SHADER_VALUES);
+
 namespace actors {
 
 void ComponentHeirarchy::GetRequiredResources(vector<ResourceIdent>* resources) const {
@@ -41,19 +48,19 @@ int ComponentHeirarchy::GetNumberOfComponents() const {
 
 void GraphicsObject::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
-	case commands::GraphicsCommandType::CREATE_COMPONENTS:
+	case GraphicsObjectCommand::CREATE_COMPONENTS:
 		RequestResourcesAndCreateComponents(
 			dynamic_cast<const WrappedCommandArgs<GraphicsObjectDetails>&>(args).data_);
 		break;
-	case commands::GraphicsCommandType::CREATE_COMPONENTS_ASSUME_RESOURCES:
+	case GraphicsObjectCommand::CREATE_COMPONENTS_ASSUME_RESOURCES:
 		CreateComponents(
 			dynamic_cast<const WrappedCommandArgs<GraphicsObjectDetails>&>(args).data_);
 		break;
-	case commands::GraphicsCommandType::PLACE_COMPONENT:
+	case GraphicsObjectCommand::PLACE_COMPONENT:
 		PlaceComponent(
 			dynamic_cast<const commands::ComponentPlacement&>(args));
 		break;
-	case commands::GraphicsCommandType::SET_SHADER_VALUES:
+	case GraphicsObjectCommand::SET_SHADER_VALUES:
 	{
 		const auto& shader_value_data = dynamic_cast<const WrappedCommandArgs<tuple<string, ShaderSettingsValue>>&>(args).data_;
 		SetShaderSettingsValue(get<0>(shader_value_data), get<1>(shader_value_data));
@@ -76,7 +83,7 @@ void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDet
 			Command(
 				Target(scene_->FindByName("GraphicsResources")),
 				make_unique<WrappedCommandArgs<ResourceIdent>>(
-					commands::GraphicsCommandType::REQUIRE_RESOURCE, resource)));
+					GraphicsObjectCommand::REQUIRE_RESOURCE, resource)));
 	}
 	// Create a new commands for this actor doing the actual component creation
 	// which occurs after all the resources have been loaded.
@@ -85,7 +92,7 @@ void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDet
 		Command(
 			Target(id_),
 			make_unique<WrappedCommandArgs<GraphicsObjectDetails>>(
-				commands::GraphicsCommandType::CREATE_COMPONENTS_ASSUME_RESOURCES,
+				GraphicsObjectCommand::CREATE_COMPONENTS_ASSUME_RESOURCES,
 				details)));
 }
 
@@ -97,8 +104,8 @@ void GraphicsObject::CreateComponents(const GraphicsObjectDetails& details) {
 	unique_ptr<QueryResult> graphics_resources_result = scene_->AskQuery(
 		graphics_resources_target,
 		make_unique<QueryArgs>(
-			queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST));
-	if (graphics_resources_result->Type() != queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST) {
+			GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST));
+	if (graphics_resources_result->Type() != GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST) {
 		std::cout << "UNEXPECTED RESPONSE WHILE GETTING GRAPHICS RESOURCES" << std::endl;
 		return;
 	}

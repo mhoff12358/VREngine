@@ -4,14 +4,10 @@
 #include "QueryArgs.h"
 
 namespace game_scene {
-namespace queries {
 
-class GraphicsResourceQueryType : public QueryType {
+class GraphicsResourceQuery {
 public:
-	enum GraphicsResourceQueryTypeId : int {
-		GRAPHICS_RESOURCE_REQUEST = GRAPHICS_RESOURCES,
-	};
+	DECLARE_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);
 };
 
-}  // queries
 }  // game_scene

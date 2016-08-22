@@ -9,20 +9,19 @@
 #include "Pose.h"
 
 namespace game_scene {
-namespace commands {
-
-class SpriteCommandType : public CommandType {
+	
+class SpriteCommand {
 public:
-	enum SpriteCommandTypeId : int {
-		CREATE_SPRITE = SPRITES,
-		PLACE_SPRITE,
-	};
+	DECLARE_COMMAND(SpriteCommand, CREATE_SPRITE);
+	DECLARE_COMMAND(SpriteCommand, PLACE_SPRITE);
 };
+
+namespace commands {
 
 class SpriteDetails : public CommandArgs {
 public:
 	SpriteDetails(string texture_name) :
-		CommandArgs(SpriteCommandType::CREATE_SPRITE), texture_name_(texture_name) {}
+		CommandArgs(SpriteCommand::CREATE_SPRITE), texture_name_(texture_name) {}
 
 	string texture_name_;
 };
@@ -30,7 +29,7 @@ public:
 class SpritePlacement : public CommandArgs {
 public:
 	SpritePlacement(Location location, array<float, 2> size) :
-		CommandArgs(SpriteCommandType::PLACE_SPRITE), location_(location), size_(size) {}
+		CommandArgs(SpriteCommand::PLACE_SPRITE), location_(location), size_(size) {}
 
 	Location location_;
 	array<float, 2> size_;

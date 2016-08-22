@@ -195,6 +195,7 @@
     <ClInclude Include="NichijouGraph.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
+    <ClInclude Include="Registry.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shmactor.h" />
     <ClInclude Include="SpecializedActors.h" />
@@ -231,9 +232,11 @@
     <ClCompile Include="NichijouGraph.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
+    <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shmactor.cpp" />
     <ClCompile Include="SpecializedActors.cpp" />
+    <ClCompile Include="SpecializedQueries.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

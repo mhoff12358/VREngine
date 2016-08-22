@@ -3,6 +3,7 @@
 #include "SpecializedActors.h"
 #include "SpecializedQueries.h"
 #include "Scene.h"
+#include "GraphicsObject.h"
 
 namespace game_scene {
 namespace actors {
@@ -33,7 +34,7 @@ void GraphicsResources::AddedToScene() {
 
 void GraphicsResources::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
-	case commands::GraphicsCommandType::REQUIRE_RESOURCE:
+	case GraphicsObjectCommand::REQUIRE_RESOURCE:
 		RequireResource(dynamic_cast<const WrappedCommandArgs<ResourceIdent>&>(args).data_);
 		break;
 	default:
@@ -43,10 +44,12 @@ void GraphicsResources::HandleCommand(const CommandArgs& args) {
 }
 
 unique_ptr<QueryResult> GraphicsResources::AnswerQuery(const QueryArgs& args) {
-	if (args.Type() == queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST) {
-		return make_unique<QueryResultWrapped<actors::GraphicsResources&>>(queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST, *this);
+	switch (args.Type()) {
+	case GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST:
+		return make_unique<QueryResultWrapped<actors::GraphicsResources&>>(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST, *this);
+	default:
+		return nullptr;
 	}
-	return nullptr;
 }
 
 void GraphicsResources::RequireResource(ResourceIdent resource_ident) {

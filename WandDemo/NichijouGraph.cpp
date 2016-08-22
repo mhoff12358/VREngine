@@ -7,10 +7,19 @@
 #include "SpecializedQueries.h"
 #include "HeadsetInterface.h"
 #include "Sprite.h"
+#include "Registry.h"
 
 #include <cstdlib>
 
 namespace game_scene {
+
+REGISTER_COMMAND(NichijouCommand, TELL_VERTEX_ABOUT_EDGE);
+REGISTER_COMMAND(NichijouCommand, SET_VERTEX_LOCATION);
+REGISTER_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
+REGISTER_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
+
+REGISTER_QUERY(NichijouQuery, GET_VERTEX);
+
 namespace actors {
 
 void NichijouGraph::HandleCommand(const CommandArgs& args) {
@@ -68,7 +77,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 					Command(
 						Target(vertex_pair.second),
 						make_unique<WrappedCommandArgs<Location>>(
-							commands::NichijouGraphCommandType::SET_VERTEX_LOCATION,
+							NichijouCommand::SET_VERTEX_LOCATION,
 							vertex_location)));
 			}
 
@@ -85,7 +94,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 		}
 	}
 	break;
-	case commands::HeadsetInterfaceCommandType::LISTEN_TRIGGER_STATE_CHANGE:
+	case HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE:
 	{
 		const commands::TriggerStateChange& trigger_state_change = dynamic_cast<const commands::TriggerStateChange&>(args);
 		if (trigger_state_change.controller_number_ == 0) {
@@ -101,7 +110,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 		}
 	}
 	break;
-	case commands::HeadsetInterfaceCommandType::LISTEN_CONTROLLER_MOVEMENT:
+	case HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT:
 	{
 		const commands::ControllerMovement& controller_movement = dynamic_cast<const commands::ControllerMovement&>(args);
 		if (controller_movement.controller_number_ == 0) {
@@ -111,7 +120,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 					Command(
 						Target(vertex_actor.second),
 						make_unique<WrappedCommandArgs<Location>>(
-							commands::NichijouGraphCommandType::MOVE_VERTEX_LOCATION,
+							NichijouCommand::MOVE_VERTEX_LOCATION,
 							controller_movement.movement_vector_)));
 			}
 		}
@@ -125,9 +134,9 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 
 unique_ptr<QueryResult> NichijouGraph::AnswerQuery(const QueryArgs& args) {
 	switch (args.Type()) {
-	case queries::NichijouGraphQueryType::GET_VERTEX:
+	case NichijouQuery::GET_VERTEX:
 	{
-		return make_unique<QueryResultWrapped<ActorId>>(queries::NichijouGraphQueryType::GET_VERTEX, vertex_actors_[dynamic_cast<const WrappedQueryArgs<string>&>(args).data_]);
+		return make_unique<QueryResultWrapped<ActorId>>(NichijouQuery::GET_VERTEX, vertex_actors_[dynamic_cast<const WrappedQueryArgs<string>&>(args).data_]);
 	}
 	default:
 		break;
@@ -139,7 +148,7 @@ void NichijouGraph::CreateGraphicsResources() {
 	actors::GraphicsResources& resources =
 		dynamic_cast<const QueryResultWrapped<actors::GraphicsResources&>&>(*scene_->AskQuery(
 			Target(scene_->FindByName("GraphicsResources")),
-			make_unique<EmptyQuery>(queries::GraphicsResourceQueryType::GRAPHICS_RESOURCE_REQUEST))).data_;
+			make_unique<EmptyQuery>(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST))).data_;
 	ModelGenerator gen(ObjLoader::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 	gen.AddVertexBatch(vector<Vertex>({
 		Vertex(ObjLoader::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
@@ -153,15 +162,15 @@ void NichijouGraph::CreateGraphicsResources() {
 		Command(
 			Target(scene_->FindByName("GraphicsResources")),
 			make_unique<WrappedCommandArgs<ResourceIdent>>(
-				commands::GraphicsCommandType::REQUIRE_RESOURCE, edge_model_ident)));
+				GraphicsObjectCommand::REQUIRE_RESOURCE, edge_model_ident)));
 }
 
 void NichijouVertex::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		/*game_scene::actors::GraphicsObjectDetails sphere_details;
-		sphere_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
+		/*actors::GraphicsObjectDetails sphere_details;
+		sphere_details.heirarchy_ = actors::ComponentHeirarchy(
 			"sphere",
 			{
 				{"sphere.obj|Sphere",
@@ -182,15 +191,15 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 		};
 
 		CommandQueueLocation last_command;
-		std::tie(vertex_graphics_, last_command) = scene_->AddActorReturnInitialize(make_unique<game_scene::actors::GraphicsObject>());
+		std::tie(vertex_graphics_, last_command) = scene_->AddActorReturnInitialize(make_unique<actors::GraphicsObject>());
 		last_command = scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(vertex_graphics_), 
-			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-				game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			make_unique<WrappedCommandArgs<actors::GraphicsObjectDetails>>(
+				GraphicsObjectCommand::CREATE_COMPONENTS,
 				sphere_details)));
 		float radius = extract<float>(configuration_["radius"]);
 		last_command = scene_->MakeCommandAfter(last_command, Command(
-			game_scene::Target(vertex_graphics_),
-			make_unique<game_scene::commands::ComponentPlacement>(
+			Target(vertex_graphics_),
+			make_unique<commands::ComponentPlacement>(
 				"sphere", DirectX::XMMatrixScaling(radius, radius, radius))));*/
 		CommandQueueLocation sprite_command;
 		std::tie(vertex_graphics_, sprite_command) = scene_->AddActorReturnInitialize(make_unique<Sprite>());
@@ -200,29 +209,29 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 			Command(Target(vertex_graphics_), make_unique<commands::SpritePlacement>(Location(0, 0, 0), array<float, 2>{1.0f, 1.0f})));
 	}
 	break;
-	case commands::NichijouGraphCommandType::TELL_VERTEX_ABOUT_EDGE:
+	case NichijouCommand::TELL_VERTEX_ABOUT_EDGE:
 	{
 		edges_.push_back(dynamic_cast<const WrappedCommandArgs<ActorId>&>(args).data_);
 	}
 	break;
-	case commands::NichijouGraphCommandType::SET_VERTEX_LOCATION:
+	case NichijouCommand::SET_VERTEX_LOCATION:
 	{
 		location_ = dynamic_cast<const WrappedCommandArgs<Location>&>(args).data_;
 		UpdateAllEdgeLocations();
 		float radius = extract<float>(configuration_["radius"]);
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			game_scene::Target(vertex_graphics_),
+			Target(vertex_graphics_),
 			make_unique<commands::SpritePlacement>(
 				location_, array<float, 2>{ radius, radius })));
 	}
 	break;
-	case commands::NichijouGraphCommandType::MOVE_VERTEX_LOCATION:
+	case NichijouCommand::MOVE_VERTEX_LOCATION:
 	{
 		location_ += dynamic_cast<const WrappedCommandArgs<Location>&>(args).data_;
 		UpdateAllEdgeLocations();
 		float radius = extract<float>(configuration_["radius"]);
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			game_scene::Target(vertex_graphics_),
+			Target(vertex_graphics_),
 			make_unique<commands::SpritePlacement>(
 				location_, array<float, 2>{ radius, radius })));
 	}
@@ -235,7 +244,7 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 
 void NichijouVertex::UpdateEdgeLocation(ActorId edge_actor) {
 	scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(edge_actor),
-		make_unique<WrappedCommandArgs<tuple<ActorId, Location>>>(commands::NichijouGraphCommandType::SET_EDGE_LOCATION, tuple<ActorId, Location>(id_, location_))));
+		make_unique<WrappedCommandArgs<tuple<ActorId, Location>>>(NichijouCommand::SET_EDGE_LOCATION, tuple<ActorId, Location>(id_, location_))));
 }
 
 void NichijouVertex::UpdateAllEdgeLocations() {
@@ -248,13 +257,13 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		u_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(queries::NichijouGraphQueryType::GET_VERTEX, string(extract<string>(edge_.attr("u_name")))))).data_;
-		v_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(queries::NichijouGraphQueryType::GET_VERTEX, string(extract<string>(edge_.attr("v_name")))))).data_;
-		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(u_actor_), make_unique<WrappedCommandArgs<ActorId>>(commands::NichijouGraphCommandType::TELL_VERTEX_ABOUT_EDGE, id_)));
-		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(v_actor_), make_unique<WrappedCommandArgs<ActorId>>(commands::NichijouGraphCommandType::TELL_VERTEX_ABOUT_EDGE, id_)));
+		u_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("u_name")))))).data_;
+		v_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("v_name")))))).data_;
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(u_actor_), make_unique<WrappedCommandArgs<ActorId>>(NichijouCommand::TELL_VERTEX_ABOUT_EDGE, id_)));
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(v_actor_), make_unique<WrappedCommandArgs<ActorId>>(NichijouCommand::TELL_VERTEX_ABOUT_EDGE, id_)));
 
-		game_scene::actors::GraphicsObjectDetails line_details;
-		line_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
+		actors::GraphicsObjectDetails line_details;
+		line_details.heirarchy_ = actors::ComponentHeirarchy(
 			"line",
 			{
 				{model_name_ + "|Line",
@@ -267,7 +276,7 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 					false)}
 			},
 			{});
-		line_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("solidline.hlsl", {true, true, true});
+		line_details.heirarchy_.shader_file_definition_ = actors::ShaderFileDefinition("solidline.hlsl", {true, true, true});
 		line_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_location;
 		line_details.heirarchy_.entity_group_ = "basic";
 		line_details.heirarchy_.shader_settings_ = {
@@ -276,18 +285,18 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 		};
 
 		CommandQueueLocation last_command;
-		std::tie(edge_graphics_, last_command) = scene_->AddActorReturnInitialize(make_unique<game_scene::actors::GraphicsObject>());
+		std::tie(edge_graphics_, last_command) = scene_->AddActorReturnInitialize(make_unique<actors::GraphicsObject>());
 		last_command = scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(edge_graphics_), 
-			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-				game_scene::commands::GraphicsCommandType::CREATE_COMPONENTS,
+			make_unique<WrappedCommandArgs<actors::GraphicsObjectDetails>>(
+				GraphicsObjectCommand::CREATE_COMPONENTS,
 				line_details)));
 		last_command = scene_->MakeCommandAfter(last_command, Command(
-			game_scene::Target(edge_graphics_),
-			make_unique<game_scene::commands::ComponentPlacement>(
+			Target(edge_graphics_),
+			make_unique<commands::ComponentPlacement>(
 				"line", DirectX::XMMatrixIdentity())));
 	}
 	break;
-	case commands::NichijouGraphCommandType::SET_EDGE_LOCATION:
+	case NichijouCommand::SET_EDGE_LOCATION:
 	{
 		const tuple<ActorId, Location>& new_location = dynamic_cast<const WrappedCommandArgs<tuple<ActorId, Location>>&>(args).data_;
 		if (get<0>(new_location) == u_actor_) {
@@ -303,14 +312,14 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 		Pose edge_pose(u_location_ + edge_vector * vertex_spacing / edge_vector_length,
 			Quaternion::RotationBetweenVectors({1, 0, 0}, edge_vector.location_));
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			game_scene::Target(edge_graphics_),
-			make_unique<game_scene::commands::ComponentPlacement>(
+			Target(edge_graphics_),
+			make_unique<commands::ComponentPlacement>(
 				"line",
 				DirectX::XMMatrixScaling(edge_vector.GetLength() - vertex_spacing * 2, 1, 1) * edge_pose.GetMatrix())));
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			game_scene::Target(edge_graphics_),
+			Target(edge_graphics_),
 			make_unique<WrappedCommandArgs<tuple<string, ShaderSettingsValue>>>(
-				commands::GraphicsCommandType::SET_SHADER_VALUES,
+				GraphicsObjectCommand::SET_SHADER_VALUES,
 				tuple<string, ShaderSettingsValue>(
 					"line",
 					ShaderSettingsValue(vector<vector<float>>({{1.0f, 0.0f, 0.0f, 1.0f}, {line_width}}))))));
