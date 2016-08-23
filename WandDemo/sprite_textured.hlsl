@@ -57,30 +57,19 @@ void GShader(
 	matrix <float, 4, 4> model_view = mul(view, model);
 	float4 right = float4(model_view[0][0], model_view[0][1], model_view[0][2], 0) * size.x;
 	float4 up = float4(model_view[1][0], model_view[1][1], model_view[1][2], 0) * size.y;
-	GOut element1;
-	element1.pos = mul(view_projection, input[0].pos + right + up);
-	element1.tex_coord = float2(1, 0);
-	output.Append(element1);
-	GOut element2;
-	element2.pos = mul(view_projection, input[0].pos - right - up);
-	element2.tex_coord = float2(0, 1);
-	output.Append(element2);
-	GOut element3;
-	element3.pos = mul(view_projection, input[0].pos - right + up);
-	element3.tex_coord = float2(0, 0);
-	output.Append(element3);
-	GOut element11;
-	element11.pos = mul(view_projection, input[0].pos + right + up);
-	element11.tex_coord = float2(1, 0);
-	output.Append(element11);
-	GOut element12;
-	element12.pos = mul(view_projection, input[0].pos - right - up);
-	element12.tex_coord = float2(0, 1);
-	output.Append(element12);
-	GOut element13;
-	element13.pos = mul(view_projection, input[0].pos + right - up);
-	element13.tex_coord = float2(1, 1);
-	output.Append(element13);
+	GOut element;
+	element.pos = mul(view_projection, input[0].pos + right + up);
+	element.tex_coord = float2(1, 0);
+	output.Append(element);
+	element.pos = mul(view_projection, input[0].pos - right - up);
+	element.tex_coord = float2(0, 1);
+	output.Append(element);
+	element.pos = mul(view_projection, input[0].pos - right + up);
+	element.tex_coord = float2(0, 0);
+	output.Append(element);
+	element.pos = mul(view_projection, input[0].pos + right - up);
+	element.tex_coord = float2(1, 1);
+	output.Append(element);
 }
 
 POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_TARGET
