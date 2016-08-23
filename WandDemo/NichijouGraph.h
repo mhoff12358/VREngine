@@ -58,6 +58,10 @@ private:
 	map<string, ActorId> vertex_actors_;
 	vector<ActorId> edge_actors_;
 	string edge_model_name_;
+	ActorId timeline_graphics_;
+	// These colors are vectors so that they can be used as input to the shader settings.
+	vector<float> timeline_color_1_;
+	vector<float> timeline_color_2_;
 
 	float timeline_position_ = 0.0f;
 	float timeline_max_position_ = 1.0f;

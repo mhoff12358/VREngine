@@ -364,6 +364,9 @@
     <FxCompile Include="sprite_textured_circle.hlsl">
       <Filter>Resource Files\Entity Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="timeline.hlsl">
+      <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">

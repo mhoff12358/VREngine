@@ -46,6 +46,10 @@ def load_graph():
                 "width" : 0.025,
                 "vertex_spacing" : 0.075,
                 },
+            "timeline_colors" : (
+                (1.0, 1.0, 1.0, 1.0),
+                (0.0, 0.0, 0.0, 1.0),
+                ),
             # Interaction configuration values
             "timeline_length" : 5,
             },
