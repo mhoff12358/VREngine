@@ -397,7 +397,7 @@ void UpdateLoop() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_active = false;
-	bool hmd_desired = false;
+	bool hmd_desired = true;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
@@ -495,7 +495,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	TextureSignature back_buffer_signature(*graphics_objects.render_pipeline->GetStagingBufferDesc());
-	//TextureSignature hmd_signature(graphics_objects.oculus->GetEyeTexture(Headset::eyes_[0]).GetDesc());
 	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
 	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", keep_nearer_depth_test), {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));

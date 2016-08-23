@@ -43,6 +43,7 @@ public:
 	void HandleCommand(const CommandArgs& args) override;
 
 	void RequireResource(ResourceIdent resource_ident);
+	static GraphicsResources& GetGraphicsResources(Scene* scene);
 
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;

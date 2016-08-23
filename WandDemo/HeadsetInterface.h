@@ -27,11 +27,15 @@ public:
 
 	enum class ListenerId : unsigned char {
 		TRIGGER_STATE_CHANGE = 0,
+		TOUCHPAD_SLIDE,
+		TOUCHPAD_DRAG,
 		CONTROLLER_MOVEMENT,
 		NUM_LISTENERS,
 	};
 
 private:
+	void HandleNewControllerState(int hand_index, vr::VRControllerState_t new_state);
+
 	array<bool, 2> controller_connectedness_;
 	array<Pose, 2> controller_positions_;
 	array<vr::VRControllerState_t, 2> controller_states_;
@@ -47,6 +51,8 @@ class HeadsetInterfaceCommand {
 public:
 	DECLARE_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TRIGGER_STATE_CHANGE);
+	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_SLIDE);
+	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_DRAG);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_CONTROLLER_MOVEMENT);
 };
 
@@ -67,26 +73,38 @@ public:
 	actors::HeadsetInterface::ListenerId listener_id_;
 };
 
-class ControllerMovement : public CommandArgs {
+class ControllerInformation : public CommandArgs {
+public:
+	ControllerInformation(IdType type, unsigned char controller_number) : CommandArgs(type), controller_number_(controller_number) {}
+	unsigned char controller_number_;
+};
+
+class ControllerMovement : public ControllerInformation {
 public:
 	ControllerMovement(unsigned char controller_number, Location movement_vector) :
-		CommandArgs(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT),
-		controller_number_(controller_number),
+		ControllerInformation(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT, controller_number),
 		movement_vector_(movement_vector) {}
 
-	unsigned char controller_number_;
 	Location movement_vector_;
 };
 
-class TriggerStateChange : public CommandArgs {
+class TriggerStateChange : public ControllerInformation {
 public:
 	TriggerStateChange(unsigned char controller_number, bool is_pulled) :
-		CommandArgs(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE),
-		controller_number_(controller_number),
+		ControllerInformation(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE, controller_number),
 		is_pulled_(is_pulled) {}
 
-	unsigned char controller_number_;
 	bool is_pulled_;
 };
+
+class TouchpadMotion : public ControllerInformation {
+public:
+	TouchpadMotion(IdType type, unsigned char controller_number, vr::VRControllerAxis_t position, vr::VRControllerAxis_t delta)
+		: ControllerInformation(type, controller_number), position_(position), delta_(delta) {}
+
+	vr::VRControllerAxis_t position_;
+	vr::VRControllerAxis_t delta_;
+};
+
 }  // commands
 }  // game_scene

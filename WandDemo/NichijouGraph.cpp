@@ -17,6 +17,7 @@ REGISTER_COMMAND(NichijouCommand, TELL_VERTEX_ABOUT_EDGE);
 REGISTER_COMMAND(NichijouCommand, SET_VERTEX_LOCATION);
 REGISTER_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
 REGISTER_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
+REGISTER_COMMAND(NichijouCommand, SET_VISIBLE);
 
 REGISTER_QUERY(NichijouQuery, GET_VERTEX);
 
@@ -86,6 +87,9 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 					Target(headset_interface_),
 					make_unique<commands::ListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TRIGGER_STATE_CHANGE)));
+				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+					Target(headset_interface_),
+					make_unique<commands::ListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TOUCHPAD_SLIDE)));
 			}
 
 			CreateGraphicsResources();
@@ -96,7 +100,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 	break;
 	case HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE:
 	{
-		const commands::TriggerStateChange& trigger_state_change = dynamic_cast<const commands::TriggerStateChange&>(args);
+		const auto& trigger_state_change = dynamic_cast<const commands::TriggerStateChange&>(args);
 		if (trigger_state_change.controller_number_ == 0) {
 			if (trigger_state_change.is_pulled_) {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
@@ -107,6 +111,15 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 					Target(headset_interface_),
 					make_unique<commands::ListenerRegistration>(false, id_, HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
 			}
+		}
+	}
+	break;
+	case HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE:
+	{
+		const auto& touchpad_slide = dynamic_cast<const commands::TouchpadMotion&>(args);
+		for (const auto& vertex : vertex_actors_) {
+			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+				Target(vertex.second), make_unique<WrappedCommandArgs<bool>>(NichijouCommand::SET_VISIBLE, touchpad_slide.position_.x > 0)));
 		}
 	}
 	break;
@@ -208,6 +221,14 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 			Target(vertex_graphics_),
 			make_unique<commands::SpritePlacement>(
 				location_, array<float, 2>{ radius, radius })));
+	}
+	break;
+	case NichijouCommand::SET_VISIBLE:
+	{
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+			Target(vertex_graphics_),
+			make_unique<commands::ComponentDrawnState>(
+				"point", dynamic_cast<const WrappedCommandArgs<bool>&>(args).data_)));
 	}
 	break;
 	default:

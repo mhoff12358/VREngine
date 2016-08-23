@@ -7,14 +7,14 @@ namespace game_scene {
 
 class QueryType {
 public:
-	QueryType(int64_t id) : id_(id) {}
+	QueryType(IdType id) : id_(id) {}
 	QueryType(QueryRegistry id) : id_(id.value_) {}
 
 	DECLARE_QUERY(QueryType, EMPTY);
 	DECLARE_QUERY(QueryType, MULTIPLE);
 
-	int64_t Type() {return id_;}
-	int64_t id_;
+	IdType Type() {return id_;}
+	IdType id_;
 };
 
 class QueryArgs
@@ -23,7 +23,7 @@ public:
 	QueryArgs(QueryType type);
 	virtual ~QueryArgs() {}
 
-	int64_t Type() const {return type_.id_;}
+	IdType Type() const {return type_.id_;}
 
 private:
 	QueryType type_;

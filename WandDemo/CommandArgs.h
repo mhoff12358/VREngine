@@ -7,13 +7,13 @@ namespace game_scene {
 
 class CommandType {
 public:
-	CommandType(int64_t id) : id_(id) {}
+	CommandType(IdType id) : id_(id) {}
 	CommandType(const CommandRegistry& id) : id_(id.value_) {}
 
 	DECLARE_COMMAND(CommandType, ADDED_TO_SCENE);
 
-	int64_t Type() {return id_;}
-	int64_t id_;
+	IdType Type() {return id_;}
+	IdType id_;
 };
 
 class CommandArgs {
@@ -21,7 +21,7 @@ public:
 	CommandArgs(CommandType type);
 	virtual ~CommandArgs();
 
-	int64_t Type() const {return type_.id_;}
+	IdType Type() const {return type_.id_;}
 
 private:
 	CommandType type_;

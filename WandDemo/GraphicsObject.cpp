@@ -15,6 +15,7 @@ REGISTER_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS);
 REGISTER_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS_ASSUME_RESOURCES);
 REGISTER_COMMAND(GraphicsObjectCommand, PLACE_COMPONENT);
 REGISTER_COMMAND(GraphicsObjectCommand, SET_SHADER_VALUES);
+REGISTER_COMMAND(GraphicsObjectCommand, SET_COMPONENT_DRAWN);
 
 namespace actors {
 
@@ -66,6 +67,9 @@ void GraphicsObject::HandleCommand(const CommandArgs& args) {
 		SetShaderSettingsValue(get<0>(shader_value_data), get<1>(shader_value_data));
 	}
 		break;
+	case GraphicsObjectCommand::SET_COMPONENT_DRAWN:
+		SetComponentIsDrawn(dynamic_cast<const commands::ComponentDrawnState&>(args));
+		break;
 	default:
 		FailToHandleCommand(args);
 		break;
@@ -99,19 +103,7 @@ void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDet
 void GraphicsObject::CreateComponents(const GraphicsObjectDetails& details) {
 	components_.reserve(details.heirarchy_.GetNumberOfComponents());
 
-	Target graphics_resources_target = Target(scene_->FindByName("GraphicsResources"));
-
-	unique_ptr<QueryResult> graphics_resources_result = scene_->AskQuery(
-		graphics_resources_target,
-		make_unique<QueryArgs>(
-			GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST));
-	if (graphics_resources_result->Type() != GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST) {
-		std::cout << "UNEXPECTED RESPONSE WHILE GETTING GRAPHICS RESOURCES" << std::endl;
-		return;
-	}
-	actors::GraphicsResources& graphics_resources = 
-		dynamic_cast<QueryResultWrapped<actors::GraphicsResources&>*>(
-			graphics_resources_result.get())->data_;
+	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(scene_);
 
 	components_.emplace_back(
 		move(tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>(
@@ -226,6 +218,25 @@ void GraphicsObject::PlaceComponent(const commands::ComponentPlacement& placemen
 	
 void GraphicsObject::SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value) {
 	value.SetIntoConstantBuffer(get<1>(LookupComponent(component_name)).get());
+}
+
+void GraphicsObject::SetComponentIsDrawn(const commands::ComponentDrawnState& component_drawn_state) {
+	const auto& component = LookupComponent(component_drawn_state.component_name_);
+	EntityHandler& entity_handler = GraphicsResources::GetGraphicsResources(scene_).entity_handler_;
+	for (unsigned int entity_offset = 0; entity_offset < get<0>(component).number_of_entities_; entity_offset++) {
+		if (component_drawn_state.is_drawn_) {
+			entity_handler.EnableEntity(get<0>(component).first_entity_ + entity_offset);
+		} else {
+			entity_handler.DisableEntity(get<0>(component).first_entity_ + entity_offset);
+		}
+	}
+	for (unsigned int settings_entity : get<2>(component)) {
+		if (component_drawn_state.is_drawn_) {
+			entity_handler.EnableEntity(settings_entity);
+		} else {
+			entity_handler.DisableEntity(settings_entity);
+		}
+	}
 }
 
 }  // actors

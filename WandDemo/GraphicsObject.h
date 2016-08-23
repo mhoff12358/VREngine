@@ -15,6 +15,7 @@ public:
 	DECLARE_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS_ASSUME_RESOURCES);
 	DECLARE_COMMAND(GraphicsObjectCommand, PLACE_COMPONENT);
 	DECLARE_COMMAND(GraphicsObjectCommand, SET_SHADER_VALUES);
+	DECLARE_COMMAND(GraphicsObjectCommand, SET_COMPONENT_DRAWN);
 };
 
 namespace commands {
@@ -28,6 +29,16 @@ public:
 
 	string component_name_;
 	DirectX::XMMATRIX transformation_;
+};
+
+class ComponentDrawnState : public CommandArgs {
+public:
+	ComponentDrawnState(string component_name, bool is_drawn) :
+		CommandArgs(GraphicsObjectCommand::SET_COMPONENT_DRAWN),
+		component_name_(component_name), is_drawn_(is_drawn) {}
+
+	string component_name_;
+	bool is_drawn_;
 };
 
 }  // commands
@@ -149,6 +160,7 @@ protected:
 	// Update methods.
 	void PlaceComponent(const commands::ComponentPlacement& placement);
 	void SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value);
+	void SetComponentIsDrawn(const commands::ComponentDrawnState& component_drawn_state);
 
 	// Each tuple is a component, an unsigned int that is the entity numbers of
 	// the settings entities, and a unique_ptr holding the settings' constant

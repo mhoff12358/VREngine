@@ -18,6 +18,7 @@ public:
 	DECLARE_COMMAND(NichijouCommand, SET_VERTEX_LOCATION);
 	DECLARE_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
 	DECLARE_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
+	DECLARE_COMMAND(NichijouCommand, SET_VISIBLE);
 };
 
 class NichijouQuery {
