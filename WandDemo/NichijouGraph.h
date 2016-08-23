@@ -19,7 +19,22 @@ public:
 	DECLARE_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
 	DECLARE_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
 	DECLARE_COMMAND(NichijouCommand, SET_VISIBLE);
+	DECLARE_COMMAND(NichijouCommand, TELL_TIMELINE_POSITION);
 };
+
+namespace commands {
+
+class TimelinePosition : public CommandArgs {
+public:
+	TimelinePosition(float position, float max_position) :
+		CommandArgs(NichijouCommand::TELL_TIMELINE_POSITION),
+		position_(position), max_position_(max_position) {}
+
+	float position_;
+	float max_position_;
+};
+
+}  // commands
 
 class NichijouQuery {
 public:
@@ -35,6 +50,7 @@ public:
 
 private:
 	void CreateGraphicsResources();
+	void MoveTimelinePosition(float timeline_delta);
 
 	ActorId headset_interface_;
 	object configuration_;
@@ -42,6 +58,9 @@ private:
 	map<string, ActorId> vertex_actors_;
 	vector<ActorId> edge_actors_;
 	string edge_model_name_;
+
+	float timeline_position_ = 0.0f;
+	float timeline_max_position_ = 1.0f;
 };
 
 class NichijouVertex : public Shmactor {
@@ -60,6 +79,7 @@ private:
 	vector<ActorId> edges_;
 	ActorId vertex_graphics_;
 	Location location_;
+	bool visible_ = true;
 };
 
 class NichijouEdge : public Shmactor {
@@ -79,6 +99,7 @@ private:
 	Location v_location_;
 	string model_name_;
 	ActorId edge_graphics_;
+	bool visible_ = true;
 };
 
 }  // actors

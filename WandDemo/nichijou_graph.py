@@ -8,6 +8,11 @@ class TimeRange(object):
         self.min_inclusive = min_inclusive
         self.max_inclusive = max_inclusive
 
+    def InRange(self, time_value):
+        after_min = (time_value > self.min_value) or ((time_value == self.min_value) and self.min_inclusive)
+        before_max = (time_value < self.max_value) or ((time_value == self.max_value) and self.max_inclusive)
+        return after_min and before_max
+
 class Vertex(object):
     def __init__(self, name, time_range, texture_name):
         self.name = name
@@ -42,8 +47,8 @@ def load_graph():
                 "vertex_spacing" : 0.075,
                 },
             # Interaction configuration values
-            "timeline_width" : 5,
+            "timeline_length" : 5,
             },
         "vertices" : list(Vertex(name = name, time_range = TimeRange(0, 4), texture_name = "nichijou_images/"+name+".png") for name in character_names),
-        "edges" : [ Edge(TimeRange(0, 5), "nano", "hakase") ],
+        "edges" : [ Edge(TimeRange(0, 2.5), "nano", "hakase") ],
         }

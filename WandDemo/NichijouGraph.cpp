@@ -18,6 +18,7 @@ REGISTER_COMMAND(NichijouCommand, SET_VERTEX_LOCATION);
 REGISTER_COMMAND(NichijouCommand, MOVE_VERTEX_LOCATION);
 REGISTER_COMMAND(NichijouCommand, SET_EDGE_LOCATION);
 REGISTER_COMMAND(NichijouCommand, SET_VISIBLE);
+REGISTER_COMMAND(NichijouCommand, TELL_TIMELINE_POSITION);
 
 REGISTER_QUERY(NichijouQuery, GET_VERTEX);
 
@@ -82,6 +83,11 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 							vertex_location)));
 			}
 
+			object timeline_length = configuration_["timeline_length"];
+			if (!timeline_length.is_none()) {
+				timeline_max_position_ = extract<float>(timeline_length);
+			}
+
 			headset_interface_ = scene_->FindByName("HeadsetInterface");
 			if (headset_interface_ != ActorId::UnsetId) {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
@@ -117,9 +123,8 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 	case HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE:
 	{
 		const auto& touchpad_slide = dynamic_cast<const commands::TouchpadMotion&>(args);
-		for (const auto& vertex : vertex_actors_) {
-			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-				Target(vertex.second), make_unique<WrappedCommandArgs<bool>>(NichijouCommand::SET_VISIBLE, touchpad_slide.position_.x > 0)));
+		if (touchpad_slide.controller_number_ == 0) {
+			MoveTimelinePosition(touchpad_slide.delta_.x / 2.0f);
 		}
 	}
 	break;
@@ -178,6 +183,19 @@ void NichijouGraph::CreateGraphicsResources() {
 				GraphicsObjectCommand::REQUIRE_RESOURCE, edge_model_ident)));
 }
 
+void NichijouGraph::MoveTimelinePosition(float delta) {
+	timeline_position_ = min(max(timeline_position_ + delta, 0.0f), timeline_max_position_);
+	std::cout << timeline_position_ << std::endl;
+	for (const auto& vertex : vertex_actors_) {
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+			Target(vertex.second), make_unique<commands::TimelinePosition>(timeline_position_, timeline_max_position_)));
+	}
+	for (const auto& edge : edge_actors_) {
+		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+			Target(edge), make_unique<commands::TimelinePosition>(timeline_position_, timeline_max_position_)));
+	}
+}
+
 void NichijouVertex::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
@@ -231,6 +249,20 @@ void NichijouVertex::HandleCommand(const CommandArgs& args) {
 				"point", dynamic_cast<const WrappedCommandArgs<bool>&>(args).data_)));
 	}
 	break;
+	case NichijouCommand::TELL_TIMELINE_POSITION:
+		try {
+			bool new_visible = extract<bool>(vertex_.attr("time_range").attr("InRange")(dynamic_cast<const commands::TimelinePosition&>(args).position_));
+			if (new_visible != visible_) {
+				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+					Target(vertex_graphics_),
+					make_unique<commands::ComponentDrawnState>(
+						"point", new_visible)));
+				visible_ = new_visible;
+			}
+		} catch (error_already_set) {
+				PyErr_Print();
+		}
+		break;
 	default:
 		FailToHandleCommand(args);
 		break;
@@ -320,6 +352,20 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 					ShaderSettingsValue(vector<vector<float>>({{1.0f, 0.0f, 0.0f, 1.0f}, {line_width}}))))));
 	}
 	break;
+	case NichijouCommand::TELL_TIMELINE_POSITION:
+		try {
+			bool new_visible = extract<bool>(edge_.attr("time_range").attr("InRange")(dynamic_cast<const commands::TimelinePosition&>(args).position_));
+			if (new_visible != visible_) {
+				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
+					Target(edge_graphics_),
+					make_unique<commands::ComponentDrawnState>(
+						"line", new_visible)));
+				visible_ = new_visible;
+			}
+		} catch (error_already_set) {
+				PyErr_Print();
+		}
+		break;
 	default:
 		FailToHandleCommand(args);
 		break;
