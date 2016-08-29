@@ -110,7 +110,7 @@ tuple<float, std::array<float, 2>> XM_CALLCONV InteractableCircle::WhereLookedAt
 	DirectX::XMStoreFloat(&cross_normal_dot, DirectX::XMVector3Dot(DirectX::XMVector3Cross(right_trans_vec, intersection_trans_vec), normal_trans_vec));
 
 	if (cross_normal_dot < 0) {
-		look_location[0] = 2 * pi - look_location[0];
+		look_location[0] = 2 * 3.1416 - look_location[0];
 	}
 
 	return std::make_tuple(-distance_from_viewer, look_location);

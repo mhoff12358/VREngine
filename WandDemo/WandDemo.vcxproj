@@ -72,7 +72,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>E:\boost_1_61_0;C:\Program Files\Python35\include;..\;C:\openvr-master\headers;C:\Users\Matt\Documents\WiimoteTest\WiimoteTest\WiimoteHandler;C:\OculusSDK\LibOVR\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Users\Matt\Documents\VRBackend\VRBackend;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <IncludePath>E:\boost_1_61_0;C:\Program Files\Python35\include;$(SolutionDir);C:\openvr-master\headers;C:\OculusSDK\LibOVR\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\Python35\libs;E:\Boost\lib\x64;$(SolutionDir)$(Platform)\$(Configuration)\;C:\openvr-master\lib\win64;C:\OculusSDK\LibOVR\Lib\Windows\x64\Debug\VS2013;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\Program Files\Python35\libs\python35.lib;E:\Boost\lib\x64\libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;Lua52.lib;LuaGameScripting.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SceneSystem.lib;C:\Program Files\Python35\libs\python35.lib;E:\Boost\lib\x64\libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;Lua52.lib;LuaGameScripting.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
     </Link>
@@ -170,18 +170,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
-    <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorHandler.h" />
-    <ClInclude Include="ActorId.h" />
-    <ClInclude Include="BoostPythonWrapper.h" />
-    <ClInclude Include="CommandArgs.h" />
-    <ClInclude Include="CommandQueue.h" />
-    <ClInclude Include="Component.h" />
-    <ClInclude Include="ConstantBufferDescribed.h" />
     <ClInclude Include="ConstantBufferLua.h" />
-    <ClInclude Include="Command.h" />
-    <ClInclude Include="GraphicsObject.h" />
-    <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
@@ -193,32 +183,13 @@
     <ClInclude Include="LookInteractable.h" />
     <ClInclude Include="LuaDirectX.h" />
     <ClInclude Include="NichijouGraph.h" />
-    <ClInclude Include="QueryArgs.h" />
-    <ClInclude Include="QueryResult.h" />
-    <ClInclude Include="Registry.h" />
-    <ClInclude Include="Scene.h" />
-    <ClInclude Include="Shmactor.h" />
-    <ClInclude Include="SpecializedActors.h" />
-    <ClInclude Include="SpecializedCommandArgs.h" />
-    <ClInclude Include="SpecializedQueries.h" />
-    <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
-    <ClInclude Include="Target.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
-    <ClCompile Include="ActorGroups.cpp" />
     <ClCompile Include="ActorHandler.cpp" />
-    <ClCompile Include="ActorId.cpp" />
-    <ClCompile Include="Command.cpp" />
-    <ClCompile Include="CommandArgs.cpp" />
-    <ClCompile Include="CommandQueue.cpp" />
-    <ClCompile Include="Component.cpp" />
-    <ClCompile Include="ConstantBufferDescribed.cpp" />
     <ClCompile Include="ConstantBufferLua.cpp" />
-    <ClCompile Include="GraphicsObject.cpp" />
-    <ClCompile Include="HeadsetInterface.cpp" />
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />
@@ -230,21 +201,12 @@
     <ClCompile Include="LookInteractable.cpp" />
     <ClCompile Include="LuaDirectX.cpp" />
     <ClCompile Include="NichijouGraph.cpp" />
-    <ClCompile Include="QueryArgs.cpp" />
-    <ClCompile Include="QueryResult.cpp" />
-    <ClCompile Include="Registry.cpp" />
-    <ClCompile Include="Scene.cpp" />
-    <ClCompile Include="Shmactor.cpp" />
-    <ClCompile Include="SpecializedActors.cpp" />
-    <ClCompile Include="SpecializedQueries.cpp" />
-    <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Target.cpp" />
     <ClCompile Include="WandDemo.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -455,6 +417,11 @@
     <None Include="wall.lua" />
     <None Include="water_flow.lua" />
     <None Include="weapons.lua" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SceneSystem\SceneSystem.vcxproj">
+      <Project>{a9b212e5-71cd-49f9-bfe9-4b48aaca885c}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

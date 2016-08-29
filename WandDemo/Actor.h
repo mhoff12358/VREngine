@@ -2,6 +2,7 @@
 
 #include "stdafx.h"
 
+/*
 #include "ResourcePool.h"
 #include "ObjLoader.h"
 #include "InteractableCollection.h"
@@ -73,4 +74,4 @@ public:
 	// Arguments are <string component_name>
 	int Raycast(lua_State* L);
 };
-
+*/

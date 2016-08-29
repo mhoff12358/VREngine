@@ -1,14 +1,14 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Shmactor.h"
-#include "SpecializedActors.h"
-#include "QueryArgs.h"
-#include "QueryResult.h"
-#include "CommandArgs.h"
-#include "BoostPythonWrapper.h"
-#include "Pose.h"
-#include "Registry.h"
+#include "SceneSystem/Shmactor.h"
+#include "SceneSystem/SpecializedActors.h"
+#include "SceneSystem/QueryArgs.h"
+#include "SceneSystem/QueryResult.h"
+#include "SceneSystem/CommandArgs.h"
+#include "SceneSystem/BoostPythonWrapper.h"
+#include "VRBackend/Pose.h"
+#include "SceneSystem/Registry.h"
 
 namespace game_scene {
 

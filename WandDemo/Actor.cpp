@@ -1,4 +1,5 @@
 #include "stdafx.h"
+/*
 #include "Actor.h"
 
 #include "LuaGameScripting/Index.h"
@@ -215,36 +216,36 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 				if (texture_file_name != "") {
 					if (texture_file_name == "|first_stage_buffer") {
 						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], graphics_objects.render_pipeline->GetFirstStageBuffer());
-						/*shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
-							ES_SETTINGS,
-							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
-							ShaderSettings(used_settings),
-							Model(),
-							NULL,
-							texture_view), entity_group_number));*/
+ //						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+ //							ES_SETTINGS,
+ //							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+ //							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
+ //							ShaderSettings(used_settings),
+ //							Model(),
+ //							NULL,
+ //							texture_view), entity_group_number));
 					}
 					else {
 						Texture texture = graphics_objects.resource_pool->LoadTexture(texture_file_name);
 						TextureView texture_view = TextureView(0, 0, texture_stage_usage[0], texture_stage_usage[1], texture);
-						/*shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
-							ES_SETTINGS,
-							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
-							ShaderSettings(used_settings),
-							Model(),
-							NULL,
-							texture_view), entity_group_number));*/
+ //						shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+ //							ES_SETTINGS,
+ //							graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+ //							graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
+ //							ShaderSettings(used_settings),
+ //							Model(),
+ //							NULL,
+ //							texture_view), entity_group_number));
 					}
 				}
 				else {
-					/*shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
-						ES_SETTINGS,
-						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
-						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
-						ShaderSettings(used_settings),
-						Model(),
-						NULL), entity_group_number));*/
+ //					shader_settings_entity_ids_.push_back(graphics_objects.entity_handler->AddEntity(Entity(
+ //						ES_SETTINGS,
+ //						graphics_objects.resource_pool->LoadPixelShader(shader_file_name),
+ //						graphics_objects.resource_pool->LoadVertexShader(shader_file_name, output_formats_[model_num].vertex_type_.GetVertexType(), output_formats_[model_num].vertex_type_.GetSizeVertexType()),
+ //						ShaderSettings(used_settings),
+ //						Model(),
+ //						NULL), entity_group_number));
 				}
 				lua_environment.GetFromTableToStack(string("components"));
 				if (lua_environment.CheckTypeOfStack() != LUA_TNIL) {
@@ -252,7 +253,7 @@ void Actor::LoadShaderSettings(Lua::Environment lua_environment, const VRBackend
 					int components_key;
 					string component_name;
 					while (lua_environment.IterateOverTable(&components_key, &component_name, NULL)) {
-						/*components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number, component_models[component_name]);*/
+ //						components_[component_lookup_[component_name]].AddEntitiesToHandler(entity_handler_, entity_group_number, component_models[component_name]);
 					}
 				}
 				lua_environment.RemoveFromStack();
@@ -477,4 +478,4 @@ int Actor::Raycast(lua_State* L) {
 	env.StoreToStack(std::get<2>(result));
 
 	return 2;
-}
+}*/

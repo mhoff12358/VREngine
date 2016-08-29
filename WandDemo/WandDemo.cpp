@@ -7,33 +7,24 @@ using std::unique_ptr;
 
 #include "stdafx.h"
 
-#include "BeginDirectx.h"
-#include "TimeTracker.h"
-#include "TextureView.h"
-#include "my_math.h"
+#include "VRBackend/BeginDirectx.h"
+#include "VRBackend/TimeTracker.h"
+#include "VRBackend/TextureView.h"
+#include "VRBackend/my_math.h"
 
-#include "LightDetails.h"
-#include "Component.h"
-#include "Actor.h"
-#include "LookInteractable.h"
-#include "InteractableTriangle.h"
-#include "InteractableQuad.h"
-#include "InteractableCircle.h"
-#include "Identifier.h"
-#include "InteractableCollection.h"
-#include "ActorHandler.h"
+#include "SceneSystem/Component.h"
 
-#include "gaussian.h"
+#include "VRBackend/gaussian.h"
 
-#include "Scene.h"
-#include "SpecializedActors.h"
-#include "SpecializedCommandArgs.h"
-#include "GraphicsObject.h"
-#include "HeadsetInterface.h"
+#include "SceneSystem/Scene.h"
+#include "SceneSystem/SpecializedActors.h"
+#include "SceneSystem/SpecializedCommandArgs.h"
+#include "SceneSystem/GraphicsObject.h"
+#include "SceneSystem/HeadsetInterface.h"
 #include "NichijouGraph.h"
-#include "Sprite.h"
+#include "SceneSystem/Sprite.h"
 
-#include "BoostPythonWrapper.h"
+#include "SceneSystem/BoostPythonWrapper.h"
 
 #include "openvr.h"
 
@@ -91,12 +82,12 @@ void GraphicsLoop() {
 
 void UpdateLoop() {
 	int prev_time = timeGetTime();
-	ActorHandler actor_handler(graphics_objects);
+	//ActorHandler actor_handler(graphics_objects);
 
 	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
 	array<float, 2> player_orientation_angles = { { 0, 0 } };
 
-	LookState previous_look = { Identifier(""), NULL, 0, { { 0, 0 } } };
+	//LookState previous_look = { Identifier(""), NULL, 0, { { 0, 0 } } };
 
 	//unique_lock<mutex> device_context_lock(device_context_access);
 	//actor_handler.LoadSceneFromLuaScript("cockpit_scene.lua");
@@ -311,13 +302,13 @@ void UpdateLoop() {
 			aim_movement[0] -= 1;
 		}
 
-		actor_handler.root_environment_.StoreToStack(tuple<>());
+		/*actor_handler.root_environment_.StoreToStack(tuple<>());
 		actor_handler.root_environment_.StoreToTable(string("aim_movement"), aim_movement);
-		actor_handler.root_environment_.SetGlobalFromStack(string("user_input"));
+		actor_handler.root_environment_.SetGlobalFromStack(string("user_input"));*/
 
 		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
-		player_orientation_angles[1] = min(pi / 2.0f, max(-pi / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
-		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, pi*2.0f);
+		player_orientation_angles[1] = min(3.1416f / 2.0f, max(-3.1416f / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
+		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, 3.1416f*2.0f);
 		player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
 		player_position_lock.unlock();
 
@@ -334,7 +325,7 @@ void UpdateLoop() {
 		}
 		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
 		player_look_camera.InvalidateViewMatrices();
-		LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
+		/*LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
 		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
 
 		for (Lua::InteractableObject* update_tick_listener : actor_handler.LookupListeners("update_tick")) {
@@ -364,7 +355,7 @@ void UpdateLoop() {
 		if (current_look.actor != NULL) {
 			current_look.actor->lua_interface_.CallLuaFunc(string("look_maintained"), current_look.id_of_object.GetId(), current_look.where_on_object[0], current_look.where_on_object[1]);
 		}
-		previous_look = current_look;
+		previous_look = current_look;*/
 
 		// Scene logic
 		game_scene::CommandQueueLocation tick_command = scene.MakeCommandAfter(
@@ -390,14 +381,14 @@ void UpdateLoop() {
 	}
 }
 
-#include "PipelineCamera.h"
-#include "PipelineStage.h"
-#include "RenderEntities.h"
+#include "VRBackend/PipelineCamera.h"
+#include "VRBackend/PipelineStage.h"
+#include "VRBackend/RenderEntities.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_active = false;
-	bool hmd_desired = true;
+	bool hmd_desired = false;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {

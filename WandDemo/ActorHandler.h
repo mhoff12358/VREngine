@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-
+/*
 #include "Actor.h"
 
 class ActorHandler
@@ -37,4 +37,4 @@ public:
 	
 	// Arguments are <Actor* actor>
 	int AddActor(lua_State* L);
-};
+};*/

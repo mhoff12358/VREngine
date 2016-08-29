@@ -1,5 +1,6 @@
 #pragma once
 
+/*
 #include <array>
 #include <cmath>
 
@@ -24,3 +25,4 @@ class ConstantBufferTyped<LightDetails> : public ConstantBufferTypedTemp<LightDe
 public:
 	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
 };
+*/

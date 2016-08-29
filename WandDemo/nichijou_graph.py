@@ -1,5 +1,35 @@
 
 import random
+from wand_demo_py import *
+#import code
+#code.interact(local = locals())
+
+class Timeline(object):
+    def __init__(self, scenes, scene_length):
+        self.scenes = scenes
+        self.scene_length = scene_length
+
+class Scene(object):
+    def __init__(self, image_name, character_names):
+        self.image_name = image_name
+        self.time_range = TimeRange(0, 0)
+        self.character_names = character_names
+
+    def SetTimeRange(self, time_range):
+        self.time_range = time_range
+
+class TimeRangeUnion(object):
+    def __init__(self, time_ranges):
+        self.time_ranges = time_ranges
+
+    def AddRange(self, time_range):
+        self.time_ranges.append(time_range)
+
+    def InRange(self, time_value):
+        for time_range in self.time_ranges:
+            if time_range.InRange(time_value):
+                return True
+        return False
 
 class TimeRange(object):
     def __init__(self, min_value, max_value, min_inclusive = True, max_inclusive = False):
@@ -12,6 +42,11 @@ class TimeRange(object):
         after_min = (time_value > self.min_value) or ((time_value == self.min_value) and self.min_inclusive)
         before_max = (time_value < self.max_value) or ((time_value == self.max_value) and self.max_inclusive)
         return after_min and before_max
+
+class Graph(object):
+    def __init__(self, vertices, edges):
+        self.vertices = vertices
+
 
 class Vertex(object):
     def __init__(self, name, time_range, texture_name):

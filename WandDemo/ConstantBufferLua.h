@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "ConstantBuffer.h"
+#include "VRBackend/ConstantBuffer.h"
 
 typedef vector<tuple<string, unsigned int>> LuaConstantBufferFormat;
 

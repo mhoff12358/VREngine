@@ -37,15 +37,6 @@
     <Filter Include="Resource Files\Old Actor Scripts">
       <UniqueIdentifier>{7b148793-1072-4f8a-abee-e63d83baceb8}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Scene System">
-      <UniqueIdentifier>{fe1b4d6f-c892-44c6-99be-38b45bf4f985}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene System\Source Files">
-      <UniqueIdentifier>{9ec44dab-01a2-45cc-a0fa-7b42e079b9d9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Scene System\Header Files">
-      <UniqueIdentifier>{7d68d671-aada-44e4-9b5a-131e1c220d82}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Nichijou Graph">
       <UniqueIdentifier>{6fe189f8-1091-4de7-a4c4-c72a6e0351b6}</UniqueIdentifier>
     </Filter>
@@ -84,9 +75,6 @@
     <ClInclude Include="Actor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="LookInteractable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,65 +108,8 @@
     <ClInclude Include="InteractableFrustum.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QueryArgs.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommandArgs.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shmactor.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="QueryResult.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Target.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="CommandQueue.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Command.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ActorId.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ActorGroups.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpecializedActors.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpecializedCommandArgs.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsObject.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SpecializedQueries.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ConstantBufferDescribed.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HeadsetInterface.h">
-      <Filter>Scene System\Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="NichijouGraph.h">
       <Filter>Nichijou Graph\Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="BoostPythonWrapper.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Sprite.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -192,9 +123,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Actor.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="LookInteractable.cpp">
@@ -230,59 +158,8 @@
     <ClCompile Include="InteractableFrustum.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CommandArgs.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QueryArgs.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Scene.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Shmactor.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="QueryResult.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Target.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="CommandQueue.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Command.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ActorId.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ActorGroups.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SpecializedActors.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="GraphicsObject.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ConstantBufferDescribed.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HeadsetInterface.cpp">
-      <Filter>Scene System\Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="NichijouGraph.cpp">
       <Filter>Nichijou Graph\Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Sprite.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Registry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="SpecializedQueries.cpp">
-      <Filter>Scene System\Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
