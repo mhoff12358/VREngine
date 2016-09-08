@@ -4,7 +4,7 @@
 #include "SceneSystem/Scene.h"
 #include "SceneSystem/QueryArgs.h"
 #include "SceneSystem/GraphicsObject.h"
-#include "SceneSystem/SpecializedQueries.h"
+#include "SceneSystem/GraphicsResources.h"
 #include "SceneSystem/HeadsetInterface.h"
 #include "SceneSystem/Sprite.h"
 #include "SceneSystem/Registry.h"

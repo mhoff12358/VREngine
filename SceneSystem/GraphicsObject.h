@@ -4,7 +4,7 @@
 #include "Shmactor.h"
 #include "VRBackend/ResourcePool.h"
 #include "Component.h"
-#include "SpecializedActors.h"
+#include "GraphicsResources.h"
 
 namespace game_scene {
 

@@ -4,9 +4,6 @@
 #include "GraphicsObject.h"
 #include "Scene.h"
 #include "VRBackend/ResourcePool.h"
-#include "SpecializedCommandArgs.h"
-#include "SpecializedActors.h"
-#include "SpecializedQueries.h"
 
 namespace game_scene {
 

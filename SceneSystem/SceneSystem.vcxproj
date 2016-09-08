@@ -126,15 +126,15 @@
     <ClInclude Include="Component.h" />
     <ClInclude Include="ConstantBufferDescribed.h" />
     <ClInclude Include="GraphicsObject.h" />
+    <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="HeadsetInterface.h" />
+    <ClInclude Include="InputCommandArgs.h" />
+    <ClInclude Include="MovableCamera.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
     <ClInclude Include="Registry.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Shmactor.h" />
-    <ClInclude Include="SpecializedActors.h" />
-    <ClInclude Include="SpecializedCommandArgs.h" />
-    <ClInclude Include="SpecializedQueries.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Target.h" />
@@ -148,14 +148,14 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="ConstantBufferDescribed.cpp" />
     <ClCompile Include="GraphicsObject.cpp" />
+    <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="HeadsetInterface.cpp" />
+    <ClCompile Include="MovableCamera.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
     <ClCompile Include="Registry.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shmactor.cpp" />
-    <ClCompile Include="SpecializedActors.cpp" />
-    <ClCompile Include="SpecializedQueries.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Target.cpp" />
   </ItemGroup>

@@ -4,7 +4,7 @@
 
 namespace game_scene {
 
-Scene::Scene() {
+Scene::Scene() : next_actor_id_(ActorId::FirstId) {
 }
 
 Scene::~Scene() {
@@ -104,7 +104,7 @@ tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<
 }
 
 tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after) {
-	ActorId new_id = ActorId::GetNewId();
+	ActorId new_id = NextActorId();
 	new_actor->SetId(new_id);
 	actor_lookup_.emplace(new_id, move(new_actor));
 	actor_lookup_[new_id]->AddedToScene();
@@ -112,7 +112,7 @@ tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<
 }
 
 ActorId Scene::AddActorGroup() {
-	ActorId new_id = ActorId::GetNewId();
+	ActorId new_id = NextActorId();
 	actor_groups_.CreateGroup(new_id);
 	return new_id;
 }

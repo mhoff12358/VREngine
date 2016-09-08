@@ -87,7 +87,7 @@ private:
 
 	// Logic state variables
 	array<vr::ETrackedDeviceClass, vr::k_unMaxTrackedDeviceCount> tracked_device_classes_;
-	array<array<vr::TrackedDeviceIndex_t, vr::k_unMaxTrackedDeviceCount>, devices_.size()> tracked_device_by_class_;
+	array<array<vr::TrackedDeviceIndex_t, vr::k_unMaxTrackedDeviceCount>, 2> tracked_device_by_class_;
 	array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> logic_trackings_;
 	array<Pose, vr::k_unMaxTrackedDeviceCount> logic_poses_;
 	array<vr::VRControllerState_t, vr::k_unMaxTrackedDeviceCount> logic_controller_states_;

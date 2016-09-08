@@ -14,6 +14,7 @@ class Scene
 public:
 	Scene();
 	~Scene();
+	Scene(const Scene&) = delete;
 
 	// Interface for Actors
 	void RegisterDependency(const Target& depender, const Target& dependent);
@@ -52,5 +53,8 @@ private:
 	multimap<ActorId, ActorId> actor_dependencies_;
 
 	map<string, ActorId> registered_actors_or_groups_;
+
+	int next_actor_id_;
+	ActorId NextActorId() { return ActorId(next_actor_id_++); }
 };
 }  // game_scene

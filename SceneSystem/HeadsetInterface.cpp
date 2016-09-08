@@ -1,10 +1,9 @@
 #include "stdafx.h"
 
 #include "HeadsetInterface.h"
-#include "SpecializedCommandArgs.h"
+#include "InputCommandArgs.h"
 #include "GraphicsObject.h"
 #include "Scene.h"
-#include "SpecializedQueries.h"
 
 namespace game_scene {
 

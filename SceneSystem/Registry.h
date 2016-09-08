@@ -11,7 +11,10 @@ namespace game_scene {
 typedef int64_t IdType;
 
 constexpr IdType FNV(const char* string) {
+#pragma warning (push)
+#pragma warning (disable : CS4307)
 	return *string == '\0' ? 14695981039346656037 : 1099511628211 * (*string ^ FNV(string + 1));
+#pragma warning (pop)
 }
 
 class RegistryMap {

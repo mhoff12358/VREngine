@@ -1,8 +1,5 @@
 
 import random
-from wand_demo_py import *
-#import code
-#code.interact(local = locals())
 
 class Timeline(object):
     def __init__(self, scenes, scene_length):

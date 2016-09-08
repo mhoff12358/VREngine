@@ -69,8 +69,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);E:\boost_1_61_0;C:\Program Files\Python35\include;$(SolutionDir)WandDemo;$(IncludePath)</IncludePath>
-    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);C:\Program Files\Python35\libs;E:\Boost\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
+    <IncludePath>$(SolutionDir);C:\boost_1_61_0;C:\Program Files\Python35\include;$(SolutionDir);$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);C:\Program Files\Python35\libs;C:\Boost\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)</OutDir>
     <TargetExt>.pyd</TargetExt>
     <TargetName>wand_demo_py</TargetName>
@@ -119,7 +119,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="PyActor.cpp" />
     <ClCompile Include="WandDemoPython.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="PyActor.h" />
+    <ClInclude Include="PyScene.h" />
+    <ClInclude Include="WrapActor.h" />
+    <ClInclude Include="WrapCommandArgs.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

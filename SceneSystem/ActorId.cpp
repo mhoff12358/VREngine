@@ -29,9 +29,6 @@ bool ActorId::operator!=(const ActorId other) const {
 
 ActorId ActorId::AllActors(ALL_ACTORS);
 ActorId ActorId::UnsetId(UNSET_ID);
-int ActorId::NextActorId = FIRST_ID;
-ActorId ActorId::GetNewId() {
-	return ActorId(NextActorId++);
-}
+int ActorId::FirstId = FIRST_ID;
 
 }  // game_scene

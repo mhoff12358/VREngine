@@ -20,7 +20,6 @@ public:
 class QueryArgs
 {
 public:
-	static QueryArgs a() {return QueryArgs(10);}
 	QueryArgs() : type_(0) {}
 	QueryArgs(QueryType type);
 	virtual ~QueryArgs() {}

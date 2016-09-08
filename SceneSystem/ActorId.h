@@ -19,8 +19,7 @@ public:
 
 	static ActorId AllActors;
 	static ActorId UnsetId;
-	static int NextActorId;
-	static ActorId GetNewId();
+	static int FirstId;
 
 	bool operator<(const ActorId other) const;
 	bool operator==(const ActorId other) const;

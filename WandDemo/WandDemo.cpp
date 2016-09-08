@@ -17,8 +17,9 @@ using std::unique_ptr;
 #include "VRBackend/gaussian.h"
 
 #include "SceneSystem/Scene.h"
-#include "SceneSystem/SpecializedActors.h"
-#include "SceneSystem/SpecializedCommandArgs.h"
+#include "SceneSystem/GraphicsResources.h"
+#include "SceneSystem/InputCommandArgs.h"
+#include "SceneSystem/MovableCamera.h"
 #include "SceneSystem/GraphicsObject.h"
 #include "SceneSystem/HeadsetInterface.h"
 #include "NichijouGraph.h"
@@ -92,6 +93,7 @@ void UpdateLoop() {
 	//unique_lock<mutex> device_context_lock(device_context_access);
 	//actor_handler.LoadSceneFromLuaScript("cockpit_scene.lua");
 	//device_context_lock.unlock();
+	Py_Initialize();
 
 	Camera player_look_camera;
 	player_look_camera.BuildViewMatrix();
@@ -105,129 +107,145 @@ void UpdateLoop() {
 		std::cout << "Error registering raw input device" << std::endl;
 	}
 
-	Py_Initialize();
-
 	game_scene::actors::Sprite::Init();
 	ModelGenerator point_gen(ObjLoader::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
-	point_gen.AddVertex(Vertex(ObjLoader::vertex_type_location, {0.0f, 0.0f, 0.0f}));
+	point_gen.AddVertex(Vertex(ObjLoader::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
 	point_gen.Finalize(graphics_objects.view_state->device_interface, nullptr, ModelStorageDescription::Immutable());
-	point_gen.parts = {{"Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0)}};
+	point_gen.parts = { {"Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0)} };
 	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourcePool::GetConstantModelName("point"), point_gen));
 
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.AddActorGroup();
 	game_scene::ActorId tick_registry = scene.AddActorGroup();
-	game_scene::ActorId camera_movement = scene.AddActor(
-		make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
-	scene.AddActorToGroup(camera_movement, controls_registry);
-	game_scene::ActorId graphics_resources = scene.AddActor(
-		make_unique<game_scene::actors::GraphicsResources>(
-			*graphics_objects.resource_pool,
-			*graphics_objects.entity_handler,
-			graphics_objects.view_state->device_interface));
-	game_scene::ActorId cockpit = scene.AddActor(
-		make_unique<game_scene::actors::GraphicsObject>());
-	game_scene::ActorId floor = scene.AddActor(
-		make_unique<game_scene::actors::GraphicsObject>());
-	game_scene::ActorId weird_wall = scene.AddActor(
-		make_unique<game_scene::actors::GraphicsObject>());
-	game_scene::ActorId nichijou_graph = scene.AddActor(
-		make_unique<game_scene::actors::NichijouGraph>());
+	if (false) {
+		game_scene::ActorId camera_movement = scene.AddActor(
+			make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
+		scene.AddActorToGroup(camera_movement, controls_registry);
+		game_scene::ActorId graphics_resources = scene.AddActor(
+			make_unique<game_scene::actors::GraphicsResources>(
+				*graphics_objects.resource_pool,
+				*graphics_objects.entity_handler,
+				graphics_objects.view_state->device_interface));
+		game_scene::ActorId cockpit = scene.AddActor(
+			make_unique<game_scene::actors::GraphicsObject>());
+		game_scene::ActorId floor = scene.AddActor(
+			make_unique<game_scene::actors::GraphicsObject>());
+		game_scene::ActorId weird_wall = scene.AddActor(
+			make_unique<game_scene::actors::GraphicsObject>());
+		game_scene::ActorId nichijou_graph = scene.AddActor(
+			make_unique<game_scene::actors::NichijouGraph>());
 
-	game_scene::ActorId sprite = scene.AddActor(
-		make_unique<game_scene::actors::Sprite>());
+		game_scene::ActorId sprite = scene.AddActor(
+			make_unique<game_scene::actors::Sprite>());
 
-	if (graphics_objects.oculus->IsInitialized()) {
-		game_scene::ActorId headset_interface = scene.AddActor(
-			make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus));
-		scene.AddActorToGroup(headset_interface, tick_registry);
+		if (graphics_objects.oculus->IsInitialized()) {
+			game_scene::ActorId headset_interface = scene.AddActor(
+				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus));
+			scene.AddActorToGroup(headset_interface, tick_registry);
+		}
+
+		/*game_scene::CommandQueueLocation sprite_command =
+			scene.MakeCommandAfter(
+				scene.FrontOfCommands(),
+				game_scene::Command(
+					game_scene::Target(sprite),
+					make_unique<game_scene::commands::SpriteDetails>("terrain.png")));
+		sprite_command = scene.MakeCommandAfter(
+				sprite_command,
+				game_scene::Command(
+					game_scene::Target(sprite),
+					make_unique<game_scene::commands::SpritePlacement>(Location(0, 1.5, -0.5), array<float, 2>({1.0f, 1.0f}))));*/
+
+		game_scene::actors::GraphicsObjectDetails square_details;
+		square_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
+			"square",
+			{
+				{"square.obj|Square",
+				ObjLoader::OutputFormat(
+					ModelModifier(
+						{0, 1, 2},
+						{1, 1, 1},
+						{false, true}),
+					ObjLoader::vertex_type_all,
+					false)}
+			},
+			{});
+		square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
+		square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
+		square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+		square_details.heirarchy_.entity_group_ = "basic";
+		square_details.heirarchy_.shader_settings_ = {
+			{0.0f, 0.5f, 0.0f},
+			{0.2f}
+		};
+		game_scene::actors::GraphicsObjectDetails cockpit_details;
+		cockpit_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
+			"bars",
+			{
+				{"cockpit_bars.obj|MetalBars",
+				ObjLoader::OutputFormat(
+					ModelModifier(
+						{0, 1, 2},
+						{1, 1, 1},
+						{false, true}),
+					ObjLoader::vertex_type_all,
+					false)}
+			},
+			{});
+		cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
+		cockpit_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
+		cockpit_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+		cockpit_details.heirarchy_.entity_group_ = "basic";
+		cockpit_details.heirarchy_.shader_settings_ = {
+			{0.0f, 0.5f, 0.0f},
+			{0.2f}
+		};
+
+		scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(floor),
+			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
+				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
+				square_details)));
+		scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(floor),
+			make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixIdentity())));
+
+		scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(weird_wall),
+			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
+				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
+				square_details)));
+		scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(weird_wall),
+			make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixTranslation(0, 0, -2))));
+
+		/*scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(cockpit),
+			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
+				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
+				cockpit_details)));
+		scene.ExecuteCommand(game_scene::Command(
+			game_scene::Target(cockpit),
+			make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));*/
+		scene.FlushCommandQueue();
 	}
 
-	/*game_scene::CommandQueueLocation sprite_command =
-		scene.MakeCommandAfter(
-			scene.FrontOfCommands(),
-			game_scene::Command(
-				game_scene::Target(sprite),
-				make_unique<game_scene::commands::SpriteDetails>("terrain.png")));
-	sprite_command = scene.MakeCommandAfter(
-			sprite_command,
-			game_scene::Command(
-				game_scene::Target(sprite),
-				make_unique<game_scene::commands::SpritePlacement>(Location(0, 1.5, -0.5), array<float, 2>({1.0f, 1.0f}))));*/
-
-	game_scene::actors::GraphicsObjectDetails square_details;
-	square_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
-		"square",
-		{
-			{"square.obj|Square",
-			ObjLoader::OutputFormat(
-				ModelModifier(
-					{0, 1, 2},
-					{1, 1, 1},
-					{false, true}),
-				ObjLoader::vertex_type_all,
-				false)}
-		},
-		{});
-	square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
-	square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-	square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
-	square_details.heirarchy_.entity_group_ = "basic";
-	square_details.heirarchy_.shader_settings_ = {
-		{0.0f, 0.5f, 0.0f},
-		{0.2f}
-	};
-	game_scene::actors::GraphicsObjectDetails cockpit_details;
-	cockpit_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
-		"bars",
-		{
-			{"cockpit_bars.obj|MetalBars",
-			ObjLoader::OutputFormat(
-				ModelModifier(
-					{0, 1, 2},
-					{1, 1, 1},
-					{false, true}),
-				ObjLoader::vertex_type_all,
-				false)}
-		},
-		{});
-	cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
-	cockpit_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-	cockpit_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
-	cockpit_details.heirarchy_.entity_group_ = "basic";
-	cockpit_details.heirarchy_.shader_settings_ = {
-		{0.0f, 0.5f, 0.0f},
-		{0.2f}
-	};
-
-	scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(floor),
-		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-			square_details)));
-	scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(floor),
-		make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixIdentity())));
-
-	scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(weird_wall),
-		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-			square_details)));
-	scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(weird_wall),
-		make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixTranslation(0, 0, -2))));
-
-	/*scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(cockpit),
-		make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-			game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-			cockpit_details)));
-	scene.ExecuteCommand(game_scene::Command(
-		game_scene::Target(cockpit),
-		make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));*/
-	scene.FlushCommandQueue();
+	game_scene::ActorId added_actor;
+	try {
+		object main_namespace = import("__main__").attr("__dict__");
+		exec("import scripts.first_load as first_load", main_namespace);
+		object loaded_module = main_namespace["first_load"];
+		game_scene::Scene& s = scene;
+		game_scene::ActorId aid(999);
+		object result = loaded_module.attr("first_load")(boost::ref(scene));
+		//object result = loaded_module.attr("first_load")(s);
+		added_actor = extract<game_scene::ActorId>(result);
+		unique_ptr<game_scene::QueryResult> q_res = scene.AskQuery(game_scene::Target(added_actor), make_unique<game_scene::QueryArgs>(1000));
+	}
+	catch (error_already_set) {
+		PyErr_Print();
+	}
 
 	MSG msg;
 	vr::VREvent_t vr_msg;

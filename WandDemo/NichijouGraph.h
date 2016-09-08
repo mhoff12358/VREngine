@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 #include "SceneSystem/Shmactor.h"
-#include "SceneSystem/SpecializedActors.h"
 #include "SceneSystem/QueryArgs.h"
 #include "SceneSystem/QueryResult.h"
 #include "SceneSystem/CommandArgs.h"
