@@ -9,7 +9,7 @@ namespace actors {
 
 void MovableCamera::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
-	case commands::InputCommandType::INPUT_UPDATE:
+	case InputCommand::INPUT_UPDATE:
 		HandleInput(dynamic_cast<const commands::InputUpdate&>(args));
 		break;
 	default:

@@ -116,8 +116,9 @@ void UpdateLoop() {
 
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
-	game_scene::ActorId controls_registry = scene.AddActorGroup();
-	game_scene::ActorId tick_registry = scene.AddActorGroup();
+	std::cout << "SETTING: " << game_scene::Shmactor::scene_ << std::endl;
+	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
+	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
 	if (false) {
 		game_scene::ActorId camera_movement = scene.AddActor(
 			make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
@@ -236,14 +237,12 @@ void UpdateLoop() {
 		object main_namespace = import("__main__").attr("__dict__");
 		exec("import scripts.first_load as first_load", main_namespace);
 		object loaded_module = main_namespace["first_load"];
-		game_scene::Scene& s = scene;
-		game_scene::ActorId aid(999);
-		object result = loaded_module.attr("first_load")(boost::ref(scene));
-		//object result = loaded_module.attr("first_load")(s);
-		added_actor = extract<game_scene::ActorId>(result);
-		unique_ptr<game_scene::QueryResult> q_res = scene.AskQuery(game_scene::Target(added_actor), make_unique<game_scene::QueryArgs>(1000));
-	}
-	catch (error_already_set) {
+		dict inputs;
+		inputs["scene"] = boost::ref(scene);
+		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::mapping_);
+		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::mapping_);
+		object result = loaded_module.attr("first_load")(inputs);
+	} catch (error_already_set) {
 		PyErr_Print();
 	}
 

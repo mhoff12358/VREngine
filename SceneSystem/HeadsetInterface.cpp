@@ -51,7 +51,7 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 		} 
 	}
 	break;
-	case commands::InputCommandType::TICK:
+	case InputCommand::TICK:
 		for (unsigned int i = 0; i < 2; i++) {
 			vr::TrackedDeviceIndex_t controller_index = headset_.GetDeviceIndex(vr::TrackedDeviceClass_Controller, i);
 			if (controller_index == vr::k_unTrackedDeviceIndexInvalid) {

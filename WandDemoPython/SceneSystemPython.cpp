@@ -1,8 +1,11 @@
 #pragma once
+#include "stdafx.h"
+
 #include "boost/python.hpp"
 #include "SceneSystem/QueryArgs.h"
 #include "SceneSystem/QueryResult.h"
 #include "SceneSystem/CommandArgs.h"
+#include "SceneSystem/Registry.h"
 
 #include "PyActor.h"
 #include "PyScene.h"
@@ -26,7 +29,7 @@ namespace boost
 	}
 }
 
-BOOST_PYTHON_MODULE(wand_demo_py) {
+BOOST_PYTHON_MODULE(scene_system_) {
 	using namespace boost::python;
 	class_<PyActor, std::auto_ptr<PyActor>, boost::noncopyable>("Actor")
 		.def("HandleCommand", &game_scene::Shmactor::HandleCommand, &PyActor::default_HandleCommand)
@@ -34,7 +37,9 @@ BOOST_PYTHON_MODULE(wand_demo_py) {
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
 		.def("EmbedSelf", &PyActor::EmbedSelf)
 		.def("GetScene", &PyActor::GetScene, return_value_policy<reference_existing_object>())
-		.staticmethod("GetScene");
+		.staticmethod("GetScene")
+		.def("SetScene", &game_scene::Shmactor::SetScene)
+		.staticmethod("SetScene");
 
 	class_<game_scene::QueryArgs>("QueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);
@@ -63,5 +68,14 @@ BOOST_PYTHON_MODULE(wand_demo_py) {
 		.def("AddActor", &PyScene::AddActor)
 		.def("AddActorAfter", &PyScene::AddActorAfter)
 		.def("AddActorReturnInitialize", &PyScene::AddActorReturnInitialize)
-		.def("AddActorAfterReturnInitialize", &PyScene::AddActorAfterReturnInitialize);
+		.def("AddActorAfterReturnInitialize", &PyScene::AddActorAfterReturnInitialize)
+		.def("RegisterByName", &game_scene::Scene::RegisterByName)
+		.def("FindByName", &game_scene::Scene::FindByName)
+		.def("AddActorToGroup", &game_scene::Scene::AddActorToGroup)
+		.def("RemoveActorFromGroup", &game_scene::Scene::RemoveActorFromGroup);
+
+	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", no_init)
+		.def("Register", &game_scene::RegistryMap::Register)
+		.def("IdFromName", &game_scene::RegistryMap::IdFromName)
+		.def("LookupName", &game_scene::RegistryMap::LookupName);
 }

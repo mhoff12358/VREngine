@@ -7,3 +7,4 @@ using boost::python::exec;
 using boost::python::extract;
 using boost::python::import;
 using boost::python::error_already_set;
+using boost::python::dict;

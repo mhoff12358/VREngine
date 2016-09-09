@@ -30,6 +30,19 @@ public:
 		return value;
 	}
 
+	IdType IdFromName(const string& name) {
+		return FNV(name.data());
+	}
+
+	string LookupName(IdType id) {
+		map<IdType, string>& map = GetMapping();
+		const auto& iter = map.find(id);
+		if (iter == map.end()) {
+			return "";
+		}
+		return iter->second;
+	}
+
 private:
 	vector<string>& GetRegistries() {
 		if (registries_ == nullptr) {

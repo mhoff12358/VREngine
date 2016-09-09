@@ -115,6 +115,8 @@
       <AdditionalDependencies>SceneSystem.lib;C:\Program Files\Python35\libs\python35.lib;libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;Lua52.lib;LuaGameScripting.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
+      <DelayLoadDLLs>
+      </DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
       <Command>mkdir $(OutDir)scripts &amp; copy *.py $(OutDir)scripts\</Command>

@@ -13,12 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Python Files">
+      <UniqueIdentifier>{f99864e3-2a63-4c15-8fc7-44abdeaf6716}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WandDemoPython.cpp">
+    <ClCompile Include="PyActor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PyActor.cpp">
+    <ClCompile Include="SceneSystemPython.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -26,14 +29,19 @@
     <ClInclude Include="PyActor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WrapActor.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="WrapCommandArgs.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PyScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="__init__.py">
+      <Filter>Python Files</Filter>
+    </Text>
+    <Text Include="scene_system_internal.py">
+      <Filter>Python Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

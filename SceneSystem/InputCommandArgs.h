@@ -5,20 +5,19 @@
 #include "VRBackend/ResourcePool.h"
 
 namespace game_scene {
-namespace commands {
 
-class InputCommandType : public CommandType {
+class InputCommand : public CommandType {
 public:
-	enum InputCommandTypeId : int {
-		TICK = 999,
-		INPUT_UPDATE,
-	};
+	DECLARE_COMMAND(InputCommand, TICK);
+	DECLARE_COMMAND(InputCommand, INPUT_UPDATE);
 };
+
+namespace commands {
 
 class TimeTick : public CommandArgs {
 public:
 	explicit TimeTick(const int duration)
-		: CommandArgs(InputCommandType::TICK), duration_(duration) {
+		: CommandArgs(InputCommand::TICK), duration_(duration) {
 	}
 
 	const int duration_;
@@ -27,7 +26,7 @@ public:
 class InputUpdate : public CommandArgs {
 public:
 	explicit InputUpdate(const InputHandler* input)
-		: CommandArgs(InputCommandType::INPUT_UPDATE), input_(*input) {
+		: CommandArgs(InputCommand::INPUT_UPDATE), input_(*input) {
 	}
 	const InputHandler& input_;
 };

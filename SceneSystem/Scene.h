@@ -36,7 +36,7 @@ public:
 	void AddActorToGroup(ActorId actor, ActorId group);
 	void RemoveActorFromGroup(ActorId actor, ActorId group);
 
-	void RegisterByName(string name, ActorId actor_or_group);
+	ActorId RegisterByName(string name, ActorId actor_or_group);
 	ActorId FindByName(string name);
 
 private:

@@ -1,4 +1,5 @@
 #pragma once
+#include "stdafx.h"
 
 #include "SceneSystem/stdafx.h"
 
@@ -10,8 +11,13 @@ struct PyActor : public game_scene::Shmactor, public boost::python::wrapper<game
 public:
 	// Wrap existing calls that work to be virtualizable through Python.
 	void HandleCommand(const game_scene::CommandArgs& args) {
-		if (boost::python::override HandleCommand = this->get_override("HandleCommand"))
-			HandleCommand(args);
+		if (boost::python::override HandleCommand = this->get_override("HandleCommand")) {
+			try {
+				HandleCommand(args);
+			} catch (error_already_set) {
+				PyErr_Print();
+			}
+		}
 		Shmactor::HandleCommand(args);
 	}
 	void default_HandleCommand(const game_scene::CommandArgs& args) {
@@ -19,8 +25,13 @@ public:
 	}
 
 	void AddedToScene() {
-		if (boost::python::override AddedToScene = this->get_override("AddedToScene"))
-			AddedToScene();
+		if (boost::python::override AddedToScene = this->get_override("AddedToScene")) {
+			try {
+				AddedToScene();
+			} catch (error_already_set) {
+				PyErr_Print();
+			}
+		}
 		Shmactor::AddedToScene();
 	}
 	void default_AddedToScene() {
@@ -30,12 +41,17 @@ public:
 	// Creates a wrapper for the AnswerQuery call that passes around query results as auto_ptrs rather than unique_ptrs.
 	//object PyAnswerQuery(const game_scene::QueryArgs& args) {
 	std::auto_ptr<game_scene::QueryResult> PyAnswerQuery(const game_scene::QueryArgs& args) {
-		object a = this->get_override("AnswerQuery")(args);
+		object a;
+		try {
+			a = this->get_override("AnswerQuery")(args);
+		} catch (error_already_set) {
+			PyErr_Print();
+		}
 		return extract<std::auto_ptr<game_scene::QueryResult>>(a);
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) override;
 
-	game_scene::Scene& GetScene() { return *scene_; }
+	static game_scene::Scene& GetScene() { return *scene_; }
 
 	void EmbedSelf(object self) {
 		self_ = self;

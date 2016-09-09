@@ -125,8 +125,9 @@ void Scene::RemoveActorFromGroup(ActorId actor, ActorId group) {
 	actor_groups_.RemoveActorFromGroup(actor, group);
 }
 
-void Scene::RegisterByName(string name, ActorId actor_or_group) {
+ActorId Scene::RegisterByName(string name, ActorId actor_or_group) {
 	registered_actors_or_groups_[name] = actor_or_group;
+	return actor_or_group;
 }
 
 ActorId Scene::FindByName(string name) {

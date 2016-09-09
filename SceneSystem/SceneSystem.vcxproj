@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -150,6 +150,7 @@
     <ClCompile Include="GraphicsObject.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="HeadsetInterface.cpp" />
+    <ClCompile Include="InputCommandArgs.cpp" />
     <ClCompile Include="MovableCamera.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
