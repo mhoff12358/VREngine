@@ -5,7 +5,7 @@
 
 namespace game_scene {
 
-class QueryType {
+class DLLSTUFF QueryType {
 public:
 	QueryType(IdType id) : id_(id) {}
 	QueryType(QueryRegistry id) : id_(id.value_) {}
@@ -17,12 +17,15 @@ public:
 	IdType id_;
 };
 
-class QueryArgs
+class DLLSTUFF QueryArgs
 {
 public:
 	QueryArgs() : type_(0) {}
 	QueryArgs(QueryType type);
 	virtual ~QueryArgs() {}
+
+	QueryArgs(const QueryArgs&) = delete;
+	QueryArgs operator=(const QueryArgs&) = delete;
 
 	IdType Type() const {return type_.id_;}
 
@@ -40,7 +43,7 @@ public:
 	WrappedType data_;
 };
 
-class EmptyQuery : public QueryArgs {
+class DLLSTUFF EmptyQuery : public QueryArgs {
 public:
 	EmptyQuery(QueryType type) : QueryArgs(type) {}
 	virtual ~EmptyQuery() {}

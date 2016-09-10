@@ -7,11 +7,14 @@
 
 namespace game_scene {
 
-class QueryResult
+class DLLSTUFF QueryResult
 {
 public:
 	explicit QueryResult(QueryType type);
 	virtual ~QueryResult() {}
+
+	QueryResult(const QueryResult&) = delete;
+	QueryResult operator=(const QueryResult&) = delete;
 
 	int64_t Type() const {return type_.id_;}
 
@@ -19,7 +22,7 @@ private:
 	QueryType type_;
 };
 
-class MultipleQueryResult : public QueryResult {
+class DLLSTUFF MultipleQueryResult : public QueryResult {
 public:
 	MultipleQueryResult();
 	virtual ~MultipleQueryResult() {}

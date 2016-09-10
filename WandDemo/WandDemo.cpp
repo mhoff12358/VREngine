@@ -116,7 +116,6 @@ void UpdateLoop() {
 
 	game_scene::Scene scene;
 	game_scene::Shmactor::SetScene(&scene);
-	std::cout << "SETTING: " << game_scene::Shmactor::scene_ << std::endl;
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
 	if (false) {
@@ -237,10 +236,18 @@ void UpdateLoop() {
 		object main_namespace = import("__main__").attr("__dict__");
 		exec("import scripts.first_load as first_load", main_namespace);
 		object loaded_module = main_namespace["first_load"];
+
+		game_scene::CommandArgs ca(20);
+		game_scene::commands::TimeTick tt(100);
+		game_scene::CommandArgs& car = tt;
+		loaded_module.attr("dump_thing")(boost::ref(ca));
+		loaded_module.attr("dump_thing")(boost::ref(tt));
+		loaded_module.attr("dump_thing")(boost::ref(car));
+
 		dict inputs;
 		inputs["scene"] = boost::ref(scene);
-		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::mapping_);
-		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::mapping_);
+		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
+		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
 		PyErr_Print();

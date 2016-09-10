@@ -9,7 +9,7 @@
 namespace game_scene {
 class Shmactor;
 
-class Scene
+class DLLSTUFF Scene
 {
 public:
 	Scene();

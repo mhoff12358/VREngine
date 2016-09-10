@@ -11,7 +11,7 @@
 namespace game_scene {
 class Scene;
 
-class Shmactor
+class DLLSTUFF Shmactor
 {
 public:
 	Shmactor();
@@ -37,13 +37,6 @@ protected:
 
 	ActorId id_;
 
-public:
-#ifdef SceneSystemImport
-	//__declspec(dllimport)
-#endif
-#ifndef SceneSystemImport
-	__declspec(dllexport)
-#endif
 	static Scene* scene_;
 };
 }  // game_scene

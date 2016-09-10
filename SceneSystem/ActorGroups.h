@@ -4,7 +4,7 @@
 #include "ActorId.h"
 
 namespace game_scene {
-class ActorGroups {
+class DLLSTUFF ActorGroups {
 public:
 	ActorGroups();
 

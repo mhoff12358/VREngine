@@ -10,7 +10,7 @@ enum {
 	FIRST_ID = 2,
 };
 
-class ActorId
+class DLLSTUFF ActorId
 {
 public:
 	explicit ActorId(int id);

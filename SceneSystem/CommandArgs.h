@@ -5,7 +5,7 @@
 
 namespace game_scene {
 
-class CommandType {
+class DLLSTUFF CommandType {
 public:
 	CommandType(IdType id) : id_(id) {}
 	CommandType(const CommandRegistry& id) : id_(id.value_) {}
@@ -16,10 +16,17 @@ public:
 	IdType id_;
 };
 
-class CommandArgs {
+class DLLSTUFF CommandArgs {
 public:
 	CommandArgs(CommandType type);
 	virtual ~CommandArgs();
+	CommandArgs(const CommandArgs&) = delete;
+	CommandArgs operator=(const CommandArgs&) = delete;
+
+	virtual int blarg() { return 1; }
+	int blargwrap() {
+		return blarg();
+	}
 
 	IdType Type() const {return type_.id_;}
 

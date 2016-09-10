@@ -6,11 +6,14 @@
 namespace game_scene {
 typedef list<Command>::iterator CommandQueueLocation;
 
-class CommandQueue
+class DLLSTUFF CommandQueue
 {
 public:
 	CommandQueue();
 	~CommandQueue();
+
+	CommandQueue(const CommandQueue&) = delete;
+	CommandQueue operator=(const CommandQueue&) = delete;
 
 	CommandQueueLocation InsertCommand(CommandQueueLocation new_location, Command new_command);
 	bool IsEmpty() const;

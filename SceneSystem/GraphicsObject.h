@@ -8,7 +8,7 @@
 
 namespace game_scene {
 
-class GraphicsObjectCommand {
+class DLLSTUFF GraphicsObjectCommand {
 public:
 	DECLARE_COMMAND(GraphicsObjectCommand, REQUIRE_RESOURCE);
 	DECLARE_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS);
@@ -20,7 +20,7 @@ public:
 
 namespace commands {
 
-class ComponentPlacement : public CommandArgs {
+class DLLSTUFF ComponentPlacement : public CommandArgs {
 public:
 	ComponentPlacement(string component_name, DirectX::XMMATRIX transformation) :
 		CommandArgs(GraphicsObjectCommand::PLACE_COMPONENT),
@@ -31,7 +31,7 @@ public:
 	DirectX::XMMATRIX transformation_;
 };
 
-class ComponentDrawnState : public CommandArgs {
+class DLLSTUFF ComponentDrawnState : public CommandArgs {
 public:
 	ComponentDrawnState(string component_name, bool is_drawn) :
 		CommandArgs(GraphicsObjectCommand::SET_COMPONENT_DRAWN),
@@ -45,7 +45,7 @@ public:
 
 namespace actors {
 
-class ShaderSettingsFormat : public vector<tuple<string, int>> {
+class DLLSTUFF ShaderSettingsFormat : public vector<tuple<string, int>> {
 public:
 	template<typename... Args>
 	ShaderSettingsFormat(Args... args) : vector<tuple<string, int>>(args...) {}
@@ -53,7 +53,7 @@ public:
 	bool ShouldCreateBuffer() { return !empty(); }
 };
 
-class ShaderSettingsValue : public vector<vector<float>> {
+class DLLSTUFF ShaderSettingsValue : public vector<vector<float>> {
 public:
 	template<typename... Args>
 	ShaderSettingsValue(Args... args) : vector<vector<float>>(args...) {}
@@ -81,7 +81,7 @@ public:
 	}
 };
 
-class TextureDetails {
+class DLLSTUFF TextureDetails {
 public:
 	TextureDetails(string name, bool use_in_vertex, bool use_in_pixel)
 		: name_(name), use_in_vertex_(use_in_vertex), use_in_pixel_(use_in_pixel) {}
@@ -90,7 +90,7 @@ public:
 	bool use_in_pixel_;
 };
 
-class ShaderFileDefinition {
+class DLLSTUFF ShaderFileDefinition {
 public:
 	ShaderFileDefinition() {}
 	explicit ShaderFileDefinition(string filename) : ShaderFileDefinition(filename, {true, false, true}) {}
@@ -112,7 +112,7 @@ private:
 	vector<pair<string, string>> shader_definitions_;
 };
 
-class ComponentHeirarchy {
+class DLLSTUFF ComponentHeirarchy {
 public:
 	ComponentHeirarchy() {}
 	ComponentHeirarchy(string name, vector<tuple<string, ObjLoader::OutputFormat>> models, vector<ComponentHeirarchy> children)
@@ -134,7 +134,7 @@ public:
 	string entity_group_;
 };
 
-class GraphicsObjectDetails {
+class DLLSTUFF GraphicsObjectDetails {
 public:
 	GraphicsObjectDetails() {}
 	GraphicsObjectDetails(ComponentHeirarchy heirarchy) : heirarchy_(heirarchy) {}
@@ -142,8 +142,12 @@ public:
 	ComponentHeirarchy heirarchy_;
 };
 
-class GraphicsObject : public Shmactor {
+class DLLSTUFF GraphicsObject : public Shmactor {
 public:
+	GraphicsObject() {}
+	GraphicsObject(const GraphicsObject&) = delete;
+	GraphicsObject operator=(const GraphicsObject&) = delete;
+
 	void HandleCommand(const CommandArgs& args) override;
 
 protected:

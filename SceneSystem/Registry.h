@@ -10,14 +10,14 @@ namespace game_scene {
 
 typedef int64_t IdType;
 
-constexpr IdType FNV(const char* string) {
+constexpr IdType DLLSTUFF FNV(const char* string) {
 #pragma warning (push)
 #pragma warning (disable : CS4307)
 	return *string == '\0' ? 14695981039346656037 : 1099511628211 * (*string ^ FNV(string + 1));
 #pragma warning (pop)
 }
 
-class RegistryMap {
+class DLLSTUFF RegistryMap {
 public:
 	IdType Register(string new_value) {
 		GetRegistries().push_back(new_value);
@@ -62,22 +62,20 @@ private:
 	unique_ptr<vector<string>> registries_ = nullptr;
 };
 
-class QueryRegistry {
+class DLLSTUFF QueryRegistry {
 public:
-	QueryRegistry(string name) { value_ = mapping_.Register(name); }
+	QueryRegistry(string name) { value_ = GetRegistry().Register(name); }
 
 	IdType value_;
-
-	static RegistryMap mapping_;
+	static RegistryMap& GetRegistry();
 };
 
-class CommandRegistry {
+class DLLSTUFF CommandRegistry {
 public:
-	CommandRegistry(string name) { value_ = mapping_.Register(name); }
+	CommandRegistry(string name) { value_ = GetRegistry().Register(name); }
 
 	IdType value_;
-
-	static RegistryMap mapping_;
+	static RegistryMap& GetRegistry();
 };
 
 }  // game_scene

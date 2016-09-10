@@ -13,7 +13,7 @@ public:
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override HandleCommand = this->get_override("HandleCommand")) {
 			try {
-				HandleCommand(args);
+				HandleCommand(boost::ref(args));
 			} catch (error_already_set) {
 				PyErr_Print();
 			}
@@ -43,7 +43,7 @@ public:
 	std::auto_ptr<game_scene::QueryResult> PyAnswerQuery(const game_scene::QueryArgs& args) {
 		object a;
 		try {
-			a = this->get_override("AnswerQuery")(args);
+			a = this->get_override("AnswerQuery")(boost::ref(args));
 		} catch (error_already_set) {
 			PyErr_Print();
 		}

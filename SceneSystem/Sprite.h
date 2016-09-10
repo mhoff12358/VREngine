@@ -10,7 +10,7 @@
 
 namespace game_scene {
 	
-class SpriteCommand {
+class DLLSTUFF SpriteCommand {
 public:
 	DECLARE_COMMAND(SpriteCommand, CREATE_SPRITE);
 	DECLARE_COMMAND(SpriteCommand, PLACE_SPRITE);
@@ -18,7 +18,7 @@ public:
 
 namespace commands {
 
-class SpriteDetails : public CommandArgs {
+class DLLSTUFF SpriteDetails : public CommandArgs {
 public:
 	SpriteDetails(string shader_name, string texture_name) :
 		CommandArgs(SpriteCommand::CREATE_SPRITE), shader_name_(shader_name), texture_name_(texture_name) {}
@@ -29,7 +29,7 @@ public:
 	string texture_name_;
 };
 
-class SpritePlacement : public CommandArgs {
+class DLLSTUFF SpritePlacement : public CommandArgs {
 public:
 	SpritePlacement(Location location, array<float, 2> size) :
 		CommandArgs(SpriteCommand::PLACE_SPRITE), location_(location), size_(size) {}
@@ -41,7 +41,7 @@ public:
 }  // commands
 namespace actors {
 
-class Sprite : public GraphicsObject {
+class DLLSTUFF Sprite : public GraphicsObject {
 public:
 	void HandleCommand(const CommandArgs& args) override;
 

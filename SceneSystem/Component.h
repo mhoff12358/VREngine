@@ -7,7 +7,7 @@
 #include "VRBackend/Model.h"
 #include "VRBackend/ConstantBuffer.h"
 
-class Component
+class DLLSTUFF Component
 {
 public:
 	Component(ID3D11Device* device_interface);

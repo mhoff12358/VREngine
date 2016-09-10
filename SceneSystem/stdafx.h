@@ -5,6 +5,13 @@
 
 #pragma once
 
+#ifdef SceneSystemExport
+#define DLLSTUFF __declspec(dllexport)
+#endif
+#ifndef SceneSystemExport
+#define DLLSTUFF __declspec(dllimport)
+#endif
+
 #include <stdio.h>
 #include <tchar.h>
 

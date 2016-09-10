@@ -11,7 +11,7 @@
 namespace game_scene {
 namespace actors {
 
-class MovableCamera : public Shmactor {
+class DLLSTUFF MovableCamera : public Shmactor {
 public:
 	MovableCamera(Camera* camera) : camera_(camera) {}
 

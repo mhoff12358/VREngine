@@ -3,7 +3,14 @@
 
 namespace game_scene {
 
-RegistryMap CommandRegistry::mapping_;
-RegistryMap QueryRegistry::mapping_;
+RegistryMap& QueryRegistry::GetRegistry() {
+	static RegistryMap mapping;
+	return mapping;
+}
+
+RegistryMap& CommandRegistry::GetRegistry() {
+	static RegistryMap mapping;
+	return mapping;
+}
 
 }  // game_scene

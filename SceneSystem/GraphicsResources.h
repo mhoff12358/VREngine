@@ -9,20 +9,20 @@
 
 namespace game_scene {
 
-class GraphicsResourceQuery {
+class DLLSTUFF GraphicsResourceQuery {
 public:
 	DECLARE_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);
 };
 
 namespace actors {
 
-enum class GraphicsResourceId {
+enum class DLLSTUFF GraphicsResourceId {
 	RESOURCE_POOL,
 	ENTITY_HANDLER,
 	DEVICE_INTERFACE,
 };
 
-class GraphicsResources : public Shmactor {
+class DLLSTUFF GraphicsResources : public Shmactor {
 public:
 	GraphicsResources(
 		ResourcePool& resource_pool, EntityHandler& entity_handler, ID3D11Device* device_interface)

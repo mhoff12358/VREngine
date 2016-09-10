@@ -6,28 +6,23 @@
 #include "SceneSystem/QueryResult.h"
 #include "SceneSystem/CommandArgs.h"
 #include "SceneSystem/Registry.h"
+#include "SceneSystem/InputCommandArgs.h"
 
 #include "PyActor.h"
 #include "PyScene.h"
 
-namespace boost
-{
-	template <>
-	game_scene::QueryResult const volatile * get_pointer<class game_scene::QueryResult const volatile >(
-		class game_scene::QueryResult const volatile *c)
-	{
-		return c;
-	}
+#define BOOST_PTR_MAGIC(class_name) \
+namespace boost { \
+	template <> \
+	class_name const volatile * get_pointer<class class_name const volatile>( \
+		class class_name const volatile *c) \
+	{ return c; } \
 }
-namespace boost
-{
-	template <>
-	PyActor const volatile * get_pointer<class PyActor const volatile >(
-		class PyActor const volatile *c)
-	{
-		return c;
-	}
-}
+
+BOOST_PTR_MAGIC(PyActor)
+BOOST_PTR_MAGIC(game_scene::CommandArgs)
+BOOST_PTR_MAGIC(game_scene::QueryArgs)
+BOOST_PTR_MAGIC(game_scene::QueryResult)
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	using namespace boost::python;
@@ -41,13 +36,15 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("SetScene", &game_scene::Shmactor::SetScene)
 		.staticmethod("SetScene");
 
-	class_<game_scene::QueryArgs>("QueryArgs", init<game_scene::IdType>())
+	class_<game_scene::QueryArgs, boost::noncopyable>("QueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);
 
 	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("QueryResult", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryResult::Type);
 
-	class_<game_scene::CommandArgs>("CommandArgs", init<game_scene::IdType>())
+	class_<game_scene::CommandArgs, boost::noncopyable>("CommandArgs", init<game_scene::IdType>())
+		.def("blarg", &game_scene::CommandArgs::blarg)
+		.def("blargwrap", &game_scene::CommandArgs::blargwrap)
 		.def("Type", &game_scene::CommandArgs::Type);
 
 	class_<game_scene::CommandQueueLocation>("CommandQueueLocation", no_init);
@@ -78,4 +75,10 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("Register", &game_scene::RegistryMap::Register)
 		.def("IdFromName", &game_scene::RegistryMap::IdFromName)
 		.def("LookupName", &game_scene::RegistryMap::LookupName);
+
+	class_<game_scene::InputCommand>("InputCommand", no_init)
+		.def_readonly("TICK", &game_scene::InputCommand::TICK);
+
+	class_<game_scene::commands::TimeTick, bases<game_scene::CommandArgs>, boost::noncopyable>("TimeTick", init<const int>())
+		.def_readonly("duration", &game_scene::commands::TimeTick::duration_);
 }

@@ -4,7 +4,7 @@
 #include "VRBackend/ConstantBuffer.h"
 #include "GraphicsObject.h"
 
-class ConstantBufferDescribed : public ConstantBuffer
+class DLLSTUFF ConstantBufferDescribed : public ConstantBuffer
 {
 public:
 	static CB_PIPELINE_STAGES GetStageFromString(const string& stage_name);

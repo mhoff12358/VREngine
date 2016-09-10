@@ -5,7 +5,7 @@
 #include "CommandArgs.h"
 
 namespace game_scene {
-class Command {
+class DLLSTUFF Command {
 public:
 	Command(const Target& target, unique_ptr<CommandArgs> args)
 		: target_(target), owned_args_(move(args)), unowned_args_(nullptr) {}
