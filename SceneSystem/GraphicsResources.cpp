@@ -10,14 +10,6 @@ REGISTER_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);
 
 namespace actors {
 
-void GraphicsResources::AddedToScene() {
-	if (scene_->FindByName("GraphicsResources") != ActorId::UnsetId) {
-		std::cout << "Attempting to register a second GraphicsResources instance" << std::endl;
-		return;
-	}
-	scene_->RegisterByName("GraphicsResources", id_);
-}
-
 void GraphicsResources::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case GraphicsObjectCommand::REQUIRE_RESOURCE:

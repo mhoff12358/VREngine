@@ -11,7 +11,6 @@ Scene* Shmactor::scene_ = nullptr;
 
 Shmactor::Shmactor() : id_(ActorId::UnsetId)
 {
-	std::cout << "IN AcTOR " << scene_ << std::endl;
 }
 
 Shmactor::~Shmactor() {

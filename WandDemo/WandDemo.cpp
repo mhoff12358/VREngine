@@ -22,6 +22,7 @@ using std::unique_ptr;
 #include "SceneSystem/MovableCamera.h"
 #include "SceneSystem/GraphicsObject.h"
 #include "SceneSystem/HeadsetInterface.h"
+#include "SceneSystem/IOInterface.h"
 #include "NichijouGraph.h"
 #include "SceneSystem/Sprite.h"
 
@@ -43,10 +44,6 @@ const float movement_scale = 0.0005f;
 const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
 
-mutex player_position_access;
-array<float, 3> player_location = { { 0, 1.5, 0 } };
-Quaternion player_orientation_quaternion;
-
 mutex device_context_access;
 
 template <>
@@ -66,37 +63,23 @@ void GraphicsLoop() {
 		graphics_objects.input_handler->UpdateHeadset(frame_index);
 		unique_lock<mutex> device_context_lock(device_context_access);
 
-		unique_lock<mutex> player_position_lock(player_position_access);
-		array<float, 3> player_location_copy = player_location;
-		Quaternion player_orientation_quaternion_copy = player_orientation_quaternion;
-		player_position_lock.unlock();
-
 		RenderGroup* drawing_groups = graphics_objects.entity_handler->GetRenderGroupForDrawing();
 		for (int render_group_number = 0; render_group_number < graphics_objects.entity_handler->GetNumEntitySets(); render_group_number++) {
 			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
 		}
 
-		graphics_objects.render_pipeline->Render(Pose(Location(player_location), player_orientation_quaternion));
+		graphics_objects.render_pipeline->Render();
 		frame_index++;
 	}
 }
 
 void UpdateLoop() {
 	int prev_time = timeGetTime();
-	//ActorHandler actor_handler(graphics_objects);
 
 	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
 	array<float, 2> player_orientation_angles = { { 0, 0 } };
 
-	//LookState previous_look = { Identifier(""), NULL, 0, { { 0, 0 } } };
-
-	//unique_lock<mutex> device_context_lock(device_context_access);
-	//actor_handler.LoadSceneFromLuaScript("cockpit_scene.lua");
-	//device_context_lock.unlock();
 	Py_Initialize();
-
-	Camera player_look_camera;
-	player_look_camera.BuildViewMatrix();
 
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
@@ -118,15 +101,29 @@ void UpdateLoop() {
 	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
-	if (false) {
-		game_scene::ActorId camera_movement = scene.AddActor(
-			make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
-		scene.AddActorToGroup(camera_movement, controls_registry);
-		game_scene::ActorId graphics_resources = scene.AddActor(
+	game_scene::ActorId graphics_resources = scene.RegisterByName(
+		"GraphicsResources",
+		scene.AddActor(
 			make_unique<game_scene::actors::GraphicsResources>(
 				*graphics_objects.resource_pool,
 				*graphics_objects.entity_handler,
-				graphics_objects.view_state->device_interface));
+				graphics_objects.view_state->device_interface)));
+	game_scene::ActorId io_interface = scene.RegisterByName(
+		"IOInterface",
+		scene.AddActor(
+			make_unique<game_scene::actors::IOInterface>(*graphics_objects.input_handler)));
+	scene.AddActorToGroup(io_interface, tick_registry);
+	if (graphics_objects.oculus->IsInitialized()) {
+		game_scene::ActorId headset_interface = scene.RegisterByName(
+			"HeadsetInterface",
+			scene.AddActor(
+				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus)));
+		scene.AddActorToGroup(headset_interface, tick_registry);
+	}
+	if (false) {
+		//game_scene::ActorId camera_movement = scene.AddActor(
+		//	make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
+		//scene.AddActorToGroup(camera_movement, controls_registry);
 		game_scene::ActorId cockpit = scene.AddActor(
 			make_unique<game_scene::actors::GraphicsObject>());
 		game_scene::ActorId floor = scene.AddActor(
@@ -139,11 +136,6 @@ void UpdateLoop() {
 		game_scene::ActorId sprite = scene.AddActor(
 			make_unique<game_scene::actors::Sprite>());
 
-		if (graphics_objects.oculus->IsInitialized()) {
-			game_scene::ActorId headset_interface = scene.AddActor(
-				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus));
-			scene.AddActorToGroup(headset_interface, tick_registry);
-		}
 
 		/*game_scene::CommandQueueLocation sprite_command =
 			scene.MakeCommandAfter(
@@ -237,18 +229,18 @@ void UpdateLoop() {
 		exec("import scripts.first_load as first_load", main_namespace);
 		object loaded_module = main_namespace["first_load"];
 
-		game_scene::CommandArgs ca(20);
-		game_scene::commands::TimeTick tt(100);
-		game_scene::CommandArgs& car = tt;
-		loaded_module.attr("dump_thing")(boost::ref(ca));
-		loaded_module.attr("dump_thing")(boost::ref(tt));
-		loaded_module.attr("dump_thing")(boost::ref(car));
-
 		dict inputs;
 		inputs["scene"] = boost::ref(scene);
 		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
 		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		object result = loaded_module.attr("first_load")(inputs);
+		scene.MakeCommandAfter(scene.FrontOfCommands(),
+			game_scene::Command(
+				game_scene::Target(io_interface),
+				make_unique<game_scene::commands::IOListenerRegistration>(
+					true,
+					extract<game_scene::ActorId>(result),
+					game_scene::actors::IOInterface::ListenerId::MOUSE_MOTION)));
 	} catch (error_already_set) {
 		PyErr_Print();
 	}
@@ -290,97 +282,11 @@ void UpdateLoop() {
 		int new_time = timeGetTime();
 		int time_delta_ms = new_time - prev_time;
 		prev_time = new_time;
-
-		graphics_objects.input_handler->UpdateKeyboardState();
-		unique_lock<mutex> player_position_lock(player_position_access);
-		if (graphics_objects.input_handler->GetKeyPressed('W')) {
-			player_location[2] -= time_delta_ms * movement_scale;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('S')) {
-			player_location[2] += time_delta_ms * movement_scale;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('A')) {
-			player_location[0] -= time_delta_ms * movement_scale;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('D')) {
-			player_location[0] += time_delta_ms * movement_scale;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('Q')) {
-			player_location[1] -= time_delta_ms * movement_scale;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('E')) {
-			player_location[1] += time_delta_ms * movement_scale;
-		}
-
-		array<float, 2> aim_movement = { 0, 0 };
-		if (graphics_objects.input_handler->GetKeyPressed('J')) {
-			aim_movement[1] += 1;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('L')) {
-			aim_movement[1] -= 1;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('I')) {
-			aim_movement[0] += 1;
-		}
-		if (graphics_objects.input_handler->GetKeyPressed('K')) {
-			aim_movement[0] -= 1;
-		}
-
-		/*actor_handler.root_environment_.StoreToStack(tuple<>());
-		actor_handler.root_environment_.StoreToTable(string("aim_movement"), aim_movement);
-		actor_handler.root_environment_.SetGlobalFromStack(string("user_input"));*/
-
-		std::array<int, 2> mouse_motion = graphics_objects.input_handler->ConsumeMouseMotion();
-		player_orientation_angles[1] = min(3.1416f / 2.0f, max(-3.1416f / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
-		player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, 3.1416f*2.0f);
-		player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
-		player_position_lock.unlock();
-
-		player_look_camera.location = player_location;
-		if (graphics_objects.input_handler->IsHeadsetActive()) {
-			/*
-			player_orientation_quaternion = graphics_objects.input_handler->GetHeadPose().orientation_ * player_orientation_quaternion;
-			array<float, 3> oculus_offset = graphics_objects.input_handler->GetHeadOffset();
-			array<float, 3> oculus_eye_offset = graphics_objects.input_handler->GetEyeOffset(0) + graphics_objects.input_handler->GetEyeOffset(1);
-			for (int i = 0; i < 3; i++) {
-				player_look_camera.location[i] += oculus_offset[i] + oculus_eye_offset[i] / 2.0f;
-			}
-			*/
-		}
-		player_look_camera.orientaiton = player_orientation_quaternion.GetArray();
-		player_look_camera.InvalidateViewMatrices();
-		/*LookState current_look = { Identifier(""), NULL, 0, { 0, 0 } };
-		std::tie(current_look.id_of_object, current_look.actor, current_look.distance_to_object, current_look.where_on_object) = actor_handler.interactable_collection_.GetClosestLookedAtAndWhere(player_look_camera.GetViewMatrix());
-
-		for (Lua::InteractableObject* update_tick_listener : actor_handler.LookupListeners("update_tick")) {
-			assert(update_tick_listener->CallLuaFunc(string("update_tick"), time_delta_ms));
-		}
-
-		if ((mouse_motion[0] != 0) && (mouse_motion[1] != 0)) {
-			for (Lua::InteractableObject* mouse_motion_listener : actor_handler.LookupListeners("mouse_motion")) {
-				mouse_motion_listener->CallLuaFunc(string("mouse_motion"), mouse_motion);
-			}
-		}
-
-		if (graphics_objects.input_handler->GetKeyToggled(' ')) {
-			for (Lua::InteractableObject* keydown_listener : actor_handler.LookupListeners("space_down")) {
-				assert(keydown_listener->CallLuaFunc(string("space_down")));
-			}
-		}
-
-		if (previous_look.id_of_object != current_look.id_of_object) {
-			if (previous_look.actor != NULL) {
-				previous_look.actor->lua_interface_.CallLuaFunc(string("look_left"), current_look.id_of_object.GetId(), previous_look.id_of_object.GetId());
-			}
-			if (current_look.actor != NULL) {
-				current_look.actor->lua_interface_.CallLuaFunc(string("look_entered"), current_look.id_of_object.GetId());
-			}
-		}
-		if (current_look.actor != NULL) {
-			current_look.actor->lua_interface_.CallLuaFunc(string("look_maintained"), current_look.id_of_object.GetId(), current_look.where_on_object[0], current_look.where_on_object[1]);
-		}
-		previous_look = current_look;*/
-
+		
+		//player_orientation_angles[1] = min(3.1416f / 2.0f, max(-3.1416f / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
+		//player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, 3.1416f*2.0f);
+		//player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
+		
 		// Scene logic
 		game_scene::CommandQueueLocation tick_command = scene.MakeCommandAfter(
 			scene.FrontOfCommands(),

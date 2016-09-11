@@ -130,6 +130,7 @@
     <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="InputCommandArgs.h" />
+    <ClInclude Include="IOInterface.h" />
     <ClInclude Include="MovableCamera.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="HeadsetInterface.cpp" />
     <ClCompile Include="InputCommandArgs.cpp" />
+    <ClCompile Include="IOInterface.cpp" />
     <ClCompile Include="MovableCamera.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />

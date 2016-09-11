@@ -11,6 +11,7 @@ struct Scale {
 
 	Scale operator*(const Scale& other) const { return Scale(scale_[0] * other[0], scale_[1] * other[1], scale_[2] * other[2]); }
 	float operator[](size_t index) const { return scale_[index]; }
+	float& get(size_t index) { return scale_[index]; }
 
 	array<float, 3> scale_;
 };
@@ -22,6 +23,7 @@ struct Location {
 
 	Location Inverse() const { return *this * -1; }
 	float operator[](size_t index) const { return location_[index]; }
+	float& get(size_t index) { return location_[index]; }
 	Location operator+(const Location& other) const { return Location(location_[0] + other[0], location_[1] + other[1], location_[2] + other[2]); }
 	Location operator-(const Location& other) const { return Location(location_[0] - other[0], location_[1] - other[1], location_[2] - other[2]); }
 	Location operator*(float scale) const { return Location(scale * location_[0], scale * location_[1], scale * location_[2]); }

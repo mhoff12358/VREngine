@@ -99,13 +99,13 @@ void ToScreenRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Enti
 	InitializeBackBuffer();
 }
 
-void ToScreenRenderingPipeline::Render(const Pose& player_position) {
+void ToScreenRenderingPipeline::Render() {
 	// Update the camera's position and transformations based on the world state
 	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
 
-	pipeline_cameras_["player_head"].SetLocation(player_position.location_);
-	pipeline_cameras_["player_head"].SetOrientation(player_position.orientation_.GetArray());
-	pipeline_cameras_["player_head"].BuildMatrices();
+	//pipeline_cameras_["player_head"].SetLocation(player_position.location_);
+	//pipeline_cameras_["player_head"].SetOrientation(player_position.orientation_.GetArray());
+	//pipeline_cameras_["player_head"].BuildMatrices();
 
 	CallPipeline(group_to_draw);
 	view_state->swap_chain->Present(0, 0);
@@ -130,7 +130,7 @@ void ToHeadsetRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Ent
 	FillPipelineTexturesFromHeadset();
 }
 
-void ToHeadsetRenderingPipeline::Render(const Pose& player_position) {
+void ToHeadsetRenderingPipeline::Render() {
 	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
 	
 	for (vr::EVREye eye : Headset::eyes_) {

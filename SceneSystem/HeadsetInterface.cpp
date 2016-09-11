@@ -22,28 +22,19 @@ bool IsTriggerPulled(const vr::VRControllerState_t& state) {
 }  // HeadsetHelpers
 
 void HeadsetInterface::AddedToScene() {
-	if (scene_->FindByName("HeadsetInterface") != ActorId::UnsetId) {
-		std::cout << "Attempting to register a second HeadsetInterface instance" << std::endl;
-		return;
-	}
-	scene_->RegisterByName("HeadsetInterface", id_);
-
 	controller_graphics_[0] = CreateControllerActor();
 	controller_graphics_[1] = CreateControllerActor();
+	
+	for (ActorId& listener_group : listener_groups_) {
+		listener_group = scene_->AddActorGroup();
+	}
 }
 
 void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
-	case CommandType::ADDED_TO_SCENE:
-	{
-		for (ActorId& listener_group : listener_groups_) {
-			listener_group = scene_->AddActorGroup();
-		}
-	}
-	break;
 	case HeadsetInterfaceCommand::REGISTER_LISTENER:
 	{
-		const commands::ListenerRegistration& registration = dynamic_cast<const commands::ListenerRegistration&>(args);
+		const commands::HeadsetListenerRegistration& registration = dynamic_cast<const commands::HeadsetListenerRegistration&>(args);
 		if (registration.register_not_unregister_) {
 			scene_->AddActorToGroup(registration.actor_to_register_, listener_groups_[static_cast<size_t>(registration.listener_id_)]);
 		} else {

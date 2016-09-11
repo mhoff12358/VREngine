@@ -20,8 +20,6 @@ public:
 		: CommandArgs(InputCommand::TICK), duration_(duration) {
 	}
 
-	int blarg() override { return 2; }
-
 	const int duration_;
 };
 

@@ -37,6 +37,11 @@ void PipelineCamera::SetOrientation(const Quaternion& orientation) {
 	SetOrientation(orientation.GetArray());
 }
 
+void PipelineCamera::SetPose(const Pose& pose) {
+	SetLocation(pose.location_);
+	SetOrientation(pose.orientation_);
+}
+
 void PipelineCamera::BuildMatrices() {
 	orientation_projection_matrix_ = orientation_matrix_ * projection_matrix_;
 	view_matrix_ = location_matrix_ * orientation_matrix_;

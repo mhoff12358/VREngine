@@ -67,6 +67,10 @@ void Scene::ExecuteCommand(const Command& command) {
 }
 
 Shmactor* Scene::FindActor(const ActorId& actor_id) {
+	auto actor_iter = actor_lookup_.find(actor_id);
+	if (actor_iter == actor_lookup_.end()) {
+		return nullptr;
+	}
 	return actor_lookup_[actor_id].get();
 }
 
@@ -118,15 +122,21 @@ ActorId Scene::AddActorGroup() {
 }
 
 void Scene::AddActorToGroup(ActorId actor, ActorId group) {
-	actor_groups_.AddActorToGroup(actor, group);
+	if (actor != ActorId::UnsetId && group != ActorId::UnsetId) {
+		actor_groups_.AddActorToGroup(actor, group);
+	}
 }
 
 void Scene::RemoveActorFromGroup(ActorId actor, ActorId group) {
-	actor_groups_.RemoveActorFromGroup(actor, group);
+	if (actor != ActorId::UnsetId && group != ActorId::UnsetId) {
+		actor_groups_.RemoveActorFromGroup(actor, group);
+	}
 }
 
 ActorId Scene::RegisterByName(string name, ActorId actor_or_group) {
-	registered_actors_or_groups_[name] = actor_or_group;
+	if (actor_or_group != ActorId::UnsetId) {
+		registered_actors_or_groups_[name] = actor_or_group;
+	}
 	return actor_or_group;
 }
 

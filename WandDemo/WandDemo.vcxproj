@@ -409,6 +409,7 @@
     <None Include="lua_test.lua" />
     <None Include="nichijou_graph.py" />
     <None Include="owns_positionables.lua" />
+    <None Include="player.py" />
     <None Include="positionable.lua" />
     <None Include="projectile.lua" />
     <None Include="reticle.lua" />

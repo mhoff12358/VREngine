@@ -23,11 +23,6 @@ public:
 	CommandArgs(const CommandArgs&) = delete;
 	CommandArgs operator=(const CommandArgs&) = delete;
 
-	virtual int blarg() { return 1; }
-	int blargwrap() {
-		return blarg();
-	}
-
 	IdType Type() const {return type_.id_;}
 
 private:

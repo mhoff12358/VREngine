@@ -138,10 +138,10 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 			if (headset_interface_ != ActorId::UnsetId) {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 					Target(headset_interface_),
-					make_unique<commands::ListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TRIGGER_STATE_CHANGE)));
+					make_unique<commands::HeadsetListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TRIGGER_STATE_CHANGE)));
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 					Target(headset_interface_),
-					make_unique<commands::ListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TOUCHPAD_SLIDE)));
+					make_unique<commands::HeadsetListenerRegistration>(true, id_, HeadsetInterface::ListenerId::TOUCHPAD_SLIDE)));
 			}
 
 			CreateGraphicsResources();
@@ -157,11 +157,11 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 			if (trigger_state_change.is_pulled_) {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 					Target(headset_interface_),
-					make_unique<commands::ListenerRegistration>(true, id_, HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
+					make_unique<commands::HeadsetListenerRegistration>(true, id_, HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
 			} else {
 				scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 					Target(headset_interface_),
-					make_unique<commands::ListenerRegistration>(false, id_, HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
+					make_unique<commands::HeadsetListenerRegistration>(false, id_, HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
 			}
 		}
 	}

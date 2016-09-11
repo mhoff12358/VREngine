@@ -30,7 +30,6 @@ public:
 		  entity_handler_(entity_handler),
 		  device_interface_(device_interface) {}
 
-	void AddedToScene() override;
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
 	void HandleCommand(const CommandArgs& args) override;
 

@@ -9,11 +9,13 @@
 
 struct PyActor : public game_scene::Shmactor, public boost::python::wrapper<game_scene::Shmactor> {
 public:
+	object self_;
 	// Wrap existing calls that work to be virtualizable through Python.
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override HandleCommand = this->get_override("HandleCommand")) {
 			try {
-				HandleCommand(boost::ref(args));
+				self_.attr("HandleCommand")(boost::ref(args));
+				//HandleCommand(boost::ref(args));
 			} catch (error_already_set) {
 				PyErr_Print();
 			}
@@ -57,5 +59,7 @@ public:
 		self_ = self;
 	}
 
-	object self_;
+	game_scene::ActorId GetId() {
+		return id_;
+	}
 };

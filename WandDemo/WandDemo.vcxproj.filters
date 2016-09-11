@@ -406,5 +406,8 @@
     <None Include="first_load.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="player.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

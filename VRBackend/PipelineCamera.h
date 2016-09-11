@@ -23,6 +23,7 @@ public:
 	void SetLocation(const Location& location);
 	void SetOrientation(array<float, 4> orientation);
 	void SetOrientation(const Quaternion& orientation);
+	void SetPose(const Pose& pose);
 
 private:
 	// Base component matrices defined by input.

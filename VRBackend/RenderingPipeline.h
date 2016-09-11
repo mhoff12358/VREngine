@@ -29,7 +29,7 @@ class RenderingPipeline {
 public:
 	RenderingPipeline();
 
-	virtual void Render(const Pose& player_position) = 0;
+	virtual void Render() = 0;
 
 	void InitializeBackBuffer();
 	Texture& GetFirstStageBuffer();
@@ -81,7 +81,7 @@ public:
 
 	void Initialize(ViewState* vs, InputHandler* ih, EntityHandler* eh, string rl);
 
-	void Render(const Pose& player_position) override;
+	void Render() override;
 
 private:
 	vector<TextureIdent> GetExistingTextureIdents() const override;
@@ -93,7 +93,7 @@ public:
 
 	void Initialize(ViewState* vs, InputHandler* ih, EntityHandler* eh, string rl, Headset* ocu);
 
-	void Render(const Pose& player_position) override;
+	void Render() override;
 
 public:
 	D3D11_VIEWPORT eye_viewports[2];

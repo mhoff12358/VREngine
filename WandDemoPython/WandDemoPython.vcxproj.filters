@@ -44,4 +44,9 @@
       <Filter>Python Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="HeadsetInterfacePython.h">
+      <Filter>Header Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

@@ -21,7 +21,7 @@ public:
 	{}
 
 	void HandleCommand(const CommandArgs& args);
-	void AddedToScene();
+	void AddedToScene() override;
 
 	ActorId CreateControllerActor();
 
@@ -57,9 +57,9 @@ public:
 };
 
 namespace commands {
-class DLLSTUFF ListenerRegistration : public CommandArgs {
+class DLLSTUFF HeadsetListenerRegistration : public CommandArgs {
 public:
-	ListenerRegistration(
+	HeadsetListenerRegistration(
 		bool register_not_unregister,
 		ActorId actor_to_register,
 		actors::HeadsetInterface::ListenerId listener_id) : 
