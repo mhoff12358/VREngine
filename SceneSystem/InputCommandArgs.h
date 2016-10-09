@@ -6,7 +6,7 @@
 
 namespace game_scene {
 
-class DLLSTUFF InputCommand : public CommandType {
+class InputCommand : public CommandType {
 public:
 	DECLARE_COMMAND(InputCommand, TICK);
 	DECLARE_COMMAND(InputCommand, INPUT_UPDATE);
@@ -14,7 +14,7 @@ public:
 
 namespace commands {
 
-class DLLSTUFF TimeTick : public CommandArgs {
+class TimeTick : public CommandArgs {
 public:
 	explicit TimeTick(const int duration)
 		: CommandArgs(InputCommand::TICK), duration_(duration) {
@@ -23,7 +23,7 @@ public:
 	const int duration_;
 };
 
-class DLLSTUFF InputUpdate : public CommandArgs {
+class InputUpdate : public CommandArgs {
 public:
 	explicit InputUpdate(const InputHandler* input)
 		: CommandArgs(InputCommand::INPUT_UPDATE), input_(*input) {

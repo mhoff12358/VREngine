@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Target.h"
+#include <cassert>
 
 namespace game_scene {
 
 Scene::Scene() : next_actor_id_(ActorId::FirstId) {
+	actor_lookup_non_unique_[ActorId(5)] = nullptr;
 }
 
 Scene::~Scene() {
@@ -95,24 +97,29 @@ vector<ActorId> Scene::ExpandTarget(const Target& target) {
 	return actors_to_return;
 }
 
-ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor) {
-	return get<0>(AddActorReturnInitialize(move(new_actor)));
+ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, unique_ptr<CommandArgs> args) {
+	return get<0>(AddActorReturnInitialize(move(new_actor), move(args)));
 }
 
-ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after) {
-	return get<0>(AddActorReturnInitialize(move(new_actor), initialize_after));
+ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+	return get<0>(AddActorReturnInitialize(move(new_actor), initialize_after, move(args)));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor) {
-	return AddActorReturnInitialize(move(new_actor), FrontOfCommands());
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, unique_ptr<CommandArgs> args) {
+	return AddActorReturnInitialize(move(new_actor), FrontOfCommands(), move(args));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	ActorId new_id = NextActorId();
 	new_actor->SetId(new_id);
+	new_actor->SetScene(this);
 	actor_lookup_.emplace(new_id, move(new_actor));
 	actor_lookup_[new_id]->AddedToScene();
-	return tuple<ActorId, CommandQueueLocation>(new_id, MakeCommandAfter(initialize_after, Command(Target(new_id), make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE))));
+	if (args == nullptr) {
+		args = make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE);
+	}
+	assert(args->Type() == CommandType::ADDED_TO_SCENE);
+	return tuple<ActorId, CommandQueueLocation>(new_id, MakeCommandAfter(initialize_after, Command(Target(new_id), move(args))));
 }
 
 ActorId Scene::AddActorGroup() {

@@ -1,19 +1,9 @@
 #include "stdafx.h"
 #include "ConstantBufferDescribed.h"
 
-
-CB_PIPELINE_STAGES ConstantBufferDescribed::GetStageFromString(const string& stage_name) {
-	if (stage_name == "vertex") {
-		return CB_PS_VERTEX_SHADER;
-	} else if (stage_name == "pixel") {
-		return CB_PS_PIXEL_SHADER;
-	}
-	assert(false);
-}
-
 ConstantBufferDescribed::ConstantBufferDescribed(
-	CB_PIPELINE_STAGES stages,
-	const game_scene::actors::ShaderSettingsFormat& format)
+	ShaderStages stages,
+	const game_scene::ShaderSettingsFormat& format)
 	: ConstantBuffer(stages)
 {
 	size_t total_size = 0;
@@ -28,6 +18,15 @@ ConstantBufferDescribed::ConstantBufferDescribed(
 	data.resize(total_size);
 }
 
+ConstantBufferDescribed::ConstantBufferDescribed(
+	ShaderStages stages,
+	const game_scene::ShaderSettingsValue& value,
+	ID3D11Device* device_interface)
+	: ConstantBufferDescribed(stages, value.GetFormat())
+{
+	CreateBuffer(device_interface);
+	value.SetIntoConstantBuffer(this);
+}
 
 ConstantBufferDescribed::~ConstantBufferDescribed()
 {

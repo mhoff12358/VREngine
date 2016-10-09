@@ -5,7 +5,7 @@
 
 namespace game_scene {
 
-class DLLSTUFF QueryType {
+class QueryType {
 public:
 	QueryType(IdType id) : id_(id) {}
 	QueryType(QueryRegistry id) : id_(id.value_) {}
@@ -17,7 +17,7 @@ public:
 	IdType id_;
 };
 
-class DLLSTUFF QueryArgs
+class QueryArgs
 {
 public:
 	QueryArgs() : type_(0) {}
@@ -43,7 +43,7 @@ public:
 	WrappedType data_;
 };
 
-class DLLSTUFF EmptyQuery : public QueryArgs {
+class EmptyQuery : public QueryArgs {
 public:
 	EmptyQuery(QueryType type) : QueryArgs(type) {}
 	virtual ~EmptyQuery() {}

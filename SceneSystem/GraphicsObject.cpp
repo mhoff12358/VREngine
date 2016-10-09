@@ -130,7 +130,7 @@ void GraphicsObject::CreateSettingsEntity(
 	ShaderSettingsFormat settings_format = heirarchy.shader_settings_.GetFormat();
 	if (settings_format.ShouldCreateBuffer()) {
 		shader_settings_buffer = make_unique<ConstantBufferDescribed>(
-			CB_PS_VERTEX_AND_GEOMETRY_AND_PIXEL_SHADER,
+			ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::GEOMETRY_STAGE | ShaderStages::PIXEL_STAGE),
 			settings_format);
 		shader_settings_buffer->CreateBuffer(graphics_resources.device_interface_);
 		heirarchy.shader_settings_.SetIntoConstantBuffer(shader_settings_buffer.get());
@@ -150,8 +150,10 @@ void GraphicsObject::CreateSettingsEntity(
 			Texture texture = graphics_resources.resource_pool_.LoadTexture(texture_details.name_);
 			TextureView texture_view = TextureView(
 				0, 0,
-				texture_details.use_in_vertex_,
-				texture_details.use_in_pixel_,
+				ShaderStages(
+					texture_details.use_in_vertex_ ? ShaderStages::VERTEX_STAGE : 0 |
+					texture_details.use_in_pixel_ ? ShaderStages::PIXEL_STAGE : 0
+				),
 				texture);
 			settings_entities.push_back(
 				graphics_resources.entity_handler_.AddEntity(Entity(
@@ -191,7 +193,7 @@ void GraphicsObject::CreateIndividualComponent(
 	CreateSettingsEntity(graphics_resources, heirarchy, reserved_space);
 	vector<Model> models;
 	for (const tuple<string, ObjLoader::OutputFormat>& model_name : heirarchy.models_) {
-		models.push_back(graphics_resources.resource_pool_.LoadExistingModel(get<0>(model_name)));
+		models.push_back(graphics_resources.resource_pool_.LoadExistingModel(ModelIdentifier(get<0>(model_name))));
 	}
 	get<0>(components_[reserved_space]).AddEntitiesToHandler(
 		graphics_resources.entity_handler_,

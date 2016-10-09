@@ -6,21 +6,12 @@
 #include "stl.h"
 #include "Camera.h"
 #include "PipelineCamera.h"
+#include "Shaders.h"
 
 #define PER_FRAME_CONSTANT_BUFFER_REGISTER 0
 #define PER_MODEL_CONSTANT_BUFFER_REGISTER 1
 // Per batch constant buffers can use registers 2+
 #define PER_BATCH_CONSTANT_BUFFER_REGISTER 2
-
-enum CB_PIPELINE_STAGES : unsigned char {
-	CB_PS_VERTEX_SHADER = 0x1,
-	CB_PS_PIXEL_SHADER = 0x2,
-	CB_PS_GEOMETRY_SHADER = 0x4,
-	CB_PS_VERTEX_AND_PIXEL_SHADER = 0x3,
-	CB_PS_VERTEX_AND_GEOMETRY_SHADER = 0x5,
-	CB_PS_GEOMETRY_AND_PIXEL_SHADER = 0x6,
-	CB_PS_VERTEX_AND_GEOMETRY_AND_PIXEL_SHADER = 0x7,
-};
 
 struct TransformationMatrixData {
 	DirectX::XMFLOAT4X4 transformation;
@@ -40,10 +31,8 @@ struct TransformationMatrixAndInvTransData {
 class ConstantBuffer
 {
 public:
-	ConstantBuffer(CB_PIPELINE_STAGES stages);
+	explicit ConstantBuffer(ShaderStages stages);
 	~ConstantBuffer();
-
-	void SetPipelineStages(CB_PIPELINE_STAGES stages);
 
 	void CreateBuffer(ID3D11Device* device_interface);
 	void PushBuffer(ID3D11DeviceContext* device_context);
@@ -59,14 +48,14 @@ public:
 
 protected:
 	ID3D11Buffer* const_buffer;
-	CB_PIPELINE_STAGES pipeline_stages;
+	ShaderStages pipeline_stages;
 	bool dirty;
 };
 
 class SizedConstantBuffer : public ConstantBuffer
 {
 public:
-	SizedConstantBuffer(CB_PIPELINE_STAGES stages, unsigned int size);
+	SizedConstantBuffer(ShaderStages stages, unsigned int size);
 	~SizedConstantBuffer();
 
 	virtual void* EditBufferData() override;
@@ -81,7 +70,7 @@ private:
 template <typename ConstantBufferData>
 class ConstantBufferTypedTemp : public ConstantBuffer {
 public:
-	ConstantBufferTypedTemp(CB_PIPELINE_STAGES stages) : ConstantBuffer(stages) {}
+	ConstantBufferTypedTemp(ShaderStages stages) : ConstantBuffer(stages) {}
 	ConstantBufferTypedTemp(ConstantBufferTypedTemp&& other)
 		: ConstantBuffer(other.pipeline_stages), buffer_data(std::move(other.buffer_data))
 	{
@@ -169,7 +158,7 @@ class ConstantBufferTyped : public ConstantBufferTypedTemp < ConstantBufferData 
 template <>
 class ConstantBufferTyped<TransformationMatrixData> : public ConstantBufferTypedTemp<TransformationMatrixData>{
 public:
-	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
+	ConstantBufferTyped(ShaderStages stages) : ConstantBufferTypedTemp(stages) {}
 
 	void XM_CALLCONV SetTransformation(DirectX::FXMMATRIX new_transformation);
 };
@@ -177,7 +166,7 @@ public:
 template <>
 class ConstantBufferTyped<ViewProjectionMatrixData> : public ConstantBufferTypedTemp<ViewProjectionMatrixData>{
 public:
-	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
+	ConstantBufferTyped(ShaderStages stages) : ConstantBufferTypedTemp(stages) {}
 
 	void XM_CALLCONV SetAllTransformations(Camera& camera);
 	void XM_CALLCONV SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix);
@@ -186,7 +175,7 @@ public:
 template <>
 class ConstantBufferTyped<TransformationMatrixAndInvTransData> : public ConstantBufferTypedTemp<TransformationMatrixAndInvTransData>{
 public:
-	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
+	ConstantBufferTyped(ShaderStages stages) : ConstantBufferTypedTemp(stages) {}
 
 	void XM_CALLCONV SetBothTransformations(DirectX::FXMMATRIX new_transformation);
 	void XM_CALLCONV SetTransformation(DirectX::FXMMATRIX new_transformation);

@@ -25,6 +25,8 @@ using std::unique_ptr;
 #include "SceneSystem/IOInterface.h"
 #include "NichijouGraph.h"
 #include "SceneSystem/Sprite.h"
+#include "SceneSystem/NewGraphicsObject.h"
+#include "SceneSystem/Scene.h"
 
 #include "SceneSystem/BoostPythonWrapper.h"
 
@@ -45,12 +47,6 @@ const float mouse_theta_scale = 0.001f;
 const float mouse_phi_scale = 0.001f;
 
 mutex device_context_access;
-
-template <>
-class ConstantBufferTyped<array<float, 4>> : public ConstantBufferTypedTemp < array<float, 4> > {
-public:
-	ConstantBufferTyped(CB_PIPELINE_STAGES stages) : ConstantBufferTypedTemp(stages) {}
-};
 
 void GraphicsLoop() {
 	int frame_index = 0;
@@ -94,20 +90,21 @@ void UpdateLoop() {
 	ModelGenerator point_gen(ObjLoader::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
 	point_gen.AddVertex(Vertex(ObjLoader::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
 	point_gen.Finalize(graphics_objects.view_state->device_interface, nullptr, ModelStorageDescription::Immutable());
-	point_gen.parts = { {"Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0)} };
-	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourcePool::GetConstantModelName("point"), point_gen));
+	point_gen.parts_ = { { "", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
+	point_gen.parts_ = { { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
+	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourceIdentifier::GetConstantModelName("point"), point_gen));
 
 	game_scene::Scene scene;
-	game_scene::Shmactor::SetScene(&scene);
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
-	game_scene::ActorId graphics_resources = scene.RegisterByName(
-		"GraphicsResources",
-		scene.AddActor(
+	unique_ptr<game_scene::Shmactor> new_actor = 
 			make_unique<game_scene::actors::GraphicsResources>(
 				*graphics_objects.resource_pool,
 				*graphics_objects.entity_handler,
-				graphics_objects.view_state->device_interface)));
+				graphics_objects.view_state->device_interface);
+	game_scene::ActorId graphics_resources = scene.RegisterByName(
+		"GraphicsResources",
+		scene.AddActor(move(new_actor)));
 	game_scene::ActorId io_interface = scene.RegisterByName(
 		"IOInterface",
 		scene.AddActor(
@@ -120,6 +117,33 @@ void UpdateLoop() {
 				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus)));
 		scene.AddActorToGroup(headset_interface, tick_registry);
 	}
+
+	game_scene::ActorId square_actor;
+	game_scene::CommandQueueLocation next_command;
+	std::tie(square_actor, next_command) = scene.AddActorReturnInitialize(
+		make_unique<game_scene::actors::NewGraphicsObject>());
+	next_command = scene.MakeCommandAfter(next_command, game_scene::Command(
+		game_scene::Target(square_actor),
+		make_unique<game_scene::commands::CreateNewGraphicsObject>(
+			"basic",
+			vector<game_scene::EntitySpecification>{
+				game_scene::EntitySpecification()
+					.SetModel(game_scene::NewModelDetails(ModelIdentifier("square.obj|Square")))
+					.SetShaders(game_scene::NewShaderDetails(
+						"texturedspecularlightsource.hlsl",
+						ObjLoader::vertex_type_all,
+						ShaderStages::Vertex().and(ShaderStages::Pixel())))
+					.SetShaderSettingsValue(vector<vector<float>>{vector<float>{0.0f, 0.0f, 0.0f}, vector<float>{1.0f}})
+					.SetTextures({{game_scene::NewIndividualTextureDetails("terrain.png", ShaderStages::All(), 0, 0)}})
+					.SetComponent("square")
+			},
+			vector<game_scene::ComponentInfo>{
+					game_scene::ComponentInfo("", "square")
+			})));
+	next_command = scene.MakeCommandAfter(next_command, game_scene::Command(
+		game_scene::Target(square_actor),
+		make_unique<game_scene::commands::PlaceNewComponent>("square", Pose(Location(0, 0, -3), Quaternion::RotationAboutAxis(AID_X, 3.14/2.0f)))));
+
 	if (false) {
 		//game_scene::ActorId camera_movement = scene.AddActor(
 		//	make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
@@ -220,8 +244,8 @@ void UpdateLoop() {
 		scene.ExecuteCommand(game_scene::Command(
 			game_scene::Target(cockpit),
 			make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));*/
-		scene.FlushCommandQueue();
 	}
+	scene.FlushCommandQueue();
 
 	game_scene::ActorId added_actor;
 	try {
@@ -282,19 +306,15 @@ void UpdateLoop() {
 		int new_time = timeGetTime();
 		int time_delta_ms = new_time - prev_time;
 		prev_time = new_time;
-		
-		//player_orientation_angles[1] = min(3.1416f / 2.0f, max(-3.1416f / 2.0f, player_orientation_angles[1] - mouse_motion[1] * mouse_phi_scale));
-		//player_orientation_angles[0] = fmodf(player_orientation_angles[0] - mouse_motion[0] * mouse_phi_scale, 3.1416f*2.0f);
-		//player_orientation_quaternion = Quaternion::RotationAboutAxis(AID_Y, player_orientation_angles[0]) * Quaternion::RotationAboutAxis(AID_X, player_orientation_angles[1]);
-		
+
 		// Scene logic
-		game_scene::CommandQueueLocation tick_command = scene.MakeCommandAfter(
+		game_scene::CommandQueueLocation next_command = scene.MakeCommandAfter(
 			scene.FrontOfCommands(),
 			game_scene::Command(
 				game_scene::Target(tick_registry),
 				make_unique<game_scene::commands::TimeTick>(time_delta_ms)));
-		scene.MakeCommandAfter(
-			tick_command,
+		next_command = scene.MakeCommandAfter(
+			next_command,
 			game_scene::Command(
 				game_scene::Target(controls_registry),
 				make_unique<game_scene::commands::InputUpdate>(
@@ -397,8 +417,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	map<string, PipelineCamera> pipeline_cameras;
 	if (hmd_active) {
 		pipeline_cameras["player_head|0"].SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[0], 0.001f, 500.0f));
+		pipeline_cameras["player_head|0"].SetPose(Pose(Location(), Quaternion::Identity()));
 		pipeline_cameras["player_head|0"].BuildMatrices();
 		pipeline_cameras["player_head|1"].SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[1], 0.001f, 500.0f));
+		pipeline_cameras["player_head|1"].SetPose(Pose(Location(), Quaternion::Identity()));
 		pipeline_cameras["player_head|1"].BuildMatrices();
 	} else {
 		pipeline_cameras["player_head"].SetPerspectiveProjection(
@@ -406,6 +428,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
 			0.001f,
 			500.0f);
+		pipeline_cameras["player_head"].SetPose(Pose(Location(), Quaternion::Identity()));
 		pipeline_cameras["player_head"].BuildMatrices();
 	}
 	graphics_objects.render_pipeline->SetPipelineCameras(pipeline_cameras);

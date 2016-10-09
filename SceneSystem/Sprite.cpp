@@ -9,7 +9,7 @@ REGISTER_COMMAND(SpriteCommand, PLACE_SPRITE);
 
 namespace actors {
 
-GraphicsObjectDetails Sprite::generic_details_;
+const GraphicsObjectDetails Sprite::generic_details_;
 
 void Sprite::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
@@ -45,6 +45,7 @@ void Sprite::PlaceSprite(const commands::SpritePlacement& placement) {
 }
 
 void Sprite::Init() {
+	/*
 	generic_details_ = GraphicsObjectDetails(ComponentHeirarchy(
 		"point",
 		{
@@ -64,6 +65,7 @@ void Sprite::Init() {
 	generic_details_.heirarchy_.shader_settings_ = {
 		{1.0f},
 	};
+	*/
 }
 
 }  // actors

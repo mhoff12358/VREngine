@@ -4,12 +4,7 @@
 
 namespace game_scene {
 
-#ifndef SceneSystemImport
-__declspec(dllexport)
-#endif
-Scene* Shmactor::scene_ = nullptr;
-
-Shmactor::Shmactor() : id_(ActorId::UnsetId)
+Shmactor::Shmactor() : id_(ActorId::UnsetId), scene_(nullptr)
 {
 }
 
@@ -59,6 +54,10 @@ void Shmactor::SetId(ActorId id) {
 
 void Shmactor::SetScene(Scene* scene) {
 	scene_ = scene;
+}
+
+Scene& Shmactor::GetScene() {
+	return *scene_;
 }
 
 }  // game_scene

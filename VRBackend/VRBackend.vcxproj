@@ -195,6 +195,7 @@
     <ClInclude Include="RenderingPipeline.h" />
     <ClInclude Include="RenderMode.h" />
     <ClInclude Include="RenderResource.h" />
+    <ClInclude Include="ResourceIdentifier.h" />
     <ClInclude Include="ResourcePool.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="ShaderSettings.h" />
@@ -239,6 +240,7 @@
     <ClCompile Include="RenderingPipeline.cpp" />
     <ClCompile Include="RenderMode.cpp" />
     <ClCompile Include="RenderResource.cpp" />
+    <ClCompile Include="ResourceIdentifier.cpp" />
     <ClCompile Include="ResourcePool.cpp" />
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ShaderSettings.cpp" />

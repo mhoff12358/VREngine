@@ -1,6 +1,7 @@
 #include "Entity.h"
+#include "TextureView.h"
 
-const TextureView Entity::dummy_texture_view(0, 0, false, false, NULL, NULL);
+const TextureView Entity::dummy_texture_view(0, 0, ShaderStages(), NULL, NULL);
 
 const EntityStatusFlags ES_NORMAL = 0x0;
 const EntityStatusFlags ES_SETTINGS = 0x1;
@@ -11,6 +12,9 @@ Entity::Entity(EntityStatusFlags stat, Shaders shaders, ShaderSettings ss, Model
 	: status(stat), shaders_(shaders), object_settings(os), shader_settings(ss), model(m), texture(tex)
 {
 
+}
+
+Entity::Entity(TextureView tex) : Entity(ES_SETTINGS, Shaders(), ShaderSettings(), Model(), nullptr, tex) {
 }
 
 Entity::Entity()

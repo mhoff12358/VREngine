@@ -9,7 +9,7 @@
 namespace game_scene {
 namespace actors {
 
-class DLLSTUFF IOInterface : public Shmactor {
+class IOInterface : public Shmactor {
 public:
 	IOInterface(InputHandler& input_handler);
 
@@ -46,7 +46,7 @@ private:
 
 }  // actors
 
-class DLLSTUFF IOInterfaceCommand {
+class IOInterfaceCommand {
 public:
 	DECLARE_COMMAND(IOInterfaceCommand, REGISTER_LISTENER);
 	DECLARE_COMMAND(IOInterfaceCommand, LISTEN_MOUSE_MOTION);
@@ -56,7 +56,7 @@ public:
 };
 
 namespace commands {
-class DLLSTUFF IOListenerRegistration : public CommandArgs {
+class IOListenerRegistration : public CommandArgs {
 public:
 	IOListenerRegistration(
 		bool register_not_unregister,

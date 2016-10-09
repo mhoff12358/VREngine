@@ -16,4 +16,5 @@ class Player(sc.DelegatingActor):
 
     @delegater(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
-        print("MOUSE MOTION", args.motion, sc.x(args.motion), sc.y(args.motion))
+        pass
+        #print("MOUSE MOTION", args.motion, sc.x(args.motion), sc.y(args.motion))

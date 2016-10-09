@@ -38,6 +38,18 @@ unsigned int EntityHandler::AddEntity(Entity new_entity, unsigned int entity_set
 	return entity_map.size() - 1;
 }
 
+unsigned int EntityHandler::AddEntities(const vector<Entity>& new_entities, unsigned int entity_set_number) {
+	vector<Entity>& entity_set = current_edit_group[entity_set_number].entities;
+	unsigned int first_new_set_id = entity_set.size();
+	entity_set.insert(entity_set.end(), new_entities.cbegin(), new_entities.cend());
+	unsigned int first_new_external_id = entity_map.size();
+	entity_map.reserve(first_new_external_id + new_entities.size());
+	for (size_t i = 0; i < new_entities.size(); i++) {
+		entity_map.push_back(EntityId(entity_set_number, first_new_set_id + i));
+	}
+	return first_new_external_id;
+}
+
 unsigned int EntityHandler::AddEntity(Entity new_entity, string entity_set_name) {
 	auto entity_set_id = entity_group_associations_.find(entity_set_name);
 	if (entity_set_id == entity_group_associations_.end()) {
@@ -45,6 +57,15 @@ unsigned int EntityHandler::AddEntity(Entity new_entity, string entity_set_name)
 		return 0;
 	}
 	return AddEntity(new_entity, entity_group_associations_[entity_set_name]);
+}
+
+unsigned int EntityHandler::AddEntities(const vector<Entity>& new_entities, string entity_set_name) {
+	auto entity_set_id = entity_group_associations_.find(entity_set_name);
+	if (entity_set_id == entity_group_associations_.end()) {
+		std::cout << "Attempting to add an entity to set \"" << entity_set_name << "\" which doesn't exist" << std::endl;
+		return 0;
+	}
+	return AddEntities(new_entities, entity_group_associations_[entity_set_name]);
 }
 
 void EntityHandler::EnableEntity(unsigned int external_entity_id) {

@@ -5,10 +5,11 @@
 #include "VRBackend/ResourcePool.h"
 #include "Component.h"
 #include "GraphicsResources.h"
+#include "ShaderSettings.h"
 
 namespace game_scene {
 
-class DLLSTUFF GraphicsObjectCommand {
+class GraphicsObjectCommand {
 public:
 	DECLARE_COMMAND(GraphicsObjectCommand, REQUIRE_RESOURCE);
 	DECLARE_COMMAND(GraphicsObjectCommand, CREATE_COMPONENTS);
@@ -20,7 +21,7 @@ public:
 
 namespace commands {
 
-class DLLSTUFF ComponentPlacement : public CommandArgs {
+class ComponentPlacement : public CommandArgs {
 public:
 	ComponentPlacement(string component_name, DirectX::XMMATRIX transformation) :
 		CommandArgs(GraphicsObjectCommand::PLACE_COMPONENT),
@@ -31,7 +32,7 @@ public:
 	DirectX::XMMATRIX transformation_;
 };
 
-class DLLSTUFF ComponentDrawnState : public CommandArgs {
+class ComponentDrawnState : public CommandArgs {
 public:
 	ComponentDrawnState(string component_name, bool is_drawn) :
 		CommandArgs(GraphicsObjectCommand::SET_COMPONENT_DRAWN),
@@ -45,43 +46,7 @@ public:
 
 namespace actors {
 
-class DLLSTUFF ShaderSettingsFormat : public vector<tuple<string, int>> {
-public:
-	template<typename... Args>
-	ShaderSettingsFormat(Args... args) : vector<tuple<string, int>>(args...) {}
-
-	bool ShouldCreateBuffer() { return !empty(); }
-};
-
-class DLLSTUFF ShaderSettingsValue : public vector<vector<float>> {
-public:
-	template<typename... Args>
-	ShaderSettingsValue(Args... args) : vector<vector<float>>(args...) {}
-
-	void operator=(const vector<vector<float>>& other) {
-		*this = ShaderSettingsValue(other);
-	}
-
-	ShaderSettingsFormat GetFormat() const {
-		ShaderSettingsFormat format;
-		for (const vector<float>& sub_array : *this) {
-			format.push_back(tuple<string, int>("float", sub_array.size()));
-		}
-		return format;
-	}
-
-	vector<vector<float>> GetValue() const { return *this; }
-
-	void SetIntoConstantBuffer(ConstantBuffer* buffer) const {
-		float* raw_buffer = static_cast<float*>(buffer->EditBufferData(true));
-		for (const vector<float>& next_data_chunk : GetValue()) {
-			memcpy(raw_buffer, next_data_chunk.data(), sizeof(float) * next_data_chunk.size());
-			raw_buffer = raw_buffer + next_data_chunk.size();
-		}
-	}
-};
-
-class DLLSTUFF TextureDetails {
+class TextureDetails {
 public:
 	TextureDetails(string name, bool use_in_vertex, bool use_in_pixel)
 		: name_(name), use_in_vertex_(use_in_vertex), use_in_pixel_(use_in_pixel) {}
@@ -90,7 +55,7 @@ public:
 	bool use_in_pixel_;
 };
 
-class DLLSTUFF ShaderFileDefinition {
+class ShaderFileDefinition {
 public:
 	ShaderFileDefinition() {}
 	explicit ShaderFileDefinition(string filename) : ShaderFileDefinition(filename, {true, false, true}) {}
@@ -112,7 +77,7 @@ private:
 	vector<pair<string, string>> shader_definitions_;
 };
 
-class DLLSTUFF ComponentHeirarchy {
+class ComponentHeirarchy {
 public:
 	ComponentHeirarchy() {}
 	ComponentHeirarchy(string name, vector<tuple<string, ObjLoader::OutputFormat>> models, vector<ComponentHeirarchy> children)
@@ -134,7 +99,7 @@ public:
 	string entity_group_;
 };
 
-class DLLSTUFF GraphicsObjectDetails {
+class GraphicsObjectDetails {
 public:
 	GraphicsObjectDetails() {}
 	GraphicsObjectDetails(ComponentHeirarchy heirarchy) : heirarchy_(heirarchy) {}
@@ -142,7 +107,7 @@ public:
 	ComponentHeirarchy heirarchy_;
 };
 
-class DLLSTUFF GraphicsObject : public Shmactor {
+class GraphicsObject : public Shmactor {
 public:
 	GraphicsObject() {}
 	GraphicsObject(const GraphicsObject&) = delete;

@@ -16,7 +16,7 @@ ProcessingEffect::ProcessingEffect(ID3D11Device* dev, ID3D11DeviceContext* dev_c
 	num_input_textures_ = description.input_textures_.size();
 	input_textures_ = new TextureView[num_input_textures_];
 	for (int i = 0; i < num_input_textures_; i++) {
-		input_textures_[i] = TextureView(i, i, false, true, description.input_textures_[i]->GetShaderResourceView(), description.input_textures_[i]->GetSampler());
+		input_textures_[i] = TextureView(i, i, ShaderStages::Pixel(), description.input_textures_[i]->GetShaderResourceView(), description.input_textures_[i]->GetSampler());
 	}
 
 	screen_filling_entity_ = default_screen_filling_entity;
@@ -24,7 +24,7 @@ ProcessingEffect::ProcessingEffect(ID3D11Device* dev, ID3D11DeviceContext* dev_c
 	screen_filling_entity_.SetVertexShader(description.vertex_shader_);
 	ConstantBuffer* settings_constant_buffer = NULL;
 	if (description.settings_buffer_ != NULL) {
-		settings_constant_buffer = new SizedConstantBuffer(CB_PS_PIXEL_SHADER, description.settings_buffer_size_);
+		settings_constant_buffer = new SizedConstantBuffer(ShaderStages(ShaderStages::PIXEL_STAGE), description.settings_buffer_size_);
 		settings_constant_buffer->CreateBuffer(dev);
 		memcpy(settings_constant_buffer->EditBufferData(), description.settings_buffer_, description.settings_buffer_size_);
 	}
@@ -63,5 +63,5 @@ Model ProcessingEffect::CreateScreenFillingModel(ResourcePool* resource_pool) {
 	model_vertices.push_back(Vertex(ObjLoader::vertex_type_texture, { -1, 1, 0, 0 }));
 	model_vertices.push_back(Vertex(ObjLoader::vertex_type_texture, { 1, 1, 1, 0 }));
 
-	return resource_pool->LoadModel("ScreenFillingModel", model_vertices, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {true, false, false});
+	return resource_pool->LoadModelFromVertices(ModelIdentifier("ScreenFillingModel"), model_vertices, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {true, false, false});
 }

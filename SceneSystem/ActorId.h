@@ -10,16 +10,16 @@ enum {
 	FIRST_ID = 2,
 };
 
-class DLLSTUFF ActorId
+class ActorId
 {
 public:
 	explicit ActorId(int id);
 	ActorId();
 	~ActorId();
 
-	static ActorId AllActors;
-	static ActorId UnsetId;
-	static int FirstId;
+	static const ActorId AllActors;
+	static const ActorId UnsetId;
+	static const int FirstId;
 
 	bool operator<(const ActorId other) const;
 	bool operator==(const ActorId other) const;

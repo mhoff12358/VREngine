@@ -6,7 +6,7 @@
 namespace game_scene {
 typedef list<Command>::iterator CommandQueueLocation;
 
-class DLLSTUFF CommandQueue
+class CommandQueue
 {
 public:
 	CommandQueue();

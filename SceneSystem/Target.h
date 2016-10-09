@@ -4,7 +4,7 @@
 #include "ActorId.h"
 
 namespace game_scene {
-class DLLSTUFF Target
+class Target
 {
 public:
 	explicit Target(ActorId id);

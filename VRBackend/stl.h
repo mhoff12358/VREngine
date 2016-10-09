@@ -12,6 +12,7 @@
 #include <atomic>
 #include <mutex>
 #include <cstdlib>
+#include <cmath>
 
 using std::map;
 using std::pair;
@@ -25,3 +26,4 @@ using std::get;
 using std::unique_ptr;
 using std::move;
 using std::mutex;
+using std::max;

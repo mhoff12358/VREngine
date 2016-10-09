@@ -18,11 +18,11 @@ extern const EntityStatusFlags ES_DELETED;
 
 class Entity
 {
-private:
+public:
 	static const TextureView dummy_texture_view;
 
-public:
 	Entity(EntityStatusFlags stat, Shaders shaders, ShaderSettings ss, Model m, ConstantBuffer* os, TextureView tex = dummy_texture_view);
+	Entity(TextureView tex);
 	Entity();
 	~Entity();
 

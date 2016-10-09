@@ -11,10 +11,12 @@
 namespace game_scene {
 class Scene;
 
-class DLLSTUFF Shmactor
+class Shmactor
 {
 public:
 	Shmactor();
+	Shmactor(const Shmactor& other) = delete;
+	Shmactor operator=(const Shmactor& other) = delete;
 	virtual ~Shmactor();
 
 	// Overridable behaviors
@@ -27,16 +29,15 @@ public:
 	void FailToHandleCommand(const CommandArgs& args);
 
 	void SetId(ActorId id);
-
-	static void SetScene(Scene* scene);
+	void SetScene(Scene* scene);
+	Scene& GetScene();
 
 protected:
 	void RegisterDependency(const Target& target);
 	CommandQueueLocation MakeCommandAfter(CommandQueueLocation location, const Target& target, unique_ptr<CommandArgs> args);
 	unique_ptr<QueryResult> AskQuery(const Target& target, unique_ptr<QueryArgs> args);
 
+	Scene* scene_;
 	ActorId id_;
-
-	static Scene* scene_;
 };
 }  // game_scene

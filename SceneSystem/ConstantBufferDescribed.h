@@ -3,15 +3,18 @@
 #include "stdafx.h"
 #include "VRBackend/ConstantBuffer.h"
 #include "GraphicsObject.h"
+#include "ShaderSettings.h"
 
-class DLLSTUFF ConstantBufferDescribed : public ConstantBuffer
+class ConstantBufferDescribed : public ConstantBuffer
 {
 public:
-	static CB_PIPELINE_STAGES GetStageFromString(const string& stage_name);
-
 	ConstantBufferDescribed(
-		CB_PIPELINE_STAGES stages,
-		const game_scene::actors::ShaderSettingsFormat& format);
+		ShaderStages stages,
+		const game_scene::ShaderSettingsFormat& format);
+	ConstantBufferDescribed(
+		ShaderStages stages,
+		const game_scene::ShaderSettingsValue& initial_value,
+		ID3D11Device* device_interface);
 	~ConstantBufferDescribed();
 
 	void* EditBufferData() override;

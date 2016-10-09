@@ -26,9 +26,8 @@ def first_load(resources):
     print("STARTING FIRST LOAD")
     sc.ParseResources(resources)
 
-    sc.Actor.SetScene(resources["scene"])
+    scene = resources["scene"]
 
-    scene = sc.Actor.GetScene()
     #dummy_actor_id = scene.AddActor(DummyActor())
     #tick_group = scene.FindByName("TickRegistry")
     #scene.AddActorToGroup(dummy_actor_id, tick_group)

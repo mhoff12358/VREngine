@@ -5,7 +5,7 @@ RenderEntities::RenderEntities(ID3D11Device* dev, ID3D11DeviceContext* dev_con, 
 	view_projection_matrix_(description.GetViewProjectionMatrix()),
 	view_matrix_(description.GetViewMatrix()),
 	orientation_projection_matrix_(description.GetOrientationProjectionMatrix()),
-	camera_transformation_buffer_(CB_PS_VERTEX_AND_GEOMETRY_SHADER)
+	camera_transformation_buffer_(ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::PIXEL_STAGE))
 {
 	assert(description.type_ == PST_RENDER_ENTITIES);
 	/*

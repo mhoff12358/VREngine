@@ -5,7 +5,7 @@
 
 namespace game_scene {
 
-class DLLSTUFF CommandType {
+class CommandType {
 public:
 	CommandType(IdType id) : id_(id) {}
 	CommandType(const CommandRegistry& id) : id_(id.value_) {}
@@ -16,7 +16,7 @@ public:
 	IdType id_;
 };
 
-class DLLSTUFF CommandArgs {
+class CommandArgs {
 public:
 	CommandArgs(CommandType type);
 	virtual ~CommandArgs();

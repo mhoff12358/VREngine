@@ -24,8 +24,10 @@ public:
 
 private:
 	unsigned int AddEntity(Entity new_entity, unsigned int entity_set_number);
+	unsigned int AddEntities(const vector<Entity>& new_entity, unsigned int entity_set_number);
 public:
 	unsigned int AddEntity(Entity new_entity, string entity_set_name);
+	unsigned int AddEntities(const vector<Entity>& new_entities, string entity_set_name);
 	void DisableEntity(unsigned int external_entity_id);
 	void EnableEntity(unsigned int external_entity_id);
 	void RemoveEntity(unsigned int external_entity_id);

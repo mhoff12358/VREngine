@@ -38,7 +38,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
@@ -69,7 +69,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>C:\boost_1_61_0;C:\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);C:\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -120,7 +120,6 @@
   <ItemGroup>
     <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorId.h" />
-    <ClInclude Include="BoostPythonWrapper.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandArgs.h" />
     <ClInclude Include="CommandQueue.h" />
@@ -132,10 +131,13 @@
     <ClInclude Include="InputCommandArgs.h" />
     <ClInclude Include="IOInterface.h" />
     <ClInclude Include="MovableCamera.h" />
+    <ClInclude Include="NewGraphicsObject.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
     <ClInclude Include="Registry.h" />
+    <ClInclude Include="ResourceDefinitions.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="ShaderSettings.h" />
     <ClInclude Include="Shmactor.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
@@ -155,6 +157,7 @@
     <ClCompile Include="InputCommandArgs.cpp" />
     <ClCompile Include="IOInterface.cpp" />
     <ClCompile Include="MovableCamera.cpp" />
+    <ClCompile Include="NewGraphicsObject.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
     <ClCompile Include="Registry.cpp" />

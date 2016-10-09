@@ -1,12 +1,12 @@
 #include "ResourcePool.h"
 
-std::string ResourcePool::object_delimiter = "|";
-std::string ResourcePool::unique_identifier = "?";
-int ResourcePool::unique_number = 0;
 
 ResourcePool::ResourcePool()
 {
 	lastest_model_number = 0;
+
+	geometry_shaders.push_back(GeometryShader(nullptr));
+	geometry_shader_lookup[ResourceIdentifier::GetConstantModelName("unset_geometry_shader")] = 0;
 }
 
 
@@ -20,10 +20,43 @@ void ResourcePool::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con) {
 	device_context = dev_con;
 }
 
-Model ResourcePool::LoadModel(std::string model_name, std::vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage) {
-	auto existing_model = model_lookup.find(model_name);
-	if (existing_model != model_lookup.end()) {
-		return models_[existing_model->second].GetModel();
+Model ResourcePool::LoadExistingModel(ModelIdentifier model_name) {
+	auto existing_model_gen = model_lookup.find(model_name.GetFileName());
+	if (existing_model_gen != model_lookup.end()) {
+		return models_[existing_model_gen->second].GetModel(model_name.GetSubPart());
+	}
+
+	return Model();
+}
+
+map<string, Model> ResourcePool::LoadExistingModelAsParts(const string& file_name) {
+	auto existing_model_gen = model_lookup.find(file_name);
+	if (existing_model_gen != model_lookup.end()) {
+		return models_[existing_model_gen->second].GetModels();
+	}
+
+	return map<string, Model>{};
+}
+
+Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoader::OutputFormat& model_output_format) {
+	Model model = LoadExistingModel(model_name);
+	if (!model.IsDummy()) {
+		return model;
+	}
+
+	ModelGenerator generator = ObjLoader::CreateModelsFromFile(
+		device_interface, device_context, model_name.GetFileName(), model_output_format);
+
+	models_.push_back(generator);
+	model_lookup[model_name.GetFileName()] = models_.size() - 1;
+
+	return generator.GetModel(model_name.GetSubPart());
+}
+
+Model ResourcePool::LoadModelFromVertices(ModelIdentifier model_name, std::vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage) {
+	Model model = LoadExistingModel(model_name);
+	if (!model.IsDummy()) {
+		return model;
 	}
 
 	if (vertices.empty()) {
@@ -35,75 +68,25 @@ Model ResourcePool::LoadModel(std::string model_name, std::vector<Vertex> vertic
 	generator.Finalize(device_interface, device_context, model_storage);
 
 	models_.push_back(generator);
-	model_lookup[model_name] = models_.size() - 1;
+	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 	
-	return generator.GetModel();
+	return generator.GetModel(model_name.GetSubPart());
 }
 
-Model ResourcePool::LoadModel(std::string file_name) {
-	auto existing_model = model_lookup.find(file_name);
-	if (existing_model != model_lookup.end()) {
-		return models_[existing_model->second].GetModel();
+Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator generator) {
+	Model model = LoadExistingModel(model_name);
+	if (!model.IsDummy()) {
+		return model;
 	}
-
-	ModelGenerator generator = ObjLoader::CreateModelFromFile(device_interface, device_context, file_name);
 
 	models_.push_back(generator);
-	model_lookup[file_name] = models_.size() - 1;
+	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
-	return generator.GetModel();
+	return generator.GetModel(model_name.GetSubPart());
 }
 
-Model ResourcePool::LoadModel(std::string file_name, const ObjLoader::OutputFormat& model_output_format) {
+void ResourcePool::UpdateModel(const string& file_name, const ModelMutation& mutation) {
 	auto existing_model = model_lookup.find(file_name);
-	if (existing_model != model_lookup.end()) {
-		return models_[existing_model->second].GetModel();
-	}
-
-	ModelGenerator generator = ObjLoader::CreateModelFromFile(device_interface, device_context, file_name, model_output_format);
-
-	models_.push_back(generator);
-	model_lookup[file_name] = models_.size() - 1;
-
-	return generator.GetModel();
-}
-
-std::map<std::string, Model> ResourcePool::LoadModelAsParts(std::string file_name, const ObjLoader::OutputFormat& model_output_format) {
-	auto existing_model = model_lookup.find(file_name);
-	if (existing_model != model_lookup.end()) {
-		return models_[existing_model->second].GetModels();
-	}
-
-	ModelGenerator generator = ObjLoader::CreateModelsFromFile(device_interface, device_context, file_name, model_output_format);
-
-	models_.push_back(generator);
-	model_lookup[file_name] = models_.size() - 1;
-
-	return generator.GetModels();
-}
-
-void ResourcePool::InsertExternallyCreatedModelParts(string model_name, ModelGenerator models) {
-	models_.push_back(models);
-	model_lookup[model_name] = models_.size() - 1;
-}
-
-Model ResourcePool::LoadExistingModel(string model_name) {
-	auto existing_model = model_lookup.find(StripSubmodel(model_name));
-	if (existing_model == model_lookup.end()) {
-		std::cout << "ATTEMPTING TO RETURN NON-EXISTANT MODEL" << std::endl;
-		return Model();
-	}
-	
-	string submodel = GetSubmodel(model_name);
-	if (submodel.empty()) {
-		return models_[existing_model->second].GetModel();
-	} else {
-		return models_[existing_model->second].GetModels()[submodel];
-	}
-}
-
-void ResourcePool::UpdateModel(std::string model_name, const ModelMutation& mutation) {
-	auto existing_model = model_lookup.find(model_name);
 	if (existing_model == model_lookup.end()) {
 		std::cout << "ATTEMPTING TO UPDATE NON-EXISTANT MODEL" << std::endl;
 		return;
@@ -278,14 +261,16 @@ vector<float> ResourcePool::AccessDataFromResource(const ResourceIdent& resource
 
 void ResourcePool::PreloadResource(const ResourceIdent& resource_ident) {
 	switch (resource_ident.type_) {
+	case ResourceIdent::NONE:
+		break;
 	case ResourceIdent::TEXTURE:
 		LoadTexture(resource_ident.name_);
 		break;
 	case ResourceIdent::MODEL:
 		if (resource_ident.models_.GetCurrentNumberOfVertices() == 0) {
-			LoadModelAsParts(StripSubmodel(resource_ident.name_), resource_ident.output_format_);
+			LoadModelFromFile(ModelIdentifier(resource_ident.name_), resource_ident.output_format_);
 		} else {
-			InsertExternallyCreatedModelParts(resource_ident.name_, resource_ident.models_);
+			LoadModelFromGenerator(ModelIdentifier(resource_ident.name_), resource_ident.models_);
 		}
 		break;
 	case ResourceIdent::VERTEX_SHADER:

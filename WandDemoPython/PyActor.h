@@ -14,8 +14,7 @@ public:
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override HandleCommand = this->get_override("HandleCommand")) {
 			try {
-				self_.attr("HandleCommand")(boost::ref(args));
-				//HandleCommand(boost::ref(args));
+				HandleCommand(boost::ref(args));
 			} catch (error_already_set) {
 				PyErr_Print();
 			}
@@ -52,8 +51,6 @@ public:
 		return extract<std::auto_ptr<game_scene::QueryResult>>(a);
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) override;
-
-	static game_scene::Scene& GetScene() { return *scene_; }
 
 	void EmbedSelf(object self) {
 		self_ = self;

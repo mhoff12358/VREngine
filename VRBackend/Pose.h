@@ -52,11 +52,11 @@ struct Pose {
 	Pose(Scale scale) : orientation_(), location_(), scale_(scale) {}
 	Pose() : location_(), orientation_(Quaternion::Identity()), scale_() {}
 
-	Pose ApplyAfter(const Pose& other) {
+	Pose ApplyAfter(const Pose& other) const {
 		return Pose(location_ + (other.location_ * scale_).Rotate(orientation_), orientation_ * other.orientation_, scale_ * other.scale_);
 	}
 
-	DirectX::XMMATRIX GetMatrix() {
+	DirectX::XMMATRIX GetMatrix() const {
 		return
 			DirectX::XMMatrixScaling(scale_[0], scale_[1], scale_[2]) *
 			DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(orientation_.x, orientation_.y, orientation_.z, orientation_.w)) *

@@ -9,10 +9,10 @@ namespace game_scene {
 namespace actors {
 
 namespace HeadsetHelpers {
-bool DLLSTUFF IsTriggerPulled(const vr::VRControllerState_t& state);
+bool IsTriggerPulled(const vr::VRControllerState_t& state);
 }  // HeadsetHelpers
 
-class DLLSTUFF HeadsetInterface : public Shmactor {
+class HeadsetInterface : public Shmactor {
 public:
 	HeadsetInterface(Headset& headset) :
 		headset_(headset),
@@ -47,7 +47,7 @@ private:
 
 }  // actors
 
-class DLLSTUFF HeadsetInterfaceCommand {
+class HeadsetInterfaceCommand {
 public:
 	DECLARE_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TRIGGER_STATE_CHANGE);
@@ -57,7 +57,7 @@ public:
 };
 
 namespace commands {
-class DLLSTUFF HeadsetListenerRegistration : public CommandArgs {
+class HeadsetListenerRegistration : public CommandArgs {
 public:
 	HeadsetListenerRegistration(
 		bool register_not_unregister,
@@ -73,13 +73,13 @@ public:
 	actors::HeadsetInterface::ListenerId listener_id_;
 };
 
-class DLLSTUFF ControllerInformation : public CommandArgs {
+class ControllerInformation : public CommandArgs {
 public:
 	ControllerInformation(IdType type, unsigned char controller_number) : CommandArgs(type), controller_number_(controller_number) {}
 	unsigned char controller_number_;
 };
 
-class DLLSTUFF ControllerMovement : public ControllerInformation {
+class ControllerMovement : public ControllerInformation {
 public:
 	ControllerMovement(unsigned char controller_number, Location movement_vector) :
 		ControllerInformation(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT, controller_number),
@@ -88,7 +88,7 @@ public:
 	Location movement_vector_;
 };
 
-class DLLSTUFF TriggerStateChange : public ControllerInformation {
+class TriggerStateChange : public ControllerInformation {
 public:
 	TriggerStateChange(unsigned char controller_number, bool is_pulled) :
 		ControllerInformation(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE, controller_number),
@@ -97,7 +97,7 @@ public:
 	bool is_pulled_;
 };
 
-class DLLSTUFF TouchpadMotion : public ControllerInformation {
+class TouchpadMotion : public ControllerInformation {
 public:
 	TouchpadMotion(IdType type, unsigned char controller_number, vr::VRControllerAxis_t position, vr::VRControllerAxis_t delta)
 		: ControllerInformation(type, controller_number), position_(position), delta_(delta) {}

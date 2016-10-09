@@ -7,12 +7,14 @@
 #include "Texture.h"
 #include "ObjLoader.h"
 #include "ConstantBuffer.h"
+#include "ResourceIdentifier.h"
 
 #include "stl.h"
 
 class ResourceIdent {
 public:
 	enum ResourceType {
+		NONE = 0,
 		MODEL = 1,
 		PIXEL_SHADER = 2,
 		VERTEX_SHADER = 3,
@@ -21,6 +23,7 @@ public:
 		TEXTURE = 6,
 	};
 
+	ResourceIdent() : type_(NONE) {}
 	ResourceIdent(ResourceType type, const string& name) : type_(type), name_(name) {}
 	ResourceIdent(ResourceType type, const string& name, ObjLoader::OutputFormat output_format)
 		: type_(type), name_(name), output_format_(output_format) {}
@@ -46,34 +49,14 @@ public:
 	ResourcePool();
 	~ResourcePool();
 
-	static string object_delimiter;
-	static string unique_identifier;
-	static int unique_number;
-	static string StripSubmodel(string name) {
-		return name.substr(0, name.find(object_delimiter));
-	};
-	static string GetSubmodel(string name) {
-		return name.substr(max(name.find(object_delimiter) + 1, name.length()));
-	}
-	static string AddSubmodel(string name, string submodel) {
-		return name + object_delimiter + submodel;
-	}
-	static string GetNewModelName(string description = "") {
-		return unique_identifier + description + unique_identifier + std::to_string(unique_number++);
-	}
-	static string GetConstantModelName(string description) {
-		return unique_identifier + description;
-	}
-
 	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con);
 
-	Model LoadModel(string file_name);
-	Model LoadModel(string file_name, const ObjLoader::OutputFormat& model_output_format);
-	map<string, Model> LoadModelAsParts(string file_name, const ObjLoader::OutputFormat& model_output_format);
-	Model LoadModel(string model_name, vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage);
-	void UpdateModel(string model_name, const ModelMutation& mutation);
-	void InsertExternallyCreatedModelParts(string model_name, ModelGenerator models);
-	Model LoadExistingModel(string model_name);
+	Model LoadExistingModel(ModelIdentifier model_name);
+	Model LoadModelFromFile(ModelIdentifier model_name, const ObjLoader::OutputFormat& model_output_format);
+	Model LoadModelFromVertices(ModelIdentifier model_name, vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage);
+	Model LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator generator);
+	map<string, Model> LoadExistingModelAsParts(const string& file_name);
+	void UpdateModel(const string& file_name, const ModelMutation& mutation);
 
 	PixelShader LoadPixelShader(string file_name);
 	PixelShader LoadPixelShader(string file_name, string function_name);
@@ -116,10 +99,3 @@ private:
 	map<string, unsigned int> texture_lookup;
 	map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;
 };
-/*
-template <typename T>
-void ResourcePool::CreateNamedConstantBuffer<T>(string name, CB_PIPELINE_STAGES stage) {
-	unique_ptr<T> new_buffer(new ConstantBufferTypedTemp<T>(stage));
-	new_buffer->CreateBuffer(device_interface);
-	named_constant_buffers_.emplace(name, move(new_buffer));
-}*/

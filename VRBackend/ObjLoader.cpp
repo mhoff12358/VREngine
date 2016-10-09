@@ -6,11 +6,6 @@ ModelModifier ModelModifier::identity_model_modifier = {
 	{ false, false }
 };
 
-ModelGenerator ObjLoader::CreateModelFromFile(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename, const OutputFormat& output_format) {
-	ObjLoader loader(filename);
-	return loader.ParseAsSingleModel(device, device_context, output_format);
-}
-
 ModelGenerator ObjLoader::CreateModelsFromFile(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename, const OutputFormat& output_format) {
 	ObjLoader loader(filename);
 	return loader.ParseAsMultipleModels(device, device_context, output_format);
@@ -101,8 +96,10 @@ void ObjLoader::AddLinesToModel(ID3D11Device* device, ID3D11DeviceContext* devic
 		}
 	}
 
-	new_part.length = generator.GetCurrentNumberOfVertices() - new_part.start;
-	generator.parts[part_name] = new_part;
+	if (!part_name.empty()) {
+		new_part.length = generator.GetCurrentNumberOfVertices() - new_part.start;
+		generator.parts_[part_name] = new_part;
+	}
 }
 
 ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11DeviceContext* device_context, const OutputFormat& output_format) {
@@ -120,9 +117,7 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11Devi
 		std::string identifier;
 		line_stream >> identifier;
 		if (identifier == "o") {
-			if (existing_sub_object_name != "") {
-				AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
-			}
+			AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
 			existing_sub_object_name = "";
 			line_stream >> existing_sub_object_name;
 			current_model_lines.clear();
@@ -130,34 +125,8 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11Devi
 			current_model_lines.push_back(line);
 		}
 	}
-	if (existing_sub_object_name != "") {
-		AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
-	}
-
-	ModelStorageDescription model_storage_description;
-	if (output_format.load_as_dynamic_) {
-		model_storage_description = { false, true, true };
-	}
-	else {
-		model_storage_description = { true, false, false };
-	}
-	generator.Finalize(device, device_context, model_storage_description);
-	return generator;
-}
-
-ModelGenerator ObjLoader::ParseAsSingleModel(ID3D11Device* device, ID3D11DeviceContext* device_context, const OutputFormat& output_format) {
-	std::string line;
-	std::vector<std::string> current_model_lines;
-
-	while (std::getline(input_file, line)) {
-		if (line.empty()) {
-			continue;
-		}
-		current_model_lines.push_back(line);
-	}
-
-	ModelGenerator generator(output_format.vertex_type_, D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	AddLinesToModel(device, device_context, current_model_lines, output_format, generator);
+	AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
+	generator.parts_[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
 
 	ModelStorageDescription model_storage_description;
 	if (output_format.load_as_dynamic_) {

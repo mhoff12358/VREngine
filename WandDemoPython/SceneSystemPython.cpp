@@ -9,6 +9,7 @@
 #include "SceneSystem/InputCommandArgs.h"
 #include "SceneSystem/HeadsetInterface.h"
 #include "SceneSystem/IOInterface.h"
+#include "SceneSystem/Scene.h"
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
 
@@ -38,11 +39,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("AddedToScene", &game_scene::Shmactor::AddedToScene, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
 		.def("EmbedSelf", &PyActor::EmbedSelf)
-		.def("GetScene", &PyActor::GetScene, return_value_policy<reference_existing_object>())
+		//.add_property("scene", &game_scene::Shmactor::GetScene, return_value_policy<reference_existing_object>())
 		.add_property("id", &PyActor::GetId)
-		.staticmethod("GetScene")
-		.def("SetScene", &game_scene::Shmactor::SetScene)
-		.staticmethod("SetScene");
+		.def("SetScene", &game_scene::Shmactor::SetScene);
 
 	class_<game_scene::QueryArgs, boost::noncopyable>("QueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);

@@ -7,7 +7,7 @@
 
 namespace game_scene {
 
-class DLLSTUFF QueryResult
+class QueryResult
 {
 public:
 	explicit QueryResult(QueryType type);
@@ -22,7 +22,7 @@ private:
 	QueryType type_;
 };
 
-class DLLSTUFF MultipleQueryResult : public QueryResult {
+class MultipleQueryResult : public QueryResult {
 public:
 	MultipleQueryResult();
 	virtual ~MultipleQueryResult() {}

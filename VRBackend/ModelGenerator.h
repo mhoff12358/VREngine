@@ -24,8 +24,7 @@ public:
 	void AddVertex(Vertex new_vertex);
 	void AddVertexBatch(std::vector<Vertex>& new_vertexes);
 
-	Model GetModel();
-	Model GetModel(std::string part_name);
+	Model GetModel(std::string part_name = "");
 	std::map<std::string, Model> GetModels();
 	void Finalize(ID3D11Device* device, ID3D11DeviceContext* device_context, ModelStorageDescription storage_desription);
 
@@ -34,7 +33,7 @@ public:
 
 	unsigned int GetCurrentNumberOfVertices() const;
 
-	std::map<std::string, ModelSlice> parts;
+	std::map<std::string, ModelSlice> parts_;
 
 private:
 	unsigned int number_of_vertices = 0;

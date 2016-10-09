@@ -122,14 +122,18 @@ void ModelGenerator::Finalize(ID3D11Device* device, ID3D11DeviceContext* device_
 	InitializeVertexBuffer(device, device_context, storage_desription);
 }
 
-Model ModelGenerator::GetModel() {
-	Model model(vertex_buffer, vertex_type.GetVertexSize(), 0, primitive_type, ModelSlice(number_of_vertices, 0));
+Model ModelGenerator::GetModel(std::string part_name) {
+	if (parts_.count(part_name) == 0) {
+		part_name = "";
+		std::cout << "Attempting to load a model part that doesn't exist." << std::endl;
+	}
+	Model model(vertex_buffer, vertex_type.GetVertexSize(), 0, primitive_type, parts_[part_name]);
 	return model;
 }
 
 std::map<std::string, Model> ModelGenerator::GetModels() {
 	std::map<std::string, Model> model_map;
-	for (const std::pair<std::string, ModelSlice>& part : parts) {
+	for (const std::pair<std::string, ModelSlice>& part : parts_) {
 		model_map[part.first] = Model(vertex_buffer, vertex_type.GetVertexSize(), 0, primitive_type, part.second);
 	}
 	return model_map;

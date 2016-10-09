@@ -8,6 +8,7 @@
 #include "SceneSystem/HeadsetInterface.h"
 #include "SceneSystem/Sprite.h"
 #include "SceneSystem/Registry.h"
+#include "VRBackend/ResourceIdentifier.h"
 
 #include <cstdlib>
 
@@ -49,7 +50,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 
 			object edges = graph_["edges"];
 			object edge_configuration = configuration_["edge_configuration"];
-			edge_model_name_ = ResourcePool::GetNewModelName("EdgeLine");
+			edge_model_name_ = ResourceIdentifier::GetNewModelName("EdgeLine");
 			//edge_model_name_ = "Line.obj";
 			for (ssize_t i = 0; i < len(edges); i++) {
 				object edge = edges[i];
@@ -219,7 +220,8 @@ void NichijouGraph::CreateGraphicsResources() {
 		Vertex(ObjLoader::vertex_type_texture, {1.0f, 0.0f, 0.0f}),
 	}));
 	gen.Finalize(resources.device_interface_, nullptr, ModelStorageDescription::Immutable());
-	gen.parts = {{"Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0)}};
+	gen.parts_ = { { "", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };
+	gen.parts_ = { { "Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };
 	ResourceIdent edge_model_ident(ResourceIdent::MODEL, edge_model_name_, gen);
 	scene_->MakeCommandAfter(
 		scene_->FrontOfCommands(),

@@ -1,18 +1,13 @@
 #include "ConstantBuffer.h"
 
 
-ConstantBuffer::ConstantBuffer(CB_PIPELINE_STAGES stages)
+ConstantBuffer::ConstantBuffer(ShaderStages stages) : pipeline_stages(stages)
 {
-	SetPipelineStages(stages);
 }
 
 
 ConstantBuffer::~ConstantBuffer()
 {
-}
-
-void ConstantBuffer::SetPipelineStages(CB_PIPELINE_STAGES stages) {
-	pipeline_stages = stages;
 }
 
 void ConstantBuffer::CreateBuffer(ID3D11Device* device_interface) {
@@ -57,18 +52,18 @@ void ConstantBuffer::ForcePushBuffer(ID3D11DeviceContext* device_context) {
 }
 
 void ConstantBuffer::Prepare(ID3D11Device* device, ID3D11DeviceContext* device_context, int buffer_register) const {
-	if ((CB_PS_VERTEX_SHADER & pipeline_stages) != 0) {
+	if (pipeline_stages.IsVertexStage()) {
 		device_context->VSSetConstantBuffers(buffer_register, 1, &const_buffer);
 	}
-	if ((CB_PS_PIXEL_SHADER & pipeline_stages) != 0) {
+	if (pipeline_stages.IsPixelStage()) {
 		device_context->PSSetConstantBuffers(buffer_register, 1, &const_buffer);
 	}
-	if ((CB_PS_GEOMETRY_SHADER & pipeline_stages) != 0) {
+	if (pipeline_stages.IsGeometryStage()) {
 		device_context->GSSetConstantBuffers(buffer_register, 1, &const_buffer);
 	}
 }
 
-SizedConstantBuffer::SizedConstantBuffer(CB_PIPELINE_STAGES stages, unsigned int size) : ConstantBuffer(stages) {
+SizedConstantBuffer::SizedConstantBuffer(ShaderStages stages, unsigned int size) : ConstantBuffer(stages) {
 	buffer_data.resize(size);
 }
 

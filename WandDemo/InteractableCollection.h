@@ -9,8 +9,6 @@
 #include "InteractableSphere.h"
 #include "InteractableFrustum.h"
 
-#include "LuaGameScripting/Environment.h"
-
 #define CONSTMAX(a, b) (a > b ? a : b)
 
 struct LookInteractableBlock {
@@ -34,7 +32,6 @@ public:
 
 	LookInteractable* GetInteractableAtPosition(int index);
 	LookInteractable* GetNewLookInteractableBlock();
-	LookInteractable* CreateLookInteractableFromLua(Actor* actor, Lua::Environment environment_with_table);
 	
 private:
 	vector<LookInteractableBlock> interactable_objects_;

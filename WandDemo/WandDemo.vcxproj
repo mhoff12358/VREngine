@@ -112,14 +112,14 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>SceneSystem.lib;C:\Program Files\Python35\libs\python35.lib;libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;Lua52.lib;LuaGameScripting.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>SceneSystem.lib;C:\Program Files\Python35\libs\python35.lib;libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
       <DelayLoadDLLs>
       </DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)scripts &amp; copy *.py $(OutDir)scripts\</Command>
+      <Command>mkdir "$(OutDir)scripts" &amp; copy *.py "$(OutDir)scripts\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -173,7 +173,6 @@
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="ActorHandler.h" />
-    <ClInclude Include="ConstantBufferLua.h" />
     <ClInclude Include="Identifier.h" />
     <ClInclude Include="InteractableCircle.h" />
     <ClInclude Include="InteractableCollection.h" />
@@ -183,7 +182,6 @@
     <ClInclude Include="InteractableTriangle.h" />
     <ClInclude Include="LightDetails.h" />
     <ClInclude Include="LookInteractable.h" />
-    <ClInclude Include="LuaDirectX.h" />
     <ClInclude Include="NichijouGraph.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -191,7 +189,6 @@
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorHandler.cpp" />
-    <ClCompile Include="ConstantBufferLua.cpp" />
     <ClCompile Include="Identifier.cpp" />
     <ClCompile Include="InteractableCircle.cpp" />
     <ClCompile Include="InteractableCollection.cpp" />
@@ -201,7 +198,6 @@
     <ClCompile Include="InteractableTriangle.cpp" />
     <ClCompile Include="LightDetails.cpp" />
     <ClCompile Include="LookInteractable.cpp" />
-    <ClCompile Include="LuaDirectX.cpp" />
     <ClCompile Include="NichijouGraph.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

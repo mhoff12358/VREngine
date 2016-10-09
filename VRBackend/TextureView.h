@@ -1,12 +1,13 @@
 #pragma once
 
 #include "Texture.h"
+#include "Shaders.h"
 
 class TextureView
 {
 public:
-	TextureView(int srs, int ss, bool vs, bool ps, ID3D11ShaderResourceView* srv, ID3D11SamplerState* s);
-	TextureView(int srs, int ss, bool vs, bool ps, const Texture& texture);
+	TextureView(int shader_resource_slot, int sampler_slot, ShaderStages shader_stages, ID3D11ShaderResourceView* srv, ID3D11SamplerState* s);
+	TextureView(int shader_resource_slot, int sampler_slot, ShaderStages shader_stages, const Texture& texture);
 	TextureView();
 	~TextureView();
 
@@ -17,10 +18,9 @@ public:
 	static ID3D11ShaderResourceView* clear_shader_resource_views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 
 private:
-	int shader_resource_slot;
-	int sampler_slot;
-	bool use_in_ps;
-	bool use_in_vs;
+	int shader_resource_slot_;
+	int sampler_slot_;
+	ShaderStages shader_stages_;
 	ID3D11ShaderResourceView* shader_resource_view;
 	ID3D11SamplerState* sampler;
 };

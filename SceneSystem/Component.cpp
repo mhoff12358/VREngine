@@ -2,9 +2,13 @@
 #include "Component.h"
 
 Component::Component(ID3D11Device* device_interface)
-	: transformation_buffer_(CB_PS_VERTEX_AND_GEOMETRY_SHADER), children_(NULL), parent_transformation_(NULL), num_children_(0)
+	: transformation_buffer_(ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::GEOMETRY_STAGE)), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
 	transformation_buffer_.CreateBuffer(device_interface);
+}
+
+Component::Component()
+	: transformation_buffer_(ShaderStages()) {
 }
 
 void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entity_group_name, vector<Model> models) {
@@ -51,7 +55,7 @@ Component::Component(Component&& other)
 void Component::SetChildren(Component* children, int num_children) {
 	children_ = children;
 	num_children_ = num_children;
-	for (int i = 0; i < num_children_; i++) {
+	for (unsigned int i = 0; i < num_children_; i++) {
 		children_[i].SetParent(this);
 	}
 }
@@ -96,6 +100,10 @@ void Component::UpdateTransformation() {
 
 const TransformationMatrixAndInvTransData* Component::GetTransformationData() {
 	return transformation_buffer_.ReadBufferDataTyped();
+}
+
+ConstantBuffer* Component::GetTransformationBuffer() {
+	return dynamic_cast<ConstantBuffer*>(&transformation_buffer_);
 }
 
 const DirectX::XMMATRIX& Component::GetLocalTransformation() {
