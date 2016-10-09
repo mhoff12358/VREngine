@@ -24,8 +24,8 @@ public:
 		ID3D11Device* dev,
 		ID3D11DeviceContext* dev_con,
 		vector<Texture>& texture_storage,
-		map<string, PipelineCamera>& pipeline_cameras,
 		map<string, int>& entity_group_associations,
+		ResourcePool& resource_pool,
 		EntityHandler& entity_handler);
 	~PipelineTexturePlanner();
 
@@ -33,7 +33,6 @@ public:
 
 	vector<Texture>& texture_storage_;
 	map<TextureIdent, tuple<ID3D11DepthStencilView*, ID3D11DepthStencilState*>> depth_state_lookup_;
-	map<string, PipelineCamera>& pipeline_cameras_;
 	map<string, int>& entity_group_associations_;
 	EntityHandler& entity_handler_;
 
@@ -43,6 +42,8 @@ public:
 	TextureBlock& GetTextureBlock(const tuple<int, int>& index);
 
 	int RequestEntityGroup(string stage_name);
+
+	ResourcePool& resource_pool_;
 
 private:
 	int CountDependanciesOnTexture(

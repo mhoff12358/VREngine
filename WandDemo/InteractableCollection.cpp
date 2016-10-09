@@ -74,4 +74,3 @@ LookInteractable* InteractableCollection::GetNewLookInteractableBlock() {
 	interactable_objects_.push_back(LookInteractableBlock());
 	return GetInteractableAtPosition(interactable_objects_.size() - 1);
 }
-

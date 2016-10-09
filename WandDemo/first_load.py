@@ -14,13 +14,8 @@ class DummyActor(sc.DelegatingActor):
         return QueryResult(query_args.Type())
 
     def HandleTICK(self, command_args):
-        #import pdb; pdb.set_trace()
         print("RECEIVED COMMAND OF TYPE TICK", command_args.duration)
     command_delegation[sc.InputCommand.TICK] = HandleTICK
-
-    #def HandleCommand(self, command_args):
-    #    print(sc.InputCommand.TICK)
-    #    print("RECEIVED COMMAND OF TYPE", sc.SceneSystemGlobals.command_registry.LookupName(command_args.Type()), command_args.Type())
 
 def first_load(resources):
     print("STARTING FIRST LOAD")

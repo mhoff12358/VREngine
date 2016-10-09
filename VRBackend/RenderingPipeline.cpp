@@ -24,12 +24,8 @@ D3D11_TEXTURE2D_DESC* RenderingPipeline::GetStagingBufferDesc() {
 	return &back_buffer_texture_desc;
 }
 
-void RenderingPipeline::SetPipelineCameras(map<string, PipelineCamera>& pipeline_cameras) {
-	pipeline_cameras_ = pipeline_cameras;
-}
-
-void RenderingPipeline::SetPipelineStages(vector<unique_ptr<PipelineStageDesc>>& stage_descs) {
-	PipelineTexturePlanner texture_planner(view_state->device_interface, view_state->device_context, pipeline_textures_, pipeline_cameras_, entity_group_associations_, *entity_handler);
+void RenderingPipeline::SetPipelineStages(ResourcePool& resource_pool, vector<unique_ptr<PipelineStageDesc>>& stage_descs) {
+	PipelineTexturePlanner texture_planner(view_state->device_interface, view_state->device_context, pipeline_textures_, entity_group_associations_, resource_pool, *entity_handler);
 	texture_planner.ParsePipelineStageDescs(GetExistingTextureIdents(), stage_descs);
 	
 	for (const unique_ptr<PipelineStageDesc>& stage_desc : stage_descs) {
@@ -102,11 +98,7 @@ void ToScreenRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Enti
 void ToScreenRenderingPipeline::Render() {
 	// Update the camera's position and transformations based on the world state
 	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
-
-	//pipeline_cameras_["player_head"].SetLocation(player_position.location_);
-	//pipeline_cameras_["player_head"].SetOrientation(player_position.orientation_.GetArray());
-	//pipeline_cameras_["player_head"].BuildMatrices();
-
+	
 	CallPipeline(group_to_draw);
 	view_state->swap_chain->Present(0, 0);
 }
@@ -132,13 +124,6 @@ void ToHeadsetRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Ent
 
 void ToHeadsetRenderingPipeline::Render() {
 	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
-	
-	for (vr::EVREye eye : Headset::eyes_) {
-		Pose eye_pose = oculus->GetEyePose(eye);
-		pipeline_cameras_["player_head|" + std::to_string(eye)].SetLocation(eye_pose.location_);
-		pipeline_cameras_["player_head|" + std::to_string(eye)].SetOrientation(eye_pose.orientation_);
-		pipeline_cameras_["player_head|" + std::to_string(eye)].BuildMatrices();
-	}
 
 	CallPipeline(group_to_draw);
 	oculus->SubmitForRendering();

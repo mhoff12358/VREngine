@@ -89,7 +89,7 @@ void RenderEntitiesDesc::ConstructStageInPlace(ID3D11Device* dev, ID3D11DeviceCo
 }
 
 void RenderEntitiesDesc::AllocateAdditionalResources(PipelineTexturePlanner& planner) {
-	const PipelineCamera& camera = planner.pipeline_cameras_[camera_ident_];
+	const PipelineCamera& camera = planner.resource_pool_.LoadExistingPipelineCamera(camera_ident_);
 	view_projection_matrix_ = &camera.GetViewProjectionMatrix();
 	view_matrix_ = &camera.GetViewMatrix();
 	orientation_projection_matrix_ = &camera.GetOrientationProjectionMatrix();

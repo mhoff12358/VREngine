@@ -64,6 +64,16 @@ void GraphicsLoop() {
 			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
 		}
 
+		if (graphics_objects.oculus->IsInitialized()) {
+			for (vr::EVREye eye : Headset::eyes_) {
+				Pose eye_pose = graphics_objects.oculus->GetEyePose(eye);
+				PipelineCamera& camera = graphics_objects.resource_pool->LoadExistingPipelineCamera("player_head|" + std::to_string(eye));
+				camera.SetLocation(eye_pose.location_);
+				camera.SetOrientation(eye_pose.orientation_);
+				camera.BuildMatrices();
+			}
+		}
+
 		graphics_objects.render_pipeline->Render();
 		frame_index++;
 	}
@@ -414,24 +424,25 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	int stage_repetition = hmd_active ? 2 : 0;
 
-	map<string, PipelineCamera> pipeline_cameras;
 	if (hmd_active) {
-		pipeline_cameras["player_head|0"].SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[0], 0.001f, 500.0f));
-		pipeline_cameras["player_head|0"].SetPose(Pose(Location(), Quaternion::Identity()));
-		pipeline_cameras["player_head|0"].BuildMatrices();
-		pipeline_cameras["player_head|1"].SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[1], 0.001f, 500.0f));
-		pipeline_cameras["player_head|1"].SetPose(Pose(Location(), Quaternion::Identity()));
-		pipeline_cameras["player_head|1"].BuildMatrices();
+		PipelineCamera& camera0 = graphics_objects.resource_pool->LoadPipelineCamera("player_head|0");
+		PipelineCamera& camera1 = graphics_objects.resource_pool->LoadPipelineCamera("player_head|1");
+		camera0.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[0], 0.001f, 500.0f));
+		camera0.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera0.BuildMatrices();
+		camera1.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[1], 0.001f, 500.0f));
+		camera1.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera1.BuildMatrices();
 	} else {
-		pipeline_cameras["player_head"].SetPerspectiveProjection(
+		PipelineCamera& camera = graphics_objects.resource_pool->LoadPipelineCamera("player_head");
+		camera.SetPerspectiveProjection(
 			60.0f / 180.0f*3.1415f,
 			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
 			0.001f,
 			500.0f);
-		pipeline_cameras["player_head"].SetPose(Pose(Location(), Quaternion::Identity()));
-		pipeline_cameras["player_head"].BuildMatrices();
+		camera.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera.BuildMatrices();
 	}
-	graphics_objects.render_pipeline->SetPipelineCameras(pipeline_cameras);
 
 	string single_camera_name = "player_head";
 	if (hmd_active) {
@@ -450,7 +461,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		pipeline_stages.emplace_back(new TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer|2", back_buffer_signature) }, { "objects|0" }));
 	}
 
-	graphics_objects.render_pipeline->SetPipelineStages(pipeline_stages);
+	graphics_objects.render_pipeline->SetPipelineStages(*graphics_objects.resource_pool, pipeline_stages);
 
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;

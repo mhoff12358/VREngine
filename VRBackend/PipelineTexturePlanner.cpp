@@ -4,13 +4,13 @@
 PipelineTexturePlanner::PipelineTexturePlanner(
 	ID3D11Device* dev, ID3D11DeviceContext* dev_con,
 	vector<Texture>& texture_storage,
-	map<string, PipelineCamera>& pipeline_cameras,
 	map<string, int>& entity_group_associations,
+	ResourcePool& resource_pool,
 	EntityHandler& entity_handler)
 	: device_(dev), device_context_(dev_con),
 	texture_storage_(texture_storage),
-	pipeline_cameras_(pipeline_cameras),
 	entity_group_associations_(entity_group_associations),
+	resource_pool_(resource_pool),
 	entity_handler_(entity_handler),
 	number_of_entity_groups_(0)
 {

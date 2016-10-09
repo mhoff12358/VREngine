@@ -36,8 +36,7 @@ public:
 
 	void CallPipeline(RenderGroup* groups_to_draw);
 
-	void SetPipelineCameras(map<string, PipelineCamera>& pipeline_cameras);
-	void SetPipelineStages(vector<unique_ptr<PipelineStageDesc>>& stage_descs);
+	void SetPipelineStages(ResourcePool& resource_pool, vector<unique_ptr<PipelineStageDesc>>& stage_descs);
 
 	array<int, 2> GetStageBufferSize();
 	D3D11_TEXTURE2D_DESC* GetStagingBufferDesc();
@@ -51,7 +50,6 @@ protected:
 
 public: // testing
 	PipelineStageBuffer pipeline_stages_;
-	map<string, PipelineCamera> pipeline_cameras_;
 	map<string, int> entity_group_associations_;
 	vector<Texture> pipeline_textures_;
 	vector<DepthTexture> pipeline_depth_textures_;

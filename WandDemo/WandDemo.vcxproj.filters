@@ -46,11 +46,11 @@
     <Filter Include="Nichijou Graph\Source Files">
       <UniqueIdentifier>{098780dd-1cb1-4cf7-890d-87fd6837b364}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Nichijou Graph\Python Files">
-      <UniqueIdentifier>{677b2fb8-4e85-4a18-ba8c-db7630b2b275}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Nichijou Graph\Textures">
       <UniqueIdentifier>{71a1ff0a-d8e4-46ee-a5bd-3c3fe21708f8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Nichijou Graph\Python Files">
+      <UniqueIdentifier>{677b2fb8-4e85-4a18-ba8c-db7630b2b275}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
