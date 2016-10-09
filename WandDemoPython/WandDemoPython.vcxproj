@@ -109,7 +109,7 @@
       </Inputs>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)scene_system &amp; copy *.py $(OutDir)scene_system\</Command>
+      <Command>mkdir "$(OutDir)scene_system" &amp; copy *.py "$(OutDir)scene_system\"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

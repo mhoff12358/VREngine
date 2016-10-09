@@ -11,9 +11,12 @@ class Player(sc.DelegatingActor):
     @delegater(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         print("Player added to the scene")
-        #scene = self.GetScene()
+        scene = self.GetScene()
+        resource_pool = scene.FindByName("GraphicsResources").resource_pool
+        import pdb; pdb.set_trace()
         #scene.AddActorToGroup(self.id, scene.FindByName("ControlsRegistry"))
 
     @delegater(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
-        print("MOUSE MOTION", args.motion, sc.x(args.motion), sc.y(args.motion))
+        pass
+        #print("MOUSE MOTION", args.motion, sc.x(args.motion), sc.y(args.motion))

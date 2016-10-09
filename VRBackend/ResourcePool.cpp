@@ -267,6 +267,19 @@ GeometryShader ResourcePool::LoadGeometryShader(std::string file_name, std::stri
 	return new_geometry_shader;
 }
 
+PipelineCamera& ResourcePool::LoadPipelineCamera(string camera_name) {
+	return pipeline_cameras_[camera_name];
+}
+
+PipelineCamera& ResourcePool::LoadExistingPipelineCamera(string camera_name) {
+	const auto pipeline_camera_iter = pipeline_cameras_.find(camera_name);
+	if (pipeline_camera_iter == pipeline_cameras_.end()) {
+		std::cout << "Attempting to load non-existant pipeline camera " << camera_name << std::endl;
+		return PipelineCamera();
+	}
+	return pipeline_camera_iter->second;
+}
+
 vector<float> ResourcePool::AccessDataFromResource(const ResourceIdent& resource_ident) {
 	switch (resource_ident.type_) {
 	case ResourceIdent::TEXTURE:

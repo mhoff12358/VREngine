@@ -9,6 +9,7 @@
 #include "SceneSystem/InputCommandArgs.h"
 #include "SceneSystem/HeadsetInterface.h"
 #include "SceneSystem/IOInterface.h"
+#include "SceneSystem/GraphicsResources.h"
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
 
@@ -119,6 +120,11 @@ BOOST_PYTHON_MODULE(scene_system_) {
 
 	class_<game_scene::commands::MouseMotion, bases<game_scene::CommandArgs>, boost::noncopyable>("MouseMotion", no_init)
 		.def_readonly("motion", &game_scene::commands::MouseMotion::motion_);
+
+//	class_<game_scene::actors::GraphicsResources, boost::noncopyable>("GraphicsResources", no_init)
+//		.def_readonly("resource_pool", &game_scene::actors::GraphicsResources::GetResourcePool, return_value_policy<reference_existing_object>());
+
+	class_<ResourcePool, boost::noncopyable>("ResourcePool", no_init);
 
 	//float& (Scale::*Scale_bracket)(size_t) = &Scale::operator[];
 	class_<Scale>("Scale")

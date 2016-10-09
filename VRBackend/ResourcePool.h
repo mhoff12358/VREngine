@@ -98,6 +98,9 @@ public:
 	vector<float> AccessDataFromResource(const ResourceIdent& resource_ident);
 	void PreloadResource(const ResourceIdent& resource_ident);
 
+	PipelineCamera& LoadPipelineCamera(string camera_name);
+	PipelineCamera& LoadExistingPipelineCamera(string camera_name);
+
 	ID3D11Device* device_interface;
 	ID3D11DeviceContext* device_context;
 
@@ -115,6 +118,8 @@ private:
 	vector<Texture> textures;
 	map<string, unsigned int> texture_lookup;
 	map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;
+
+	map<string, PipelineCamera> pipeline_cameras_;
 };
 /*
 template <typename T>

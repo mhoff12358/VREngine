@@ -36,6 +36,10 @@ public:
 	void RequireResource(ResourceIdent resource_ident);
 	static GraphicsResources& GetGraphicsResources(Scene* scene);
 
+	ResourcePool& GetResourcePool() { return resource_pool_; }
+	EntityHandler& GetEntityHandler() { return entity_handler_; }
+	ID3D11Device* GetDeviceInterface() { return device_interface_; }
+
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;
 	ID3D11Device* device_interface_;
