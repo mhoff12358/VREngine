@@ -10,6 +10,9 @@ typedef string PipelineCameraIdent;
 class PipelineCamera {
 public:
 	void BuildMatrices();
+	void BuildMatricesIfDirty();
+
+	void SetDirty();
 
 	const DirectX::XMMATRIX& GetViewProjectionMatrix() const;
 	const DirectX::XMMATRIX& GetViewMatrix() const;
@@ -35,4 +38,6 @@ private:
 	DirectX::XMMATRIX view_matrix_;
 	DirectX::XMMATRIX view_projection_matrix_;
 	DirectX::XMMATRIX orientation_projection_matrix_;
+
+	bool dirty_ = false;
 };

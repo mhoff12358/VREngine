@@ -60,6 +60,7 @@ RenderGroup* AsyncEntityBuffer::ConsumerFinish() {
 	// Claim the current new reading group
 	reader_on_new = true;
 	RenderGroup* returned_group = new_reading_group;
+
 	state_ownership_lock.unlock();
 	return returned_group;
 }

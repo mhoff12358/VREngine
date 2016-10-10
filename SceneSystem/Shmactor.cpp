@@ -35,8 +35,8 @@ CommandQueueLocation Shmactor::MakeCommandAfter(CommandQueueLocation location, c
 	return MakeCommandAfter(location, target, move(args));
 }
 
-unique_ptr<QueryResult> Shmactor::AskQuery(const Target& target, unique_ptr<QueryArgs> args) {
-	return scene_->AskQuery(target, move(args));
+unique_ptr<QueryResult> Shmactor::AskQuery(const Target& target, const QueryArgs& args) {
+	return scene_->AskQuery(target, args);
 }
 
 void Shmactor::FailToHandleCommand(const CommandArgs& args) {

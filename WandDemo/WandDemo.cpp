@@ -54,6 +54,8 @@ void GraphicsLoop() {
 	int prev_sec = timeGetTime();
 	int fps = 0;
 
+	float old_x = 1;
+	bool is_decreasing = false;
 
 	while (true) {
 		graphics_objects.input_handler->UpdateHeadset(frame_index);
@@ -64,13 +66,22 @@ void GraphicsLoop() {
 			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
 		}
 
+		float new_x = DirectX::XMVectorGetX(drawing_groups->cameras[0].GetOrientationProjectionMatrix().r[0]);
+		if ((new_x < old_x)) {
+			if ((old_x == 1.0f) || is_decreasing) {
+				is_decreasing = true;
+			} else {
+				std::cout << new_x << " " << old_x << std::endl;
+			}
+		}
+
 		if (graphics_objects.oculus->IsInitialized()) {
 			for (vr::EVREye eye : Headset::eyes_) {
 				Pose eye_pose = graphics_objects.oculus->GetEyePose(eye);
-				PipelineCamera& camera = graphics_objects.resource_pool->LoadExistingPipelineCamera("player_head|" + std::to_string(eye));
+				/*PipelineCamera& camera = graphics_objects.resource_pool->LoadExistingPipelineCamera("player_head|" + std::to_string(eye));
 				camera.SetLocation(eye_pose.location_);
 				camera.SetOrientation(eye_pose.orientation_);
-				camera.BuildMatrices();
+				camera.BuildMatrices();*/
 			}
 		}
 
@@ -268,13 +279,6 @@ void UpdateLoop() {
 		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
 		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		object result = loaded_module.attr("first_load")(inputs);
-		scene.MakeCommandAfter(scene.FrontOfCommands(),
-			game_scene::Command(
-				game_scene::Target(io_interface),
-				make_unique<game_scene::commands::IOListenerRegistration>(
-					true,
-					extract<game_scene::ActorId>(result),
-					game_scene::actors::IOInterface::ListenerId::MOUSE_MOTION)));
 	} catch (error_already_set) {
 		PyErr_Print();
 	}
@@ -330,6 +334,8 @@ void UpdateLoop() {
 				make_unique<game_scene::commands::InputUpdate>(
 					graphics_objects.input_handler)));
 		scene.FlushCommandQueue();
+
+		graphics_objects.entity_handler->BuildCameras();
 
 		graphics_objects.entity_handler->FinishUpdate();
 	}
@@ -424,26 +430,6 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	int stage_repetition = hmd_active ? 2 : 0;
 
-	if (hmd_active) {
-		PipelineCamera& camera0 = graphics_objects.resource_pool->LoadPipelineCamera("player_head|0");
-		PipelineCamera& camera1 = graphics_objects.resource_pool->LoadPipelineCamera("player_head|1");
-		camera0.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[0], 0.001f, 500.0f));
-		camera0.SetPose(Pose(Location(), Quaternion::Identity()));
-		camera0.BuildMatrices();
-		camera1.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[1], 0.001f, 500.0f));
-		camera1.SetPose(Pose(Location(), Quaternion::Identity()));
-		camera1.BuildMatrices();
-	} else {
-		PipelineCamera& camera = graphics_objects.resource_pool->LoadPipelineCamera("player_head");
-		camera.SetPerspectiveProjection(
-			60.0f / 180.0f*3.1415f,
-			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
-			0.001f,
-			500.0f);
-		camera.SetPose(Pose(Location(), Quaternion::Identity()));
-		camera.BuildMatrices();
-	}
-
 	string single_camera_name = "player_head";
 	if (hmd_active) {
 		single_camera_name += "|0";
@@ -462,6 +448,28 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	graphics_objects.render_pipeline->SetPipelineStages(*graphics_objects.resource_pool, pipeline_stages);
+
+	if (hmd_active) {
+		PipelineCamera& camera0 = graphics_objects.entity_handler->MutableCamera("player_head|0");
+		PipelineCamera& camera1 = graphics_objects.entity_handler->MutableCamera("player_head|1");
+		camera0.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[0], 0.001f, 500.0f));
+		camera0.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera0.BuildMatrices();
+		camera1.SetRawProjection(graphics_objects.oculus->GetEyeProjectionMatrix(Headset::eyes_[1], 0.001f, 500.0f));
+		camera1.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera1.BuildMatrices();
+	}
+	else {
+		PipelineCamera& camera = graphics_objects.entity_handler->MutableCamera("player_head");
+		camera.SetPerspectiveProjection(
+			60.0f / 180.0f*3.1415f,
+			((float)graphics_objects.view_state->window_details.screen_size[0]) / graphics_objects.view_state->window_details.screen_size[1],
+			0.001f,
+			500.0f);
+		camera.SetPose(Pose(Location(), Quaternion::Identity()));
+		camera.BuildMatrices();
+	}
+	graphics_objects.entity_handler->FinishUpdate();
 
 	TimeTracker::PreparePerformanceCounter();
 	TimeTracker::active_track = TimeTracker::NUM_TRACKS;

@@ -7,16 +7,41 @@ class Player(sc.DelegatingActor):
     def __init__(self):
         super(sc.DelegatingActor, self).__init__()
         self.EmbedSelf(self)
+        self.pitch = 0.0
+        self.yaw = 0.0
         
     @delegater(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         print("Player added to the scene")
         scene = self.GetScene()
-        resource_pool = scene.FindByName("GraphicsResources").resource_pool
-        import pdb; pdb.set_trace()
-        #scene.AddActorToGroup(self.id, scene.FindByName("ControlsRegistry"))
+
+        # Registers for IO
+        scene.MakeCommandAfter(
+            scene.FrontOfCommands(),
+            sc.Target(scene.FindByName("IOInterface")),
+            sc.IOListenerRegistration(
+                True, self.id, sc.ListenerId.KEY_TOGGLE, ord(' ')))
+        scene.MakeCommandAfter(
+            scene.FrontOfCommands(),
+            sc.Target(scene.FindByName("IOInterface")),
+            sc.IOListenerRegistration(
+                True, self.id, sc.ListenerId.MOUSE_MOTION))
+
+        # Gets the entity handler to access the camera
+        graphics_resources = scene.AskQuery(
+            sc.Target(scene.FindByName("GraphicsResources")),
+            sc.QueryArgs(sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
+        self.entity_handler = graphics_resources.GetEntityHandler()
 
     @delegater(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
-        pass
-        #print("MOUSE MOTION", args.motion, sc.x(args.motion), sc.y(args.motion))
+        self.yaw += sc.x(args.motion) * -0.01
+        self.yaw = self.yaw % (3.14 * 2)
+        self.PushPose()
+
+    @delegater(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
+    def HandleKeyToggle(self, args):
+        print(args.key)
+
+    def PushPose(self):
+        self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw)))

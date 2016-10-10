@@ -35,6 +35,7 @@ public:
 	map<TextureIdent, tuple<ID3D11DepthStencilView*, ID3D11DepthStencilState*>> depth_state_lookup_;
 	map<string, int>& entity_group_associations_;
 	EntityHandler& entity_handler_;
+	ResourcePool& resource_pool_;
 
 	map<TextureSignature, int> group_number_lookup_;
 	map<TextureIdent, tuple<int, int>> texture_block_lookup_;
@@ -42,8 +43,7 @@ public:
 	TextureBlock& GetTextureBlock(const tuple<int, int>& index);
 
 	int RequestEntityGroup(string stage_name);
-
-	ResourcePool& resource_pool_;
+	unsigned int RequestCameraIndex(PipelineCameraIdent camera_ident);
 
 private:
 	int CountDependanciesOnTexture(
@@ -56,9 +56,12 @@ private:
 	int ReserveTexture(const TextureSignature& signature, const TextureIdent& ident, TextureUsage usage, int number_of_references);
 	int ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references);
 	
+	map<PipelineCameraIdent, unsigned int> camera_map_;
+
 	ID3D11Device* device_;
 	ID3D11DeviceContext* device_context_;
 
+	int number_of_cameras_;
 	int number_of_entity_groups_;
 };
 

@@ -32,17 +32,17 @@ CommandQueueLocation Scene::FrontOfCommands() {
 	return commands_.GetNewFront();
 }
 
-unique_ptr<QueryResult> Scene::AskQuery(const Target& target, unique_ptr<QueryArgs> args) {
+unique_ptr<QueryResult> Scene::AskQuery(const Target& target, const QueryArgs& args) {
 	vector<ActorId> actors_to_query = ExpandTarget(target);
 	if (actors_to_query.size() == 0) {
 		return make_unique<QueryResult>(QueryType::EMPTY);
 	}
 	if (actors_to_query.size() == 1) {
-		return FindActor(actors_to_query[0])->AnswerQuery(*args);
+		return FindActor(actors_to_query[0])->AnswerQuery(args);
 	}
 	unique_ptr<MultipleQueryResult> query_results = make_unique<MultipleQueryResult>();
 	for (const ActorId& query_id : ExpandTarget(target)) {
-		query_results->AddResult(query_id, move(FindActor(query_id)->AnswerQuery(*args)));
+		query_results->AddResult(query_id, move(FindActor(query_id)->AnswerQuery(args)));
 	}
 	return move(query_results);
 }

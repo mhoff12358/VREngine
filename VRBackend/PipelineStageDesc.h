@@ -111,17 +111,9 @@ public:
 	virtual void AllocateAdditionalResources(PipelineTexturePlanner& planner) override;
 	virtual vector<PipelineStage*> AllocateStage(ID3D11Device* dev, ID3D11DeviceContext* dev_con) const override;
 
-	const DirectX::XMMATRIX& GetViewMatrix() const;
-	const DirectX::XMMATRIX& GetViewProjectionMatrix() const;
-	const DirectX::XMMATRIX& GetOrientationProjectionMatrix() const;
-
 	// Configuration variables
 	PipelineCameraIdent camera_ident_;
-
-	// Values to be filled in based on configuration variables
-	const DirectX::XMMATRIX* view_matrix_;
-	const DirectX::XMMATRIX* view_projection_matrix_;
-	const DirectX::XMMATRIX* orientation_projection_matrix_;
+	unsigned int camera_index_;
 };
 
 class TextureCopyDesc : public BasePipelineStageDesc {

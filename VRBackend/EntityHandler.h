@@ -14,6 +14,7 @@ public:
 
 	void Initialize(ResourcePool* rp);
 	void SetEntitySets(map<string, int>& entity_group_associations);
+	void SetCameras(const map<PipelineCameraIdent, unsigned int>& camera_map);
 
 	// Rendering accessors
 	RenderGroup* GetRenderGroupForDrawing();
@@ -47,6 +48,11 @@ public:
 
 	void AddModelMutation(std::string model_resource_id, ModelMutation new_model_mutation);
 
+	PipelineCamera& MutableCamera(PipelineCameraIdent camera_name);
+	unsigned int GetCameraIndex(PipelineCameraIdent camera_name);
+	PipelineCamera& AddCamera(PipelineCameraIdent camera_name);
+	void BuildCameras();
+
 private:
 	ResourcePool* resource_pool;
 
@@ -54,6 +60,8 @@ private:
 	std::vector<EntityId> entity_map;
 	map<string, int> entity_group_associations_;
 	unsigned int num_entity_sets_;
+
+	map<PipelineCameraIdent, unsigned int> camera_map_;
 
 	AsyncEntityBuffer entity_buffers;
 	RenderGroup* current_edit_group;

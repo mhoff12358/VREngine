@@ -35,7 +35,7 @@ public:
 protected:
 	void RegisterDependency(const Target& target);
 	CommandQueueLocation MakeCommandAfter(CommandQueueLocation location, const Target& target, unique_ptr<CommandArgs> args);
-	unique_ptr<QueryResult> AskQuery(const Target& target, unique_ptr<QueryArgs> args);
+	unique_ptr<QueryResult> AskQuery(const Target& target, const QueryArgs& args);
 
 	Scene* scene_;
 	ActorId id_;

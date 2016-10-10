@@ -213,7 +213,7 @@ void NichijouGraph::CreateGraphicsResources() {
 	actors::GraphicsResources& resources =
 		dynamic_cast<const QueryResultWrapped<actors::GraphicsResources&>&>(*scene_->AskQuery(
 			Target(scene_->FindByName("GraphicsResources")),
-			make_unique<EmptyQuery>(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST))).data_;
+			QueryArgs(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST))).data_;
 	ModelGenerator gen(ObjLoader::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 	gen.AddVertexBatch(vector<Vertex>({
 		Vertex(ObjLoader::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
@@ -340,8 +340,8 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
-		u_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("u_name")))))).data_;
-		v_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), make_unique<WrappedQueryArgs<string>>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("v_name")))))).data_;
+		u_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), WrappedQueryArgs<string>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("u_name")))))).data_;
+		v_actor_ = dynamic_cast<QueryResultWrapped<ActorId>&>(*scene_->AskQuery(Target(graph_), WrappedQueryArgs<string>(NichijouQuery::GET_VERTEX, string(extract<string>(edge_.attr("v_name")))))).data_;
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(u_actor_), make_unique<WrappedCommandArgs<ActorId>>(NichijouCommand::TELL_VERTEX_ABOUT_EDGE, id_)));
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(Target(v_actor_), make_unique<WrappedCommandArgs<ActorId>>(NichijouCommand::TELL_VERTEX_ABOUT_EDGE, id_)));
 

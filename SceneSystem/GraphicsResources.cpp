@@ -38,8 +38,7 @@ GraphicsResources& GraphicsResources::GetGraphicsResources(Scene* scene) {
 	Target graphics_resources_target = Target(scene->FindByName("GraphicsResources"));
 	unique_ptr<QueryResult> graphics_resources_result = scene->AskQuery(
 		graphics_resources_target,
-		make_unique<QueryArgs>(
-			GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST));
+		QueryArgs(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST));
 	if (graphics_resources_result->Type() != GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST) {
 		std::cout << "UNEXPECTED RESPONSE WHILE GETTING GRAPHICS RESOURCES" << std::endl;
 	}

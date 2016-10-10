@@ -20,7 +20,7 @@ public:
 	void RegisterDependency(const Target& depender, const Target& dependent);
 	CommandQueueLocation MakeCommandAfter(CommandQueueLocation location, Command command);
 	CommandQueueLocation FrontOfCommands();
-	unique_ptr<QueryResult> AskQuery(const Target& target, unique_ptr<QueryArgs> args);
+	unique_ptr<QueryResult> AskQuery(const Target& target, const QueryArgs& args);
 	void OwnCommandArgsForFlushDuration(CommandArgs* args_to_own);
 
 	// Interface for main loop

@@ -13,6 +13,7 @@
 #include "SceneSystem/GraphicsResources.h"
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
+#include "VRBackend/EntityHandler.h"
 
 #include "PyActor.h"
 #include "PyScene.h"
@@ -29,9 +30,19 @@ BOOST_PTR_MAGIC(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
+BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
+BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 
 int x(const array<int, 2>& arr) { return arr[0]; }
 int y(const array<int, 2>& arr) { return arr[1]; }
+
+int getitem_foo(array<int, 2>& foo, int index) {
+	return foo[index];
+}
+
+game_scene::actors::GraphicsResources& GetGraphicsResources(game_scene::QueryResultWrapped<game_scene::actors::GraphicsResources&>& a) {
+	return a.data_;
+}
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	using namespace boost::python;
@@ -40,7 +51,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("AddedToScene", &game_scene::Shmactor::AddedToScene, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
 		.def("EmbedSelf", &PyActor::EmbedSelf)
-		//.add_property("scene", &game_scene::Shmactor::GetScene, return_value_policy<reference_existing_object>())
+		.def("GetScene", &game_scene::Shmactor::GetScene, return_value_policy<reference_existing_object>())
 		.add_property("id", &PyActor::GetId)
 		.def("SetScene", &game_scene::Shmactor::SetScene);
 
@@ -50,7 +61,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("QueryResult", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryResult::Type);
 
-	class_<game_scene::CommandArgs, boost::noncopyable>("CommandArgs", init<game_scene::IdType>())
+	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("CommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);
 
 	class_<game_scene::CommandQueueLocation>("CommandQueueLocation", no_init);
@@ -64,9 +75,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("AllActors", &game_scene::Target::AllActors)
 		.staticmethod("AllActors");
 
-	class_<game_scene::Scene, boost::noncopyable>("Scene", no_init)
+	auto scene_registration = class_<game_scene::Scene, boost::noncopyable>("Scene", no_init)
 		.def("RegisterDependency", &game_scene::Scene::RegisterDependency)
-		.def("MakeCommandAfter", &PyScene::MakeCommandAfter)
+		.def("AskQuery", &PyScene::AskQuery)
 		.def("FrontOfCommands", &game_scene::Scene::FrontOfCommands)
 		.def("AddActor", &PyScene::AddActor)
 		.def("AddActorAfter", &PyScene::AddActorAfter)
@@ -110,65 +121,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def_readonly("position", &game_scene::commands::TouchpadMotion::position_)
 		.def_readonly("delta", &game_scene::commands::TouchpadMotion::delta_);
 
-	class_<game_scene::IOInterfaceCommand>("IOInterfaceCommand", no_init)
-		.def_readonly("REGISTER_LISTENER", &game_scene::IOInterfaceCommand::REGISTER_LISTENER)
-		.def_readonly("LISTEN_MOUSE_MOTION", &game_scene::IOInterfaceCommand::LISTEN_MOUSE_MOTION)
-		.def_readonly("LISTEN_KEY_PRESS", &game_scene::IOInterfaceCommand::LISTEN_KEY_PRESS)
-		.def_readonly("LISTEN_KEY_RELEASE", &game_scene::IOInterfaceCommand::LISTEN_KEY_RELEASE)
-		.def_readonly("LISTEN_KEY_TOGGLE", &game_scene::IOInterfaceCommand::LISTEN_KEY_TOGGLE);
-
-	class_<game_scene::commands::MouseMotion, bases<game_scene::CommandArgs>, boost::noncopyable>("MouseMotion", no_init)
-		.def_readonly("motion", &game_scene::commands::MouseMotion::motion_);
-
-//	class_<game_scene::actors::GraphicsResources, boost::noncopyable>("GraphicsResources", no_init)
-//		.def_readonly("resource_pool", &game_scene::actors::GraphicsResources::GetResourcePool, return_value_policy<reference_existing_object>());
-
-	class_<ResourcePool, boost::noncopyable>("ResourcePool", no_init);
-
-	//float& (Scale::*Scale_bracket)(size_t) = &Scale::operator[];
-	class_<Scale>("Scale")
-		.def(init<float>())
-		.def(init<float, float, float>())
-		.def(self * self)
-		//.def("get", &Scale::get, return_value_policy<reference_existing_object>());
-		.def("get", &Scale::operator[]);
-
-	//float& (Location::*Location_bracket)(size_t) = &Location::operator[];
-	class_<Location>("Location")
-		.def(init<float, float, float>())
-		.def(self + self)
-		.def(self - self)
-		.def(self * float())
-		.def(self * Scale())
-		.def(self / float())
-		.def(self += self)
-		.def(self -= self)
-		.def(self *= float())
-		.def(self /= float())
-		.def("get", &Location::operator[]);
-
-	class_<Quaternion>("Quaternion")
-		.def(init<float, float, float, float>())
-		.def("dot", &Quaternion::dot)
-		.def(self * self)
-		.def(self * float())
-		.def("ToPower", &Quaternion::ToPower)
-		.def("Inverse", &Quaternion::Inverse)
-		.def("StripAxis", &Quaternion::StripAxis)
-		.def("Slerp", &Quaternion::Slerp)
-		.staticmethod("Slerp")
-		.def("Identity", &Quaternion::Identity)
-		.staticmethod("Identity");
-
-	class_<Pose>("Pose")
-		.def(init<Location, Quaternion, Scale>())
-		.def(init<Location, Quaternion>())
-		.def(init<Location, Scale>())
-		.def(init<Quaternion, Scale>())
-		.def(init<Location>())
-		.def(init<Quaternion>())
-		.def(init<Scale>())
-		.def("ApplyAfter", &Pose::ApplyAfter);
+#include "io_interface.ipp"
+#include "graphics_resources.ipp"
+#include "pose.ipp"
 
 	void (PipelineCamera::*SetLocationFromLocation)(const Location&) = &PipelineCamera::SetLocation;
 	void (PipelineCamera::*SetOrientationFromQuaternion)(const Quaternion&) = &PipelineCamera::SetOrientation;
@@ -178,9 +133,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("SetPose", &PipelineCamera::SetPose)
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
-	//int& (array<int, 2>::*at)(size_t) = &array<int, 2>::at;
-	class_<array<int, 2>>("Arr2");
-	def("x", &x);
-	def("y", &y);
-	//	.def("get", at, return_value_policy<reference_existing_object>());
+	int& (array<int, 2>::*at)(size_t) = &array<int, 2>::at;
+	class_<array<int, 2>>("Arr2")
+		.def("__getitem__", &getitem_foo);
+		def("x", &x);
+		def("y", &y);
 }

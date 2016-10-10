@@ -12,7 +12,8 @@ PipelineTexturePlanner::PipelineTexturePlanner(
 	entity_group_associations_(entity_group_associations),
 	resource_pool_(resource_pool),
 	entity_handler_(entity_handler),
-	number_of_entity_groups_(0)
+	number_of_entity_groups_(0),
+	number_of_cameras_(0)
 {
 }
 
@@ -31,6 +32,17 @@ int PipelineTexturePlanner::RequestEntityGroup(string stage_name) {
 	number_of_entity_groups_++;
 	entity_group_associations_[base_name] = new_group_number;
 	return new_group_number;
+}
+
+unsigned int PipelineTexturePlanner::RequestCameraIndex(PipelineCameraIdent camera_ident) {
+	auto existing_camera_number = camera_map_.find(camera_ident);
+	if (existing_camera_number != camera_map_.end()) {
+		return existing_camera_number->second;
+	}
+	int new_camera_number = number_of_cameras_;
+	number_of_cameras_++;
+	camera_map_[camera_ident] = new_camera_number;
+	return new_camera_number;
 }
 
 int PipelineTexturePlanner::CountDependanciesOnTexture(
@@ -73,8 +85,6 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 		texture_blocks_[group_number].push_back({ -1, i });
 		texture_block_lookup_[existing_textures[i]] = make_tuple(group_number, texture_blocks_[group_number].size() - 1);
 	}
-
-	//int num_entity_sets_needed = 0;
 
 	for (auto stage_iter = stages.begin(); stage_iter != stages.end(); stage_iter++) {
 		for (BasePipelineStageDesc* stage : (*stage_iter)->GetBaseStages()) {
@@ -153,6 +163,7 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 	}
 
 	entity_handler_.SetEntitySets(entity_group_associations_);
+	entity_handler_.SetCameras(camera_map_);
 }
 
 int PipelineTexturePlanner::LookupBlockGroupNumber(const TextureSignature& signature) {

@@ -20,6 +20,11 @@ void EntityHandler::SetEntitySets(map<string, int>& entity_group_associations) {
 	current_edit_group = entity_buffers.Initialize(num_entity_sets_);
 }
 
+void EntityHandler::SetCameras(const map<PipelineCameraIdent, unsigned int>& camera_map) {
+	camera_map_ = camera_map;
+	current_edit_group[0].cameras.resize(camera_map_.size());
+}
+
 unsigned int EntityHandler::GetNumEntitySets() {
 	return num_entity_sets_;
 }
@@ -96,6 +101,35 @@ void EntityHandler::SetEntityPixelShader(unsigned int external_entity_id, PixelS
 
 Entity& EntityHandler::ReferenceEntity(EntityId entity_id) {
 	return current_edit_group[entity_id.render_group_index_].entities[entity_id.entity_index_];
+}
+
+PipelineCamera& EntityHandler::MutableCamera(PipelineCameraIdent camera_name) {
+	return current_edit_group[0].cameras[camera_map_[camera_name]];
+}
+
+unsigned int EntityHandler::GetCameraIndex(PipelineCameraIdent camera_name) {
+	if (!camera_map_.count(camera_name)) {
+		std::cout << "Attempting to look up nonexistant camera" << std::endl;
+		return 0;
+	}
+	return camera_map_[camera_name];
+}
+
+PipelineCamera& EntityHandler::AddCamera(PipelineCameraIdent camera_name) {
+	if (camera_map_.count(camera_name)) {
+		std::cout << "Attempting to recreate an existing pipeline camera" << std::endl;
+		return MutableCamera(camera_name);
+	}
+	auto& cameras = current_edit_group[0].cameras;
+	cameras.emplace_back();
+	camera_map_[camera_name] = cameras.size() - 1;
+	return cameras[camera_map_[camera_name]];
+}
+
+void EntityHandler::BuildCameras() {
+	for (auto& camera : current_edit_group[0].cameras) {
+		camera.BuildMatricesIfDirty();
+	}
 }
 
 ConstantBuffer* EntityHandler::GetEntityObjectSettings(unsigned int external_entity_id) {

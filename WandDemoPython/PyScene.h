@@ -21,8 +21,13 @@ tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddActorAfterReturn
 	return self.AddActorReturnInitialize(unique_ptr<game_scene::Shmactor>(new_actor), initialize_after);
 }
 
-game_scene::CommandQueueLocation MakeCommandAfter(game_scene::Scene& self, game_scene::CommandQueueLocation location, game_scene::Command& command) {
-	return self.MakeCommandAfter(location, move(command));
+template <typename T>
+game_scene::CommandQueueLocation MakeCommandAfter(game_scene::Scene& self, game_scene::CommandQueueLocation location, game_scene::Target target, std::auto_ptr<T> args) {
+	return self.MakeCommandAfter(location, game_scene::Command(target, unique_ptr<game_scene::CommandArgs>(dynamic_cast<game_scene::CommandArgs*>(args.release()))));
+}
+
+std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args) {
+	return std::auto_ptr<game_scene::QueryResult>(self.AskQuery(target, args).release());
 }
 
 }  // PyScene

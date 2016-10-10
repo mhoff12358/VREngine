@@ -11,6 +11,7 @@ RenderGroup::~RenderGroup()
 
 void RenderGroup::Update(RenderGroup* other) {
 	entities = other->entities;
+	cameras = other->cameras;
 }
 
 void RenderGroup::ApplyMutations(ResourcePool& resource_pool) {

@@ -39,6 +39,8 @@ public:
 		: QueryResult(type), data_(data) {}
 	virtual ~QueryResultWrapped() {}
 
+	WrappedType GetData() { return data_; }
+
 	WrappedType data_;
 };
 

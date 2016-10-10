@@ -165,7 +165,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="graphics_resources.ipp" />
     <None Include="HeadsetInterfacePython.h" />
+    <None Include="io_interface.ipp" />
+    <None Include="pose.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
