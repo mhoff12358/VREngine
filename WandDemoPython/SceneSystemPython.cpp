@@ -36,12 +36,20 @@ BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 int x(const array<int, 2>& arr) { return arr[0]; }
 int y(const array<int, 2>& arr) { return arr[1]; }
 
-int getitem_foo(array<int, 2>& foo, int index) {
+int& getitem_foo(array<int, 2>& foo, int index) {
 	return foo[index];
 }
 
-game_scene::actors::GraphicsResources& GetGraphicsResources(game_scene::QueryResultWrapped<game_scene::actors::GraphicsResources&>& a) {
-	return a.data_;
+template <typename T>
+auto CreateClass() {
+	return boost::python::class_<T>(typeid(T).name());
+}
+
+template <typename IndexType, typename ValueType, typename PyType>
+auto& CreateIndexing(boost::python::class_<PyType>& c) {
+	return c
+		.def("__getitem__", static_cast<const ValueType(*)(PyType&, IndexType)>([](PyType& t, IndexType i)->const ValueType {return t[i];}))
+		.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
 }
 
 BOOST_PYTHON_MODULE(scene_system_) {
@@ -133,9 +141,5 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("SetPose", &PipelineCamera::SetPose)
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
-	int& (array<int, 2>::*at)(size_t) = &array<int, 2>::at;
-	class_<array<int, 2>>("Arr2")
-		.def("__getitem__", &getitem_foo);
-		def("x", &x);
-		def("y", &y);
+#include "stl.ipp"
 }

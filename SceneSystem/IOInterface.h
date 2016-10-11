@@ -65,7 +65,7 @@ public:
 		CommandArgs(IOInterfaceCommand::REGISTER_LISTENER),
 		register_not_unregister_(register_not_unregister),
 		actor_to_register_(actor_to_register),
-		listener_id_(listener_id), key_(0) {}
+		listener_id_(listener_id) {}
 
 	IOListenerRegistration(
 		bool register_not_unregister,
@@ -75,14 +75,25 @@ public:
 		CommandArgs(IOInterfaceCommand::REGISTER_LISTENER),
 		register_not_unregister_(register_not_unregister),
 		actor_to_register_(actor_to_register),
-		listener_id_(listener_id),
-		key_(key) {}
+		listener_id_(listener_id) {
+		keys_.push_back(key);
+	}
+
+	IOListenerRegistration(
+		bool register_not_unregister,
+		ActorId actor_to_register,
+		actors::IOInterface::ListenerId listener_id,
+		vector<unsigned char> keys) :
+		CommandArgs(IOInterfaceCommand::REGISTER_LISTENER),
+		register_not_unregister_(register_not_unregister),
+		actor_to_register_(actor_to_register),
+		listener_id_(listener_id), keys_(move(keys)) {}
 
 	bool register_not_unregister_;
 	ActorId actor_to_register_;
 	actors::IOInterface::ListenerId listener_id_;
 	// Which key to register for. Is unused for non-key related registrations.
-	unsigned char key_;
+	vector<unsigned char> keys_;
 };
 
 class MouseMotion : public CommandArgs {

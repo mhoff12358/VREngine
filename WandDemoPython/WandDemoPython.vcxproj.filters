@@ -57,5 +57,8 @@
     <None Include="io_interface.ipp">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="stl.ipp">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

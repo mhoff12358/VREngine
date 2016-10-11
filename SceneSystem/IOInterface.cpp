@@ -39,25 +39,33 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 		// Set the listener group to register based on the new group.
 		if (registration.listener_id_ == ListenerId::MOUSE_MOTION) {
 			listener_group_to_register = mouse_motion_listener_group_;
+			if (registration.register_not_unregister_) {
+				scene_->AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
+			}
+			else {
+				scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
+			}
 		} else {
 			// The registration is for a specific key's action.
 			// The listener id specifies which set of listeners to search through.
 			// The key specifies which specific listener to use.
 
 			// Lookup the actual registration group's existing ID.
-			ActorId& listener_group_ref = GetKeyActionListenerGroup(registration.listener_id_, registration.key_);
-			// If we are registering and the registration group doesn't exist then create it and watch the key.
-			if (registration.register_not_unregister_ && listener_group_ref == ActorId::UnsetId) {
-				listener_group_ref = scene_->AddActorGroup();
-				WatchKey(registration.key_);
+			for (unsigned char key : registration.keys_) {
+				ActorId& listener_group_ref = GetKeyActionListenerGroup(registration.listener_id_, key);
+				// If we are registering and the registration group doesn't exist then create it and watch the key.
+				if (registration.register_not_unregister_ && listener_group_ref == ActorId::UnsetId) {
+					listener_group_ref = scene_->AddActorGroup();
+					WatchKey(key);
+				}
+				listener_group_to_register = listener_group_ref;
+				if (registration.register_not_unregister_) {
+					scene_->AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
+				}
+				else {
+					scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
+				}
 			}
-			listener_group_to_register = listener_group_ref;
-		}
-		if (registration.register_not_unregister_) {
-			scene_->AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
-		}
-		else {
-			scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
 		}
 	}
 		break;

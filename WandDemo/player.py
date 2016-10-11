@@ -35,7 +35,7 @@ class Player(sc.DelegatingActor):
 
     @delegater(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
-        self.yaw += sc.x(args.motion) * -0.01
+        self.yaw += args.motion[0] * -0.002
         self.yaw = self.yaw % (3.14 * 2)
         self.PushPose()
 

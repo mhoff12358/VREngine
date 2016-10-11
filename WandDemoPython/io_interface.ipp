@@ -15,6 +15,7 @@ class_<game_scene::IOInterfaceCommand>("IOInterfaceCommand")
 
 class_<game_scene::commands::IOListenerRegistration, bases<game_scene::CommandArgs>, std::auto_ptr<game_scene::commands::IOListenerRegistration>, boost::noncopyable>("IOListenerRegistration",
 	init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId>())
+	//.def(init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId, vector<unsigned char>>())
 	.def(init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId, unsigned char>());
 scene_registration.def("MakeCommandAfter", &PyScene::MakeCommandAfter<game_scene::commands::IOListenerRegistration>);
 

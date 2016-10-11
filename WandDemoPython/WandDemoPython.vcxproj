@@ -169,6 +169,7 @@
     <None Include="HeadsetInterfacePython.h" />
     <None Include="io_interface.ipp" />
     <None Include="pose.ipp" />
+    <None Include="stl.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
