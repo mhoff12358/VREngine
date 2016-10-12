@@ -1,6 +1,5 @@
 #include "ModelGenerator.h"
 
-
 ModelGenerator::ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type)
 	: vertex_type(v_type), primitive_type(p_type), number_of_vertices(0) {
 
@@ -18,6 +17,10 @@ void ModelGenerator::AddVertexBatch(std::vector<Vertex>& new_vertexes) {
 		memcpy(new_data_location + vertex_type.GetVertexSize() * vertex_number, new_vertexes[vertex_number].GetData(), vertex_type.GetVertexSize());
 	}
 	number_of_vertices += new_vertexes.size();
+}
+
+void ModelGenerator::SetParts(map<string, ModelSlice> parts) {
+	parts_ = std::move(parts);
 }
 
 void ModelGenerator::InitializeVertexBuffer(ID3D11Device* device, ID3D11DeviceContext* device_context, ModelStorageDescription storage_description) {

@@ -3,7 +3,7 @@
 #include "Vertices.h"
 #include "Model.h"
 
-#include <map>
+#include "stl.h"
 
 struct ModelStorageDescription {
 	bool immutable;
@@ -23,6 +23,7 @@ public:
 
 	void AddVertex(Vertex new_vertex);
 	void AddVertexBatch(std::vector<Vertex>& new_vertexes);
+	void SetParts(map<string, ModelSlice> parts);
 
 	Model GetModel(std::string part_name = "");
 	std::map<std::string, Model> GetModels();

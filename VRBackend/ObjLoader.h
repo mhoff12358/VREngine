@@ -43,10 +43,6 @@ public:
 		bool load_as_dynamic_;
 	};
 
-	static VertexType vertex_type_location;
-	static VertexType vertex_type_texture;
-	static VertexType vertex_type_normal;
-	static VertexType vertex_type_all;
 	static const OutputFormat default_output_format;
 
 	static ModelGenerator CreateModelsFromFile(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename, const OutputFormat& output_format = default_output_format);

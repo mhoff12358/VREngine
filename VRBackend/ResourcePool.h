@@ -53,9 +53,10 @@ public:
 
 	Model LoadExistingModel(ModelIdentifier model_name);
 	Model LoadModelFromFile(ModelIdentifier model_name, const ObjLoader::OutputFormat& model_output_format);
-	Model LoadModelFromVertices(ModelIdentifier model_name, vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage);
+	Model LoadModelFromVertices(ModelIdentifier model_name, VertexType vertex_type, vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage, map<string, ModelSlice> parts = {});
 	Model LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator generator);
 	map<string, Model> LoadExistingModelAsParts(const string& file_name);
+	// Should only be called by the drawing thread when claiming ownership of the device contex.t
 	void UpdateModel(const string& file_name, const ModelMutation& mutation);
 
 	PixelShader LoadPixelShader(string file_name);

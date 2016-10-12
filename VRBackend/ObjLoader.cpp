@@ -11,29 +11,9 @@ ModelGenerator ObjLoader::CreateModelsFromFile(ID3D11Device* device, ID3D11Devic
 	return loader.ParseAsMultipleModels(device, device_context, output_format);
 }
 
-VertexType ObjLoader::vertex_type_all = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-}));
-
-VertexType ObjLoader::vertex_type_texture = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-}));
-
-VertexType ObjLoader::vertex_type_normal = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-}));
-
-VertexType ObjLoader::vertex_type_location = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-}));
-
 const ObjLoader::OutputFormat ObjLoader::default_output_format = {
 	ModelModifier::identity_model_modifier,
-	vertex_type_all,
+	VertexType::vertex_type_all,
 	false
 };
 
@@ -180,25 +160,25 @@ Vertex ObjLoader::CreateVertexFromAll(int location_ref, int texture_coords_ref, 
 	vector_data.insert(vector_data.end(), locations[location_ref].begin(), locations[location_ref].end());
 	vector_data.insert(vector_data.end(), normals[normal_ref].begin(), normals[normal_ref].end());
 	vector_data.insert(vector_data.end(), texture_coords[texture_coords_ref].begin(), texture_coords[texture_coords_ref].end());
-	return Vertex(ObjLoader::vertex_type_all, vector_data);
+	return Vertex(VertexType::vertex_type_all, vector_data);
 }
 
 Vertex ObjLoader::CreateVertexFromTexture(int location_ref, int texture_coords_ref) {
 	std::vector<float> vector_data;
 	vector_data.insert(vector_data.end(), locations[location_ref].begin(), locations[location_ref].end());
 	vector_data.insert(vector_data.end(), texture_coords[texture_coords_ref].begin(), texture_coords[texture_coords_ref].end());
-	return Vertex(ObjLoader::vertex_type_texture, vector_data);
+	return Vertex(VertexType::vertex_type_texture, vector_data);
 }
 
 Vertex ObjLoader::CreateVertexFromNormal(int location_ref, int normal_ref) {
 	std::vector<float> vector_data;
 	vector_data.insert(vector_data.end(), locations[location_ref].begin(), locations[location_ref].end());
 	vector_data.insert(vector_data.end(), normals[normal_ref].begin(), normals[normal_ref].end());
-	return Vertex(ObjLoader::vertex_type_normal, vector_data);
+	return Vertex(VertexType::vertex_type_normal, vector_data);
 }
 
 Vertex ObjLoader::CreateVertexFromLocation(int location_ref) {
 	std::vector<float> vector_data;
 	vector_data.insert(vector_data.end(), locations[location_ref].begin(), locations[location_ref].end());
-	return Vertex(ObjLoader::vertex_type_location, vector_data);
+	return Vertex(VertexType::vertex_type_location, vector_data);
 }

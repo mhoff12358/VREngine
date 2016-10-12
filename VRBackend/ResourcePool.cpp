@@ -53,18 +53,19 @@ Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoade
 	return generator.GetModel(model_name.GetSubPart());
 }
 
-Model ResourcePool::LoadModelFromVertices(ModelIdentifier model_name, std::vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage) {
+Model ResourcePool::LoadModelFromVertices(
+	ModelIdentifier model_name, VertexType vertex_type, std::vector<Vertex> vertices,
+	D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage,
+	map<string, ModelSlice> parts) {
 	Model model = LoadExistingModel(model_name);
 	if (!model.IsDummy()) {
 		return model;
 	}
 
-	if (vertices.empty()) {
-		return Model(); // Somehow return an empty model eventually
-	}
-
-	ModelGenerator generator(vertices[0].GetVertexType(), primitive_type);
+	ModelGenerator generator(vertex_type, primitive_type);
 	generator.AddVertexBatch(vertices);
+	parts[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
+	generator.SetParts(parts);
 	generator.Finalize(device_interface, device_context, model_storage);
 
 	models_.push_back(generator);

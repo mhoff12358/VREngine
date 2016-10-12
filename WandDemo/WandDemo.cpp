@@ -66,15 +66,6 @@ void GraphicsLoop() {
 			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
 		}
 
-		float new_x = DirectX::XMVectorGetX(drawing_groups->cameras[0].GetOrientationProjectionMatrix().r[0]);
-		if ((new_x < old_x)) {
-			if ((old_x == 1.0f) || is_decreasing) {
-				is_decreasing = true;
-			} else {
-				std::cout << new_x << " " << old_x << std::endl;
-			}
-		}
-
 		if (graphics_objects.oculus->IsInitialized()) {
 			for (vr::EVREye eye : Headset::eyes_) {
 				Pose eye_pose = graphics_objects.oculus->GetEyePose(eye);
@@ -108,10 +99,9 @@ void UpdateLoop() {
 	}
 
 	game_scene::actors::Sprite::Init();
-	ModelGenerator point_gen(ObjLoader::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
-	point_gen.AddVertex(Vertex(ObjLoader::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
+	ModelGenerator point_gen(VertexType::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
+	point_gen.AddVertex(Vertex(VertexType::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
 	point_gen.Finalize(graphics_objects.view_state->device_interface, nullptr, ModelStorageDescription::Immutable());
-	point_gen.parts_ = { { "", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
 	point_gen.parts_ = { { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
 	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourceIdentifier::GetConstantModelName("point"), point_gen));
 
@@ -149,10 +139,10 @@ void UpdateLoop() {
 			"basic",
 			vector<game_scene::EntitySpecification>{
 				game_scene::EntitySpecification()
-					.SetModel(game_scene::NewModelDetails(ModelIdentifier("square.obj|Square")))
+					.SetModel(game_scene::NewModelDetails(ModelIdentifier("square.obj|Square"), ObjLoader::default_output_format))
 					.SetShaders(game_scene::NewShaderDetails(
 						"texturedspecularlightsource.hlsl",
-						ObjLoader::vertex_type_all,
+						VertexType::vertex_type_all,
 						ShaderStages::Vertex().and(ShaderStages::Pixel())))
 					.SetShaderSettingsValue(vector<vector<float>>{vector<float>{0.0f, 0.0f, 0.0f}, vector<float>{1.0f}})
 					.SetTextures({{game_scene::NewIndividualTextureDetails("terrain.png", ShaderStages::All(), 0, 0)}})
@@ -204,13 +194,13 @@ void UpdateLoop() {
 						{0, 1, 2},
 						{1, 1, 1},
 						{false, true}),
-					ObjLoader::vertex_type_all,
+					VertexType::vertex_type_all,
 					false)}
 			},
 			{});
 		square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
 		square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-		square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+		square_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_all;
 		square_details.heirarchy_.entity_group_ = "basic";
 		square_details.heirarchy_.shader_settings_ = {
 			{0.0f, 0.5f, 0.0f},
@@ -226,13 +216,13 @@ void UpdateLoop() {
 						{0, 1, 2},
 						{1, 1, 1},
 						{false, true}),
-					ObjLoader::vertex_type_all,
+					VertexType::vertex_type_all,
 					false)}
 			},
 			{});
 		cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
 		cockpit_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-		cockpit_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+		cockpit_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_all;
 		cockpit_details.heirarchy_.entity_group_ = "basic";
 		cockpit_details.heirarchy_.shader_settings_ = {
 			{0.0f, 0.5f, 0.0f},

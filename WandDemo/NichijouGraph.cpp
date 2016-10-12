@@ -113,12 +113,12 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 							{0, 1, 2},
 							{1, 1, 1},
 							{false, true}),
-						ObjLoader::vertex_type_all,
+						VertexType::vertex_type_all,
 						false)}
 				},
 				{});
 			square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("timeline.hlsl");
-			square_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_all;
+			square_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_all;
 			square_details.heirarchy_.entity_group_ = "basic";
 			square_details.heirarchy_.shader_settings_ = {
 				timeline_color_1_,
@@ -214,13 +214,12 @@ void NichijouGraph::CreateGraphicsResources() {
 		dynamic_cast<const QueryResultWrapped<actors::GraphicsResources&>&>(*scene_->AskQuery(
 			Target(scene_->FindByName("GraphicsResources")),
 			QueryArgs(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST))).data_;
-	ModelGenerator gen(ObjLoader::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
+	ModelGenerator gen(VertexType::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
 	gen.AddVertexBatch(vector<Vertex>({
-		Vertex(ObjLoader::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
-		Vertex(ObjLoader::vertex_type_texture, {1.0f, 0.0f, 0.0f}),
+		Vertex(VertexType::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
+		Vertex(VertexType::vertex_type_texture, {1.0f, 0.0f, 0.0f}),
 	}));
 	gen.Finalize(resources.device_interface_, nullptr, ModelStorageDescription::Immutable());
-	gen.parts_ = { { "", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };
 	gen.parts_ = { { "Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };
 	ResourceIdent edge_model_ident(ResourceIdent::MODEL, edge_model_name_, gen);
 	scene_->MakeCommandAfter(
@@ -355,12 +354,12 @@ void NichijouEdge::HandleCommand(const CommandArgs& args) {
 						{0, 1, 2},
 						{1, 1, 1},
 						{false, true}),
-					ObjLoader::vertex_type_location,
+					VertexType::vertex_type_location,
 					false)}
 			},
 			{});
 		line_details.heirarchy_.shader_file_definition_ = actors::ShaderFileDefinition("solidline.hlsl", {true, true, true});
-		line_details.heirarchy_.vertex_shader_input_type_ = ObjLoader::vertex_type_location;
+		line_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_location;
 		line_details.heirarchy_.entity_group_ = "basic";
 		line_details.heirarchy_.shader_settings_ = {
 			{1.0f, 0.0f, 0.0f, 1.0f},

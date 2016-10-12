@@ -107,9 +107,9 @@ struct NewShaderDetails {
 
 struct NewModelDetails {
 	NewModelDetails() {}
-	NewModelDetails(const ModelIdentifier& ident, const ObjLoader::OutputFormat& format)
+	NewModelDetails(const ModelIdentifier& ident, const ObjLoader::OutputFormat& format = ObjLoader::default_output_format)
 		: ident_(ident), format_(format) {}
-	NewModelDetails(const ModelIdentifier& ident) : ident_(ident) {}
+	NewModelDetails(const ModelIdentifier& ident) {}
 
 	bool IsActive() const {
 		return !ident_.GetFileName().empty();
@@ -125,14 +125,18 @@ struct NewModelDetails {
 
 	Model GetModel(ResourcePool& resources) const {
 		if (IsActive()) {
-			return resources.LoadModelFromFile(ident_, format_);
+			if (format_) {
+				return resources.LoadModelFromFile(ident_, *format_);
+			} else {
+				return resources.LoadExistingModel(ident_);
+			}
 		} else {
 			return Model();
 		}
 	}
 
 	ModelIdentifier ident_;
-	ObjLoader::OutputFormat format_ = ObjLoader::default_output_format;
+	optional<ObjLoader::OutputFormat> format_;
 };
 
 struct EntityInfo {
