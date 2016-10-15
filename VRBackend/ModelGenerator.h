@@ -22,7 +22,7 @@ public:
 	virtual ~ModelGenerator() {};
 
 	void AddVertex(Vertex new_vertex);
-	void AddVertexBatch(std::vector<Vertex>& new_vertexes);
+	void AddVertexBatch(const Vertices& new_vertices);
 	void SetParts(map<string, ModelSlice> parts);
 
 	Model GetModel(std::string part_name = "");

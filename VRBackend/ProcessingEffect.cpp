@@ -55,13 +55,13 @@ void ProcessingEffect::CreateProcessingEffectResources(ResourcePool* resource_po
 }
 
 Model ProcessingEffect::CreateScreenFillingModel(ResourcePool* resource_pool) {
-	std::vector<Vertex> model_vertices;
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { -1, -1, 0, 1 }));
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { -1, 1, 0, 0 }));
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { 1, -1, 1, 1 }));
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { 1, -1, 1, 1 }));
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { -1, 1, 0, 0 }));
-	model_vertices.push_back(Vertex(VertexType::vertex_type_texture, { 1, 1, 1, 0 }));
+	vector<array<float, 4>> model_vertices;
+	model_vertices.push_back({ -1, -1, 0, 1 });
+	model_vertices.push_back({ -1, 1, 0, 0 });
+	model_vertices.push_back({ 1, -1, 1, 1 });
+	model_vertices.push_back({ 1, -1, 1, 1 });
+	model_vertices.push_back({ -1, 1, 0, 0 });
+	model_vertices.push_back({ 1, 1, 1, 0 });
 
-	return resource_pool->LoadModelFromVertices(ModelIdentifier("ScreenFillingModel"), VertexType::vertex_type_texture, model_vertices, D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {true, false, false});
+	return resource_pool->LoadModelFromVertices(ModelIdentifier("ScreenFillingModel"), Vertices(VertexType::xyuv, model_vertices), D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {true, false, false});
 }

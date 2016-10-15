@@ -54,7 +54,7 @@ Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoade
 }
 
 Model ResourcePool::LoadModelFromVertices(
-	ModelIdentifier model_name, VertexType vertex_type, std::vector<Vertex> vertices,
+	ModelIdentifier model_name, const Vertices& vertices,
 	D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage,
 	map<string, ModelSlice> parts) {
 	Model model = LoadExistingModel(model_name);
@@ -62,7 +62,7 @@ Model ResourcePool::LoadModelFromVertices(
 		return model;
 	}
 
-	ModelGenerator generator(vertex_type, primitive_type);
+	ModelGenerator generator(vertices.GetVertexType(), primitive_type);
 	generator.AddVertexBatch(vertices);
 	parts[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
 	generator.SetParts(parts);
@@ -175,11 +175,11 @@ VertexShader ResourcePool::LoadVertexShader(std::string file_name, VertexType ve
 	return LoadVertexShader(file_name, vertex_type.GetVertexType(), vertex_type.GetSizeVertexType());
 }
 
-VertexShader ResourcePool::LoadVertexShader(std::string file_name, D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
+VertexShader ResourcePool::LoadVertexShader(std::string file_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
 	return LoadVertexShader(file_name, "VShader", ied, ied_size);
 }
 
-VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string function_name, D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
+VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string function_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
 	auto existing_vertex_shader = vertex_shader_lookup.find(file_name);
 	if (existing_vertex_shader != vertex_shader_lookup.end()) {
 		return vertex_shaders[existing_vertex_shader->second];

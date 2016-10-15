@@ -20,6 +20,11 @@ const VertexType VertexType::vertex_type_location = VertexType(std::vector<D3D11
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
 }));
 
+const VertexType VertexType::xyuv = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
+	{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+}));
+
 VertexType::VertexType(D3D11_INPUT_ELEMENT_DESC* v_type, int num_elements_in_type) {
 	for (int i = 0; i < num_elements_in_type; i++) {
 		vertex_type.push_back(v_type[i]);
@@ -46,15 +51,15 @@ bool VertexType::operator==(const VertexType& that) const {
 	return equal;
 }
 
-D3D11_INPUT_ELEMENT_DESC* VertexType::GetVertexType() {
+const D3D11_INPUT_ELEMENT_DESC* VertexType::GetVertexType() const {
 	return vertex_type.data();
 }
 
-int VertexType::GetSizeVertexType() {
+int VertexType::GetSizeVertexType() const {
 	return vertex_type.size();
 }
 
-unsigned int VertexType::GetVertexSize() {
+unsigned int VertexType::GetVertexSize() const {
 	return size_;
 }
 
@@ -89,33 +94,32 @@ VertexType Vertex::GetVertexType() {
 	return vertex_type;
 }
 
-template<unsigned int N>
-Vertices::Vertices(VertexType vertex_type, vector<array<float, N>> data_per_vertex) : vertex_type_(vertex_type) {
-	assert(vertex_type.GetVertexSize() == (sizeof(float) * N));
-	data_.resize(data_per_vertex.size() * N);
-	for (unsigned int array_index = 0; array_index < data_per_vertex.size(); array_index++) {
-		memcpy(data_.data() + (N * array_index), data_per_vertex[array_index].data(), vertex_type.GetVertexSize());
-	}
+vector<float>& Vertex::GetDataVec() {
+	return data;
 }
 
 Vertices::Vertices(VertexType vertex_type, vector<float> data) : vertex_type_(vertex_type), data_(move(data)) {
 
 }
 
-float* Vertices::GetData() {
+const float* Vertices::GetData() const {
 	return data_.data();
+}
+
+unsigned int Vertices::GetTotalByteSize() const {
+	return data_.size() * sizeof(float);
 }
 
 Vertices::VertexIterator Vertices::GetVertexData(unsigned int vertex_index) {
 	return VertexIterator(&data_[vertex_index * vertex_type_.GetVertexSize()], vertex_type_);
 }
 
-unsigned int Vertices::GetNumberOfVertices() {
+unsigned int Vertices::GetNumberOfVertices() const {
 	if (unsigned int vertex_size = vertex_type_.GetVertexSize()) {
 		return data_.size() / vertex_size;
 	}
 }
 
-const VertexType& Vertices::GetVertexType() {
+const VertexType& Vertices::GetVertexType() const {
 	return vertex_type_;
 }

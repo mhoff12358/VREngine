@@ -53,7 +53,7 @@ public:
 
 	Model LoadExistingModel(ModelIdentifier model_name);
 	Model LoadModelFromFile(ModelIdentifier model_name, const ObjLoader::OutputFormat& model_output_format);
-	Model LoadModelFromVertices(ModelIdentifier model_name, VertexType vertex_type, vector<Vertex> vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage, map<string, ModelSlice> parts = {});
+	Model LoadModelFromVertices(ModelIdentifier model_name, const Vertices& vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage, map<string, ModelSlice> parts = {});
 	Model LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator generator);
 	map<string, Model> LoadExistingModelAsParts(const string& file_name);
 	// Should only be called by the drawing thread when claiming ownership of the device contex.t
@@ -63,9 +63,9 @@ public:
 	PixelShader LoadPixelShader(string file_name, string function_name);
 	PixelShader LoadExistingPixelShader(string file_name);
 
-	VertexShader LoadVertexShader(string file_name, D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
+	VertexShader LoadVertexShader(string file_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
 	VertexShader LoadVertexShader(string file_name, VertexType vertex_type);
-	VertexShader LoadVertexShader(string file_name, string function_name, D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
+	VertexShader LoadVertexShader(string file_name, string function_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
 	VertexShader LoadExistingVertexShader(string file_name);
 
 	GeometryShader LoadGeometryShader(string file_name);

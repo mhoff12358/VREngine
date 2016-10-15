@@ -17,11 +17,11 @@ public:
 	VertexType(vector<D3D11_INPUT_ELEMENT_DESC> v_type);
 	VertexType();
 
-	D3D11_INPUT_ELEMENT_DESC* GetVertexType();
-	int GetSizeVertexType();
+	const D3D11_INPUT_ELEMENT_DESC* GetVertexType() const;
+	int GetSizeVertexType() const;
 
 	// Returns the size of the vertex's data in bytes
-	unsigned int GetVertexSize();
+	unsigned int GetVertexSize() const;
 
 	bool operator==(const VertexType& that) const;
 	//bool operator!=(const VertexType& that) const;
@@ -30,6 +30,8 @@ public:
 	static const VertexType vertex_type_texture;
 	static const VertexType vertex_type_normal;
 	static const VertexType vertex_type_all;
+
+	static const VertexType xyuv;
 
 private:
 	unsigned int ComputeVertexSize();
@@ -44,6 +46,7 @@ public:
 
 	float* GetData();
 	VertexType GetVertexType();
+	vector<float>& GetDataVec();
 
 private:
 	vector<float> data;
@@ -56,9 +59,10 @@ public:
 	Vertices(VertexType vertex_type, vector<array<float, N>> data_per_vertex);
 	Vertices(VertexType vertex_type, vector<float> data);
 
-	float* GetData();
-	unsigned int GetNumberOfVertices();
-	const VertexType& GetVertexType();
+	const float* GetData() const;
+	unsigned int GetNumberOfVertices() const;
+	const VertexType& GetVertexType() const;
+	unsigned int GetTotalByteSize() const;
 
 	class VertexIterator : public std::iterator<std::input_iterator_tag, float> {
 		float* p_;
@@ -80,5 +84,14 @@ private:
 	VertexType vertex_type_;
 	vector<float> data_;
 };
+
+template<unsigned int N>
+Vertices::Vertices(VertexType vertex_type, vector<array<float, N>> data_per_vertex) : vertex_type_(vertex_type) {
+	assert(vertex_type.GetVertexSize() == (sizeof(float) * N));
+	data_.resize(data_per_vertex.size() * N);
+	for (unsigned int array_index = 0; array_index < data_per_vertex.size(); array_index++) {
+		memcpy(data_.data() + (N * array_index), data_per_vertex[array_index].data(), vertex_type.GetVertexSize());
+	}
+}
 
 #endif

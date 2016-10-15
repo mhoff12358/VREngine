@@ -215,9 +215,10 @@ void NichijouGraph::CreateGraphicsResources() {
 			Target(scene_->FindByName("GraphicsResources")),
 			QueryArgs(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST))).data_;
 	ModelGenerator gen(VertexType::vertex_type_texture, D3D10_PRIMITIVE_TOPOLOGY_LINELIST);
-	gen.AddVertexBatch(vector<Vertex>({
-		Vertex(VertexType::vertex_type_texture, {0.0f, 0.0f, 0.0f}),
-		Vertex(VertexType::vertex_type_texture, {1.0f, 0.0f, 0.0f}),
+	gen.AddVertexBatch(Vertices(VertexType::vertex_type_texture,
+	vector<array<float,3>>{
+		array<float,3>{0.0f, 0.0f, 0.0f},
+		array<float,3>{1.0f, 0.0f, 0.0f},
 	}));
 	gen.Finalize(resources.device_interface_, nullptr, ModelStorageDescription::Immutable());
 	gen.parts_ = { { "Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };

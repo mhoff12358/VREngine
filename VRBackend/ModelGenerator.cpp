@@ -6,17 +6,15 @@ ModelGenerator::ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type)
 }
 
 void ModelGenerator::AddVertex(Vertex new_vertex) {
-	AddVertexBatch(std::vector<Vertex>({ { new_vertex } }));
+	AddVertexBatch(Vertices(new_vertex.GetVertexType(), vector<float>{move(new_vertex.GetDataVec())}));
 }
 
-void ModelGenerator::AddVertexBatch(std::vector<Vertex>& new_vertexes) {
+void ModelGenerator::AddVertexBatch(const Vertices& new_vertices) {
 	unsigned int existing_data_size = cpu_side_data.size();
-	cpu_side_data.resize(existing_data_size + new_vertexes.size() * vertex_type.GetVertexSize());
+	cpu_side_data.resize(existing_data_size + new_vertices.GetTotalByteSize());
 	char* new_data_location = cpu_side_data.data() + existing_data_size;
-	for (unsigned int vertex_number = 0; vertex_number < new_vertexes.size(); vertex_number++) {
-		memcpy(new_data_location + vertex_type.GetVertexSize() * vertex_number, new_vertexes[vertex_number].GetData(), vertex_type.GetVertexSize());
-	}
-	number_of_vertices += new_vertexes.size();
+	memcpy(new_data_location, new_vertices.GetData(), new_vertices.GetTotalByteSize());
+	number_of_vertices += new_vertices.GetNumberOfVertices();
 }
 
 void ModelGenerator::SetParts(map<string, ModelSlice> parts) {
