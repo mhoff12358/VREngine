@@ -69,5 +69,8 @@
     <None Include="graphics_object.ipp">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="headset.ipp">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
