@@ -35,6 +35,9 @@
     <ClInclude Include="stdafx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StlHelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">
@@ -58,6 +61,12 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="stl.ipp">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="entity_specification.ipp">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="graphics_object.ipp">
       <Filter>Source Files</Filter>
     </None>
   </ItemGroup>

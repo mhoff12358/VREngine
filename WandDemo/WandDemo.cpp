@@ -63,7 +63,8 @@ void GraphicsLoop() {
 
 		RenderGroup* drawing_groups = graphics_objects.entity_handler->GetRenderGroupForDrawing();
 		for (int render_group_number = 0; render_group_number < graphics_objects.entity_handler->GetNumEntitySets(); render_group_number++) {
-			drawing_groups[render_group_number].ApplyMutations(*graphics_objects.resource_pool);
+			drawing_groups[render_group_number].ApplyMutations(
+				graphics_objects.view_state->device_interface, graphics_objects.view_state->device_context, *graphics_objects.resource_pool);
 		}
 
 		if (graphics_objects.oculus->IsInitialized()) {
@@ -101,8 +102,9 @@ void UpdateLoop() {
 	game_scene::actors::Sprite::Init();
 	ModelGenerator point_gen(VertexType::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
 	point_gen.AddVertex(Vertex(VertexType::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
-	point_gen.Finalize(graphics_objects.view_state->device_interface, nullptr, ModelStorageDescription::Immutable());
-	point_gen.parts_ = { { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
+	point_gen.Finalize(graphics_objects.view_state->device_interface, optional<EntityHandler&>{}, ModelStorageDescription::Immutable());
+	point_gen.parts_ = { { "", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) },
+	                     { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
 	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourceIdentifier::GetConstantModelName("point"), point_gen));
 
 	game_scene::Scene scene;
@@ -129,133 +131,6 @@ void UpdateLoop() {
 		scene.AddActorToGroup(headset_interface, tick_registry);
 	}
 
-	game_scene::ActorId square_actor;
-	game_scene::CommandQueueLocation next_command;
-	std::tie(square_actor, next_command) = scene.AddActorReturnInitialize(
-		make_unique<game_scene::actors::NewGraphicsObject>());
-	next_command = scene.MakeCommandAfter(next_command, game_scene::Command(
-		game_scene::Target(square_actor),
-		make_unique<game_scene::commands::CreateNewGraphicsObject>(
-			"basic",
-			vector<game_scene::EntitySpecification>{
-				game_scene::EntitySpecification()
-					.SetModel(game_scene::NewModelDetails(ModelIdentifier("square.obj|Square"), ObjLoader::default_output_format))
-					.SetShaders(game_scene::NewShaderDetails(
-						"texturedspecularlightsource.hlsl",
-						VertexType::vertex_type_all,
-						ShaderStages::Vertex().and(ShaderStages::Pixel())))
-					.SetShaderSettingsValue(vector<vector<float>>{vector<float>{0.0f, 0.0f, 0.0f}, vector<float>{1.0f}})
-					.SetTextures({{game_scene::NewIndividualTextureDetails("terrain.png", ShaderStages::All(), 0, 0)}})
-					.SetComponent("square")
-			},
-			vector<game_scene::ComponentInfo>{
-					game_scene::ComponentInfo("", "square")
-			})));
-	next_command = scene.MakeCommandAfter(next_command, game_scene::Command(
-		game_scene::Target(square_actor),
-		make_unique<game_scene::commands::PlaceNewComponent>("square", Pose(Location(0, 0, -3), Quaternion::RotationAboutAxis(AID_X, 3.14/2.0f)))));
-
-	if (false) {
-		//game_scene::ActorId camera_movement = scene.AddActor(
-		//	make_unique<game_scene::actors::MovableCamera>(&player_look_camera));
-		//scene.AddActorToGroup(camera_movement, controls_registry);
-		game_scene::ActorId cockpit = scene.AddActor(
-			make_unique<game_scene::actors::GraphicsObject>());
-		game_scene::ActorId floor = scene.AddActor(
-			make_unique<game_scene::actors::GraphicsObject>());
-		game_scene::ActorId weird_wall = scene.AddActor(
-			make_unique<game_scene::actors::GraphicsObject>());
-		game_scene::ActorId nichijou_graph = scene.AddActor(
-			make_unique<game_scene::actors::NichijouGraph>());
-
-		game_scene::ActorId sprite = scene.AddActor(
-			make_unique<game_scene::actors::Sprite>());
-
-
-		/*game_scene::CommandQueueLocation sprite_command =
-			scene.MakeCommandAfter(
-				scene.FrontOfCommands(),
-				game_scene::Command(
-					game_scene::Target(sprite),
-					make_unique<game_scene::commands::SpriteDetails>("terrain.png")));
-		sprite_command = scene.MakeCommandAfter(
-				sprite_command,
-				game_scene::Command(
-					game_scene::Target(sprite),
-					make_unique<game_scene::commands::SpritePlacement>(Location(0, 1.5, -0.5), array<float, 2>({1.0f, 1.0f}))));*/
-
-		game_scene::actors::GraphicsObjectDetails square_details;
-		square_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
-			"square",
-			{
-				{"square.obj|Square",
-				ObjLoader::OutputFormat(
-					ModelModifier(
-						{0, 1, 2},
-						{1, 1, 1},
-						{false, true}),
-					VertexType::vertex_type_all,
-					false)}
-			},
-			{});
-		square_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("terrain.png", false, true));
-		square_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-		square_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_all;
-		square_details.heirarchy_.entity_group_ = "basic";
-		square_details.heirarchy_.shader_settings_ = {
-			{0.0f, 0.5f, 0.0f},
-			{0.2f}
-		};
-		game_scene::actors::GraphicsObjectDetails cockpit_details;
-		cockpit_details.heirarchy_ = game_scene::actors::ComponentHeirarchy(
-			"bars",
-			{
-				{"cockpit_bars.obj|MetalBars",
-				ObjLoader::OutputFormat(
-					ModelModifier(
-						{0, 1, 2},
-						{1, 1, 1},
-						{false, true}),
-					VertexType::vertex_type_all,
-					false)}
-			},
-			{});
-		cockpit_details.heirarchy_.textures_.push_back(game_scene::actors::TextureDetails("metal_bars.png", false, true));
-		cockpit_details.heirarchy_.shader_file_definition_ = game_scene::actors::ShaderFileDefinition("texturedspecularlightsource.hlsl");
-		cockpit_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_all;
-		cockpit_details.heirarchy_.entity_group_ = "basic";
-		cockpit_details.heirarchy_.shader_settings_ = {
-			{0.0f, 0.5f, 0.0f},
-			{0.2f}
-		};
-
-		scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(floor),
-			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-				square_details)));
-		scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(floor),
-			make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixIdentity())));
-
-		scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(weird_wall),
-			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-				square_details)));
-		scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(weird_wall),
-			make_unique<game_scene::commands::ComponentPlacement>("square", DirectX::XMMatrixTranslation(0, 0, -2))));
-
-		/*scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(cockpit),
-			make_unique<game_scene::WrappedCommandArgs<game_scene::actors::GraphicsObjectDetails>>(
-				game_scene::GraphicsObjectCommand::CREATE_COMPONENTS,
-				cockpit_details)));
-		scene.ExecuteCommand(game_scene::Command(
-			game_scene::Target(cockpit),
-			make_unique<game_scene::commands::ComponentPlacement>("bars", DirectX::XMMatrixTranslation(0, 1.5, 0))));*/
-	}
 	scene.FlushCommandQueue();
 
 	game_scene::ActorId added_actor;

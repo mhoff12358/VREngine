@@ -54,6 +54,7 @@ struct ComponentInfo {
 	ComponentInfo(string parent_name, string name)
 		: parent_name_(parent_name), name_(name) {}
 
+	// These accesses are only needed internally.
 	void AddChild(const ComponentInfo& new_child) {
 		children_.push_back(&new_child);
 	}

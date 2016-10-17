@@ -18,7 +18,7 @@ public:
 	RenderGroup* ConsumerFinish();
 
 private:
-	std::mutex state_ownership_lock;
+	mutex state_ownership_lock;
 
 	// This is the number of render groups for each group, so there are 3*num_render_groups individual RenderGroup objects.
 	unsigned int num_render_groups;

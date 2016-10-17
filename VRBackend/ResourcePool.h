@@ -11,6 +11,8 @@
 
 #include "stl.h"
 
+class EntityHandler;
+
 class ResourceIdent {
 public:
 	enum ResourceType {
@@ -46,7 +48,7 @@ public:
 class ResourcePool
 {
 public:
-	ResourcePool();
+	ResourcePool(EntityHandler& entity_handler);
 	~ResourcePool();
 
 	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con);
@@ -80,6 +82,7 @@ public:
 
 	ID3D11Device* device_interface;
 	ID3D11DeviceContext* device_context;
+	EntityHandler& entity_handler_;
 
 private:
 	unsigned int lastest_model_number;

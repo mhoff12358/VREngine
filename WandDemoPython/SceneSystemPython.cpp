@@ -11,12 +11,15 @@
 #include "SceneSystem/IOInterface.h"
 #include "SceneSystem/Scene.h"
 #include "SceneSystem/GraphicsResources.h"
+#include "SceneSystem/EntitySpecification.h"
+#include "SceneSystem/NewGraphicsObject.h"
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
 #include "VRBackend/EntityHandler.h"
 
 #include "PyActor.h"
 #include "PyScene.h"
+#include "StlHelper.h"
 
 #define BOOST_PTR_MAGIC(class_name) \
 namespace boost { \
@@ -32,6 +35,8 @@ BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
 BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
+BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
+BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 
 int x(const array<int, 2>& arr) { return arr[0]; }
 int y(const array<int, 2>& arr) { return arr[1]; }
@@ -41,8 +46,11 @@ int& getitem_foo(array<int, 2>& foo, int index) {
 }
 
 template <typename T>
-auto CreateClass() {
-	return boost::python::class_<T>(typeid(T).name());
+auto CreateClass(string name = "") {
+	if (name.empty()) {
+		name = typeid(T).name();
+	}
+	return boost::python::class_<T>(name.c_str(), no_init);
 }
 
 template <typename IndexType, typename ValueType, typename PyType>
@@ -52,8 +60,11 @@ auto& CreateIndexing(boost::python::class_<PyType>& c) {
 		.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
 }
 
+array<float, 3>* MakeArray(const object& p) {
+	return new array<float, 3>{1, 2, 3};
+}
+
 BOOST_PYTHON_MODULE(scene_system_) {
-	using namespace boost::python;
 	class_<PyActor, boost::noncopyable>("Actor")
 		.def("HandleCommand", &game_scene::Shmactor::HandleCommand, &PyActor::default_HandleCommand)
 		.def("AddedToScene", &game_scene::Shmactor::AddedToScene, &PyActor::default_AddedToScene)
@@ -141,5 +152,14 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("SetPose", &PipelineCamera::SetPose)
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
+	class_<VertexType>("VertexType", no_init)
+		.def_readonly("vertex_type_location", make_getter(&VertexType::vertex_type_location, return_value_policy<reference_existing_object>()))
+		.def_readonly("vertex_type_texture", make_getter(&VertexType::vertex_type_texture, return_value_policy<reference_existing_object>()))
+		.def_readonly("vertex_type_normal", make_getter(&VertexType::vertex_type_normal, return_value_policy<reference_existing_object>()))
+		.def_readonly("vertex_type_all", &VertexType::vertex_type_all)
+		.def_readonly("xyuv", make_getter(&VertexType::xyuv, return_value_policy<reference_existing_object>()));
+
 #include "stl.ipp"
+#include "entity_specification.ipp"
+#include "graphics_object.ipp"
 }

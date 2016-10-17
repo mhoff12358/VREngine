@@ -6,9 +6,9 @@ ModelModifier ModelModifier::identity_model_modifier = {
 	{ false, false }
 };
 
-ModelGenerator ObjLoader::CreateModelsFromFile(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename, const OutputFormat& output_format) {
+ModelGenerator ObjLoader::CreateModelsFromFile(ID3D11Device* device, std::string filename, const OutputFormat& output_format) {
 	ObjLoader loader(filename);
-	return loader.ParseAsMultipleModels(device, device_context, output_format);
+	return loader.ParseAsMultipleModels(device, output_format);
 }
 
 const ObjLoader::OutputFormat ObjLoader::default_output_format = {
@@ -21,7 +21,7 @@ ObjLoader::ObjLoader(std::string filename)
 	: input_file(filename) {
 }
 
-void ObjLoader::AddLinesToModel(ID3D11Device* device, ID3D11DeviceContext* device_context, const std::vector<std::string>& input_lines, const OutputFormat& output_format, ModelGenerator& generator, std::string part_name) {
+void ObjLoader::AddLinesToModel(ID3D11Device* device, const std::vector<std::string>& input_lines, const OutputFormat& output_format, ModelGenerator& generator, std::string part_name) {
 	ModelSlice new_part;
 	new_part.start = generator.GetCurrentNumberOfVertices();
 	
@@ -82,7 +82,7 @@ void ObjLoader::AddLinesToModel(ID3D11Device* device, ID3D11DeviceContext* devic
 	}
 }
 
-ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11DeviceContext* device_context, const OutputFormat& output_format) {
+ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, const OutputFormat& output_format) {
 	std::string line;
 	std::string existing_sub_object_name = "";
 	std::vector<std::string> current_model_lines;
@@ -97,7 +97,7 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11Devi
 		std::string identifier;
 		line_stream >> identifier;
 		if (identifier == "o") {
-			AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
+			AddLinesToModel(device, current_model_lines, output_format, generator, existing_sub_object_name);
 			existing_sub_object_name = "";
 			line_stream >> existing_sub_object_name;
 			current_model_lines.clear();
@@ -105,7 +105,7 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11Devi
 			current_model_lines.push_back(line);
 		}
 	}
-	AddLinesToModel(device, device_context, current_model_lines, output_format, generator, existing_sub_object_name);
+	AddLinesToModel(device, current_model_lines, output_format, generator, existing_sub_object_name);
 	generator.parts_[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
 
 	ModelStorageDescription model_storage_description;
@@ -115,7 +115,7 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, ID3D11Devi
 	else {
 		model_storage_description = { true, false, false };
 	}
-	generator.Finalize(device, device_context, model_storage_description);
+	generator.Finalize(device, optional<EntityHandler&>{}, model_storage_description);
 	return generator;
 }
 

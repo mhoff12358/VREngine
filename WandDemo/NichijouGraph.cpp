@@ -220,7 +220,7 @@ void NichijouGraph::CreateGraphicsResources() {
 		array<float,3>{0.0f, 0.0f, 0.0f},
 		array<float,3>{1.0f, 0.0f, 0.0f},
 	}));
-	gen.Finalize(resources.device_interface_, nullptr, ModelStorageDescription::Immutable());
+	gen.Finalize(resources.device_interface_, optional<EntityHandler&>{}, ModelStorageDescription::Immutable());
 	gen.parts_ = { { "Line", ModelSlice(gen.GetCurrentNumberOfVertices(), 0) } };
 	ResourceIdent edge_model_ident(ResourceIdent::MODEL, edge_model_name_, gen);
 	scene_->MakeCommandAfter(

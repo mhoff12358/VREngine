@@ -146,6 +146,7 @@
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyScene.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StlHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="scene_system_internal.py">
@@ -165,6 +166,8 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="entity_specification.ipp" />
+    <None Include="graphics_object.ipp" />
     <None Include="graphics_resources.ipp" />
     <None Include="HeadsetInterfacePython.h" />
     <None Include="io_interface.ipp" />

@@ -7,6 +7,8 @@
 namespace game_scene {
 
 struct NewIndividualTextureDetails {
+	NewIndividualTextureDetails() :
+		ident_(""), stages_(), shader_resource_slot_(0), sampler_slot_(0) {}
 	NewIndividualTextureDetails(
 		string ident, ShaderStages stages,
 		int shader_resource_slot, int sampler_slot) :
@@ -109,7 +111,6 @@ struct NewModelDetails {
 	NewModelDetails() {}
 	NewModelDetails(const ModelIdentifier& ident, const ObjLoader::OutputFormat& format = ObjLoader::default_output_format)
 		: ident_(ident), format_(format) {}
-	NewModelDetails(const ModelIdentifier& ident) {}
 
 	bool IsActive() const {
 		return !ident_.GetFileName().empty();

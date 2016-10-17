@@ -12,9 +12,9 @@ VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, std::string resource
 	} else {
 		graphics_objects.view_state = new ViewState;
 	}
-	graphics_objects.resource_pool = new ResourcePool;
-	graphics_objects.player_camera = new PerspectiveCamera;
 	graphics_objects.entity_handler = new EntityHandler;
+	graphics_objects.resource_pool = new ResourcePool(*graphics_objects.entity_handler);
+	graphics_objects.player_camera = new PerspectiveCamera;
 
 
 	graphics_objects.input_handler->Initialize();

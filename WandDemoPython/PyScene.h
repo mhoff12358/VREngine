@@ -5,6 +5,36 @@
 #include "PyActor.h"
 
 namespace PyScene {
+
+template <typename ActorSubclass>
+game_scene::ActorId AddAndConstructActor(game_scene::Scene& self) {
+	return self.AddActor(make_unique<ActorSubclass>());
+}
+
+template <typename ActorSubclass>
+game_scene::ActorId AddAndConstructActorAfter(game_scene::Scene& self, game_scene::CommandQueueLocation initialize_after) {
+	return self.AddActor(make_unique<ActorSubclass>(), initialize_after);
+}
+
+template <typename ActorSubclass>
+tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddAndConstructActorReturnIntialize(game_scene::Scene& self) {
+	return self.AddActorReturnInitialize(make_unique<ActorSubclass>());
+}
+
+template <typename ActorSubclass>
+tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddAndConstructActorAfterReturnInitialize(game_scene::Scene& self, game_scene::CommandQueueLocation initialize_after) {
+	return self.AddActorReturnInitialize(make_unique<ActorSubclass>(), initialize_after);
+}
+
+template <typename ActorSubclass>
+auto& AddActorSubclassCreation(class_<game_scene::Scene, boost::noncopyable>& scene_class, const string& subclass_name) {
+	return scene_class
+		.def(("AddAndConstruct" + subclass_name).c_str(), &AddAndConstructActor<ActorSubclass>)
+		.def(("AddAndConstruct" + subclass_name + "After").c_str(), &AddAndConstructActorAfter<ActorSubclass>)
+		.def(("AddAndConstruct" + subclass_name + "ReturnInitialize").c_str(), &AddAndConstructActor<ActorSubclass>)
+		.def(("AddAndConstruct" + subclass_name + "AfterReturnInitialize").c_str(), &AddAndConstructActorAfter<ActorSubclass>);
+}
+
 game_scene::ActorId AddActor(game_scene::Scene& self, PyActor* new_actor) {
 	return self.AddActor(unique_ptr<game_scene::Shmactor>(new_actor));
 }

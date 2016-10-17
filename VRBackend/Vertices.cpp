@@ -115,9 +115,7 @@ Vertices::VertexIterator Vertices::GetVertexData(unsigned int vertex_index) {
 }
 
 unsigned int Vertices::GetNumberOfVertices() const {
-	if (unsigned int vertex_size = vertex_type_.GetVertexSize()) {
-		return data_.size() / vertex_size;
-	}
+	return GetTotalByteSize() / vertex_type_.GetVertexSize();
 }
 
 const VertexType& Vertices::GetVertexType() const {

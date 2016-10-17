@@ -45,12 +45,12 @@ public:
 
 	static const OutputFormat default_output_format;
 
-	static ModelGenerator CreateModelsFromFile(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename, const OutputFormat& output_format = default_output_format);
+	static ModelGenerator CreateModelsFromFile(ID3D11Device* device, std::string filename, const OutputFormat& output_format = default_output_format);
 
 	ObjLoader(std::string filename);
 
-	void AddLinesToModel(ID3D11Device* device, ID3D11DeviceContext* device_context, const std::vector<std::string>& input_lines, const OutputFormat& output_format, ModelGenerator& generator, std::string part_name = "");
-	ModelGenerator ParseAsMultipleModels(ID3D11Device* device, ID3D11DeviceContext* device_context, const OutputFormat& output_format);
+	void AddLinesToModel(ID3D11Device* device, const std::vector<std::string>& input_lines, const OutputFormat& output_format, ModelGenerator& generator, std::string part_name = "");
+	ModelGenerator ParseAsMultipleModels(ID3D11Device* device, const OutputFormat& output_format);
 	
 	Vertex CreateVertex(std::string vertex_id);
 	Vertex CreateVertex(std::string location_str, std::string texture_coords_str, std::string normal_str);

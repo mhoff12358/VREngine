@@ -22,8 +22,13 @@ using std::string;
 using std::unordered_map;
 using std::tuple;
 using std::make_tuple;
+using std::make_pair;
 using std::get;
 using std::unique_ptr;
 using std::move;
 using std::mutex;
 using std::max;
+
+#include "boost/optional.hpp"
+
+using boost::optional;

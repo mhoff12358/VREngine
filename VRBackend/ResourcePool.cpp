@@ -1,7 +1,8 @@
 #include "ResourcePool.h"
 
+#include "EntityHandler.h"
 
-ResourcePool::ResourcePool()
+ResourcePool::ResourcePool(EntityHandler& entity_handler) : entity_handler_(entity_handler)
 {
 	lastest_model_number = 0;
 
@@ -45,7 +46,7 @@ Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoade
 	}
 
 	ModelGenerator generator = ObjLoader::CreateModelsFromFile(
-		device_interface, device_context, model_name.GetFileName(), model_output_format);
+		device_interface, model_name.GetFileName(), model_output_format);
 
 	models_.push_back(generator);
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
@@ -66,7 +67,7 @@ Model ResourcePool::LoadModelFromVertices(
 	generator.AddVertexBatch(vertices);
 	parts[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
 	generator.SetParts(parts);
-	generator.Finalize(device_interface, device_context, model_storage);
+	generator.Finalize(device_interface, entity_handler_, model_storage);
 
 	models_.push_back(generator);
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;

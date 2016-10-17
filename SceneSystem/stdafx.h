@@ -25,10 +25,6 @@
 #include <list>
 #include <queue>
 
-#include "boost/optional.hpp"
-
-using boost::optional;
-
 using std::string;
 using std::map;
 using std::multimap;
@@ -49,3 +45,7 @@ using std::move;
 using std::swap;
 using std::make_unique;
 using std::get;
+
+#include "boost/optional.hpp"
+
+using boost::optional;

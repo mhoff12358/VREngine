@@ -21,7 +21,7 @@ void ModelGenerator::SetParts(map<string, ModelSlice> parts) {
 	parts_ = std::move(parts);
 }
 
-void ModelGenerator::InitializeVertexBuffer(ID3D11Device* device, ID3D11DeviceContext* device_context, ModelStorageDescription storage_description) {
+void ModelGenerator::InitializeVertexBuffer(ID3D11Device* device, optional<EntityHandler&> entity_handler, ModelStorageDescription storage_description) {
 	int vertex_data_size = vertex_type.GetVertexSize();
 
 	if (storage_description.immutable || !storage_description.store_staging_copy) {
@@ -43,7 +43,7 @@ void ModelGenerator::InitializeVertexBuffer(ID3D11Device* device, ID3D11DeviceCo
 		vertices_data.pSysMem = (void*)cpu_side_data.data();
 
 		device->CreateBuffer(&buffer_desc, &vertices_data, &vertex_buffer);
-		staging_buffer = NULL;
+		staging_buffer = nullptr;
 	} else {
 		D3D11_BUFFER_DESC buffer_desc;
 		ZeroMemory(&buffer_desc, sizeof(buffer_desc));
@@ -64,7 +64,8 @@ void ModelGenerator::InitializeVertexBuffer(ID3D11Device* device, ID3D11DeviceCo
 		buffer_desc.CPUAccessFlags = 0;
 
 		device->CreateBuffer(&buffer_desc, NULL, &vertex_buffer);
-		CopyFromStagingToVertexBuffer(device_context);
+		assert(entity_handler.is_initialized());
+		entity_handler.get().AddBufferCopy(vertex_buffer, staging_buffer);
 	}
 
 	cpu_side_data_kept = true;
@@ -94,12 +95,10 @@ void ModelGenerator::FinalizeWriteToBuffer(ID3D11DeviceContext* device_context, 
 	}
 
 	// Unmap whatever was opened for writing.
+	device_context->Unmap(staging_buffer, 0);
 	if (staging_buffer != NULL) {
 		// If the staging buffer was used for writing, also do a copy to the usable vertex buffer.
-		device_context->Unmap(staging_buffer, 0);
 		CopyFromStagingToVertexBuffer(device_context);
-	} else {
-		device_context->Unmap(vertex_buffer, 0);
 	}
 }
 
@@ -119,8 +118,8 @@ void ModelGenerator::CopyFromStagingToVertexBuffer(ID3D11DeviceContext* device_c
 	device_context->CopyResource(vertex_buffer, staging_buffer);
 }
 
-void ModelGenerator::Finalize(ID3D11Device* device, ID3D11DeviceContext* device_context, ModelStorageDescription storage_desription) {
-	InitializeVertexBuffer(device, device_context, storage_desription);
+void ModelGenerator::Finalize(ID3D11Device* device, optional<EntityHandler&> entity_handler, ModelStorageDescription storage_desription) {
+	InitializeVertexBuffer(device, entity_handler, storage_desription);
 }
 
 Model ModelGenerator::GetModel(std::string part_name) {
