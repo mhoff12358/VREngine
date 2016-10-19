@@ -33,6 +33,7 @@ public:
 		: type_(type), name_(name), vertex_type_(vertex_type) {}
 	ResourceIdent(ResourceType type, const string& name, ModelGenerator models)
 		: type_(type), name_(name), models_(models) {}
+	ResourceIdent(const ResourceIdent& other) = default;
 
 	ResourceType type_;
 	string name_;

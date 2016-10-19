@@ -5,6 +5,17 @@ ModelGenerator::ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type)
 
 }
 
+ModelGenerator::ModelGenerator(ModelGenerator&& other) :
+	parts_(move(other.parts_)),
+	number_of_vertices(other.number_of_vertices),
+	cpu_side_data_kept(other.cpu_side_data_kept),
+	cpu_side_data(move(other.cpu_side_data)),
+	vertex_buffer(other.vertex_buffer),
+	staging_buffer(other.staging_buffer),
+	vertex_type(other.vertex_type),
+	primitive_type(other.primitive_type) {
+}
+
 void ModelGenerator::AddVertex(Vertex new_vertex) {
 	AddVertexBatch(Vertices(new_vertex.GetVertexType(), vector<float>{move(new_vertex.GetDataVec())}));
 }

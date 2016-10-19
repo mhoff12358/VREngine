@@ -20,7 +20,8 @@ class ModelGenerator {
 public:
 	ModelGenerator() {}
 	ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type);
-	virtual ~ModelGenerator() {};
+	ModelGenerator(const ModelGenerator& other) = default;
+	ModelGenerator(ModelGenerator&& other);
 
 	void AddVertex(Vertex new_vertex);
 	void AddVertexBatch(const Vertices& new_vertices);
