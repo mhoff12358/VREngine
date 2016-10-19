@@ -22,6 +22,9 @@
 #include "StlHelper.h"
 #include "PythonClassHelpers.h"
 
+#include "StlInterface.h"
+#include "EntitySpecificationInterface.h"
+
 #define BOOST_PTR_MAGIC(class_name) \
 namespace boost { \
 	template <> \
@@ -38,13 +41,6 @@ BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
-
-template <typename IndexType, typename ValueType, typename PyType>
-auto& CreateIndexing(boost::python::class_<PyType>& c) {
-	return c
-		.def("__getitem__", static_cast<const ValueType(*)(PyType&, IndexType)>([](PyType& t, IndexType i)->const ValueType {return t[i];}))
-		.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
-}
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("Actor")
@@ -119,11 +115,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def_readonly("vertex_type_all", &VertexType::vertex_type_all)
 		.def_readonly("xyuv", make_getter(&VertexType::xyuv, return_value_policy<reference_existing_object>()));
 
+	StlInterface();
+	EntitySpecificationInterface();
+
 #include "stl.ipp"
 #include "headset.ipp"
 #include "io_interface.ipp"
 #include "graphics_resources.ipp"
 #include "pose.ipp"
-#include "entity_specification.ipp"
 #include "graphics_object.ipp"
 }

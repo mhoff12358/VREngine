@@ -41,6 +41,12 @@
     <ClInclude Include="PythonClassHelpers.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StlInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntitySpecificationInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">

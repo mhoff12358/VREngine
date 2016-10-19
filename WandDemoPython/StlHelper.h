@@ -47,3 +47,19 @@ auto& CreateListToCollectionWithResize(boost::python::class_<PyType> c) {
 		.def("Create", &CreateFromListWithResize<ValueType, PyType>, return_value_policy<manage_new_object>())
 		.staticmethod("Create");
 }
+
+template<typename T, size_t N>
+void CreateArray(string name) {
+	CreateListToCollection<T, array<T, N>>(CreateIndexing<size_t, T, array<T, N>>(CreateClass<array<T, N>>("Array" + name + std::to_string(N))));
+}
+
+template<typename T>
+void CreateVector(string name) {
+	CreateListToCollectionWithResize<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
+}
+
+template<typename T, size_t N>
+void CreateArrayWithVector(string name) {
+	CreateArray<T, N>(name);
+	CreateVector<array<T, N>>("Array" + name + std::to_string(N));
+}

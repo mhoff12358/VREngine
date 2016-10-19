@@ -143,11 +143,13 @@
     <ClCompile Include="SceneSystemPython.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="EntitySpecificationInterface.h" />
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyScene.h" />
     <ClInclude Include="PythonClassHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlHelper.h" />
+    <ClInclude Include="StlInterface.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="scene_system_internal.py">
