@@ -144,6 +144,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="EntitySpecificationInterface.h" />
+    <ClInclude Include="GraphicsObjectInterface.h" />
+    <ClInclude Include="GraphicsResourcesInterface.h" />
+    <ClInclude Include="HeadsetInterface.h" />
+    <ClInclude Include="IOInterfaceInterface.h" />
+    <ClInclude Include="PoseInterface.h" />
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyScene.h" />
     <ClInclude Include="PythonClassHelpers.h" />
@@ -169,7 +174,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="entity_specification.ipp" />
     <None Include="graphics_object.ipp" />
     <None Include="graphics_resources.ipp" />
     <None Include="headset.ipp" />

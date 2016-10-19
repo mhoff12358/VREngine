@@ -47,6 +47,21 @@
     <ClInclude Include="EntitySpecificationInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GraphicsObjectInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HeadsetInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IOInterfaceInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsResourcesInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PoseInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">
@@ -70,9 +85,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="stl.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="entity_specification.ipp">
       <Filter>Source Files</Filter>
     </None>
     <None Include="graphics_object.ipp">

@@ -2,20 +2,8 @@
 #include "stdafx.h"
 #include "StlHelper.h"
 
-#include "SceneSystem/QueryArgs.h"
-#include "SceneSystem/QueryResult.h"
-#include "SceneSystem/CommandArgs.h"
-#include "SceneSystem/Registry.h"
-#include "SceneSystem/InputCommandArgs.h"
-#include "SceneSystem/HeadsetInterface.h"
-#include "SceneSystem/IOInterface.h"
-#include "SceneSystem/Scene.h"
-#include "SceneSystem/GraphicsResources.h"
 #include "SceneSystem/EntitySpecification.h"
 #include "SceneSystem/NewGraphicsObject.h"
-#include "VRBackend/PipelineCamera.h"
-#include "VRBackend/Pose.h"
-#include "VRBackend/EntityHandler.h"
 
 void EntitySpecificationInterface() {
 	class_<ModelIdentifier>("ModelIdentifier", init<>())

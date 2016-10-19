@@ -24,6 +24,11 @@
 
 #include "StlInterface.h"
 #include "EntitySpecificationInterface.h"
+#include "GraphicsObjectInterface.h"
+#include "HeadsetInterface.h"
+#include "IOInterfaceInterface.h"
+#include "GraphicsResourcesInterface.h"
+#include "PoseInterface.h"
 
 #define BOOST_PTR_MAGIC(class_name) \
 namespace boost { \
@@ -117,11 +122,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 
 	StlInterface();
 	EntitySpecificationInterface();
-
-#include "stl.ipp"
-#include "headset.ipp"
-#include "io_interface.ipp"
-#include "graphics_resources.ipp"
-#include "pose.ipp"
-#include "graphics_object.ipp"
+	GraphicsObjectInterface(scene_registration);
+	IOInterfaceInterface(scene_registration);
+	HeadsetInterface();
+	GraphicsResourcesInterface();
+	PoseInterface();
 }
