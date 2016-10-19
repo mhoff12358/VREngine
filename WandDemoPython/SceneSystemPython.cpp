@@ -20,6 +20,7 @@
 #include "PyActor.h"
 #include "PyScene.h"
 #include "StlHelper.h"
+#include "PythonClassHelpers.h"
 
 #define BOOST_PTR_MAGIC(class_name) \
 namespace boost { \
@@ -38,30 +39,11 @@ BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 
-int x(const array<int, 2>& arr) { return arr[0]; }
-int y(const array<int, 2>& arr) { return arr[1]; }
-
-int& getitem_foo(array<int, 2>& foo, int index) {
-	return foo[index];
-}
-
-template <typename T>
-auto CreateClass(string name = "") {
-	if (name.empty()) {
-		name = typeid(T).name();
-	}
-	return boost::python::class_<T>(name.c_str(), no_init);
-}
-
 template <typename IndexType, typename ValueType, typename PyType>
 auto& CreateIndexing(boost::python::class_<PyType>& c) {
 	return c
 		.def("__getitem__", static_cast<const ValueType(*)(PyType&, IndexType)>([](PyType& t, IndexType i)->const ValueType {return t[i];}))
 		.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
-}
-
-array<float, 3>* MakeArray(const object& p) {
-	return new array<float, 3>{1, 2, 3};
 }
 
 BOOST_PYTHON_MODULE(scene_system_) {

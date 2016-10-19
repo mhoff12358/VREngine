@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyScene.h" />
+    <ClInclude Include="PythonClassHelpers.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlHelper.h" />
   </ItemGroup>
