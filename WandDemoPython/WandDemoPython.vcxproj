@@ -90,6 +90,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PrecompiledHeader>Create</PrecompiledHeader>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>VRBackend.lib;SceneSystem.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -174,13 +175,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="graphics_object.ipp" />
-    <None Include="graphics_resources.ipp" />
-    <None Include="headset.ipp" />
     <None Include="HeadsetInterfacePython.h" />
-    <None Include="io_interface.ipp" />
-    <None Include="pose.ipp" />
-    <None Include="stl.ipp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

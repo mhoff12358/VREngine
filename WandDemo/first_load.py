@@ -24,6 +24,16 @@ def first_load(resources):
 	scene = resources["scene"]
 
 	graphics_object_id = scene.AddAndConstructGraphicsObject()
+	
+	import pdb; pdb.set_trace()
+
+	sc.Vertices(
+		sc.VectorArrayFloat6((
+			sc.ArrayFloat6((1, 2, 3, 4, 5, 6)),
+			sc.ArrayFloat6((2, 3, 4, 5, 6, 7)),
+			)))
+
+	import pdb; pdb.set_trace()
 
 	latest_command = scene.MakeCommandAfter(
 		scene.FrontOfCommands(),

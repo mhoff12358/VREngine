@@ -75,23 +75,5 @@
     <None Include="HeadsetInterfacePython.h">
       <Filter>Header Files</Filter>
     </None>
-    <None Include="graphics_resources.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="pose.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="io_interface.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="stl.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="graphics_object.ipp">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="headset.ipp">
-      <Filter>Source Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

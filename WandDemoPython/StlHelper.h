@@ -1,6 +1,8 @@
 #pragma once
 #include "stdafx.h"
 
+#include <type_traits>
+
 template <typename ValueType, typename Collection>
 Collection* CreateFromList(object iterable) {
 	unique_ptr<Collection> c = make_unique<Collection>();
@@ -53,6 +55,14 @@ void CreateArray(string name) {
 	CreateListToCollection<T, array<T, N>>(CreateIndexing<size_t, T, array<T, N>>(CreateClass<array<T, N>>("Array" + name + std::to_string(N))));
 }
 
+template<typename T, size_t N>
+void CreateArrays(string name) {
+	if (N > 0) {
+		CreateArray<T, N>(name);
+		CreateArrays<T, N - 1>(name);
+	}
+}
+
 template<typename T>
 void CreateVector(string name) {
 	CreateListToCollectionWithResize<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
@@ -63,3 +73,15 @@ void CreateArrayWithVector(string name) {
 	CreateArray<T, N>(name);
 	CreateVector<array<T, N>>("Array" + name + std::to_string(N));
 }
+
+template<typename T, size_t N, bool recurse = true>
+void CreateArraysWithVector(string name);
+
+template<typename T, size_t N, bool recurse>
+std::enable_if<recurse> CreateArraysWithVector(string name) {
+	CreateArrayWithVector<T, N>(name);
+	CreateArraysWithVector<T, N - 1, N > 0>(name);
+}
+
+template<typename T, size_t N, bool recurse>
+void CreateArraysWithVector(string name) {}

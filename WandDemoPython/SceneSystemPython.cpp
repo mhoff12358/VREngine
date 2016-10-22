@@ -47,6 +47,18 @@ BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 
+template<size_t N>
+void AddVerticesConstructor(class_<Vertices>& vertices);
+
+template<>
+void AddVerticesConstructor<0>(class_<Vertices>& vertices) {}
+
+template<size_t N>
+void AddVerticesConstructor(class_<Vertices>& vertices) {
+	vertices.def(init<VertexType, vector<array<float, N>>>());
+	AddVerticesConstructor<N - 1>(vertices);
+}
+
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("Actor")
 		.def("HandleCommand", &game_scene::Shmactor::HandleCommand, &PyActor::default_HandleCommand)
@@ -117,8 +129,11 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def_readonly("vertex_type_location", make_getter(&VertexType::vertex_type_location, return_value_policy<reference_existing_object>()))
 		.def_readonly("vertex_type_texture", make_getter(&VertexType::vertex_type_texture, return_value_policy<reference_existing_object>()))
 		.def_readonly("vertex_type_normal", make_getter(&VertexType::vertex_type_normal, return_value_policy<reference_existing_object>()))
-		.def_readonly("vertex_type_all", &VertexType::vertex_type_all)
+		.def_readonly("vertex_type_all", make_getter(&VertexType::vertex_type_all, return_value_policy<reference_existing_object>()))
 		.def_readonly("xyuv", make_getter(&VertexType::xyuv, return_value_policy<reference_existing_object>()));
+
+	auto vertices_registration = class_<Vertices>("Vertices", init<VertexType, vector<float>>());
+	AddVerticesConstructor<12>(vertices_registration);
 
 	StlInterface();
 	EntitySpecificationInterface();
