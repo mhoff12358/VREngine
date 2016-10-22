@@ -135,6 +135,17 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	auto vertices_registration = class_<Vertices>("Vertices", init<VertexType, vector<float>>());
 	AddVerticesConstructor<12>(vertices_registration);
 
+	enum_<D3D_PRIMITIVE_TOPOLOGY>("D3DTopology")
+		.value("POINTLIST", D3D_PRIMITIVE_TOPOLOGY_POINTLIST)
+		.value("LINELIST", D3D_PRIMITIVE_TOPOLOGY_LINELIST)
+		.value("LINESTRIP", D3D_PRIMITIVE_TOPOLOGY_LINESTRIP)
+		.value("TRIANGLELIST", D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST)
+		.value("TRIANGLESTRIP", D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP)
+		.value("LINELIST_ADJ", D3D_PRIMITIVE_TOPOLOGY_LINELIST_ADJ)
+		.value("LINESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ)
+		.value("TRIANGLELIST_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ)
+		.value("TRIANGLESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ);
+
 	StlInterface();
 	EntitySpecificationInterface();
 	GraphicsObjectInterface(scene_registration);
