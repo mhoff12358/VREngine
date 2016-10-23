@@ -126,11 +126,11 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
 	class_<VertexType>("VertexType", no_init)
-		.def_readonly("vertex_type_location", make_getter(&VertexType::vertex_type_location, return_value_policy<reference_existing_object>()))
-		.def_readonly("vertex_type_texture", make_getter(&VertexType::vertex_type_texture, return_value_policy<reference_existing_object>()))
-		.def_readonly("vertex_type_normal", make_getter(&VertexType::vertex_type_normal, return_value_policy<reference_existing_object>()))
-		.def_readonly("vertex_type_all", make_getter(&VertexType::vertex_type_all, return_value_policy<reference_existing_object>()))
-		.def_readonly("xyuv", make_getter(&VertexType::xyuv, return_value_policy<reference_existing_object>()));
+		.def_readonly("vertex_type_location", &VertexType::vertex_type_location)
+		.def_readonly("vertex_type_texture", &VertexType::vertex_type_texture)
+		.def_readonly("vertex_type_normal", &VertexType::vertex_type_normal)
+		.def_readonly("vertex_type_all", &VertexType::vertex_type_all)
+		.def_readonly("xyuv", &VertexType::xyuv);
 
 	auto vertices_registration = class_<Vertices>("Vertices", init<VertexType, vector<float>>());
 	AddVerticesConstructor<12>(vertices_registration);
@@ -145,6 +145,16 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.value("LINESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ)
 		.value("TRIANGLELIST_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ)
 		.value("TRIANGLESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ);
+
+	class_<ModelGenerator>("ModelGenerator")
+		.def(init<VertexType, D3D_PRIMITIVE_TOPOLOGY>())
+		.def("AddVertexBatch", &ModelGenerator::AddVertexBatch)
+		.def("SetParts", &ModelGenerator::SetParts);
+
+	class_<ModelSlice>("ModelSlice")
+		.def(init<unsigned int, unsigned int>())
+		.add_property("start", boost::python::make_getter(&ModelSlice::start), boost::python::make_setter(&ModelSlice::start))
+		.add_property("length", boost::python::make_getter(&ModelSlice::length), boost::python::make_setter(&ModelSlice::length));
 
 	StlInterface();
 	EntitySpecificationInterface();

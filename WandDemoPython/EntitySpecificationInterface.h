@@ -21,7 +21,7 @@ void EntitySpecificationInterface() {
 		.staticmethod("All")
 		.def("And", &ShaderStages::and);
 
-	CreateListToCollectionWithResize<vector<float>, game_scene::ShaderSettingsValue>(
+	CreateListToCollection<vector<float>, game_scene::ShaderSettingsValue>(
 		CreateIndexing<size_t, vector<float>, game_scene::ShaderSettingsValue>(
 			class_<game_scene::ShaderSettingsValue>("ShaderSettingsValue", no_init)));
 

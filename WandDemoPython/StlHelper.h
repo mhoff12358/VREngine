@@ -3,29 +3,38 @@
 
 #include <type_traits>
 
+struct A {
+	A() {}
+};
+
+template <unsigned int b>
+struct B {
+	B(A a) {}
+};
+
+template <typename Collection>
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, B<0> b) -> decltype(c.resize(size), void()) {
+	c.resize(size)
+}
+
+template <typename Collection>
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, B<1> b) -> void {
+
+}
+
+template <typename Collection>
+auto ResizeIfPossible(Collection& c, unsigned int size) -> void {
+	ResizeIfPossibleImpl(c, size, A());
+}
+
 template <typename ValueType, typename Collection>
 Collection* CreateFromList(object iterable) {
 	unique_ptr<Collection> c = make_unique<Collection>();
 	try {
 		unsigned int iterable_size = boost::python::len(iterable);
+		ResizeIfPossible(*c, iterable_size);
 		for (unsigned int i = 0; i < iterable_size; i++) {
 			(*c)[i] = extract<ValueType>(iterable[i]);
-		}
-	}
-	catch (error_already_set) {
-		PyErr_Print();
-	}
-	return c.release();
-}
-
-template <typename ValueType, typename Collection>
-Collection* CreateFromListWithResize(object iterable) {
-	unique_ptr<Collection> c = make_unique<Collection>();
-	try {
-		unsigned int iterable_size = boost::python::len(iterable);
-		//c->resize(iterable_size);
-		for (unsigned int i = 0; i < iterable_size; i++) {
-			c->push_back(extract<ValueType>(iterable[i]));
 		}
 	}
 	catch (error_already_set) {
@@ -39,14 +48,6 @@ auto& CreateListToCollection(boost::python::class_<PyType> c) {
 	return c
 		.def("__init__", boost::python::make_constructor(&CreateFromList<ValueType, PyType>))
 		.def("Create", &CreateFromList<ValueType, PyType>, return_value_policy<manage_new_object>())
-		.staticmethod("Create");
-}
-
-template <typename ValueType, typename PyType>
-auto& CreateListToCollectionWithResize(boost::python::class_<PyType> c) {
-	return c
-		.def("__init__", boost::python::make_constructor(&CreateFromListWithResize<ValueType, PyType>))
-		.def("Create", &CreateFromListWithResize<ValueType, PyType>, return_value_policy<manage_new_object>())
 		.staticmethod("Create");
 }
 
@@ -65,7 +66,7 @@ void CreateArrays(string name) {
 
 template<typename T>
 void CreateVector(string name) {
-	CreateListToCollectionWithResize<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
+	CreateListToCollection<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
 }
 
 template<typename T, size_t N>
