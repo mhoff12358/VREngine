@@ -3,28 +3,37 @@
 
 #include <type_traits>
 
-struct A {
-	A() {}
-};
+struct general_ {};
+struct special_ : general_ {};
 
-template <unsigned int b>
-struct B {
-	B(A a) {}
-};
-
-template <typename Collection>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, B<0> b) -> decltype(c.resize(size), void()) {
-	c.resize(size)
+template <typename Collection, typename ValueType>
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, special_) -> decltype(c.reserve(size), void()) {
+	c.reserve(size);
 }
 
-template <typename Collection>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, B<1> b) -> void {
+template <typename Collection, typename ValueType>
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, general_) -> void {
 
 }
 
-template <typename Collection>
-auto ResizeIfPossible(Collection& c, unsigned int size) -> void {
-	ResizeIfPossibleImpl(c, size, A());
+template <typename Collection, typename ValueType>
+void ResizeIfPossible(Collection& c, unsigned int size) {
+	ResizeIfPossibleImpl<Collection, ValueType>(c, size, special_());
+}
+
+template <typename Collection, typename ValueType>
+auto PushBackIfPossibleImpl(Collection& c, unsigned int index, ValueType&& value, special_) -> decltype(c.reserve(0), void()) {
+	c.push_back(move(value));
+}
+
+template <typename Collection, typename ValueType>
+auto PushBackIfPossibleImpl(Collection& c, unsigned int index, ValueType&& value, general_) -> void {
+	c[index] = value;
+}
+
+template <typename Collection, typename ValueType>
+void PushBackIfPossible(Collection& c, unsigned int index, ValueType&& value) {
+	PushBackIfPossibleImpl<Collection, ValueType>(c, index, move(value), special_());
 }
 
 template <typename ValueType, typename Collection>
@@ -32,9 +41,10 @@ Collection* CreateFromList(object iterable) {
 	unique_ptr<Collection> c = make_unique<Collection>();
 	try {
 		unsigned int iterable_size = boost::python::len(iterable);
-		ResizeIfPossible(*c, iterable_size);
+		ResizeIfPossible<Collection, ValueType>(*c, iterable_size);
 		for (unsigned int i = 0; i < iterable_size; i++) {
-			(*c)[i] = extract<ValueType>(iterable[i]);
+			ValueType v = extract<ValueType>(iterable[i]);
+			PushBackIfPossible<Collection, ValueType>(*c, i, move(v));
 		}
 	}
 	catch (error_already_set) {
