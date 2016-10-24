@@ -53,11 +53,36 @@ Collection* CreateFromList(object iterable) {
 	return c.release();
 }
 
+template <typename KeyType, typename ValueType, typename Collection>
+Collection* CreateFromDict(dict mapping) {
+	unique_ptr<Collection> c = make_unique<Collection>();
+	try {
+		object iterable = mapping.items();
+		size_t iterable_size = boost::python::len(iterable);
+		for (size_t i = 0; i < iterable_size; i++) {
+			object key_value = iterable[i];
+			c->emplace(extract<KeyType>(key_value[0]), extract<ValueType>(key_value[1]));
+		}
+	}
+	catch (error_already_set) {
+		PyErr_Print();
+	}
+	return c.release();
+}
+
 template <typename ValueType, typename PyType>
 auto& CreateListToCollection(boost::python::class_<PyType> c) {
 	return c
 		.def("__init__", boost::python::make_constructor(&CreateFromList<ValueType, PyType>))
 		.def("Create", &CreateFromList<ValueType, PyType>, return_value_policy<manage_new_object>())
+		.staticmethod("Create");
+}
+
+template <typename KeyType, typename ValueType, typename PyType>
+auto& CreateDictToMap(boost::python::class_<PyType> c) {
+	return c
+		.def("__init__", boost::python::make_constructor(&CreateFromDict<KeyType, ValueType, PyType>))
+		.def("Create", &CreateFromDict<KeyType, ValueType, PyType>, return_value_policy<manage_new_object>())
 		.staticmethod("Create");
 }
 
@@ -79,20 +104,27 @@ void CreateVector(string name) {
 	CreateListToCollection<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
 }
 
+template<typename Key, typename Value>
+void CreateMap(string key_name, string value_name) {
+	typedef map<Key, Value> MapType;
+	CreateDictToMap<Key, Value, MapType>(CreateIndexing<Key, Value, MapType>(CreateClass<MapType>("Map" + key_name + "To" + value_name)));
+}
+
 template<typename T, size_t N>
 void CreateArrayWithVector(string name) {
 	CreateArray<T, N>(name);
 	CreateVector<array<T, N>>("Array" + name + std::to_string(N));
 }
 
-template<typename T, size_t N, bool recurse = true>
-void CreateArraysWithVector(string name);
+template <typename T, size_t N>
+struct CreateArraysWithVector {
+	static void Create(string name) {
+		CreateArrayWithVector<T, N>(name);
+		CreateArraysWithVector<T, N - 1>::Create(name);
+	}
+};
 
-template<typename T, size_t N, bool recurse>
-std::enable_if<recurse> CreateArraysWithVector(string name) {
-	CreateArrayWithVector<T, N>(name);
-	CreateArraysWithVector<T, N - 1, N > 0>(name);
-}
-
-template<typename T, size_t N, bool recurse>
-void CreateArraysWithVector(string name) {}
+template <typename T>
+struct CreateArraysWithVector<T, 0> {
+	static void Create(string name) {}
+};

@@ -9,5 +9,7 @@ void StlInterface() {
 	CreateVector<unsigned char>("UnsignedChar");
 	CreateVector<float>("Float");
 
-	CreateArraysWithVector<float, 12>("Float");
+	CreateArraysWithVector<float, 12>::Create("Float");
+
+	CreateMap<string, float>("String", "Float");
 }

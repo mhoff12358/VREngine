@@ -24,12 +24,18 @@ def first_load(resources):
 	scene = resources["scene"]
 
 	graphics_object_id = scene.AddAndConstructGraphicsObject()
+
+	import code
+	a = globals()
+	a.update(locals())
+	code.interact(local = a)
 	
-#	sc.Vertices(
-#		sc.VectorArrayFloat6((
-#			sc.ArrayFloat6((1, 2, 3, 4, 5, 6)),
-#			sc.ArrayFloat6((2, 3, 4, 5, 6, 7)),
-#			)))
+	vertices = sc.Vertices(
+		sc.VertexType.normal,
+		sc.VectorArrayFloat6((
+			sc.ArrayFloat6((1, 2, 3, 4, 5, 6)),
+			sc.ArrayFloat6((2, 3, 4, 5, 6, 7)),
+			)))
 
 	latest_command = scene.MakeCommandAfter(
 		scene.FrontOfCommands(),
@@ -41,7 +47,7 @@ def first_load(resources):
 					.SetModel(sc.ModelDetails(sc.ModelIdentifier("square.obj|Square")))
 					.SetShaders(sc.ShaderDetails(
 						"texturedspecularlightsource.hlsl",
-						sc.VertexType.vertex_type_all,
+						sc.VertexType.all,
 						sc.ShaderStages.Vertex().And(sc.ShaderStages.Pixel())))
 					.SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0, 0, 0)), sc.VectorFloat((1,)))))
 					.SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))

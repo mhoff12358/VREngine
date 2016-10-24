@@ -126,10 +126,10 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
 	class_<VertexType>("VertexType", no_init)
-		.def_readonly("vertex_type_location", &VertexType::vertex_type_location)
-		.def_readonly("vertex_type_texture", &VertexType::vertex_type_texture)
-		.def_readonly("vertex_type_normal", &VertexType::vertex_type_normal)
-		.def_readonly("vertex_type_all", &VertexType::vertex_type_all)
+		.def_readonly("location", &VertexType::vertex_type_location)
+		.def_readonly("texture", &VertexType::vertex_type_texture)
+		.def_readonly("normal", &VertexType::vertex_type_normal)
+		.def_readonly("all", &VertexType::vertex_type_all)
 		.def_readonly("xyuv", &VertexType::xyuv);
 
 	auto vertices_registration = class_<Vertices>("Vertices", init<VertexType, vector<float>>());
@@ -155,6 +155,8 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def(init<unsigned int, unsigned int>())
 		.add_property("start", boost::python::make_getter(&ModelSlice::start), boost::python::make_setter(&ModelSlice::start))
 		.add_property("length", boost::python::make_getter(&ModelSlice::length), boost::python::make_setter(&ModelSlice::length));
+
+	CreateMap<string, ModelSlice>("String", "ModelSlice");
 
 	StlInterface();
 	EntitySpecificationInterface();
