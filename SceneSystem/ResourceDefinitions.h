@@ -111,8 +111,8 @@ struct NewModelDetails {
 	NewModelDetails() {}
 	NewModelDetails(const ModelIdentifier& ident, const ObjLoader::OutputFormat& format = ObjLoader::default_output_format)
 		: ident_(ident), format_(format) {}
-	NewModelDetails(const ModelIdentifier& ident, std::shared_ptr<ModelGenerator> model_generator, ModelStorageDescription storage_description)
-		: ident_(ident), model_generator_(model_generator), storage_description_(storage_description) {
+	NewModelDetails(const ModelIdentifier& ident, std::shared_ptr<ModelGenerator> model_generator)
+		: ident_(ident), model_generator_(model_generator) {
 	}
 
 	bool IsActive() const {
@@ -130,8 +130,7 @@ struct NewModelDetails {
 	Model GetModel(ResourcePool& resources) const {
 		if (IsActive()) {
 			if (model_generator_) {
-				assert(storage_description_);
-				return resources.LoadModelFromGenerator(ident_, std::move(*model_generator_), *storage_description_);
+				return resources.LoadModelFromGenerator(ident_, std::move(*model_generator_));
 			} else if (format_) {
 				return resources.LoadModelFromFile(ident_, *format_);
 			} else {
@@ -145,7 +144,6 @@ struct NewModelDetails {
 	ModelIdentifier ident_;
 	optional<ObjLoader::OutputFormat> format_;
 	std::shared_ptr<ModelGenerator> model_generator_ = nullptr;
-	optional<ModelStorageDescription> storage_description_;
 };
 
 struct EntityInfo {

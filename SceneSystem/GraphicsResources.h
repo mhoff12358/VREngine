@@ -39,6 +39,7 @@ public:
 	ResourcePool& GetResourcePool() { return resource_pool_; }
 	EntityHandler& GetEntityHandler() { return entity_handler_; }
 	ID3D11Device* GetDeviceInterface() { return device_interface_; }
+	ID3D11Device& GetDeviceInterfaceRef() { return *device_interface_; }
 
 	ResourcePool& resource_pool_;
 	EntityHandler& entity_handler_;

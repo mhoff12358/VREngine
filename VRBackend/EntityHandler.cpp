@@ -142,8 +142,8 @@ ConstantBuffer* EntityHandler::GetShaderSettings(unsigned int external_entity_id
 	return ReferenceEntity(entity_offset).MutableShaderSettings().constant_buffer;
 }
 
-void EntityHandler::AddModelMutation(std::string model_resource_id, ModelMutation new_model_mutation) {
-	current_edit_group->model_mutations.push_back(std::make_pair(model_resource_id, new_model_mutation));
+void EntityHandler::AddModelMutation(std::string model_resource_id, ModelMutation&& new_model_mutation) {
+	current_edit_group->model_mutations.emplace_back(std::make_pair(model_resource_id, new_model_mutation));
 }
 
 void EntityHandler::AddBufferCopy(ID3D11Buffer* dest_buffer, ID3D11Buffer* src_buffer) {

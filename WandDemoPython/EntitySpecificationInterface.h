@@ -35,7 +35,7 @@ void EntitySpecificationInterface() {
 
 	class_<game_scene::NewModelDetails>("ModelDetails")
 		.def(init<const ModelIdentifier&>())
-		.def(init<const ModelIdentifier&, std::shared_ptr<ModelGenerator>, ModelStorageDescription>());
+		.def(init<const ModelIdentifier&, std::shared_ptr<ModelGenerator>>());
 
 	class_<game_scene::EntitySpecification>("EntitySpecification", init<string>())
 		.def("SetShaderStages", &game_scene::EntitySpecification::SetShaderStages, boost::python::return_self<>())

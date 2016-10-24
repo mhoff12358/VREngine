@@ -75,7 +75,7 @@ Model ResourcePool::LoadModelFromVertices(
 	return generator.GetModel(model_name.GetSubPart());
 }
 
-Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator&& generator, optional<ModelStorageDescription> storage) {
+Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator&& generator) {
 	Model model = LoadExistingModel(model_name);
 	if (!model.IsDummy()) {
 		return model;
@@ -85,9 +85,6 @@ Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGene
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
 	ModelGenerator& new_generator = models_.back();
-	if (storage) {
-		new_generator.Finalize(device_interface, entity_handler_, *storage);
-	}
 
 	return new_generator.GetModel(model_name.GetSubPart());
 }

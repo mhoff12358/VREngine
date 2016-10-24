@@ -47,7 +47,7 @@ public:
 	ConstantBufferTyped<T>* GetShaderSettingsTyped(unsigned int external_entity_id);
 	ConstantBuffer* GetShaderSettings(unsigned int external_entity_id);
 
-	void AddModelMutation(std::string model_resource_id, ModelMutation new_model_mutation);
+	void AddModelMutation(std::string model_resource_id, ModelMutation&& new_model_mutation);
 	void AddBufferCopy(ID3D11Buffer* dest_buffer, ID3D11Buffer* src_buffer);
 
 	PipelineCamera& MutableCamera(PipelineCameraIdent camera_name);

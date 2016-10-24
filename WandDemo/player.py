@@ -20,7 +20,7 @@ class Player(sc.DelegatingActor):
 			scene.FrontOfCommands(),
 			sc.Target(scene.FindByName("IOInterface")),
 			sc.IOListenerRegistration(
-				True, self.id, sc.ListenerId.KEY_TOGGLE, ord(' ')))
+				True, self.id, sc.ListenerId.KEY_TOGGLE, ord('B')))
 		scene.MakeCommandAfter(
 			scene.FrontOfCommands(),
 			sc.Target(scene.FindByName("IOInterface")),

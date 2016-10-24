@@ -12,6 +12,15 @@ class MutableGraphicalObject(sc.DelegatingActor):
 	def HandleAddToScene(self, args):
 		scene = self.GetScene()
 
+		latest_command = scene.FrontOfCommands()
+		latest_command = scene.MakeCommandAfter(
+			latest_command,
+			sc.Target(scene.FindByName("IOInterface")),
+			sc.IOListenerRegistration(
+				True, self.id, sc.ListenerId.KEY_TOGGLE, ord(' ')))
+
+		self.graphics_resources = sc.GraphicsResources.GetGraphicsResources(scene)
+
 		model_generator = sc.ModelGenerator(sc.VertexType.texture, sc.D3DTopology.TRIANGLELIST)
 		model_generator.AddVertexBatch(sc.Vertices(
 			sc.VertexType.texture,
@@ -24,19 +33,23 @@ class MutableGraphicalObject(sc.DelegatingActor):
 				sc.ArrayFloat5(( 1,  1, 0, 1, 1)),
 				))))
 		model_generator.SetParts(sc.MapStringToModelSlice({"Square":sc.ModelSlice(6, 0)}))
+		model_generator.Finalize(
+			self.graphics_resources.GetDeviceInterface(),
+			self.graphics_resources.GetEntityHandler(),
+			sc.ModelStorageDescription(False, True, False))
 
 		self.graphics_object_id = scene.AddAndConstructGraphicsObject()
+		self.graphics_object_model_name = sc.ResourceIdentifier.GetNewModelName("mutable_square")
 		latest_command = scene.MakeCommandAfter(
-			scene.FrontOfCommands(),
+			latest_command,
 			sc.Target(self.graphics_object_id),
 			sc.CreateGraphicsObject(
 				"basic",
 				sc.VectorEntitySpecification((
 					sc.EntitySpecification("square") \
 						.SetModel(sc.ModelDetails(
-							sc.ModelIdentifier(sc.ResourceIdentifier.GetNewModelName("mutable_square")),
-							model_generator,
-							sc.ModelStorageDescription(False, True, False)))
+							sc.ModelIdentifier(self.graphics_object_model_name),
+							model_generator))
 						.SetShaders(sc.ShaderDetails(
 							"textured.hlsl",
 							sc.VertexType.texture,
@@ -53,6 +66,16 @@ class MutableGraphicalObject(sc.DelegatingActor):
 				"square",
 				sc.Pose(sc.Location(0, 0, -3))))
 
-
-	def PushPose(self):
-		self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw)))
+	@delegater(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
+	def HandleKeyToggle(self, args):
+		model_mutation = sc.ModelMutation()
+		model_mutation.AddVertexBlock(
+			5,
+			sc.Vertices(
+				sc.VertexType.texture,
+				sc.VectorArrayFloat5((
+					sc.ArrayFloat5((-2,  2, 0, 0, 1)),
+					sc.ArrayFloat5(( 2,  2, 0, 1, 1)),
+					))))
+		self.graphics_resources.GetEntityHandler().AddModelMutation(self.graphics_object_model_name, model_mutation)
+		print(args.key)
