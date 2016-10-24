@@ -106,7 +106,6 @@ ModelGenerator ObjLoader::ParseAsMultipleModels(ID3D11Device* device, const Outp
 		}
 	}
 	AddLinesToModel(device, current_model_lines, output_format, generator, existing_sub_object_name);
-	generator.parts_[""] = ModelSlice(generator.GetCurrentNumberOfVertices(), 0);
 
 	ModelStorageDescription model_storage_description;
 	if (output_format.load_as_dynamic_) {

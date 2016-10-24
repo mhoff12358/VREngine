@@ -12,7 +12,7 @@ struct NewIndividualTextureDetails {
 	NewIndividualTextureDetails(
 		string ident, ShaderStages stages,
 		int shader_resource_slot, int sampler_slot) :
-		ident_(move(ident)), stages_(stages),
+		ident_(std::move(ident)), stages_(stages),
 		shader_resource_slot_(shader_resource_slot),
 		sampler_slot_(sampler_slot) {}
 
@@ -65,13 +65,13 @@ struct NewTextureDetails {
 struct NewShaderDetails {
 	NewShaderDetails() {}
 	NewShaderDetails(const string& filename, VertexType vertex_type, bool include_geometry_shader = true)
-		: vertex_type_(move(vertex_type)) {
+		: vertex_type_(std::move(vertex_type)) {
 		idents_[0] = filename;
 		idents_[1] = include_geometry_shader ? filename : ResourceIdentifier::GetConstantModelName("unset_geometry_shader");
 		idents_[2] = filename;
 	};
 	NewShaderDetails(const string& filename, VertexType vertex_type, ShaderStages stages)
-		: vertex_type_(move(vertex_type)) {
+		: vertex_type_(std::move(vertex_type)) {
 		idents_[0] = stages.IsVertexStage() ? filename : "";
 		idents_[1] = stages.IsGeometryStage() ? filename : "";
 		idents_[2] = stages.IsPixelStage() ? filename : "";
@@ -111,6 +111,9 @@ struct NewModelDetails {
 	NewModelDetails() {}
 	NewModelDetails(const ModelIdentifier& ident, const ObjLoader::OutputFormat& format = ObjLoader::default_output_format)
 		: ident_(ident), format_(format) {}
+	NewModelDetails(const ModelIdentifier& ident, std::shared_ptr<ModelGenerator> model_generator, ModelStorageDescription storage_description)
+		: ident_(ident), model_generator_(model_generator), storage_description_(storage_description) {
+	}
 
 	bool IsActive() const {
 		return !ident_.GetFileName().empty();
@@ -126,7 +129,10 @@ struct NewModelDetails {
 
 	Model GetModel(ResourcePool& resources) const {
 		if (IsActive()) {
-			if (format_) {
+			if (model_generator_) {
+				assert(storage_description_);
+				return resources.LoadModelFromGenerator(ident_, std::move(*model_generator_), *storage_description_);
+			} else if (format_) {
 				return resources.LoadModelFromFile(ident_, *format_);
 			} else {
 				return resources.LoadExistingModel(ident_);
@@ -138,6 +144,8 @@ struct NewModelDetails {
 
 	ModelIdentifier ident_;
 	optional<ObjLoader::OutputFormat> format_;
+	std::shared_ptr<ModelGenerator> model_generator_ = nullptr;
+	optional<ModelStorageDescription> storage_description_;
 };
 
 struct EntityInfo {

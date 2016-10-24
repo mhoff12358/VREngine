@@ -103,8 +103,7 @@ void UpdateLoop() {
 	ModelGenerator point_gen(VertexType::vertex_type_location, D3D10_PRIMITIVE_TOPOLOGY_POINTLIST);
 	point_gen.AddVertex(Vertex(VertexType::vertex_type_location, { 0.0f, 0.0f, 0.0f }));
 	point_gen.Finalize(graphics_objects.view_state->device_interface, optional<EntityHandler&>{}, ModelStorageDescription::Immutable());
-	point_gen.parts_ = { { "", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) },
-	                     { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
+	point_gen.parts_ = { { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
 	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourceIdentifier::GetConstantModelName("point"), point_gen));
 
 	game_scene::Scene scene;

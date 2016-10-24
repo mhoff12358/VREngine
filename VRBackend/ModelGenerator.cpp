@@ -13,7 +13,8 @@ ModelGenerator::ModelGenerator(ModelGenerator&& other) :
 	vertex_buffer(other.vertex_buffer),
 	staging_buffer(other.staging_buffer),
 	vertex_type(other.vertex_type),
-	primitive_type(other.primitive_type) {
+	primitive_type(other.primitive_type),
+	finalized(other.finalized) {
 }
 
 void ModelGenerator::AddVertex(Vertex new_vertex) {
@@ -130,15 +131,24 @@ void ModelGenerator::CopyFromStagingToVertexBuffer(ID3D11DeviceContext* device_c
 }
 
 void ModelGenerator::Finalize(ID3D11Device* device, optional<EntityHandler&> entity_handler, ModelStorageDescription storage_desription) {
-	InitializeVertexBuffer(device, entity_handler, storage_desription);
+	if (!finalized) {
+		InitializeVertexBuffer(device, entity_handler, storage_desription);
+		finalized = true;
+	}
 }
 
 Model ModelGenerator::GetModel(std::string part_name) {
-	if (parts_.count(part_name) == 0) {
-		part_name = "";
-		std::cout << "Attempting to load a model part that doesn't exist." << std::endl;
+	ModelSlice slice;
+	if (part_name.empty()) {
+		slice = ModelSlice(GetCurrentNumberOfVertices(), 0);
+	} else {
+		if (parts_.count(part_name) == 0) {
+			part_name = "";
+			std::cout << "Attempting to load a model part that doesn't exist." << std::endl;
+		}
+		slice = parts_[part_name];
 	}
-	Model model(vertex_buffer, vertex_type.GetVertexSize(), 0, primitive_type, parts_[part_name]);
+	Model model(vertex_buffer, vertex_type.GetVertexSize(), 0, primitive_type, slice);
 	return model;
 }
 

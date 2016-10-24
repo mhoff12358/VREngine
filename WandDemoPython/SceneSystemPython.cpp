@@ -16,6 +16,7 @@
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
 #include "VRBackend/EntityHandler.h"
+#include "VRBackend/ResourceIdentifier.h"
 
 #include "PyActor.h"
 #include "PyScene.h"
@@ -146,10 +147,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.value("TRIANGLELIST_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ)
 		.value("TRIANGLESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ);
 
-	class_<ModelGenerator>("ModelGenerator")
+	class_<ModelGenerator, std::shared_ptr<ModelGenerator>, boost::noncopyable>("ModelGenerator")
 		.def(init<VertexType, D3D_PRIMITIVE_TOPOLOGY>())
 		.def("AddVertexBatch", &ModelGenerator::AddVertexBatch)
-		.def("SetParts", &ModelGenerator::SetParts);
+		.def("SetParts", &ModelGenerator::SetParts)
+		.def("Finalize", &ModelGenerator::Finalize);
+
+	class_<ModelStorageDescription>("ModelStorageDescription", init<bool, bool, bool>());
 
 	class_<ModelSlice>("ModelSlice")
 		.def(init<unsigned int, unsigned int>())
@@ -157,6 +161,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.add_property("length", boost::python::make_getter(&ModelSlice::length), boost::python::make_setter(&ModelSlice::length));
 
 	CreateMap<string, ModelSlice>("String", "ModelSlice");
+
+	class_<ResourceIdentifier, boost::noncopyable>("ResourceIdentifier")
+		.def("StripSubmodel", &ResourceIdentifier::StripSubmodel)
+		.def("GetSubmodel", &ResourceIdentifier::GetSubmodel)
+		.def("AddSubmodel", &ResourceIdentifier::AddSubmodel)
+		.def("GetNewModelName", &ResourceIdentifier::GetNewModelName)
+		.def("GetConstantModelName", &ResourceIdentifier::GetConstantModelName);
 
 	StlInterface();
 	EntitySpecificationInterface();

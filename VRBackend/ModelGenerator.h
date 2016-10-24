@@ -7,6 +7,11 @@
 #include "stl.h"
 
 struct ModelStorageDescription {
+	ModelStorageDescription() : ModelStorageDescription(true, false, false) {}
+	ModelStorageDescription(bool immutable, bool store_staging_copy, bool retain_cpu_copy)
+		: immutable(immutable), store_staging_copy(store_staging_copy), retain_cpu_copy(retain_cpu_copy) {
+	}
+
 	bool immutable;
 	bool store_staging_copy;
 	bool retain_cpu_copy;
@@ -42,10 +47,11 @@ private:
 	unsigned int number_of_vertices = 0;
 	bool cpu_side_data_kept;
 	vector<char> cpu_side_data;
-	ID3D11Buffer* vertex_buffer;
-	ID3D11Buffer* staging_buffer;
+	ID3D11Buffer* vertex_buffer = nullptr;
+	ID3D11Buffer* staging_buffer = nullptr;
 	VertexType vertex_type;
 	D3D_PRIMITIVE_TOPOLOGY primitive_type;
+	bool finalized = false;
 
 	void InitializeVertexBuffer(ID3D11Device* device, optional<EntityHandler&> entity_handler, ModelStorageDescription storage_desription);
 	void CopyFromStagingToVertexBuffer(ID3D11DeviceContext* device_context);

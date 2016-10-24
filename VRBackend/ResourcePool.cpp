@@ -75,16 +75,21 @@ Model ResourcePool::LoadModelFromVertices(
 	return generator.GetModel(model_name.GetSubPart());
 }
 
-Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator generator) {
+Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator&& generator, optional<ModelStorageDescription> storage) {
 	Model model = LoadExistingModel(model_name);
 	if (!model.IsDummy()) {
 		return model;
 	}
 
-	models_.push_back(generator);
+	models_.emplace_back(std::move(generator));
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
-	return generator.GetModel(model_name.GetSubPart());
+	ModelGenerator& new_generator = models_.back();
+	if (storage) {
+		new_generator.Finalize(device_interface, entity_handler_, *storage);
+	}
+
+	return new_generator.GetModel(model_name.GetSubPart());
 }
 
 void ResourcePool::UpdateModel(const string& file_name, const ModelMutation& mutation) {
@@ -272,7 +277,7 @@ void ResourcePool::PreloadResource(const ResourceIdent& resource_ident) {
 		if (resource_ident.models_.GetCurrentNumberOfVertices() == 0) {
 			LoadModelFromFile(ModelIdentifier(resource_ident.name_), resource_ident.output_format_);
 		} else {
-			LoadModelFromGenerator(ModelIdentifier(resource_ident.name_), resource_ident.models_);
+			//LoadModelFromGenerator(ModelIdentifier(resource_ident.name_), std::move(resource_ident.models_));
 		}
 		break;
 	case ResourceIdent::VERTEX_SHADER:

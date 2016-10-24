@@ -403,6 +403,7 @@
     <None Include="laser.lua" />
     <None Include="LiquidContainer.lua" />
     <None Include="lua_test.lua" />
+    <None Include="mutable_graphical_object.py" />
     <None Include="nichijou_graph.py" />
     <None Include="owns_positionables.lua" />
     <None Include="player.py" />

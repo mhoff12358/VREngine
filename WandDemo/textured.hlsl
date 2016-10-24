@@ -7,7 +7,6 @@ struct VOut
 struct POut
 {
 	float4 t1 : SV_Target0;
-	float4 t2 : SV_Target1;
 };
 
 Texture2D model_skin : register(t0);
@@ -42,6 +41,5 @@ POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_T
 	//return float4(0.0f, tex_coord.y, 0.0f, 1.0f);
 	POut result;
 	result.t1 = model_skin.Sample(skin_sampler, tex_coord);
-	result.t2 = result.t1;
 	return result;
 }
