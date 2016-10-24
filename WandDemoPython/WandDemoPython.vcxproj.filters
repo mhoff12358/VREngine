@@ -62,6 +62,9 @@
     <ClInclude Include="PoseInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ModelCreationInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">

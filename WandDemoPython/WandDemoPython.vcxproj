@@ -149,6 +149,7 @@
     <ClInclude Include="GraphicsResourcesInterface.h" />
     <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="IOInterfaceInterface.h" />
+    <ClInclude Include="ModelCreationInterface.h" />
     <ClInclude Include="PoseInterface.h" />
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyScene.h" />
