@@ -27,6 +27,11 @@ def first_load(resources):
 	graphics_object_id = scripts.mutable_graphical_object.MutableGraphicalObject()
 	scene.AddActor(graphics_object_id)
 
+	import code
+	a = globals()
+	a.update(locals())
+	code.interact(local = a)
+
 #	graphics_object_id = scene.AddAndConstructGraphicsObject()
 #	latest_command = scene.MakeCommandAfter(
 #		scene.FrontOfCommands(),
