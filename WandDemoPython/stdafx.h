@@ -12,3 +12,5 @@ using boost::python::manage_new_object;
 using boost::python::bases;
 using boost::python::enum_;
 using boost::python::dict;
+using boost::python::raw_function;
+using boost::python::make_function;

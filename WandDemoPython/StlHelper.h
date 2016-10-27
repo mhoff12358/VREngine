@@ -4,7 +4,8 @@
 #include <type_traits>
 
 struct general_ {};
-struct special_ : general_ {};
+struct less_special_ : general_ {};
+struct special_ : less_special_ {};
 
 template <typename Collection, typename ValueType>
 auto ResizeIfPossibleImpl(Collection& c, unsigned int size, special_) -> decltype(c.reserve(size), void()) {
@@ -12,8 +13,13 @@ auto ResizeIfPossibleImpl(Collection& c, unsigned int size, special_) -> decltyp
 }
 
 template <typename Collection, typename ValueType>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, general_) -> void {
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, less_special_) -> decltype(c.size(), void()) {
+	assert(c.size() == size);
+}
 
+
+template <typename Collection, typename ValueType>
+auto ResizeIfPossibleImpl(Collection& c, unsigned int size, general_) -> void {
 }
 
 template <typename Collection, typename ValueType>
@@ -70,6 +76,28 @@ Collection* CreateFromDict(dict mapping) {
 	return c.release();
 }
 
+/*template <size_t index, typename TupleType>
+void CreateTupleFromListImpl(object iterable, TupleType& t) {
+}
+
+template <size_t index, typename TupleType, typename FirstType, typename ... Types>
+void CreateTupleFromListImpl(object iterable, TupleType& t) {
+	std::get<index>(t) = extract<FirstType>(iterable[index]);
+	CreateTupleFromListImpl<index + 1, TupleType, Types...>(iterable, t);
+}
+
+template <typename ... Types>
+tuple<Types...>* CreateTupleFromList(object iterable) {
+	assert(boost::python::len(iterable) == sizeof...(Types));
+	auto t = make_unique<tuple<Types...>>();
+	CreateTupleFromListImpl<0, tuple<Types...>, Types...>(iterable, *t);
+	return t.release();
+}
+
+object TupleExtract(boost::python::tuple args, dict kwargs) {
+	return object();
+}*/
+
 template <typename ValueType, typename PyType>
 auto& CreateListToCollection(boost::python::class_<PyType> c) {
 	return c
@@ -85,6 +113,49 @@ auto& CreateDictToMap(boost::python::class_<PyType> c) {
 		.def("Create", &CreateFromDict<KeyType, ValueType, PyType>, return_value_policy<manage_new_object>())
 		.staticmethod("Create");
 }
+
+/*template <typename TupleType, size_t N>
+struct CreateTupleAccess {
+	using tuple_element_t = typename std::tuple_element<N, TupleType>::type;
+	static void Create(class_<TupleType> tuple_reference) {
+		tuple_reference.add_property((string("a") + std::to_string(N)).c_str(), &AccessElement, &UpdateElement);
+		CreateTupleAccess<TupleType, N - 1>::Create(tuple_reference);
+	}
+	
+	static tuple_element_t AccessElement(TupleType& t) {
+		return std::get<N>(t);
+	}
+
+	static void UpdateElement(TupleType& t, tuple_element_t& value) {
+		std::get<N>(t) = value;
+	}
+};
+
+template <typename TupleType>
+struct CreateTupleAccess<TupleType, 0> {
+	using tuple_element_t = typename std::tuple_element<0, TupleType>::type;
+	static void Create(class_<TupleType> tuple_reference) {
+		tuple_reference.add_property((string("a") + std::to_string(0)).c_str(), &AccessElement, &UpdateElement);
+	}
+	
+	static tuple_element_t AccessElement(TupleType& t) {
+		return std::get<0>(t);
+	}
+
+	static void UpdateElement(TupleType& t, tuple_element_t& value) {
+		std::get<0>(t) = value;
+	}
+};
+
+template<typename ... Types>
+void CreateTuple(string names) {
+	auto tuple_class = CreateClass<tuple<Types...>>("Tuple" + names);
+	CreateTupleAccess<tuple<Types...>, sizeof...(Types) - 1>::Create(tuple_class);
+	tuple_class
+		.def("__init__", boost::python::make_constructor(&CreateTupleFromList<Types...>));
+		//.def("__getitem__", static_cast<const ValueType(*)(PyType&, IndexType)>([](PyType& t, IndexType i)->const ValueType{ return t[i]; }))
+		//.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
+}*/
 
 template<typename T, size_t N>
 void CreateArray(string name) {
