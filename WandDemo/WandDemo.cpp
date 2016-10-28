@@ -7,6 +7,8 @@ using std::unique_ptr;
 
 #include "stdafx.h"
 
+#include "Kinect.h"
+
 #include "VRBackend/BeginDirectx.h"
 #include "VRBackend/TimeTracker.h"
 #include "VRBackend/TextureView.h"
@@ -15,6 +17,7 @@ using std::unique_ptr;
 #include "SceneSystem/Component.h"
 
 #include "VRBackend/gaussian.h"
+#include "VRBackend/BlendDesc.h"
 
 #include "SceneSystem/Scene.h"
 #include "SceneSystem/GraphicsResources.h"
@@ -67,7 +70,7 @@ void GraphicsLoop() {
 				graphics_objects.view_state->device_interface, graphics_objects.view_state->device_context, *graphics_objects.resource_pool);
 		}
 
-		if (graphics_objects.oculus->IsInitialized()) {
+		if (graphics_objects.oculus->IsHeadsetInitialized()) {
 			for (vr::EVREye eye : Headset::eyes_) {
 				Pose eye_pose = graphics_objects.oculus->GetEyePose(eye);
 				/*PipelineCamera& camera = graphics_objects.resource_pool->LoadExistingPipelineCamera("player_head|" + std::to_string(eye));
@@ -122,7 +125,7 @@ void UpdateLoop() {
 		scene.AddActor(
 			make_unique<game_scene::actors::IOInterface>(*graphics_objects.input_handler)));
 	scene.AddActorToGroup(io_interface, tick_registry);
-	if (graphics_objects.oculus->IsInitialized()) {
+	if (graphics_objects.oculus->IsHeadsetInitialized()) {
 		game_scene::ActorId headset_interface = scene.RegisterByName(
 			"HeadsetInterface",
 			scene.AddActor(
@@ -150,6 +153,9 @@ void UpdateLoop() {
 	MSG msg;
 	vr::VREvent_t vr_msg;
 
+	bool body_found = false;
+	uint64_t body_tracking_id;
+
 	while (TRUE)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
@@ -161,7 +167,7 @@ void UpdateLoop() {
 			}
 		}
 
-		if (graphics_objects.oculus->IsInitialized()) {
+		if (graphics_objects.oculus->IsHeadsetInitialized()) {
 			while (graphics_objects.oculus->ProcessAndReturnLatestEvent(&vr_msg)) {
 				switch (vr_msg.eventType) {
 				case vr::VREvent_InputFocusCaptured:
@@ -177,8 +183,23 @@ void UpdateLoop() {
 					break;
 				}
 			}
+		}
+		graphics_objects.oculus->UpdateGamePoses();
 
-			graphics_objects.oculus->UpdateGamePoses();
+		vector<uint64_t> new_tracking_ids = graphics_objects.oculus->GetNewTrackedIds();
+		if (!new_tracking_ids.empty()) {
+			std::cout << "Body found" << std::endl;
+			body_found = true;
+			body_tracking_id = new_tracking_ids.front();
+		}
+		if (body_found) {
+			Body& body = graphics_objects.oculus->GetBody(body_tracking_id);
+			if (body.filled_) {
+				std::cout << body.hands_[Body::LEFT] << std::endl;
+			} else {
+				std::cout << "Lost tracking" << std::endl;
+				body_found = false;
+			}
 		}
 
 		int new_time = timeGetTime();
@@ -226,71 +247,21 @@ int _tmain(int argc, _TCHAR* argv[])
 		headset_system = vr::VR_Init( &eError, vr::VRApplication_Scene );
 		hmd_active = true;
 	}
-	D3D11_BLEND_DESC no_alpha_blend_state_desc;
-	no_alpha_blend_state_desc.AlphaToCoverageEnable = false;
-	no_alpha_blend_state_desc.IndependentBlendEnable = false;
-	no_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
-	no_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	no_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-	no_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	no_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-	no_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	no_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	no_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
 
-	D3D11_BLEND_DESC keep_new_alpha_blend_state_desc;
-	keep_new_alpha_blend_state_desc.AlphaToCoverageEnable = false;
-	keep_new_alpha_blend_state_desc.IndependentBlendEnable = false;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ZERO;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	keep_new_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	bool kinect_desired = true;
+	IKinectSensor* kinect_sensor = nullptr;
+	if (kinect_desired) {
+		HRESULT hr;
+		hr = GetDefaultKinectSensor(&kinect_sensor);
+		if (SUCCEEDED(hr)) {
+			hr = kinect_sensor->Open();
+		}
+		if (FAILED(hr)) {
+			kinect_sensor = nullptr;
+		}
+	}
 
-	D3D11_BLEND_DESC drop_alpha_with_alpha_blend_state_desc;
-	drop_alpha_with_alpha_blend_state_desc.AlphaToCoverageEnable = false;
-	drop_alpha_with_alpha_blend_state_desc.IndependentBlendEnable = false;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendEnable = true;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ZERO;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	drop_alpha_with_alpha_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	D3D11_BLEND_DESC additative_for_all_blend_state_desc;
-	additative_for_all_blend_state_desc.AlphaToCoverageEnable = false;
-	additative_for_all_blend_state_desc.IndependentBlendEnable = false;
-	additative_for_all_blend_state_desc.RenderTarget[0].BlendEnable = true;
-	additative_for_all_blend_state_desc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
-	additative_for_all_blend_state_desc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
-	additative_for_all_blend_state_desc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-	additative_for_all_blend_state_desc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-	additative_for_all_blend_state_desc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;
-	additative_for_all_blend_state_desc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-	additative_for_all_blend_state_desc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
-
-	D3D11_DEPTH_STENCIL_DESC keep_nearer_depth_test;
-	keep_nearer_depth_test.DepthEnable = true;
-	keep_nearer_depth_test.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	keep_nearer_depth_test.DepthFunc = D3D11_COMPARISON_LESS;
-	keep_nearer_depth_test.StencilEnable = true;
-	keep_nearer_depth_test.StencilReadMask = 0xFF;
-	keep_nearer_depth_test.StencilWriteMask = 0xFF;
-	keep_nearer_depth_test.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	keep_nearer_depth_test.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	keep_nearer_depth_test.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	keep_nearer_depth_test.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-	keep_nearer_depth_test.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	keep_nearer_depth_test.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	keep_nearer_depth_test.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	keep_nearer_depth_test.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	graphics_objects = BeginDirectx(headset_system, "");
+	graphics_objects = BeginDirectx(headset_system, kinect_sensor, "");
 
 	int stage_repetition = hmd_active ? 2 : 0;
 
@@ -299,13 +270,17 @@ int _tmain(int argc, _TCHAR* argv[])
 		single_camera_name += "|0";
 	}
 
+	BlendDesc::Init();
 	TextureSignature back_buffer_signature(*graphics_objects.render_pipeline->GetStagingBufferDesc());
 	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
-	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
-	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", keep_nearer_depth_test), {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
-	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("terrain", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", keep_nearer_depth_test), {}, no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
-	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, DepthStencilDescription("normal_depth", keep_nearer_depth_test), {}, keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
-	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", keep_nearer_depth_test), {}, drop_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name)));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("terrain", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::drop_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<TextureCopyDesc>(stage_repetition, TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer", back_buffer_signature) }, { "objects" })));
 	if (hmd_active) {
 		pipeline_stages.emplace_back(new TextureCopyDesc("move_to_back", { std::make_tuple("back_buffer|2", back_buffer_signature) }, { "objects|0" }));

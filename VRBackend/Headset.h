@@ -6,12 +6,14 @@
 #include <d3dx10.h>
 
 #include "openvr.h"
+#include "Kinect.h"
 
 #include <array>
 #include <vector>
 
 #include "Quaternion.h"
 #include "Pose.h"
+#include "Body.h"
 
 #pragma comment (lib, "d3d11.lib")
 #pragma comment (lib, "d3dx11.lib")
@@ -27,7 +29,7 @@ class Headset {
 public:
 	Headset();
 
-	void Initialize(vr::IVRSystem* system);
+	void Initialize(vr::IVRSystem* system, IKinectSensor* sensor);
 
 	void Cleanup();
 
@@ -46,7 +48,8 @@ public:
 	void SubmitForRendering();
 	void UpdateRenderingPoses();
 
-	bool IsInitialized();
+	bool IsHeadsetInitialized();
+	bool IsKinectInitialized();
 
 	void RegisterTrackedObject(vr::TrackedDeviceIndex_t index);
 	void UnregisterTrackedObject(vr::TrackedDeviceIndex_t index);
@@ -54,6 +57,9 @@ public:
 	vr::TrackedDeviceIndex_t GetDeviceIndex(vr::ETrackedDeviceClass device_class, unsigned int device_number);
 	Pose GetGamePose(vr::TrackedDeviceIndex_t index);
 	vr::VRControllerState_t GetGameControllerState(vr::TrackedDeviceIndex_t index);
+
+	Body& GetBody(uint64_t tracking_id);
+	vector<uint64_t> GetNewTrackedIds();
 
 	static Pose DecomposePoseFromMatrix(const vr::HmdMatrix34_t& matrix);
 	static DirectX::XMMATRIX ToDXMatrix(const vr::HmdMatrix34_t& matrix);
@@ -76,6 +82,11 @@ private:
 	vr::IVRSystem* system_;
 	vr::IVRCompositor* compositor_;
 
+	// Interfaces to kinect
+	IKinectSensor* sensor_;
+	IBodyFrameReader* body_frame_reader_;
+	ICoordinateMapper* coordinate_mapper_;
+
 	// Internal resource storage
 	array<Texture, 2> eye_textures_;
 	array<vr::Texture_t, 2> eye_texture_submissions_;
@@ -91,6 +102,16 @@ private:
 	array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> logic_trackings_;
 	array<Pose, vr::k_unMaxTrackedDeviceCount> logic_poses_;
 	array<vr::VRControllerState_t, vr::k_unMaxTrackedDeviceCount> logic_controller_states_;
+
+	// body_frame_time_delta_ is -1 if the current frame is invalid.
+	int64_t body_frame_time_ = -1;
+	int64_t body_frame_time_delta_ = -1;
+	IBodyFrame* body_frame_ = nullptr;
+	Vector4 floor_clip_plane_;
+	array<IBody*, BODY_COUNT> raw_bodies_;
+	array<Body, BODY_COUNT+1> bodies_;
+	set<uint64_t> tracking_ids_;
+	vector<uint64_t> new_tracked_ids_;
 
 	float photon_prediction_time_ = 0.0f;
 };

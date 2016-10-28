@@ -3,6 +3,7 @@
 #include "stl.h"
 
 #include "Entity.h"
+#include "PipelineCamera.h"
 
 class ResourcePool;
 

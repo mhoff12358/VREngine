@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include "openvr.h"
+#include "Kinect.h"
 
 #include "Headset.h"
 #include "RenderingPipeline.h"
@@ -23,4 +24,4 @@ typedef struct {
 	PerspectiveCamera* player_camera;
 } VRBackendBasics;
 
-VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, std::string resource_location);
+VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinect_sensor, std::string resource_location);

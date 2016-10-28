@@ -117,7 +117,7 @@ void InputHandler::SetHeadsetState(Headset* ocu) {
 }
 
 bool InputHandler::IsHeadsetActive() const {
-	return (oculus != NULL);
+	return oculus->IsHeadsetInitialized();
 }
 
 void InputHandler::SetUsePredictiveTiming(bool new_use_predictive) {

@@ -13,6 +13,7 @@
 #include <mutex>
 #include <cstdlib>
 #include <cmath>
+#include <set>
 
 using std::map;
 using std::pair;
@@ -28,6 +29,7 @@ using std::unique_ptr;
 using std::move;
 using std::mutex;
 using std::max;
+using std::set;
 
 #include "boost/optional.hpp"
 

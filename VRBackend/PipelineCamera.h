@@ -1,7 +1,6 @@
 #pragma once
 
 #include "DirectXMath.h"
-#include "Headset.h"
 #include "Pose.h"
 #include "stl.h"
 

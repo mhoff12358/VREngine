@@ -30,7 +30,7 @@ def first_load(resources):
 	import code
 	a = globals()
 	a.update(locals())
-	code.interact(local = a)
+	#code.interact(local = a)
 
 #	graphics_object_id = scene.AddAndConstructGraphicsObject()
 #	latest_command = scene.MakeCommandAfter(

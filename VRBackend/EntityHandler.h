@@ -4,6 +4,7 @@
 #include "AsyncEntityBuffer.h"
 #include "Entity.h"
 #include "EntityId.h"
+#include "PipelineCamera.h"
 
 class ResourcePool;
 

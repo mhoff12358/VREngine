@@ -3,34 +3,60 @@
 #include "Windows.h"
 
 Headset::Headset() {
+	for (IBody*& body : raw_bodies_) {
+		body = nullptr;
+	}
 }
 
-bool Headset::IsInitialized() {
+bool Headset::IsHeadsetInitialized() {
 	return system_ != nullptr;
 }
 
-void Headset::Initialize(vr::IVRSystem* system) {
-	vr::EVRInitError error;
-	system_ = system;
-	compositor_ = static_cast<vr::IVRCompositor*>(vr::VR_GetGenericInterface(vr::IVRCompositor_Version, &error));
+bool Headset::IsKinectInitialized() {
+	return sensor_ != nullptr;
+}
 
-	for (auto& tracked_device_indexes : tracked_device_by_class_) {
-		for (auto& index : tracked_device_indexes) {
-			index = vr::k_unTrackedDeviceIndexInvalid;
+void Headset::Initialize(vr::IVRSystem* system, IKinectSensor* sensor) {
+	if (system) {
+		vr::EVRInitError error;
+		system_ = system;
+		compositor_ = static_cast<vr::IVRCompositor*>(vr::VR_GetGenericInterface(vr::IVRCompositor_Version, &error));
+
+		for (auto& tracked_device_indexes : tracked_device_by_class_) {
+			for (auto& index : tracked_device_indexes) {
+				index = vr::k_unTrackedDeviceIndexInvalid;
+			}
+		}
+
+		for (auto eye : eyes_) {
+			vr::HmdMatrix34_t eye_transform = system_->GetEyeToHeadTransform(eye);
+			array<float, 3> eye_offset;
+			for (int i = 0; i < 3; i++) {
+				eye_offset[i] = eye_transform.m[i][3];
+			}
+			eye_rendering_poses_[eye].location_ = Location(eye_offset);
+		}
+
+		for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
+			RegisterTrackedObject(i);
 		}
 	}
+	if (sensor) {
+		HRESULT hr;
+		sensor_ = sensor;
 
-	for (auto eye : eyes_) {
-		vr::HmdMatrix34_t eye_transform = system_->GetEyeToHeadTransform(eye);
-		array<float, 3> eye_offset;
-		for (int i = 0; i < 3; i++) {
-			eye_offset[i] = eye_transform.m[i][3];
+		IBodyFrameSource* body_frame_source_ = nullptr;
+		hr = sensor_->get_CoordinateMapper(&coordinate_mapper_);
+		if (SUCCEEDED(hr)) {
+			hr = sensor_->get_BodyFrameSource(&body_frame_source_);
 		}
-		eye_rendering_poses_[eye].location_ = Location(eye_offset);
-	}
+		if (SUCCEEDED(hr)) {
+			hr = body_frame_source_->OpenReader(&body_frame_reader_);
+		}
 
-	for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
-		RegisterTrackedObject(i);
+		if (FAILED(hr)) {
+			sensor_ = nullptr;
+		}
 	}
 }
 
@@ -72,26 +98,92 @@ void Headset::UpdateRenderingPoses() {
 }
 
 void Headset::UpdateGamePoses() {
-	system_->GetDeviceToAbsoluteTrackingPose(
-		vr::TrackingUniverseStanding, photon_prediction_time_,
-		logic_trackings_.data(), logic_trackings_.size());
-	// Updates the pose for all devices that aren't invalid.
-	for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
-		if (tracked_device_classes_[i] != vr::TrackedDeviceClass_Invalid) {
-			logic_poses_[i] = DecomposePoseFromMatrix(logic_trackings_[i].mDeviceToAbsoluteTracking);
+	if (IsHeadsetInitialized()) {
+		system_->GetDeviceToAbsoluteTrackingPose(
+			vr::TrackingUniverseStanding, photon_prediction_time_,
+			logic_trackings_.data(), logic_trackings_.size());
+		// Updates the pose for all devices that aren't invalid.
+		for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
+			if (tracked_device_classes_[i] != vr::TrackedDeviceClass_Invalid) {
+				logic_poses_[i] = DecomposePoseFromMatrix(logic_trackings_[i].mDeviceToAbsoluteTracking);
+			}
 		}
-	}
 
-	// Updates the controller state for all active controller devices.
-	for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
-		if (tracked_device_classes_[i] == vr::TrackedDeviceClass_Controller) {
-			uint32_t old_packet_stamp = logic_controller_states_[i].unPacketNum;
-			system_->GetControllerState(i, &logic_controller_states_[i]);
-			if (old_packet_stamp != logic_controller_states_[i].unPacketNum) {
-				// Do any additional logic that only happens when the controller button state changes.
+		// Updates the controller state for all active controller devices.
+		for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
+			if (tracked_device_classes_[i] == vr::TrackedDeviceClass_Controller) {
+				uint32_t old_packet_stamp = logic_controller_states_[i].unPacketNum;
+				system_->GetControllerState(i, &logic_controller_states_[i]);
+				if (old_packet_stamp != logic_controller_states_[i].unPacketNum) {
+					// Do any additional logic that only happens when the controller button state changes.
+				}
 			}
 		}
 	}
+	if (IsKinectInitialized()) {
+		// Release any old body frame and data if they still exist.
+		if (body_frame_) {
+			body_frame_->Release();
+			body_frame_ = nullptr;
+		}
+
+		// Generate a new body frame and data.
+		int64_t new_body_frame_time;
+		HRESULT hr;
+		hr = body_frame_reader_->AcquireLatestFrame(&body_frame_);
+		if (SUCCEEDED(hr)) {
+			hr = body_frame_->get_RelativeTime(&new_body_frame_time);
+		}
+		if (SUCCEEDED(hr)) {
+			hr = body_frame_->GetAndRefreshBodyData(BODY_COUNT, raw_bodies_.data());
+		}
+		if (SUCCEEDED(hr)) {
+			hr = body_frame_->get_FloorClipPlane(&floor_clip_plane_);
+		}
+		if (SUCCEEDED(hr)) {
+			body_frame_time_delta_ = new_body_frame_time - body_frame_time_;
+			body_frame_time_ = new_body_frame_time;
+			for (size_t body_index = 0; body_index < BODY_COUNT; body_index++) {
+				IBody* raw_body = raw_bodies_[body_index];
+				bodies_[body_index].Empty();
+				BOOLEAN is_tracked = FALSE;
+				HRESULT tracking_hr;
+				tracking_hr = raw_body->get_IsTracked(&is_tracked);
+				if (SUCCEEDED(tracking_hr) && is_tracked) {
+					uint64_t tracking_id;
+					tracking_hr = raw_body->get_TrackingId(&tracking_id);
+					if (SUCCEEDED(tracking_hr)) {
+						bodies_[body_index].FillFromIBody(tracking_id, raw_body);
+						if (tracking_ids_.count(tracking_id) == 0) {
+							tracking_ids_.insert(tracking_id);
+							new_tracked_ids_.push_back(tracking_id);
+							std::cout << "New tracking ID: " << tracking_id << std::endl;
+						}
+					}
+				}
+			}
+		}
+		if (FAILED(hr) && (hr != E_PENDING)) {
+			body_frame_time_delta_ = -1;
+		}
+	}
+}
+
+Body& Headset::GetBody(uint64_t tracking_id) {
+	size_t body_index = 0;
+	for (; body_index < BODY_COUNT; body_index++) {
+		if (bodies_[body_index].tracking_id_ == tracking_id) {
+			break;
+		}
+	}
+	return bodies_[body_index];
+}
+
+vector<uint64_t> Headset::GetNewTrackedIds() {
+	if (new_tracked_ids_.empty()) {
+		return{};
+	}
+	return std::move(new_tracked_ids_);
 }
 
 Pose Headset::GetHeadPose() const {

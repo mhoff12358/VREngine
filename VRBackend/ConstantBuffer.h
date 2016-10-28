@@ -5,7 +5,6 @@
 
 #include "stl.h"
 #include "Camera.h"
-#include "PipelineCamera.h"
 #include "Shaders.h"
 
 #define PER_FRAME_CONSTANT_BUFFER_REGISTER 0

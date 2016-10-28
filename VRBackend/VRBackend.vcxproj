@@ -74,7 +74,7 @@
     <IncludePath>C:\OculusSDK\LibOVR\Include;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\boost_1_61_0;C:\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+    <IncludePath>C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;C:\boost_1_61_0;C:\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
@@ -164,6 +164,8 @@
   <ItemGroup>
     <ClInclude Include="AsyncEntityBuffer.h" />
     <ClInclude Include="BeginDirectx.h" />
+    <ClInclude Include="BlendDesc.h" />
+    <ClInclude Include="Body.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConvolutionEffectDesc.h" />
@@ -210,6 +212,8 @@
   <ItemGroup>
     <ClCompile Include="AsyncEntityBuffer.cpp" />
     <ClCompile Include="BeginDirectx.cpp" />
+    <ClCompile Include="BlendDesc.cpp" />
+    <ClCompile Include="Body.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConvolutionEffectDesc.cpp" />
