@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include "TimeTracker.h"
-
 
 float TimeTracker::performance_freq_inv = 0.0f;
 unsigned int TimeTracker::frame_number = 0;

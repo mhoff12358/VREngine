@@ -1,6 +1,7 @@
+#include "stdafx.h"
 #include "Headset.h"
 
-#include "Windows.h"
+#include "Texture.h"
 
 Headset::Headset() {
 	for (IBody*& body : raw_bodies_) {

@@ -1,11 +1,9 @@
 #ifndef __INPUT_HANDLER_H_INCLUDED__
 #define __INPUT_HANDLER_H_INCLUDED__
 
-#include "Windows.h"
-#include "stl.h"
+#include "stdafx.h"
 
-#include "Logging.h"
-#include "Headset.h"
+class Headset;
 
 class InputHandler {
 public:

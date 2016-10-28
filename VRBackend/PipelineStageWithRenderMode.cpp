@@ -1,11 +1,12 @@
+#include "stdafx.h"
 #include "PipelineStageWithRenderMode.h"
 
+#include "Texture.h"
 
 PipelineStageWithRenderMode::PipelineStageWithRenderMode(const BasePipelineStageDesc& description)
 	: PipelineStage(description)
 {
 }
-
 
 PipelineStageWithRenderMode::~PipelineStageWithRenderMode()
 {

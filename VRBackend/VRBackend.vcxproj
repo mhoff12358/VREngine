@@ -97,12 +97,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>true</SDLCheck>
-      <DisableSpecificWarnings>4005</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4005;4267;</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -166,9 +166,9 @@
     <ClInclude Include="BeginDirectx.h" />
     <ClInclude Include="BlendDesc.h" />
     <ClInclude Include="Body.h" />
-    <ClInclude Include="Camera.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConvolutionEffectDesc.h" />
+    <ClInclude Include="dx.h" />
     <ClInclude Include="Entity.h" />
     <ClInclude Include="EntityHandler.h" />
     <ClInclude Include="EntityId.h" />
@@ -179,11 +179,8 @@
     <ClInclude Include="ModelGenerator.h" />
     <ClInclude Include="ModelMutation.h" />
     <ClInclude Include="ModelSlice.h" />
-    <ClInclude Include="my_math.h" />
     <ClInclude Include="ObjLoader.h" />
     <ClInclude Include="Headset.h" />
-    <ClInclude Include="OrthoCamera.h" />
-    <ClInclude Include="PerspectiveCamera.h" />
     <ClInclude Include="PipelineCamera.h" />
     <ClInclude Include="PipelineStage.h" />
     <ClInclude Include="PipelineStageDesc.h" />
@@ -196,14 +193,16 @@
     <ClInclude Include="RenderGroup.h" />
     <ClInclude Include="RenderingPipeline.h" />
     <ClInclude Include="RenderMode.h" />
-    <ClInclude Include="RenderResource.h" />
     <ClInclude Include="ResourceIdentifier.h" />
     <ClInclude Include="ResourcePool.h" />
     <ClInclude Include="Shaders.h" />
     <ClInclude Include="ShaderSettings.h" />
+    <ClInclude Include="ShaderStages.h" />
+    <ClInclude Include="stdafx.h" />
     <ClInclude Include="stl.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TextureCopy.h" />
+    <ClInclude Include="TextureUsage.h" />
     <ClInclude Include="TextureView.h" />
     <ClInclude Include="TimeTracker.h" />
     <ClInclude Include="Vertices.h" />
@@ -214,7 +213,6 @@
     <ClCompile Include="BeginDirectx.cpp" />
     <ClCompile Include="BlendDesc.cpp" />
     <ClCompile Include="Body.cpp" />
-    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConvolutionEffectDesc.cpp" />
     <ClCompile Include="Entity.cpp" />
@@ -227,11 +225,8 @@
     <ClCompile Include="ModelGenerator.cpp" />
     <ClCompile Include="ModelMutation.cpp" />
     <ClCompile Include="ModelSlice.cpp" />
-    <ClCompile Include="my_math.cpp" />
     <ClCompile Include="ObjLoader.cpp" />
     <ClCompile Include="Headset.cpp" />
-    <ClCompile Include="OrthoCamera.cpp" />
-    <ClCompile Include="PerspectiveCamera.cpp" />
     <ClCompile Include="PipelineCamera.cpp" />
     <ClCompile Include="PipelineStage.cpp" />
     <ClCompile Include="PipelineStageDesc.cpp" />
@@ -243,11 +238,11 @@
     <ClCompile Include="RenderGroup.cpp" />
     <ClCompile Include="RenderingPipeline.cpp" />
     <ClCompile Include="RenderMode.cpp" />
-    <ClCompile Include="RenderResource.cpp" />
     <ClCompile Include="ResourceIdentifier.cpp" />
     <ClCompile Include="ResourcePool.cpp" />
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ShaderSettings.cpp" />
+    <ClCompile Include="ShaderStages.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCopy.cpp" />
     <ClCompile Include="TextureView.cpp" />

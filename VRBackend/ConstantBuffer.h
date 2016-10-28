@@ -1,11 +1,8 @@
 #pragma once
 
-#include <D3D11.h>
-#include <DirectXMath.h>
+#include "stdafx.h"
 
-#include "stl.h"
-#include "Camera.h"
-#include "Shaders.h"
+#include "ShaderStages.h"
 
 #define PER_FRAME_CONSTANT_BUFFER_REGISTER 0
 #define PER_MODEL_CONSTANT_BUFFER_REGISTER 1
@@ -167,7 +164,6 @@ class ConstantBufferTyped<ViewProjectionMatrixData> : public ConstantBufferTyped
 public:
 	ConstantBufferTyped(ShaderStages stages) : ConstantBufferTypedTemp(stages) {}
 
-	void XM_CALLCONV SetAllTransformations(Camera& camera);
 	void XM_CALLCONV SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix);
 };
 

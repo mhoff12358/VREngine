@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "PipelineCamera.h"
 
 void PipelineCamera::SetOrthoProjection(float width, float height, float near_z, float far_z) {

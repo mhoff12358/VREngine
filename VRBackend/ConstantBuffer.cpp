@@ -1,10 +1,9 @@
+#include "stdafx.h"
 #include "ConstantBuffer.h"
-
 
 ConstantBuffer::ConstantBuffer(ShaderStages stages) : pipeline_stages(stages)
 {
 }
-
 
 ConstantBuffer::~ConstantBuffer()
 {
@@ -109,13 +108,6 @@ void XM_CALLCONV ConstantBufferTyped<TransformationMatrixAndInvTransData>::SetTr
 
 void XM_CALLCONV ConstantBufferTyped<TransformationMatrixAndInvTransData>::SetTransformationInvTrans(DirectX::FXMMATRIX new_transformation_inv_trans) {
 	DirectX::XMStoreFloat4x4(&buffer_data.transformation_inv_trans, new_transformation_inv_trans);
-	SetDirty();
-}
-
-void XM_CALLCONV ConstantBufferTyped<ViewProjectionMatrixData>::SetAllTransformations(Camera& camera) {
-	DirectX::XMStoreFloat4x4(&buffer_data.view_matrix, camera.GetViewMatrix());
-	DirectX::XMStoreFloat4x4(&buffer_data.view_proj_matrix, camera.GetViewProjectionMatrix());
-	DirectX::XMStoreFloat4x4(&buffer_data.orient_proj_matrix, camera.GetOrientationProjectionMatrix());
 	SetDirty();
 }
 

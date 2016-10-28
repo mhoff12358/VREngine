@@ -1,12 +1,16 @@
 #pragma once
 
-#include "RenderGroup.h"
-#include "AsyncEntityBuffer.h"
-#include "Entity.h"
+#include "stdafx.h"
+
 #include "EntityId.h"
+#include "AsyncEntityBuffer.h"
+#include "Shaders.h"
+#include "Entity.h"
+#include "ConstantBuffer.h"
 #include "PipelineCamera.h"
 
 class ResourcePool;
+class PipelineCamera;
 
 class EntityHandler
 {

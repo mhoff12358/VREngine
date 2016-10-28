@@ -1,8 +1,11 @@
+#include "stdafx.h"
 #include "PipelineStage.h"
-#include "RenderEntities.h"
+
+#include "RenderMode.h"
+#include "PipelineStageDesc.h"
 #include "TextureCopy.h"
 #include "ProcessingEffect.h"
-#include "PipelineStageDesc.h"
+#include "RenderEntities.h"
 
 PipelineStageBuffer::PipelineStageBuffer() {
 	for (int i = 0; i < D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT; i++) {

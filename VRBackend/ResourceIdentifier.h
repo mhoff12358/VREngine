@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stl.h"
+#include "stdafx.h"
 
 class ResourceIdentifier {
 public:

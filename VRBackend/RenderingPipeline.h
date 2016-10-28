@@ -1,29 +1,18 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "stdafx.h"
 
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dx11.lib")
-#pragma comment (lib, "d3dx10.lib")
-
-#include <string>
-#include "stl.h"
-
-#include "ViewState.h"
-#include "RenderMode.h"
-#include "InputHandler.h"
-#include "PerspectiveCamera.h"
-#include "Headset.h"
-#include "EntityHandler.h"
-#include "Entity.h"
-#include "ProcessingEffect.h"
-#include "PipelineStageDesc.h"
+#include "Texture.h"
 #include "PipelineStage.h"
-#include "PipelineTexturePlanner.h"
-#include "Quaternion.h"
-#include "PipelineCamera.h"
+#include "PipelineStageDesc.h"
+#include "RenderMode.h"
+
+class EntityHandler;
+class InputHandler;
+class Headset;
+class RenderGroup;
+class ResourcePool;
+class ViewState;
 
 class RenderingPipeline {
 public:

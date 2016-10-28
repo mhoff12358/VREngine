@@ -1,7 +1,7 @@
+#include "stdafx.h"
 #include "ViewState.h"
 
 #include "InputHandler.h"
-#include <atomic>
 
 namespace WindowProcOutput {
 	InputHandler* input_handler = NULL;

@@ -1,7 +1,6 @@
 #pragma once
 
-#include <cmath>
-#include "stl.h"
+#include "stdafx.h"
 
 template <int width>
 array<float, width> Generate1DGausian(float peak, float center, float std_dev);

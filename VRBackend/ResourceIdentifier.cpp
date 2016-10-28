@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "ResourceIdentifier.h"
 
 std::string ResourceIdentifier::object_delimiter = "|";

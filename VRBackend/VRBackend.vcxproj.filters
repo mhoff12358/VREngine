@@ -30,22 +30,10 @@
     <ClInclude Include="RenderingPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PerspectiveCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="OrthoCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="my_math.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Logging.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="InputHandler.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="BeginDirectx.h">
@@ -61,9 +49,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RenderResource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ResourcePool.h">
@@ -156,6 +141,18 @@
     <ClInclude Include="Body.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="dx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderStages.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureUsage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ViewState.cpp">
@@ -170,22 +167,10 @@
     <ClCompile Include="RenderingPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PerspectiveCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="OrthoCamera.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="my_math.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Logging.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputHandler.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BeginDirectx.cpp">
@@ -201,9 +186,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Model.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RenderResource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ResourcePool.cpp">
@@ -288,6 +270,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Body.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderStages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

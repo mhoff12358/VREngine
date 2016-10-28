@@ -1,18 +1,18 @@
 
 #pragma once
 
-#include <string>
-#include <iostream>
+#include "stdafx.h"
 
-#include "openvr.h"
-#include "Kinect.h"
-
-#include "Headset.h"
-#include "RenderingPipeline.h"
-#include "InputHandler.h"
-#include "ViewState.h"
-#include "EntityHandler.h"
-#include "PipelineStageDesc.h"
+namespace vr {
+	class IVRSystem;
+}
+class IKinectSensor;
+class EntityHandler;
+class Headset;
+class InputHandler;
+class RenderingPipeline;
+class ResourcePool;
+class ViewState;
 
 typedef struct {
 	Headset* oculus;
@@ -21,7 +21,6 @@ typedef struct {
 	ViewState* view_state;
 	ResourcePool* resource_pool;
 	EntityHandler* entity_handler;
-	PerspectiveCamera* player_camera;
 } VRBackendBasics;
 
 VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinect_sensor, std::string resource_location);

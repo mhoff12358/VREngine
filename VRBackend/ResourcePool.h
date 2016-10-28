@@ -1,17 +1,15 @@
 #pragma once
 
-#include "Model.h"
-#include "Shaders.h"
-#include "Vertices.h"
-#include "ModelGenerator.h"
-#include "Texture.h"
-#include "ObjLoader.h"
-#include "ConstantBuffer.h"
-#include "ResourceIdentifier.h"
+#include "stdafx.h"
 
-#include "stl.h"
+#include "ModelGenerator.h"
+#include "ObjLoader.h"
+#include "ResourceIdentifier.h"
+#include "Shaders.h"
+#include "Texture.h"
 
 class EntityHandler;
+class ConstantBuffer;
 
 class ResourceIdent {
 public:
@@ -96,6 +94,7 @@ private:
 	map<string, unsigned int> vertex_shader_lookup;
 	vector<GeometryShader> geometry_shaders;
 	map<string, unsigned int> geometry_shader_lookup;
+	Texture dummy_texture;
 	vector<Texture> textures;
 	map<string, unsigned int> texture_lookup;
 	map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;

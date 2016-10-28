@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Texture.h"
 
 void Texture::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::array<int, 2> new_size, const D3D11_TEXTURE2D_DESC* texture_desc) {
@@ -192,7 +193,7 @@ void Texture::Fill() {
 	for (int row = 0; row < 128; row++) {
 		float* row_ptr = (float*)(data + ms.RowPitch*row);
 		for (int i = 0; i < 128 * 4; i += 4) {
-			row_ptr[i + 0] = ((float)i)/(128.0*4);
+			row_ptr[i + 0] = ((float)i)/(128.0f*4.0f);
 			row_ptr[i + 1] = 0.0f;
 			row_ptr[i + 2] = 1.0f;
 			row_ptr[i + 3] = 1.0f;
@@ -213,7 +214,7 @@ void Texture::CopyFrom(const Texture& other_texture) {
 }
 
 void Texture::CopyFrom(ID3D11Texture2D* other_texture, D3D11_VIEWPORT dest_viewport) {
-	device_context->CopySubresourceRegion(GetTexture(), 0, dest_viewport.TopLeftX, dest_viewport.TopLeftY, 0, other_texture, 0, NULL);
+	device_context->CopySubresourceRegion(GetTexture(), 0, static_cast<unsigned int>(dest_viewport.TopLeftX), static_cast<unsigned int>(dest_viewport.TopLeftY), 0, other_texture, 0, NULL);
 }
 
 void Texture::CopyFrom(const Texture& other_texture, D3D11_VIEWPORT dest_viewport) {

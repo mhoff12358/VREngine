@@ -1,11 +1,6 @@
 #pragma once
 
-#include <Windows.h>
-#include <string>
-#include <iostream>
-#include <array>
-
-#include "stl.h"
+#include "stdafx.h"
 
 class TimeTracker {
 public:

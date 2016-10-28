@@ -1,29 +1,13 @@
 #ifndef __OCULUS_H_INCLUDED__
 #define __OCULUS_H_INCLUDED__
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "stdafx.h"
 
 #include "openvr.h"
 #include "Kinect.h"
 
-#include <array>
-#include <vector>
-
-#include "Quaternion.h"
-#include "Pose.h"
 #include "Body.h"
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dx11.lib")
-#pragma comment (lib, "d3dx10.lib")
-
-#include "DirectXMath.h"
-
 #include "Texture.h"
-#include "ViewState.h"
-#include "PerspectiveCamera.h"
 
 class Headset {
 public:

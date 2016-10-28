@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "BlendDesc.h"
 
 D3D11_BLEND_DESC BlendDesc::no_alpha_blend_state_desc;

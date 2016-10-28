@@ -1,5 +1,9 @@
+#include "stdafx.h"
 #include "ProcessingEffect.h"
-#include "ObjLoader.h"
+
+#include "PipelineStageDesc.h"
+#include "ConstantBuffer.h"
+#include "ResourcePool.h"
 
 VertexType ProcessingEffect::squares_vertex_type = VertexType(std::vector<D3D11_INPUT_ELEMENT_DESC>({
 	{ "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
@@ -15,7 +19,7 @@ ProcessingEffect::ProcessingEffect(ID3D11Device* dev, ID3D11DeviceContext* dev_c
 
 	num_input_textures_ = description.input_textures_.size();
 	input_textures_ = new TextureView[num_input_textures_];
-	for (int i = 0; i < num_input_textures_; i++) {
+	for (unsigned int i = 0; i < num_input_textures_; i++) {
 		input_textures_[i] = TextureView(i, i, ShaderStages::Pixel(), description.input_textures_[i]->GetShaderResourceView(), description.input_textures_[i]->GetSampler());
 	}
 
@@ -40,11 +44,11 @@ ProcessingEffect::~ProcessingEffect()
 void ProcessingEffect::Apply(ID3D11Device* dev, ID3D11DeviceContext* dev_con, RenderGroup* groups_to_draw) {
 	PreApply();
 	render_mode_.Prepare();
-	for (int i = 0; i < num_input_textures_; i++) {
+	for (unsigned int i = 0; i < num_input_textures_; i++) {
 		input_textures_[i].Prepare(dev, dev_con);
 	}
 	screen_filling_entity_.Draw(dev, dev_con);
-	for (int i = 0; i < num_input_textures_; i++) {
+	for (unsigned int i = 0; i < num_input_textures_; i++) {
 		input_textures_[i].UnPrepare(dev, dev_con);
 	}
 	render_mode_.UnPrepare();

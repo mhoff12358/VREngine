@@ -1,8 +1,6 @@
 #pragma once
 
-#include "DirectXMath.h"
-#include "Pose.h"
-#include "stl.h"
+#include "stdafx.h"
 
 typedef string PipelineCameraIdent;
 
@@ -20,7 +18,6 @@ public:
 	void SetOrthoProjection(float width, float height, float near_z, float far_z);
 	void SetPerspectiveProjection(float vertical_fov, float aspect_ratio, float near_z, float far_z);
 	void SetRawProjection(DirectX::XMMATRIX projection_matrix);
-	//void SetPerspectiveProjection(ovrFovPort oculus_fov, float near_z, float far_z);
 	void SetLocation(array<float, 3> location);
 	void SetLocation(const Location& location);
 	void SetOrientation(array<float, 4> orientation);

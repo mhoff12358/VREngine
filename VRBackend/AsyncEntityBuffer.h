@@ -1,8 +1,8 @@
 #pragma once
 
-#include "stl.h"
+#include "stdafx.h"
 
-#include "RenderGroup.h"
+class RenderGroup;
 
 class AsyncEntityBuffer
 {

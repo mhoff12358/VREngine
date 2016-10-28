@@ -1,4 +1,10 @@
+#include "stdafx.h"
 #include "ObjLoader.h"
+
+#include "ModelSlice.h"
+#include "EntityHandler.h"
+
+#include <sstream>
 
 ModelModifier ModelModifier::identity_model_modifier = {
 	{ 0, 1, 2 },

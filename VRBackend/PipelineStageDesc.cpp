@@ -1,9 +1,14 @@
+#include "stdafx.h"
 #include "PipelineStageDesc.h"
 
+#include "PipelineStage.h"
+#include "Texture.h"
+#include "PipelineCamera.h"
 #include "TextureCopy.h"
 #include "RenderEntities.h"
 #include "ProcessingEffect.h"
 #include "PipelineTexturePlanner.h"
+#include "Shaders.h"
 
 PipelineStageDesc::PipelineStageDesc() {
 

@@ -12,7 +12,10 @@ using std::unique_ptr;
 #include "VRBackend/BeginDirectx.h"
 #include "VRBackend/TimeTracker.h"
 #include "VRBackend/TextureView.h"
-#include "VRBackend/my_math.h"
+#include "VRBackend/ViewState.h"
+#include "VRBackend/RenderGroup.h"
+#include "VRBackend/RenderingPipeline.h"
+#include "VRBackend/PipelineStageDesc.h"
 
 #include "SceneSystem/Component.h"
 
@@ -22,7 +25,6 @@ using std::unique_ptr;
 #include "SceneSystem/Scene.h"
 #include "SceneSystem/GraphicsResources.h"
 #include "SceneSystem/InputCommandArgs.h"
-#include "SceneSystem/MovableCamera.h"
 #include "SceneSystem/GraphicsObject.h"
 #include "SceneSystem/HeadsetInterface.h"
 #include "SceneSystem/IOInterface.h"

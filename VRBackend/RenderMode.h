@@ -1,31 +1,19 @@
 #ifndef __RENDER_MODE_H_INCLUDED__
 #define __RENDER_MODE_H_INCLUDED__
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
-
-#pragma comment (lib, "d3d11.lib")
-#pragma comment (lib, "d3dx11.lib")
-#pragma comment (lib, "d3dx10.lib")
-
-#include <string>
-#include <vector>
-#include <array>
-#include "Model.h"
-#include "ConstantBuffer.h"
+#include "stdafx.h"
 
 class RenderMode {
 public:
-	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st, D3D11_VIEWPORT view);
-	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st);
+	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st, D3D11_VIEWPORT view);
+	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st);
 	void SetViewport(D3D11_VIEWPORT view);
-	void SetViewport(std::array<int, 2> offset, std::array<int, 2> size, std::array<float, 2> depth_range);
-	void SetViewport(std::array<int, 2> size, std::array<float, 2> depth_range);
+	void SetViewport(array<int, 2> offset, array<int, 2> size, array<float, 2> depth_range);
+	void SetViewport(array<int, 2> size, array<float, 2> depth_range);
 	void SetViewport(int xoff, int yoff, int width, int height, float min_depth, float max_depth);
 	void SetViewport(int width, int height, float min_depth, float max_depth);
-	void SetViewports(const std::vector<D3D11_VIEWPORT> views);
-	void SetRenderTargetViews(const std::vector<ID3D11RenderTargetView*>& rend_tar_views);
+	void SetViewports(const vector<D3D11_VIEWPORT> views);
+	void SetRenderTargetViews(const vector<ID3D11RenderTargetView*>& rend_tar_views);
 	ID3D11RenderTargetView** MutateRenderTargetViews(int num_render_target_views_set);
 
 	void Cleanup();

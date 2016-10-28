@@ -1,9 +1,8 @@
 #pragma once
 
-#include "stl.h"
-#include "Vertices.h"
+#include "stdafx.h"
 
-#include <vector>
+#include "Vertices.h"
 
 class ModelMutation
 {

@@ -1,5 +1,7 @@
+#include "stdafx.h"
 #include "Entity.h"
-#include "TextureView.h"
+
+#include "ConstantBuffer.h"
 
 const TextureView Entity::dummy_texture_view(0, 0, ShaderStages(), NULL, NULL);
 

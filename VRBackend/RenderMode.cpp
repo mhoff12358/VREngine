@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "RenderMode.h"
 
 ID3D11RenderTargetView* RenderMode::clear_render_target_views[] = {

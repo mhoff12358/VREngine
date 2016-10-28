@@ -1,6 +1,8 @@
+#include "stdafx.h"
 #include "ResourcePool.h"
 
 #include "EntityHandler.h"
+#include "Texture.h"
 
 ResourcePool::ResourcePool(EntityHandler& entity_handler) : entity_handler_(entity_handler)
 {
@@ -136,7 +138,7 @@ Texture& ResourcePool::LoadExistingTexture(std::string file_name) {
 		return textures[existing_texture->second];
 	}
 	assert(false);
-	return Texture();
+	return dummy_texture;
 }
 
 PixelShader ResourcePool::LoadExistingPixelShader(std::string file_name) {
@@ -197,7 +199,7 @@ VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string f
 		std::cout << std::string((const char*)vertex_shader_error_blob->GetBufferPointer()) << std::endl;
 	}
 	device_interface->CreateVertexShader(vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), NULL, &new_dx_vertex_shader);
-	HandleHResult(device_interface->CreateInputLayout(ied, ied_size, vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), &new_dx_input_layout));
+	device_interface->CreateInputLayout(ied, ied_size, vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), &new_dx_input_layout);
 
 	if (new_dx_input_layout == nullptr) {
 		std::cout << "Error creating input layout" << std::endl;

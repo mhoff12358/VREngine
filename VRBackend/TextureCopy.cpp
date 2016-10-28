@@ -1,5 +1,8 @@
+#include "stdafx.h"
 #include "TextureCopy.h"
 
+#include "PipelineStageDesc.h"
+#include "Texture.h"
 
 TextureCopy::TextureCopy(ID3D11Device* dev, ID3D11DeviceContext* dev_con, const TextureCopyDesc& description)
 	: PipelineStage(description)
@@ -15,7 +18,6 @@ TextureCopy::TextureCopy(ID3D11Device* dev, ID3D11DeviceContext* dev_con, const 
 TextureCopy::~TextureCopy()
 {
 }
-
 
 void TextureCopy::Apply(ID3D11Device* dev, ID3D11DeviceContext* dev_con, RenderGroup* groups_to_draw) {
 	output_texture_->CopyFrom(*input_texture_);

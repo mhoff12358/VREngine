@@ -1,14 +1,17 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "stdafx.h"
 
-#include "RenderMode.h"
 #include "Entity.h"
-#include "ResourcePool.h"
-#include "PipelineStageDesc.h"
 #include "PipelineStageWithRenderMode.h"
+#include "Model.h"
+#include "Vertices.h"
+
+class ConstantBuffer;
+class TextureView;
+class ResourcePool;
+class RenderGroup;
+class ProcessingEffectDesc;
 
 class ProcessingEffect : public PipelineStageWithRenderMode
 {

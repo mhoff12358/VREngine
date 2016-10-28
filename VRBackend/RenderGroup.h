@@ -1,21 +1,12 @@
 #pragma once
 
-#include "stl.h"
+#include "stdafx.h"
 
-#include "Entity.h"
 #include "PipelineCamera.h"
+#include "ModelMutation.h"
+#include "Entity.h"
 
 class ResourcePool;
-
-/*
-class GPUCopies {
-public:
-	GPUCopies() {}
-
-	// The format is dest, src.
-	vector<pair<ID3D11Buffer*, ID3D11Buffer*>> buffer_copies_;
-};
-*/
 
 class RenderGroup
 {

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Logging.h"
 
 void OutputFormatted(const char* format, ...) {

@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "Body.h"
 
 void Body::Empty() {

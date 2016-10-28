@@ -1,8 +1,8 @@
 #pragma once
 
-#include <D3D11.h>
+#include "stdafx.h"
 
-#include "ConstantBuffer.h"
+class ConstantBuffer;
 
 class ShaderSettings
 {

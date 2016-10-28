@@ -1,5 +1,7 @@
+#include "stdafx.h"
 #include "Model.h"
-#include "ResourcePool.h"
+
+#include "ModelMutation.h"
 
 Model::Model()
 	: vertex_buffer(NULL), slice(0, 0)

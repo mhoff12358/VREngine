@@ -1,10 +1,12 @@
+#include "stdafx.h"
 #include "EntityHandler.h"
-#include "ResourcePool.h"
+
+#include "RenderGroup.h"
+#include "ModelMutation.h"
 
 EntityHandler::EntityHandler()
 {
 }
-
 
 EntityHandler::~EntityHandler()
 {

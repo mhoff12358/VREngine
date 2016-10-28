@@ -1,11 +1,10 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
-#include "PipelineStageDesc.h"
-#include "RenderMode.h"
+#include "stdafx.h"
 #include "PipelineStageWithRenderMode.h"
+#include "ConstantBuffer.h"
+
+class RenderEntitiesDesc;
 
 class RenderEntities : public PipelineStageWithRenderMode
 {

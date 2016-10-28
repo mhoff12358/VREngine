@@ -14,6 +14,8 @@
 #include <cstdlib>
 #include <cmath>
 #include <set>
+#include <iostream>
+#include <cassert>
 
 using std::map;
 using std::pair;

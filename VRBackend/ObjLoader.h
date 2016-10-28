@@ -1,12 +1,9 @@
 #pragma once
 
+#include "stdafx.h"
 #include <fstream>
-#include <vector>
-#include <array>
-#include <map>
 
-#include "stl.h"
-#include "Model.h"
+#include "ModelMutation.h"
 #include "ModelGenerator.h"
 #include "Vertices.h"
 

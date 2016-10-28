@@ -1,6 +1,10 @@
 #pragma once
+
+#include "stdafx.h"
 #include "PipelineStage.h"
 #include "RenderMode.h"
+
+class Texture;
 
 class PipelineStageWithRenderMode : public PipelineStage
 {

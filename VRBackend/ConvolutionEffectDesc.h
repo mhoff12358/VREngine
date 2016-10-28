@@ -1,7 +1,10 @@
 #pragma once
 
+#include "stdafx.h"
+
 #include "PipelineStageDesc.h"
-#include "ProcessingEffect.h"
+
+class ResourcePool;
 
 #define CONVOLUTION_SIZE 27
 

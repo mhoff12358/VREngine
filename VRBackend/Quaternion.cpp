@@ -1,4 +1,18 @@
+#include "stdafx.h"
 #include "Quaternion.h"
+
+float dot(array<float, 3> u, array<float, 3> v) {
+	return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
+}
+
+array<float, 3> cross(array<float, 3> u, array<float, 3> v) {
+	return array<float, 3>({ u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0] });
+}
+
+array<float, 3> vertex_normalize(array<float, 3> in_vert) {
+	float mag = pow(pow(in_vert[0], 2) + pow(in_vert[1], 2) + pow(in_vert[2], 2), 0.5f);
+	return array<float, 3>({ { in_vert[0] / mag, in_vert[1] / mag, in_vert[2] / mag } });
+}
 
 Quaternion::Quaternion() {
 	x = 0;
@@ -90,6 +104,7 @@ Quaternion Quaternion::RotationAboutAxis(AxisID axis, float angle_in_radians) {
 		return Quaternion(0, 0, sin(angle_in_radians / 2.0f), cos(angle_in_radians / 2));
 	default:
 		std::cerr << "Rotation about combined axis" << std::endl;
+		return Quaternion::Identity();
 	}
 }
 
@@ -105,7 +120,7 @@ Quaternion Quaternion::RotationBetweenVectors(const std::array<float, 3>& start_
 	std::array<float, 3> rotation_vector = cross(start_vec, end_vec);
 	rotation_vector = vertex_normalize(rotation_vector);
 	float dot_prod = ::dot(vertex_normalize(start_vec), vertex_normalize(end_vec));
-	dot_prod = std::max(std::min(dot_prod, 1.0f), -1.0f);
+	dot_prod = max(min(dot_prod, 1.0f), -1.0f);
 	float angle_between = acos(dot_prod) * proportion_of_angle;
 	return Quaternion(
 		rotation_vector[0] * sin(angle_between / 2.0f),

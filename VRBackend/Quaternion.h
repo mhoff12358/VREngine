@@ -1,9 +1,6 @@
 #pragma once
 
-#include <array>
-#include <iostream>
-
-#include "my_math.h"
+#include "stdafx.h"
 
 enum AxisID {
 	AID_X = 0x1,

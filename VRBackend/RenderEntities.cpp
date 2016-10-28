@@ -1,4 +1,10 @@
+#include "stdafx.h"
 #include "RenderEntities.h"
+
+#include "PipelineStageDesc.h"
+#include "PipelineCamera.h"
+#include "Entity.h"
+#include "RenderGroup.h"
 
 RenderEntities::RenderEntities(ID3D11Device* dev, ID3D11DeviceContext* dev_con, const RenderEntitiesDesc& description)
 	: PipelineStageWithRenderMode(description),

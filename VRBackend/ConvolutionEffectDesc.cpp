@@ -1,4 +1,9 @@
+#include "stdafx.h"
 #include "ConvolutionEffectDesc.h"
+
+#include "ResourcePool.h"
+#include "PipelineStageDesc.h"
+#include "ProcessingEffect.h"
 
 ConvolutionEffectDesc::ConvolutionEffectDesc(
 	string name,
@@ -7,10 +12,18 @@ ConvolutionEffectDesc::ConvolutionEffectDesc(
 	ResourcePool* resource_pool,
 	bool horizonal_convolution,
 	const array<float, CONVOLUTION_SIZE>& convolution_data)
-	: ProcessingEffectDesc(name, { output_texture_desc }, { input_texture_ident }, GetBlendDesc(), resource_pool->LoadPixelShader(LookupShaderName(horizonal_convolution)), resource_pool->LoadVertexShader(LookupShaderName(horizonal_convolution), ProcessingEffect::squares_vertex_type), (char*)MorphConvolutionData(convolution_data), sizeof(array<float, 4 * (CONVOLUTION_SIZE + 1)>))
+	: ProcessingEffectDesc(
+		name,
+		{ output_texture_desc },
+		{ input_texture_ident },
+		GetBlendDesc(),
+		resource_pool->LoadPixelShader(LookupShaderName(horizonal_convolution)),
+		resource_pool->LoadVertexShader(LookupShaderName(horizonal_convolution),
+			ProcessingEffect::squares_vertex_type),
+			(char*)MorphConvolutionData(convolution_data),
+		sizeof(array<float, 4 * (CONVOLUTION_SIZE + 1)>))
 {
 }
-
 
 ConvolutionEffectDesc::~ConvolutionEffectDesc()
 {

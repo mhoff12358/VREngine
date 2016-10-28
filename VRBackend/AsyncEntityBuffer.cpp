@@ -1,5 +1,7 @@
+#include "stdafx.h"
 #include "AsyncEntityBuffer.h"
 
+#include "RenderGroup.h"
 
 AsyncEntityBuffer::AsyncEntityBuffer()
 {

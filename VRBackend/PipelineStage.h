@@ -1,21 +1,16 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "stdafx.h"
 
-#include "stl.h"
-#include "Texture.h"
-#include "RenderGroup.h"
+class BasePipelineStageDesc;
+class PipelineStageDesc;
+class RenderGroup;
 
 enum PipelineStageType : unsigned char {
 	PST_TEXTURE_COPY,
 	PST_RENDER_ENTITIES,
 	PST_PROCESSING_EFFECT,
 };
-
-class PipelineStageDesc;
-class BasePipelineStageDesc;
 
 class PipelineStage
 {
@@ -42,7 +37,6 @@ public:
 	pair<void*, int> GetStage(int stage_number);
 
 private:
-	//vector<char> stages_;
 	vector<unique_ptr<PipelineStage>> stages_;
 	ID3D11ShaderResourceView* clear_shader_resource_views[D3D11_COMMONSHADER_INPUT_RESOURCE_SLOT_COUNT];
 };

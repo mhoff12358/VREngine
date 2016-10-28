@@ -1,4 +1,8 @@
+#include "stdafx.h"
 #include "InputHandler.h"
+
+#include "Headset.h"
+#include "Logging.h"
 
 void InputHandler::Initialize() {
 }
@@ -6,9 +10,6 @@ void InputHandler::Initialize() {
 void InputHandler::HandleKeydown(unsigned int key_code) {
 	OutputFormatted("Key code: %u", key_code);
 	keyboard_down_waiting[key_code] = 1;
-	//if (keydown_callback.target != NULL) {
-	//	keydown_callback(key_code);
-	//}
 }
 
 void InputHandler::UpdateKeyboardState() {

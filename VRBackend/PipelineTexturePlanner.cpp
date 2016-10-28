@@ -1,5 +1,10 @@
+#include "stdafx.h"
 #include "PipelineTexturePlanner.h"
 
+#include "PipelineStageDesc.h"
+#include "Texture.h"
+#include "EntityHandler.h"
+#include "PipelineCamera.h"
 
 PipelineTexturePlanner::PipelineTexturePlanner(
 	ID3D11Device* dev, ID3D11DeviceContext* dev_con,
@@ -16,7 +21,6 @@ PipelineTexturePlanner::PipelineTexturePlanner(
 	number_of_cameras_(0)
 {
 }
-
 
 PipelineTexturePlanner::~PipelineTexturePlanner()
 {
@@ -81,7 +85,7 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 		D3D11_TEXTURE2D_DESC existing_texture_desc;
 		texture_storage_[i].GetTexture()->GetDesc(&existing_texture_desc);
 		TextureSignature existing_signature(existing_texture_desc);
-		int group_number = LookupBlockGroupNumber(existing_signature);
+		int64_t group_number = LookupBlockGroupNumber(existing_signature);
 		texture_blocks_[group_number].push_back({ -1, i });
 		texture_block_lookup_[existing_textures[i]] = make_tuple(group_number, texture_blocks_[group_number].size() - 1);
 	}
@@ -114,7 +118,7 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 
 			if (stage->depth_desc_.depth_texture_ident_ != "") {
 				auto existing_texture = texture_block_lookup_.find(stage->depth_desc_.depth_texture_ident_);
-				int texture_index;
+				int64_t texture_index;
 				if (existing_texture != texture_block_lookup_.end()) {
 					texture_index = GetTextureBlock(existing_texture->second).texture_;
 				}
@@ -166,7 +170,7 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 	entity_handler_.SetCameras(camera_map_);
 }
 
-int PipelineTexturePlanner::LookupBlockGroupNumber(const TextureSignature& signature) {
+int64_t PipelineTexturePlanner::LookupBlockGroupNumber(const TextureSignature& signature) {
 	map<TextureSignature, int>::iterator existing_group = group_number_lookup_.find(signature);
 	int group_number;
 	if (existing_group == group_number_lookup_.end()) {
@@ -181,8 +185,8 @@ int PipelineTexturePlanner::LookupBlockGroupNumber(const TextureSignature& signa
 	return group_number;
 }
 
-int PipelineTexturePlanner::ReserveTexture(const TextureSignature& signature, const TextureIdent& ident, TextureUsage usage, int number_of_references) {
-	int group_number = LookupBlockGroupNumber(signature);
+int64_t PipelineTexturePlanner::ReserveTexture(const TextureSignature& signature, const TextureIdent& ident, TextureUsage usage, int number_of_references) {
+	int64_t group_number = LookupBlockGroupNumber(signature);
 	vector<TextureBlock>& block_group = texture_blocks_[group_number];
 
 	int block_number;
@@ -203,7 +207,7 @@ int PipelineTexturePlanner::ReserveTexture(const TextureSignature& signature, co
 	return block_group[block_number].texture_;
 }
 
-int PipelineTexturePlanner::AddTextureToStorage(const TextureSignature& signature, TextureUsage usage) {
+int64_t PipelineTexturePlanner::AddTextureToStorage(const TextureSignature& signature, TextureUsage usage) {
 	texture_storage_.emplace_back(usage);
 	texture_storage_.back().Initialize(device_, device_context_,
 		{ { static_cast<int>(signature.texture_desc_.Width), static_cast<int>(signature.texture_desc_.Height) } },
@@ -211,7 +215,7 @@ int PipelineTexturePlanner::AddTextureToStorage(const TextureSignature& signatur
 	return texture_storage_.size() - 1;
 }
 
-int PipelineTexturePlanner::ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references) {
+int64_t PipelineTexturePlanner::ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references) {
 	TextureSignature signature = signature_with_size;
 	//TextureSignature signature = DepthTexture::GetDefaultDepthTextureDesc();
 	//signature.texture_desc_.Width = signature_with_size.texture_desc_.Width;
@@ -219,6 +223,6 @@ int PipelineTexturePlanner::ReserveDepthBufferTexture(const TextureSignature& si
 	return ReserveTexture(signature, ident, TextureUsage::DepthStencil(), number_of_references);
 }
 
-TextureBlock& PipelineTexturePlanner::GetTextureBlock(const tuple<int, int>& index) {
+TextureBlock& PipelineTexturePlanner::GetTextureBlock(const tuple<int64_t, size_t>& index) {
 	return texture_blocks_[get<0>(index)][get<1>(index)];
 }

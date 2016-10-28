@@ -1,6 +1,10 @@
+#include "stdafx.h"
 #include "RenderingPipeline.h"
 
-#include "TimeTracker.h"
+#include "PipelineTexturePlanner.h"
+#include "ViewState.h"
+#include "Headset.h"
+#include "EntityHandler.h"
 
 RenderingPipeline::RenderingPipeline() {
 }

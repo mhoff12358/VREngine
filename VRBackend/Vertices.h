@@ -1,10 +1,7 @@
 #ifndef __VERTICES_H_INCLUDED__
 #define __VERTICES_H_INCLUDED__
 
-#include "D3D11.h"
-
-#include "stl.h"
-#include "Logging.h"
+#include "stdafx.h"
 
 enum VERTEXID {
 	TEXTUREVERTEX_ID = 0,

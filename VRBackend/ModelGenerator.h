@@ -1,10 +1,11 @@
 #pragma once
 
+#include "stdafx.h"
 #include "Vertices.h"
 #include "Model.h"
-#include "EntityHandler.h"
 
-#include "stl.h"
+class ModelSlice;
+class EntityHandler;
 
 struct ModelStorageDescription {
 	ModelStorageDescription() : ModelStorageDescription(true, false, false) {}

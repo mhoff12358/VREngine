@@ -1,14 +1,11 @@
 #pragma once
 
-#include "RenderResource.h"
-#include "Model.h"
-#include "ShaderSettings.h"
-#include "Shaders.h"
-#include "ConstantBuffer.h"
-#include "ModelSlice.h"
-#include "TextureView.h"
+#include "stdafx.h"
 
-#include <vector>
+#include "Shaders.h"
+#include "ShaderSettings.h"
+#include "TextureView.h"
+#include "Model.h"
 
 typedef unsigned char EntityStatusFlags;
 extern const EntityStatusFlags ES_NORMAL;

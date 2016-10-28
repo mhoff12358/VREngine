@@ -1,12 +1,18 @@
 #pragma once
 
-#include "stl.h"
+#include "stdafx.h"
+
+#include "PipelineCamera.h"
 #include "PipelineStageDesc.h"
-#include "EntityHandler.h"
+#include "TextureUsage.h"
+
+class EntityHandler;
+class Texture;
+class ResourcePool;
 
 struct TextureBlock {
 	int active_references_;
-	int texture_;
+	int64_t texture_;
 };
 
 struct TextureReservation {
@@ -38,9 +44,9 @@ public:
 	ResourcePool& resource_pool_;
 
 	map<TextureSignature, int> group_number_lookup_;
-	map<TextureIdent, tuple<int, int>> texture_block_lookup_;
+	map<TextureIdent, tuple<int64_t, size_t>> texture_block_lookup_;
 	vector<vector<TextureBlock>> texture_blocks_;
-	TextureBlock& GetTextureBlock(const tuple<int, int>& index);
+	TextureBlock& GetTextureBlock(const tuple<int64_t, size_t>& index);
 
 	int RequestEntityGroup(string stage_name);
 	unsigned int RequestCameraIndex(PipelineCameraIdent camera_ident);
@@ -51,10 +57,10 @@ private:
 		vector<unique_ptr<PipelineStageDesc>>::iterator first_stage,
 		vector<unique_ptr<PipelineStageDesc>>::iterator end_stage,
 		int initial_dependancies);
-	int LookupBlockGroupNumber(const TextureSignature& signature);
-	int AddTextureToStorage(const TextureSignature& signature, TextureUsage usage);
-	int ReserveTexture(const TextureSignature& signature, const TextureIdent& ident, TextureUsage usage, int number_of_references);
-	int ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references);
+	int64_t LookupBlockGroupNumber(const TextureSignature& signature);
+	int64_t AddTextureToStorage(const TextureSignature& signature, TextureUsage usage);
+	int64_t ReserveTexture(const TextureSignature& signature, const TextureIdent& ident, TextureUsage usage, int number_of_references);
+	int64_t ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references);
 	
 	map<PipelineCameraIdent, unsigned int> camera_map_;
 

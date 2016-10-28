@@ -1,9 +1,10 @@
 #pragma once
 
-#include <D3D11.h>
+#include "stdafx.h"
 
 #include "ModelSlice.h"
-#include "ModelMutation.h"
+
+class ModelMutation;
 
 class Model
 {

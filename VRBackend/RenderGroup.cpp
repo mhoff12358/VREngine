@@ -1,5 +1,8 @@
+#include "stdafx.h"
 #include "RenderGroup.h"
+
 #include "ResourcePool.h"
+#include "Entity.h"
 
 RenderGroup::RenderGroup()
 {
@@ -8,7 +11,6 @@ RenderGroup::RenderGroup()
 RenderGroup::~RenderGroup()
 {
 }
-
 
 void RenderGroup::AddBufferCopy(ID3D11Buffer* dest_buffer, ID3D11Buffer* src_buffer) {
 	buffer_copies_.push_back(make_pair(dest_buffer, src_buffer));

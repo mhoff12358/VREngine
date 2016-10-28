@@ -1,4 +1,9 @@
+#include "stdafx.h"
 #include "ModelGenerator.h"
+
+#include "EntityHandler.h"
+#include "Model.h"
+#include "ModelSlice.h"
 
 ModelGenerator::ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type)
 	: vertex_type(v_type), primitive_type(p_type), number_of_vertices(0) {

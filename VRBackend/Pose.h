@@ -1,7 +1,7 @@
 #pragma once
 
+#include "stdafx.h"
 #include "Quaternion.h"
-#include "stl.h"
 
 struct Scale {
 	Scale(float x, float y, float z) : scale_({x, y, z}) {}

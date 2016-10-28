@@ -69,9 +69,6 @@
     <ClInclude Include="GraphicsResources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="MovableCamera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InputCommandArgs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -88,9 +85,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EntitySpecification.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -144,9 +138,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GraphicsResources.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="MovableCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="InputCommandArgs.cpp">

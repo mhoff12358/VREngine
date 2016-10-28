@@ -1,17 +1,16 @@
 #pragma once
 
-#include <d3d11.h>
-#include <d3dx11.h>
-#include <d3dx10.h>
+#include "stdafx.h"
 
-#include "stl.h"
-#include "Texture.h"
 #include "PipelineStage.h"
 #include "Shaders.h"
+#include "PipelineCamera.h"
 
 typedef string TextureIdent;
 
 class PipelineTexturePlanner;
+class PipelineStage;
+class Texture;
 
 struct DepthStencilDescription {
 	DepthStencilDescription(

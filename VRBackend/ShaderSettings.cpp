@@ -1,4 +1,7 @@
+#include "stdafx.h"
 #include "ShaderSettings.h"
+
+#include "ConstantBuffer.h"
 
 ShaderSettings::ShaderSettings()
 	: constant_buffer(NULL) {
@@ -9,7 +12,6 @@ ShaderSettings::ShaderSettings(ConstantBuffer* buffer)
 	: constant_buffer(buffer)
 {
 }
-
 
 ShaderSettings::~ShaderSettings()
 {
