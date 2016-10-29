@@ -4,8 +4,11 @@
 #include "Shmactor.h"
 #include "CommandArgs.h"
 
-#include "VRBackend/EntityHandler.h"
 #include "VRBackend/ResourcePool.h"
+
+class ResourcePool;
+class EntityHandler;
+struct ID3D11Device;
 
 namespace game_scene {
 

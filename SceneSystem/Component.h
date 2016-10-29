@@ -2,10 +2,10 @@
 
 #include "stdafx.h"
 
-#include "VRBackend/EntityHandler.h"
-#include "VRBackend/Entity.h"
-#include "VRBackend/Model.h"
 #include "VRBackend/ConstantBuffer.h"
+#include "VRBackend/Model.h"
+
+class EntityHandler;
 
 class Component
 {

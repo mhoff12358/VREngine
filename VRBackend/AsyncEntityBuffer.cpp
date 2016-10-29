@@ -55,7 +55,7 @@ RenderGroup* AsyncEntityBuffer::ConsumerFinish() {
 	} else {
 		cleanup_group = old_reading_group;
 	}
-	for (int i = 0; i < num_render_groups; i++) {
+	for (unsigned int i = 0; i < num_render_groups; i++) {
 		cleanup_group[i].Cleanup();
 	}
 

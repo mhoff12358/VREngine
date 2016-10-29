@@ -1,8 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
+
 #include "VRBackend/ConstantBuffer.h"
-#include "GraphicsObject.h"
 #include "ShaderSettings.h"
 
 class ConstantBufferDescribed : public ConstantBuffer

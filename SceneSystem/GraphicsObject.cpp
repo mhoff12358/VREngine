@@ -4,6 +4,10 @@
 #include "GraphicsObject.h"
 #include "Scene.h"
 #include "VRBackend/ResourcePool.h"
+#include "VRBackend/EntityHandler.h"
+#include "VRBackend/TextureView.h"
+#include "VRBackend/Shaders.h"
+#include "VRBackend/ShaderSettings.h"
 
 namespace game_scene {
 

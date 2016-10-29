@@ -23,7 +23,7 @@ void PipelineStageWithRenderMode::InitializeRenderMode(
 	dev->CreateBlendState(&blend_desc, &blend_state_);
 
 	num_output_textures_ = min(output_textures.size(), D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
-	for (int i = 0; i < num_output_textures_; i++) {
+	for (unsigned int i = 0; i < num_output_textures_; i++) {
 		output_textures_[i] = output_textures[i];
 	}
 
@@ -37,7 +37,7 @@ void PipelineStageWithRenderMode::InitializeRenderMode(
 
 void PipelineStageWithRenderMode::SetRenderModeRenderTargetViews() {
 	ID3D11RenderTargetView** rtvs = render_mode_.MutateRenderTargetViews(num_output_textures_);
-	for (int i = 0; i < num_output_textures_; i++) {
+	for (unsigned int i = 0; i < num_output_textures_; i++) {
 		rtvs[i] = output_textures_[i]->GetRenderTargetView();
 	}
 }

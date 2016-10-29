@@ -4,6 +4,8 @@
 #include "InputCommandArgs.h"
 #include "Scene.h"
 
+#include "VRBackend/InputHandler.h"
+
 namespace game_scene {
 namespace actors {
 

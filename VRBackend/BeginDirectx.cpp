@@ -8,6 +8,7 @@
 #include "ResourcePool.h"
 #include "ProcessingEffect.h"
 #include "RenderingPipeline.h"
+#include "Kinect.h"
 
 VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinect_sensor, std::string resource_location) {
 	VRBackendBasics graphics_objects;

@@ -23,6 +23,6 @@ public:
 private:
 	static array<float, 4 * (CONVOLUTION_SIZE + 1)>* MorphConvolutionData(const array<float, CONVOLUTION_SIZE>& convolution_data);
 	static D3D11_BLEND_DESC GetBlendDesc();
-	static const string& LookupShaderName(bool use_horizontal);
+	static string LookupShaderName(bool use_horizontal);
 };
 

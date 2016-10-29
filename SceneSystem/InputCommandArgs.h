@@ -1,8 +1,8 @@
 #pragma once
 
 #include "CommandArgs.h"
-#include "VRBackend/InputHandler.h"
-#include "VRBackend/ResourcePool.h"
+
+class InputHandler;
 
 namespace game_scene {
 

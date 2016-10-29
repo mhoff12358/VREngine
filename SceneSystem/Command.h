@@ -5,6 +5,7 @@
 #include "CommandArgs.h"
 
 namespace game_scene {
+
 class Command {
 public:
 	Command(const Target& target, unique_ptr<CommandArgs> args)

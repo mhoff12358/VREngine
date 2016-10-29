@@ -3,8 +3,9 @@
 #include "stdafx.h"
 
 #include "Shmactor.h"
+#include "CommandArgs.h"
 
-#include "VRBackend/InputHandler.h"
+class InputHandler;
 
 namespace game_scene {
 namespace actors {

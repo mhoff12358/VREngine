@@ -2,6 +2,8 @@
 #include "NewGraphicsObject.h"
 #include "GraphicsResources.h"
 #include "ConstantBufferDescribed.h"
+#include "VRBackend/Entity.h"
+#include "VRBackend/EntityHandler.h"
 
 namespace game_scene {
 namespace actors {

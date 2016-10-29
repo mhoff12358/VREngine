@@ -251,9 +251,6 @@
     <ClCompile Include="ConvolutionEffectDesc.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gaussian.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="PipelineCamera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

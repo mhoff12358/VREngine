@@ -1,13 +1,15 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Shmactor.h"
+
+#include "ActorGroups.h"
 #include "ActorId.h"
 #include "CommandQueue.h"
-#include "ActorGroups.h"
+#include "QueryResult.h"
 
 namespace game_scene {
 class Shmactor;
+class QueryArgs;
 
 class Scene
 {

@@ -218,7 +218,6 @@
     <ClCompile Include="Entity.cpp" />
     <ClCompile Include="EntityHandler.cpp" />
     <ClCompile Include="EntityId.cpp" />
-    <ClCompile Include="gaussian.cpp" />
     <ClCompile Include="InputHandler.cpp" />
     <ClCompile Include="Logging.cpp" />
     <ClCompile Include="Model.cpp" />

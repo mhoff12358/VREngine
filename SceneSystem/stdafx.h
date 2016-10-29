@@ -24,6 +24,7 @@
 #include <memory>
 #include <list>
 #include <queue>
+#include <cassert>
 
 using std::string;
 using std::map;

@@ -46,9 +46,9 @@ template <typename ValueType, typename Collection>
 Collection* CreateFromList(object iterable) {
 	unique_ptr<Collection> c = make_unique<Collection>();
 	try {
-		unsigned int iterable_size = boost::python::len(iterable);
+		ssize_t iterable_size = boost::python::len(iterable);
 		ResizeIfPossible<Collection, ValueType>(*c, iterable_size);
-		for (unsigned int i = 0; i < iterable_size; i++) {
+		for (ssize_t i = 0; i < iterable_size; i++) {
 			ValueType v = extract<ValueType>(iterable[i]);
 			PushBackIfPossible<Collection, ValueType>(*c, i, move(v));
 		}
@@ -64,8 +64,8 @@ Collection* CreateFromDict(dict mapping) {
 	unique_ptr<Collection> c = make_unique<Collection>();
 	try {
 		object iterable = mapping.items();
-		size_t iterable_size = boost::python::len(iterable);
-		for (size_t i = 0; i < iterable_size; i++) {
+		ssize_t iterable_size = boost::python::len(iterable);
+		for (ssize_t i = 0; i < iterable_size; i++) {
 			object key_value = iterable[i];
 			c->emplace(extract<KeyType>(key_value[0]), extract<ValueType>(key_value[1]));
 		}

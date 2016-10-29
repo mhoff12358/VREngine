@@ -1,43 +1,32 @@
 #pragma once
 #include "stdafx.h"
-#include "VRBackend/ConstantBuffer.h"
+
+class ConstantBuffer;
 
 namespace game_scene {
 
 class ShaderSettingsFormat : public vector<tuple<string, int>> {
 public:
+	ShaderSettingsFormat();
 	template<typename... Args>
-	ShaderSettingsFormat(Args... args) : vector<tuple<string, int>>(args...) {}
+	ShaderSettingsFormat(Args... args);
 
-	bool ShouldCreateBuffer() { return !empty(); }
+	bool ShouldCreateBuffer();
 };
 
 class ShaderSettingsValue : public vector<vector<float>> {
 public:
+	ShaderSettingsValue();
 	template<typename... Args>
-	ShaderSettingsValue(Args... args) : vector<vector<float>>(args...) {}
+	ShaderSettingsValue(Args... args);
 
-	void operator=(const vector<vector<float>>& other) {
-		*this = ShaderSettingsValue(other);
-	}
+	void operator=(const vector<vector<float>>& other);
 
-	ShaderSettingsFormat GetFormat() const {
-		ShaderSettingsFormat format;
-		for (const vector<float>& sub_array : *this) {
-			format.push_back(tuple<string, int>("float", sub_array.size()));
-		}
-		return format;
-	}
+	ShaderSettingsFormat GetFormat() const;
 
-	vector<vector<float>> GetValue() const { return *this; }
+	vector<vector<float>> GetValue() const;
 
-	void SetIntoConstantBuffer(ConstantBuffer* buffer) const {
-		float* raw_buffer = static_cast<float*>(buffer->EditBufferData(true));
-		for (const vector<float>& next_data_chunk : GetValue()) {
-			memcpy(raw_buffer, next_data_chunk.data(), sizeof(float) * next_data_chunk.size());
-			raw_buffer = raw_buffer + next_data_chunk.size();
-		}
-	}
+	void SetIntoConstantBuffer(ConstantBuffer* buffer) const;
 };
 
 }  // game_scene

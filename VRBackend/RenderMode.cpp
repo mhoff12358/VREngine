@@ -38,10 +38,10 @@ void RenderMode::SetViewport(int width, int height, float min_depth, float max_d
 void RenderMode::SetViewport(int xoff, int yoff, int width, int height, float min_depth, float max_depth) {
 	ZeroMemory(viewports, sizeof(D3D11_VIEWPORT));
 
-	viewports[0].TopLeftX = xoff;
-	viewports[0].TopLeftY = yoff;
-	viewports[0].Width = (float)width;
-	viewports[0].Height = (float)height;
+	viewports[0].TopLeftX = static_cast<float>(xoff);
+	viewports[0].TopLeftY = static_cast<float>(yoff);
+	viewports[0].Width = static_cast<float>(width);
+	viewports[0].Height = static_cast<float>(height);
 	viewports[0].MinDepth = min_depth;
 	viewports[0].MaxDepth = max_depth;
 }

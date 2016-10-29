@@ -1,7 +1,8 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Target.h"
-#include <cassert>
+#include "Shmactor.h"
+#include "CommandArgs.h"
 
 namespace game_scene {
 

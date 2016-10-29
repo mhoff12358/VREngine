@@ -1,9 +1,6 @@
 #pragma once
 #include "stdafx.h"
 
-#include "VRBackend/ResourcePool.h"
-#include "Shmactor.h"
-#include "Component.h"
 #include "ResourceDefinitions.h"
 
 namespace game_scene {

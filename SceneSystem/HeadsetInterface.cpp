@@ -4,6 +4,7 @@
 #include "InputCommandArgs.h"
 #include "GraphicsObject.h"
 #include "Scene.h"
+#include "VRBackend/Headset.h"
 
 namespace game_scene {
 

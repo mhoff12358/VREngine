@@ -16,12 +16,14 @@ using std::unique_ptr;
 #include "VRBackend/RenderGroup.h"
 #include "VRBackend/RenderingPipeline.h"
 #include "VRBackend/PipelineStageDesc.h"
-
-#include "SceneSystem/Component.h"
+#include "VRBackend/InputHandler.h"
+#include "VRBackend/EntityHandler.h"
+#include "VRBackend/Headset.h"
 
 #include "VRBackend/gaussian.h"
 #include "VRBackend/BlendDesc.h"
 
+#include "SceneSystem/Component.h"
 #include "SceneSystem/Scene.h"
 #include "SceneSystem/GraphicsResources.h"
 #include "SceneSystem/InputCommandArgs.h"
@@ -67,7 +69,7 @@ void GraphicsLoop() {
 		unique_lock<mutex> device_context_lock(device_context_access);
 
 		RenderGroup* drawing_groups = graphics_objects.entity_handler->GetRenderGroupForDrawing();
-		for (int render_group_number = 0; render_group_number < graphics_objects.entity_handler->GetNumEntitySets(); render_group_number++) {
+		for (unsigned int render_group_number = 0; render_group_number < graphics_objects.entity_handler->GetNumEntitySets(); render_group_number++) {
 			drawing_groups[render_group_number].ApplyMutations(
 				graphics_objects.view_state->device_interface, graphics_objects.view_state->device_context, *graphics_objects.resource_pool);
 		}

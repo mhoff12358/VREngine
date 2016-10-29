@@ -10,7 +10,10 @@ public:
 	CommandType(IdType id) : id_(id) {}
 	CommandType(const CommandRegistry& id) : id_(id.value_) {}
 
+#pragma warning(push)
+#pragma warning(disable: 4307)
 	DECLARE_COMMAND(CommandType, ADDED_TO_SCENE);
+#pragma warning(pop)
 
 	IdType Type() {return id_;}
 	IdType id_;

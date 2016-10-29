@@ -1,9 +1,13 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Shmactor.h"
 
-#include "VRBackend/Headset.h"
+#include "Shmactor.h"
+#include "openvr.h"
+#include "CommandArgs.h"
+#include "VRBackend/Pose.h"
+
+class Headset;
 
 namespace game_scene {
 namespace actors {

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "Shmactor.h"
 #include "Scene.h"
+#include "QueryArgs.h"
+#include "CommandArgs.h"
 
 namespace game_scene {
 
@@ -29,10 +31,6 @@ void Shmactor::DependencyDying(const ActorId& dying_id) {
 
 void Shmactor::RegisterDependency(const Target& target) {
 	scene_->RegisterDependency(Target(id_), target);
-}
-
-CommandQueueLocation Shmactor::MakeCommandAfter(CommandQueueLocation location, const Target& target, unique_ptr<CommandArgs> args) {
-	return MakeCommandAfter(location, target, move(args));
 }
 
 unique_ptr<QueryResult> Shmactor::AskQuery(const Target& target, const QueryArgs& args) {

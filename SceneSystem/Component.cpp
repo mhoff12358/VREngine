@@ -1,6 +1,11 @@
 #include "stdafx.h"
 #include "Component.h"
 
+#include "VRBackend/Model.h"
+#include "VRBackend/EntityHandler.h"
+#include "VRBackend/Shaders.h"
+#include "VRBackend/ShaderSettings.h"
+
 Component::Component(ID3D11Device* device_interface)
 	: transformation_buffer_(ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::GEOMETRY_STAGE)), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
@@ -16,7 +21,7 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entit
 }
 
 void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entity_group_name, vector<Model>::iterator first_model, vector<Model>::iterator end_of_models) {
-	number_of_entities_ = std::distance(first_model, end_of_models);
+	number_of_entities_ = static_cast<unsigned int>(std::distance(first_model, end_of_models));
 	assert(number_of_entities_ > 0);
 
 	//ConstantBufferTyped<TransformationMatrixAndInvTransData>* trans = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);

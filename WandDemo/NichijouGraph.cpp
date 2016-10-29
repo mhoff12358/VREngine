@@ -133,7 +133,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 			timeline_command = scene_->MakeCommandAfter(timeline_command, Command(
 				Target(timeline_graphics_),
 				make_unique<commands::ComponentPlacement>("square",
-					Pose(Location(0, 1.5f, -7.5f), Quaternion::RotationAboutAxis(AID_X, 3.1416/2.0f), Scale(5.0f, 1.0f, 0.1f)).GetMatrix())));
+					Pose(Location(0.0f, 1.5f, -7.5f), Quaternion::RotationAboutAxis(AID_X, 3.1416/2.0f), Scale(5.0f, 1.0f, 0.1f)).GetMatrix())));
 
 			headset_interface_ = scene_->FindByName("HeadsetInterface");
 			if (headset_interface_ != ActorId::UnsetId) {
@@ -242,8 +242,6 @@ void NichijouGraph::MoveTimelinePosition(float delta) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			Target(edge), make_unique<commands::TimelinePosition>(timeline_position_, timeline_max_position_)));
 	}
-	ShaderSettingsValue new_timeline_shader_value(
-			);
 	scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 		Target(timeline_graphics_), make_unique<WrappedCommandArgs<tuple<string, ShaderSettingsValue>>>(
 			GraphicsObjectCommand::SET_SHADER_VALUES, make_tuple("square", ShaderSettingsValue(vector<vector<float>>({

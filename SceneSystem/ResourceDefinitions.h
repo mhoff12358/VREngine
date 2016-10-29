@@ -3,6 +3,8 @@
 
 #include "VRBackend/ResourcePool.h"
 #include "ShaderSettings.h"
+#include "VRBackend/ShaderStages.h"
+#include "VRBackend/TextureView.h"
 
 namespace game_scene {
 

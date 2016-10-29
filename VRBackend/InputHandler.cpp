@@ -58,7 +58,7 @@ void InputHandler::ResetHeadTracking() {
 }
 
 bool InputHandler::GetKeyPressed(char key) const {
-	return keyboard_state[key] & 0x80;
+	return (keyboard_state[key] & 0x80) != 0;
 }
 
 bool InputHandler::GetKeyToggled(char key, bool now_pressed_down) const {

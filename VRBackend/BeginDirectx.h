@@ -6,7 +6,7 @@
 namespace vr {
 	class IVRSystem;
 }
-class IKinectSensor;
+struct IKinectSensor;
 class EntityHandler;
 class Headset;
 class InputHandler;

@@ -44,7 +44,7 @@ D3D11_BLEND_DESC ConvolutionEffectDesc::GetBlendDesc() {
 	return overwrite_blend_desc;
 }
 
-const string& ConvolutionEffectDesc::LookupShaderName(bool use_horizontal) {
+string ConvolutionEffectDesc::LookupShaderName(bool use_horizontal) {
 	if (use_horizontal) {
 		return "horizontal_conv.hlsl";
 	}
