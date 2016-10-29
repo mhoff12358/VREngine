@@ -36,31 +36,6 @@ def first_load(resources):
 	a.update(locals())
 	#code.interact(local = a)
 
-#	graphics_object_id = scene.AddAndConstructGraphicsObject()
-#	latest_command = scene.MakeCommandAfter(
-#		scene.FrontOfCommands(),
-#		sc.Target(graphics_object_id),
-#		sc.CreateGraphicsObject(
-#			"basic",
-#			sc.VectorEntitySpecification((
-#				sc.EntitySpecification("square") \
-#					.SetModel(sc.ModelDetails(sc.ModelIdentifier("square.obj|Square")))
-#					.SetShaders(sc.ShaderDetails(
-#						"texturedspecularlightsource.hlsl",
-#						sc.VertexType.all,
-#						sc.ShaderStages.Vertex().And(sc.ShaderStages.Pixel())))
-#					.SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0, 0, 0)), sc.VectorFloat((1,)))))
-#					.SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))
-#					.SetComponent("square")
-#,)),
-# 		   sc.VectorComponentInfo((sc.ComponentInfo("", "square"),))))
-#	latest_command = scene.MakeCommandAfter(
-#		latest_command,
-#		sc.Target(graphics_object_id),
-#		sc.PlaceComponent(
-#			"square",
-#			sc.Pose(sc.Location(0, 0, -3), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/2.0))))
-
 	p = scripts.player.Player()
 	player_id = scene.AddActor(p)
 	return player_id

@@ -9,9 +9,20 @@
 #include "ActorId.h"
 
 class Headset;
+class Body;
 typedef uint64_t TrackingId;
 
 namespace game_scene {
+
+class BodyLookup {
+public:
+	BodyLookup(Headset& headset);
+
+	Body& GetBody(TrackingId id);
+private:
+	Headset& headset_;
+};
+
 namespace actors {
 
 class KinectInterface : public Shmactor {
@@ -20,8 +31,11 @@ public:
 		headset_(headset)
 	{}
 
-	void HandleCommand(const CommandArgs& args);
+	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
+	void HandleCommand(const CommandArgs& args) override;
 	void AddedToScene() override;
+
+	static BodyLookup GetBodyLookup(Scene* scene);
 
 private:
 
@@ -36,6 +50,15 @@ public:
 	DECLARE_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTEN_FOR_BODIES);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, BODIES_DISCOVERED);
 };
+
+class KinectInterfaceQuery {
+public:
+	DECLARE_QUERY(KinectInterfaceQuery, GET_BODY_LOOKUP)
+};
+
+namespace queries {
+
+}  // queries
 
 namespace commands {
 

@@ -76,28 +76,6 @@ Collection* CreateFromDict(dict mapping) {
 	return c.release();
 }
 
-/*template <size_t index, typename TupleType>
-void CreateTupleFromListImpl(object iterable, TupleType& t) {
-}
-
-template <size_t index, typename TupleType, typename FirstType, typename ... Types>
-void CreateTupleFromListImpl(object iterable, TupleType& t) {
-	std::get<index>(t) = extract<FirstType>(iterable[index]);
-	CreateTupleFromListImpl<index + 1, TupleType, Types...>(iterable, t);
-}
-
-template <typename ... Types>
-tuple<Types...>* CreateTupleFromList(object iterable) {
-	assert(boost::python::len(iterable) == sizeof...(Types));
-	auto t = make_unique<tuple<Types...>>();
-	CreateTupleFromListImpl<0, tuple<Types...>, Types...>(iterable, *t);
-	return t.release();
-}
-
-object TupleExtract(boost::python::tuple args, dict kwargs) {
-	return object();
-}*/
-
 template <typename ValueType, typename PyType>
 auto& CreateListToCollection(boost::python::class_<PyType> c) {
 	return c
@@ -114,52 +92,18 @@ auto& CreateDictToMap(boost::python::class_<PyType> c) {
 		.staticmethod("Create");
 }
 
-/*template <typename TupleType, size_t N>
-struct CreateTupleAccess {
-	using tuple_element_t = typename std::tuple_element<N, TupleType>::type;
-	static void Create(class_<TupleType> tuple_reference) {
-		tuple_reference.add_property((string("a") + std::to_string(N)).c_str(), &AccessElement, &UpdateElement);
-		CreateTupleAccess<TupleType, N - 1>::Create(tuple_reference);
-	}
-	
-	static tuple_element_t AccessElement(TupleType& t) {
-		return std::get<N>(t);
-	}
-
-	static void UpdateElement(TupleType& t, tuple_element_t& value) {
-		std::get<N>(t) = value;
-	}
-};
-
-template <typename TupleType>
-struct CreateTupleAccess<TupleType, 0> {
-	using tuple_element_t = typename std::tuple_element<0, TupleType>::type;
-	static void Create(class_<TupleType> tuple_reference) {
-		tuple_reference.add_property((string("a") + std::to_string(0)).c_str(), &AccessElement, &UpdateElement);
-	}
-	
-	static tuple_element_t AccessElement(TupleType& t) {
-		return std::get<0>(t);
-	}
-
-	static void UpdateElement(TupleType& t, tuple_element_t& value) {
-		std::get<0>(t) = value;
-	}
-};
-
-template<typename ... Types>
-void CreateTuple(string names) {
-	auto tuple_class = CreateClass<tuple<Types...>>("Tuple" + names);
-	CreateTupleAccess<tuple<Types...>, sizeof...(Types) - 1>::Create(tuple_class);
-	tuple_class
-		.def("__init__", boost::python::make_constructor(&CreateTupleFromList<Types...>));
-		//.def("__getitem__", static_cast<const ValueType(*)(PyType&, IndexType)>([](PyType& t, IndexType i)->const ValueType{ return t[i]; }))
-		//.def("__setitem__", static_cast<void(*)(PyType&, IndexType, ValueType)>([](PyType& t, IndexType i, ValueType v)->void {t[i] = v;}));
-}*/
+template <typename PyType>
+auto& CreateIteration(boost::python::class_<PyType> c) {
+	return c
+		.def("size", &PyType::size)
+		.def("__len__", &PyType::size)
+		.def("__iter__", boost::python::iterator<PyType>());
+}
 
 template<typename T, size_t N>
 void CreateArray(string name) {
-	CreateListToCollection<T, array<T, N>>(CreateIndexing<size_t, T, array<T, N>>(CreateClass<array<T, N>>("Array" + name + std::to_string(N))));
+	typedef array<T, N> PyType;
+	CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateIndexing<size_t, T, PyType>(CreateClass<PyType>("Array" + name + std::to_string(N)))));
 }
 
 template<typename T, size_t N>
@@ -172,7 +116,8 @@ void CreateArrays(string name) {
 
 template<typename T>
 void CreateVector(string name) {
-	CreateListToCollection<T, vector<T>>(CreateIndexing<size_t, T, vector<T>>(CreateClass<vector<T>>("Vector" + name)));
+	typedef vector<T> PyType;
+	auto vec_class = CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateIndexing<size_t, T, PyType>(CreateClass<PyType>("Vector" + name))));
 }
 
 template<typename Key, typename Value>

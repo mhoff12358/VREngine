@@ -68,6 +68,9 @@
     <ClInclude Include="KinectInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="KinectBackingClassesInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">
@@ -76,10 +79,5 @@
     <Text Include="scene_system_internal.py">
       <Filter>Python Files</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="HeadsetInterfacePython.h">
-      <Filter>Header Files</Filter>
-    </None>
   </ItemGroup>
 </Project>

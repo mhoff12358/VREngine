@@ -32,6 +32,7 @@
 #include "PoseInterface.h"
 #include "ModelCreationInterface.h"
 #include "KinectInterface.h"
+#include "KinectBackingClassesInterface.h"
 
 #define BOOST_PTR_MAGIC_STRUCT(class_name) \
 namespace boost { \
@@ -130,6 +131,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	GraphicsObjectInterface(scene_registration);
 	IOInterfaceInterface(scene_registration);
 	HeadsetInterface();
+	KinectBackingClassesInterface();
 	KinectInterface(scene_registration);
 	GraphicsResourcesInterface();
 	PoseInterface();
