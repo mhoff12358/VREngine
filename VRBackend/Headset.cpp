@@ -151,7 +151,7 @@ void Headset::UpdateGamePoses() {
 				HRESULT tracking_hr;
 				tracking_hr = raw_body->get_IsTracked(&is_tracked);
 				if (SUCCEEDED(tracking_hr) && is_tracked) {
-					uint64_t tracking_id;
+					TrackingId tracking_id;
 					tracking_hr = raw_body->get_TrackingId(&tracking_id);
 					if (SUCCEEDED(tracking_hr)) {
 						bodies_[body_index].FillFromIBody(tracking_id, raw_body);

@@ -9,6 +9,8 @@
 #include "Body.h"
 #include "Texture.h"
 
+typedef uint64_t TrackingId;
+
 class Headset {
 public:
 	Headset();
@@ -94,8 +96,8 @@ private:
 	Vector4 floor_clip_plane_;
 	array<IBody*, BODY_COUNT> raw_bodies_;
 	array<Body, BODY_COUNT+1> bodies_;
-	set<uint64_t> tracking_ids_;
-	vector<uint64_t> new_tracked_ids_;
+	set<TrackingId> tracking_ids_;
+	vector<TrackingId> new_tracked_ids_;
 
 	float photon_prediction_time_ = 0.0f;
 };

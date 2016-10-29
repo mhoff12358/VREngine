@@ -31,6 +31,7 @@
 #include "GraphicsResourcesInterface.h"
 #include "PoseInterface.h"
 #include "ModelCreationInterface.h"
+#include "KinectInterface.h"
 
 #define BOOST_PTR_MAGIC_STRUCT(class_name) \
 namespace boost { \
@@ -48,7 +49,7 @@ namespace boost { \
 	{ return c; } \
 }
 
-BOOST_PTR_MAGIC(PyActor)
+BOOST_PTR_MAGIC_STRUCT(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
@@ -56,6 +57,7 @@ BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
+BOOST_PTR_MAGIC(game_scene::commands::ListenForBodies)
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("Actor")
@@ -128,6 +130,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	GraphicsObjectInterface(scene_registration);
 	IOInterfaceInterface(scene_registration);
 	HeadsetInterface();
+	KinectInterface(scene_registration);
 	GraphicsResourcesInterface();
 	PoseInterface();
 	ModelCreationInterface();

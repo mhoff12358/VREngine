@@ -111,8 +111,8 @@ float XM_CALLCONV InteractableFrustum::IsLookedAt(const DirectX::FXMMATRIX& view
 		// This can be detected by finding the quad in the xy-plane formed by the points on each circle with the max and min y-values.
 		// (Or the max and min x-values in the case where the circles are just lines in the xy-plane).
 		if (right_radius_trans.y != 0) {
-			right_radius_scale = sqrtf(1.0 / (1 + pow(forward_radius_trans.y, 2) / pow(right_radius_trans.y, 2)));
-			forward_radius_scale = sqrtf(1.0 / (1 + pow(right_radius_trans.y, 2) / pow(forward_radius_trans.y, 2)));
+			right_radius_scale = sqrtf(1.0f / (1.0f + pow(forward_radius_trans.y, 2.0f) / pow(right_radius_trans.y, 2.0f)));
+			forward_radius_scale = sqrtf(1.0f / (1.0f + pow(right_radius_trans.y, 2.0f) / pow(forward_radius_trans.y, 2.0f)));
 
 			pair<float, float> base_tip_max = std::make_pair(base_center_trans.x + scaled_base_radius * right_radius_scale * right_radius_trans.x, base_center_trans.y + scaled_base_radius * right_radius_scale * right_radius_trans.y);
 			pair<float, float> base_tip_min = std::make_pair(base_center_trans.x + scaled_base_radius * forward_radius_scale * forward_radius_trans.x, base_center_trans.y + scaled_base_radius * forward_radius_scale * forward_radius_trans.y);
@@ -288,8 +288,8 @@ tuple<float, std::array<float, 2>> XM_CALLCONV InteractableFrustum::WhereLookedA
 		// This can be detected by finding the quad in the xy-plane formed by the points on each circle with the max and min y-values.
 		// (Or the max and min x-values in the case where the circles are just lines in the xy-plane).
 		if (right_radius_trans.y != 0) {
-			right_radius_scale = sqrtf(1.0 / (1 + pow(forward_radius_trans.y, 2) / pow(right_radius_trans.y, 2)));
-			forward_radius_scale = sqrtf(1.0 / (1 + pow(right_radius_trans.y, 2) / pow(forward_radius_trans.y, 2)));
+			right_radius_scale = sqrtf(1.0f / (1.0f + pow(forward_radius_trans.y, 2.0f) / pow(right_radius_trans.y, 2.0f)));
+			forward_radius_scale = sqrtf(1.0f / (1.0f + pow(right_radius_trans.y, 2.0f) / pow(forward_radius_trans.y, 2.0f)));
 
 			pair<float, float> base_tip_max = std::make_pair(base_center_trans.x + scaled_base_radius * right_radius_scale * right_radius_trans.x, base_center_trans.y + scaled_base_radius * right_radius_scale * right_radius_trans.y);
 			pair<float, float> base_tip_min = std::make_pair(base_center_trans.x + scaled_base_radius * forward_radius_scale * forward_radius_trans.x, base_center_trans.y + scaled_base_radius * forward_radius_scale * forward_radius_trans.y);
@@ -395,12 +395,12 @@ tuple<float, std::array<float, 2>> XM_CALLCONV InteractableFrustum::WhereLookedA
 tuple<bool, bool, bool, bool> InteractableFrustum::GetIntercepts(pair<float, float> p1, pair<float, float> p2) {
 	float y_intercept, x_intercept;
 	if (p2.second == p1.second) {
-		x_intercept = std::nan("");
+		x_intercept = std::nanf("");
 	} else {
 		x_intercept = p1.first - (p1.second / (p2.second - p1.second) * (p2.first - p1.first));
 	}
 	if (p2.first == p1.first) {
-		y_intercept = std::nan("");
+		y_intercept = std::nanf("");
 	} else {
 		y_intercept = p1.second - (p1.first / (p2.first - p1.first) * (p2.second - p1.second));
 	}

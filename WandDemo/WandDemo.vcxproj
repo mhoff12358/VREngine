@@ -400,6 +400,7 @@
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />
     <None Include="first_load.py" />
+    <None Include="kinect_body_display.py" />
     <None Include="laser.lua" />
     <None Include="LiquidContainer.lua" />
     <None Include="lua_test.lua" />

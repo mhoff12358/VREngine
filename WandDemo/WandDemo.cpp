@@ -29,6 +29,7 @@ using std::unique_ptr;
 #include "SceneSystem/InputCommandArgs.h"
 #include "SceneSystem/GraphicsObject.h"
 #include "SceneSystem/HeadsetInterface.h"
+#include "SceneSystem/KinectInterface.h"
 #include "SceneSystem/IOInterface.h"
 #include "NichijouGraph.h"
 #include "SceneSystem/Sprite.h"
@@ -136,6 +137,13 @@ void UpdateLoop() {
 				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus)));
 		scene.AddActorToGroup(headset_interface, tick_registry);
 	}
+	if (graphics_objects.oculus->IsKinectInitialized()) {
+		game_scene::ActorId kinect_interface = scene.RegisterByName(
+			"KinectInterface",
+			scene.AddActor(
+				make_unique<game_scene::actors::KinectInterface>(*graphics_objects.oculus)));
+		scene.AddActorToGroup(kinect_interface, tick_registry);
+	}
 
 	scene.FlushCommandQueue();
 
@@ -190,6 +198,7 @@ void UpdateLoop() {
 		}
 		graphics_objects.oculus->UpdateGamePoses();
 
+		/*
 		vector<uint64_t> new_tracking_ids = graphics_objects.oculus->GetNewTrackedIds();
 		if (!new_tracking_ids.empty()) {
 			std::cout << "Body found" << std::endl;
@@ -205,6 +214,7 @@ void UpdateLoop() {
 				body_found = false;
 			}
 		}
+		*/
 
 		int new_time = timeGetTime();
 		int time_delta_ms = new_time - prev_time;
