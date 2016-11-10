@@ -26,3 +26,12 @@ void Body::FillFromIBody(uint64_t tracking_id, IBody* body) {
 	tracking_id_ = tracking_id;
 	filled_ = true;
 }
+
+Joint& Body::GetJoint(JointType joint_type) {
+	for (Joint& joint : joints_) {
+		if (joint.JointType == joint_type) {
+			return joint;
+		}
+	}
+	return *(Joint*)nullptr;
+}

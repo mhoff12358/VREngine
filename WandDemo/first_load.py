@@ -3,6 +3,7 @@ import collections
 import scripts.player
 import scripts.mutable_graphical_object
 import scripts.kinect_body_display
+import scripts.draggable_object
 
 class DummyActor(sc.DelegatingActor):
 	command_delegation = sc.DelegatingActor.GetDefaultDelegation()
@@ -25,11 +26,13 @@ def first_load(resources):
 
 	scene = resources["scene"]
 
-	graphics_object = scripts.mutable_graphical_object.MutableGraphicalObject()
-	scene.AddActor(graphics_object)
+	#graphics_object = scripts.mutable_graphical_object.MutableGraphicalObject()
+	#scene.AddActor(graphics_object)
 
-	body_display = scripts.kinect_body_display.KinectBodyDisplay()
-	scene.AddActor(body_display)
+	scene.AddActor(scripts.draggable_object.DraggableObject())
+
+	#body_display = scripts.kinect_body_display.KinectBodyDisplay()
+	#scene.AddActor(body_display)
 
 	import code
 	a = globals()

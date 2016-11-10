@@ -16,6 +16,8 @@ public:
 	void Empty();
 	void FillFromIBody(uint64_t tracking_id, IBody* body);
 
+	Joint& GetJoint(JointType joint_type);
+
 	bool filled_ = false;
 	uint64_t tracking_id_;
 	array<HandState, 2> hands_;

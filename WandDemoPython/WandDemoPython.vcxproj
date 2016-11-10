@@ -145,7 +145,10 @@
     <ClCompile Include="SceneSystemPython.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BoostPointerMagic.h" />
+    <ClInclude Include="CollisionShapeInterface.h" />
     <ClInclude Include="EntitySpecificationInterface.h" />
+    <ClInclude Include="GrabbableObjectHandlerInterface.h" />
     <ClInclude Include="GraphicsObjectInterface.h" />
     <ClInclude Include="GraphicsResourcesInterface.h" />
     <ClInclude Include="HeadsetInterface.h" />

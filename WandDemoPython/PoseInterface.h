@@ -55,5 +55,8 @@ void PoseInterface() {
 		.def(init<Location>())
 		.def(init<Quaternion>())
 		.def(init<Scale>())
+		.def_readonly("location", &Pose::location_)
+		.def_readonly("scale", &Pose::scale_)
+		.def_readonly("orientation", &Pose::orientation_)
 		.def("ApplyAfter", &Pose::ApplyAfter);
 }

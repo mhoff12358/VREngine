@@ -33,22 +33,8 @@
 #include "ModelCreationInterface.h"
 #include "KinectInterface.h"
 #include "KinectBackingClassesInterface.h"
-
-#define BOOST_PTR_MAGIC_STRUCT(class_name) \
-namespace boost { \
-	template <> \
-	class_name const volatile * get_pointer<class class_name const volatile>( \
-		struct class_name const volatile *c) \
-	{ return c; } \
-}
-
-#define BOOST_PTR_MAGIC(class_name) \
-namespace boost { \
-	template <> \
-	class_name const volatile * get_pointer<class class_name const volatile>( \
-		class class_name const volatile *c) \
-	{ return c; } \
-}
+#include "GrabbableObjectHandlerInterface.h"
+#include "CollisionShapeInterface.h"
 
 BOOST_PTR_MAGIC_STRUCT(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
@@ -61,7 +47,7 @@ BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 BOOST_PTR_MAGIC(game_scene::commands::ListenForBodies)
 
 BOOST_PYTHON_MODULE(scene_system_) {
-	class_<PyActor, boost::noncopyable>("Actor")
+	class_<PyActor, boost::noncopyable>("RawActor")
 		.def("HandleCommand", &game_scene::Shmactor::HandleCommand, &PyActor::default_HandleCommand)
 		.def("AddedToScene", &game_scene::Shmactor::AddedToScene, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
@@ -136,4 +122,6 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	GraphicsResourcesInterface();
 	PoseInterface();
 	ModelCreationInterface();
+	GrabbableObjectHandlerInterface(scene_registration);
+	CollisionShapeInterface();
 }

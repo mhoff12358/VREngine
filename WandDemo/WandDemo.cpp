@@ -35,8 +35,11 @@ using std::unique_ptr;
 #include "SceneSystem/Sprite.h"
 #include "SceneSystem/NewGraphicsObject.h"
 #include "SceneSystem/Scene.h"
+#include "SceneSystem/GrabbableObjectHandler.h"
 
 #include "SceneSystem/BoostPythonWrapper.h"
+
+#include "boost/numeric/ublas/matrix.hpp"
 
 #include "openvr.h"
 
@@ -78,14 +81,14 @@ void GraphicsLoop() {
 		if (graphics_objects.oculus->IsHeadsetInitialized()) {
 			for (vr::EVREye eye : Headset::eyes_) {
 				Pose eye_pose = graphics_objects.oculus->GetEyePose(eye);
-				/*PipelineCamera& camera = graphics_objects.resource_pool->LoadExistingPipelineCamera("player_head|" + std::to_string(eye));
+				PipelineCamera& camera = drawing_groups->cameras[graphics_objects.entity_handler->GetCameraIndex("player_head|" + std::to_string(eye))];
 				camera.SetLocation(eye_pose.location_);
 				camera.SetOrientation(eye_pose.orientation_);
-				camera.BuildMatrices();*/
+				camera.BuildMatrices();
 			}
 		}
 
-		graphics_objects.render_pipeline->Render();
+		graphics_objects.render_pipeline->Render(drawing_groups);
 		frame_index++;
 	}
 }
@@ -144,6 +147,12 @@ void UpdateLoop() {
 				make_unique<game_scene::actors::KinectInterface>(*graphics_objects.oculus)));
 		scene.AddActorToGroup(kinect_interface, tick_registry);
 	}
+	game_scene::ActorId grabbable_object_handler = scene.RegisterByName(
+		"GrabbableObjectHandler",
+		scene.AddActor(
+			make_unique<game_scene::GrabbableObjectHandler>()
+		)
+	);
 
 	scene.FlushCommandQueue();
 
@@ -166,7 +175,6 @@ void UpdateLoop() {
 	vr::VREvent_t vr_msg;
 
 	bool body_found = false;
-	uint64_t body_tracking_id;
 
 	while (TRUE)
 	{
@@ -197,24 +205,6 @@ void UpdateLoop() {
 			}
 		}
 		graphics_objects.oculus->UpdateGamePoses();
-
-		/*
-		vector<uint64_t> new_tracking_ids = graphics_objects.oculus->GetNewTrackedIds();
-		if (!new_tracking_ids.empty()) {
-			std::cout << "Body found" << std::endl;
-			body_found = true;
-			body_tracking_id = new_tracking_ids.front();
-		}
-		if (body_found) {
-			Body& body = graphics_objects.oculus->GetBody(body_tracking_id);
-			if (body.filled_) {
-				std::cout << body.hands_[Body::LEFT] << std::endl;
-			} else {
-				std::cout << "Lost tracking" << std::endl;
-				body_found = false;
-			}
-		}
-		*/
 
 		int new_time = timeGetTime();
 		int time_delta_ms = new_time - prev_time;
@@ -253,7 +243,7 @@ void UpdateLoop() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_active = false;
-	bool hmd_desired = false;
+	bool hmd_desired = true;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
@@ -262,7 +252,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		hmd_active = true;
 	}
 
-	bool kinect_desired = true;
+	bool kinect_desired = false;
 	IKinectSensor* kinect_sensor = nullptr;
 	if (kinect_desired) {
 		HRESULT hr;

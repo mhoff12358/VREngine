@@ -397,6 +397,7 @@
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="cpp_interface.lua" />
+    <None Include="draggable_object.py" />
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />
     <None Include="first_load.py" />

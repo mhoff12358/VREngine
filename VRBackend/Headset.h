@@ -9,6 +9,9 @@
 #include "Body.h"
 #include "Texture.h"
 
+#include "boost/numeric/ublas/matrix.hpp"
+#include "boost/numeric/ublas/lu.hpp"
+
 typedef uint64_t TrackingId;
 
 class Headset {
@@ -84,7 +87,7 @@ private:
 
 	// Logic state variables
 	array<vr::ETrackedDeviceClass, vr::k_unMaxTrackedDeviceCount> tracked_device_classes_;
-	array<array<vr::TrackedDeviceIndex_t, vr::k_unMaxTrackedDeviceCount>, 2> tracked_device_by_class_;
+	array<array<vr::TrackedDeviceIndex_t, vr::k_unMaxTrackedDeviceCount>, 4> tracked_device_by_class_;
 	array<vr::TrackedDevicePose_t, vr::k_unMaxTrackedDeviceCount> logic_trackings_;
 	array<Pose, vr::k_unMaxTrackedDeviceCount> logic_poses_;
 	array<vr::VRControllerState_t, vr::k_unMaxTrackedDeviceCount> logic_controller_states_;
@@ -96,10 +99,18 @@ private:
 	Vector4 floor_clip_plane_;
 	array<IBody*, BODY_COUNT> raw_bodies_;
 	array<Body, BODY_COUNT+1> bodies_;
-	set<TrackingId> tracking_ids_;
+	vector<TrackingId> tracking_ids_;
 	vector<TrackingId> new_tracked_ids_;
+	DirectX::XMMATRIX coordinate_mapping_;
+
+	// Temporary variables for linking the kinect and vive coordinate systems.
+	vector<array<float, 6>> coordinate_mapping_data_;
+	void ClearCoordinateMapping();
 
 	float photon_prediction_time_ = 0.0f;
 };
+
+//bool InvertMatrix(boost::numeric::ublas::matrix<float>& input, boost::numeric::ublas::matrix<float>& inverse);
+//bool Solve(boost::numeric::ublas::matrix<float>& lhs, boost::numeric::ublas::matrix<float>& rhs, boost::numeric::ublas::matrix<float>& solution);
 
 #endif

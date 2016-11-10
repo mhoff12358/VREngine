@@ -6,6 +6,8 @@
 #include "Scene.h"
 #include "VRBackend/Headset.h"
 
+constexpr float controller_sphere_radius = 0.025f;
+
 namespace game_scene {
 
 REGISTER_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);
@@ -63,11 +65,13 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 				Target(listener_groups_[static_cast<size_t>(ListenerId::CONTROLLER_MOVEMENT)]),
 				make_unique<commands::ControllerMovement>(
-					i, new_controller_position.location_ + (controller_positions_[i].location_ * -1))));
+					i,
+					new_controller_position.location_,
+					new_controller_position.location_ - controller_positions_[i].location_)));
 			controller_positions_[i] = new_controller_position;
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 				Target(controller_graphics_[i]),
-				make_unique<commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f)*controller_positions_[i].GetMatrix())));
+				make_unique<commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(controller_sphere_radius, controller_sphere_radius, controller_sphere_radius)*controller_positions_[i].GetMatrix())));
 
 			// Update the button state of the controller.
 			HandleNewControllerState(i, headset_.GetGameControllerState(controller_index));
@@ -83,7 +87,7 @@ void HeadsetInterface::HandleNewControllerState(int hand_index, vr::VRController
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			Target(listener_groups_[static_cast<size_t>(ListenerId::TRIGGER_STATE_CHANGE)]),
 			make_unique<commands::TriggerStateChange>(
-				hand_index, trigger_is_pulled)));
+				hand_index, controller_positions_[hand_index].location_, trigger_is_pulled)));
 	}
 
 	vr::VRControllerAxis_t touchpad_delta;
@@ -94,13 +98,23 @@ void HeadsetInterface::HandleNewControllerState(int hand_index, vr::VRController
 		(vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & controller_states_[hand_index].ulButtonTouched)) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			Target(listener_groups_[static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
-			make_unique<commands::TouchpadMotion>(HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE, hand_index, new_state.rAxis[0], touchpad_delta)));
+			make_unique<commands::TouchpadMotion>(
+				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE,
+				hand_index,
+				controller_positions_[hand_index].location_,
+				new_state.rAxis[0],
+				touchpad_delta)));
 	}
 	if ((vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & new_state.ulButtonPressed) &&
 		(vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & controller_states_[hand_index].ulButtonPressed)) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			Target(listener_groups_[static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
-			make_unique<commands::TouchpadMotion>(HeadsetInterfaceCommand::LISTEN_TOUCHPAD_DRAG, hand_index, new_state.rAxis[0], touchpad_delta)));
+			make_unique<commands::TouchpadMotion>(
+				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_DRAG,
+				hand_index,
+				controller_positions_[hand_index].location_,
+				new_state.rAxis[0],
+				touchpad_delta)));
 	}
 	controller_states_[hand_index] = new_state;
 }
@@ -124,7 +138,7 @@ ActorId HeadsetInterface::CreateControllerActor() {
 	sphere_details.heirarchy_.vertex_shader_input_type_ = VertexType::vertex_type_texture;
 	sphere_details.heirarchy_.entity_group_ = "basic";
 	sphere_details.heirarchy_.shader_settings_ = {
-		{0.0f, 0.0f, 0.5f},
+		{1.0f, 0.0f, 0.5f},
 	};
 
 	ActorId new_controller = scene_->AddActor(make_unique<game_scene::actors::GraphicsObject>());
@@ -135,7 +149,7 @@ ActorId HeadsetInterface::CreateControllerActor() {
 			sphere_details)));
 	scene_->MakeCommandAfter(created_actor, Command(
 		game_scene::Target(new_controller),
-		make_unique<game_scene::commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(0.1f, 0.1f, 0.1f))));
+		make_unique<game_scene::commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(controller_sphere_radius, controller_sphere_radius, controller_sphere_radius))));
 	return new_controller;
 }
 

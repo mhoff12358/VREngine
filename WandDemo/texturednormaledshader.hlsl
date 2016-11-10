@@ -1,7 +1,12 @@
 struct VOut
 {
-    float4 position : SV_POSITION;
-    float2 tex_coord : TEXCOORD;
+	float4 position : SV_POSITION;
+	float2 tex_coord : TEXCOORD0;
+};
+
+struct POut
+{
+	float4 t1 : SV_Target0;
 };
 
 Texture2D model_skin : register(t0);
@@ -21,18 +26,20 @@ cbuffer personal_matrices : register(b1)
 
 VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD0, float2 tex_coord : TEXCOORD1)
 {
-    VOut output;
+	VOut output;
 
 	output.position = mul(model, position);
 	output.position = mul(view_projection, output.position);
 	output.tex_coord = tex_coord;
 
-    return output;
+	return output;
 }
 
 
-float4 PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD) : SV_TARGET
+POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0) : SV_TARGET
 {
-    //return float4(tex_coord.x, tex_coord.y, 0.0f, 1.0f);
-	return model_skin.Sample(skin_sampler, tex_coord);
+	//return float4(0.0f, tex_coord.y, 0.0f, 1.0f);
+	POut result;
+	result.t1 = model_skin.Sample(skin_sampler, tex_coord);
+	return result;
 }

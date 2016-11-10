@@ -79,14 +79,18 @@ public:
 
 class ControllerInformation : public CommandArgs {
 public:
-	ControllerInformation(IdType type, unsigned char controller_number) : CommandArgs(type), controller_number_(controller_number) {}
+	ControllerInformation(IdType type, unsigned char controller_number, Pose controller_position) :
+		CommandArgs(type),
+		controller_number_(controller_number),
+		controller_position_(controller_position) {}
+	Pose controller_position_;
 	unsigned char controller_number_;
 };
 
 class ControllerMovement : public ControllerInformation {
 public:
-	ControllerMovement(unsigned char controller_number, Location movement_vector) :
-		ControllerInformation(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT, controller_number),
+	ControllerMovement(unsigned char controller_number, Pose controller_position, Location movement_vector) :
+		ControllerInformation(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT, controller_number, controller_position),
 		movement_vector_(movement_vector) {}
 
 	Location movement_vector_;
@@ -94,8 +98,8 @@ public:
 
 class TriggerStateChange : public ControllerInformation {
 public:
-	TriggerStateChange(unsigned char controller_number, bool is_pulled) :
-		ControllerInformation(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE, controller_number),
+	TriggerStateChange(unsigned char controller_number, Pose controller_position, bool is_pulled) :
+		ControllerInformation(HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE, controller_number, controller_position),
 		is_pulled_(is_pulled) {}
 
 	bool is_pulled_;
@@ -103,8 +107,8 @@ public:
 
 class TouchpadMotion : public ControllerInformation {
 public:
-	TouchpadMotion(IdType type, unsigned char controller_number, vr::VRControllerAxis_t position, vr::VRControllerAxis_t delta)
-		: ControllerInformation(type, controller_number), position_(position), delta_(delta) {}
+	TouchpadMotion(IdType type, unsigned char controller_number, Pose controller_position, vr::VRControllerAxis_t position, vr::VRControllerAxis_t delta)
+		: ControllerInformation(type, controller_number, controller_position), position_(position), delta_(delta) {}
 
 	vr::VRControllerAxis_t position_;
 	vr::VRControllerAxis_t delta_;

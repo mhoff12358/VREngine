@@ -90,6 +90,12 @@
     <ClInclude Include="KinectInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GrabbableObjectHandler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorGroups.cpp">
@@ -159,6 +165,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="KinectInterface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GrabbableObjectHandler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionShape.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

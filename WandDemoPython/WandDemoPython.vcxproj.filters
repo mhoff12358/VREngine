@@ -71,6 +71,15 @@
     <ClInclude Include="KinectBackingClassesInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GrabbableObjectHandlerInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BoostPointerMagic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionShapeInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">

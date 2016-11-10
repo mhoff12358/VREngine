@@ -99,10 +99,7 @@ void ToScreenRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Enti
 	InitializeBackBuffer();
 }
 
-void ToScreenRenderingPipeline::Render() {
-	// Update the camera's position and transformations based on the world state
-	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
-	
+void ToScreenRenderingPipeline::Render(RenderGroup* group_to_draw) {
 	CallPipeline(group_to_draw);
 	view_state->swap_chain->Present(0, 0);
 }
@@ -126,9 +123,7 @@ void ToHeadsetRenderingPipeline::Initialize(ViewState* vs, InputHandler* ih, Ent
 	FillPipelineTexturesFromHeadset();
 }
 
-void ToHeadsetRenderingPipeline::Render() {
-	RenderGroup* group_to_draw = entity_handler->GetRenderGroupForDrawing();
-
+void ToHeadsetRenderingPipeline::Render(RenderGroup* group_to_draw) {
 	CallPipeline(group_to_draw);
 	oculus->SubmitForRendering();
 	view_state->swap_chain->Present(0, 0);

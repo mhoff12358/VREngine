@@ -403,5 +403,8 @@
     <None Include="kinect_body_display.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="draggable_object.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

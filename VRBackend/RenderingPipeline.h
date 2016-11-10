@@ -18,7 +18,7 @@ class RenderingPipeline {
 public:
 	RenderingPipeline();
 
-	virtual void Render() = 0;
+	virtual void Render(RenderGroup* group_to_draw) = 0;
 
 	void InitializeBackBuffer();
 	Texture& GetFirstStageBuffer();
@@ -68,7 +68,7 @@ public:
 
 	void Initialize(ViewState* vs, InputHandler* ih, EntityHandler* eh, string rl);
 
-	void Render() override;
+	void Render(RenderGroup* group_to_draw) override;
 
 private:
 	vector<TextureIdent> GetExistingTextureIdents() const override;
@@ -80,7 +80,7 @@ public:
 
 	void Initialize(ViewState* vs, InputHandler* ih, EntityHandler* eh, string rl, Headset* ocu);
 
-	void Render() override;
+	void Render(RenderGroup* group_to_draw) override;
 
 public:
 	D3D11_VIEWPORT eye_viewports[2];

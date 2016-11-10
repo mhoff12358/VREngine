@@ -67,13 +67,13 @@ struct NewTextureDetails {
 struct NewShaderDetails {
 	NewShaderDetails() {}
 	NewShaderDetails(const string& filename, VertexType vertex_type, bool include_geometry_shader = true)
-		: vertex_type_(std::move(vertex_type)) {
+		: vertex_type_(std::move(vertex_type)), stages_(include_geometry_shader ? ShaderStages::All() : ShaderStages::Vertex().and(ShaderStages::Pixel())) {
 		idents_[0] = filename;
 		idents_[1] = include_geometry_shader ? filename : ResourceIdentifier::GetConstantModelName("unset_geometry_shader");
 		idents_[2] = filename;
 	};
 	NewShaderDetails(const string& filename, VertexType vertex_type, ShaderStages stages)
-		: vertex_type_(std::move(vertex_type)) {
+		: vertex_type_(std::move(vertex_type)), stages_(stages) {
 		idents_[0] = stages.IsVertexStage() ? filename : "";
 		idents_[1] = stages.IsGeometryStage() ? filename : "";
 		idents_[2] = stages.IsPixelStage() ? filename : "";
@@ -107,6 +107,7 @@ struct NewShaderDetails {
 
 	array<string, 3> idents_;
 	VertexType vertex_type_;
+	ShaderStages stages_;
 };
 
 struct NewModelDetails {

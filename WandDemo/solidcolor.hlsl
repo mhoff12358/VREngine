@@ -25,7 +25,7 @@ cbuffer solid_color : register(b2)
 	float4 color;
 };
 
-VOut VShader(float4 position : POSITION, float4 normal : TEXCOORD)
+VOut VShader(float4 position : POSITION)
 {
     VOut output;
 

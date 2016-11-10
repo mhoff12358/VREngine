@@ -49,6 +49,6 @@ POut PShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0, float 
 {
     POut result;
 	float4 texture_sample = model_skin.Sample(skin_sampler, tex_coord);
-	result.t1 = float4(texture_sample.xyz * light_scale, texture_sample.w);
+	result.t1 = float4(texture_sample.xyz, texture_sample.w);
 	return result;
 }

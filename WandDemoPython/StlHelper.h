@@ -8,37 +8,37 @@ struct less_special_ : general_ {};
 struct special_ : less_special_ {};
 
 template <typename Collection, typename ValueType>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, special_) -> decltype(c.reserve(size), void()) {
+auto ResizeIfPossibleImpl(Collection& c, ssize_t size, special_) -> decltype(c.reserve(size), void()) {
 	c.reserve(size);
 }
 
 template <typename Collection, typename ValueType>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, less_special_) -> decltype(c.size(), void()) {
+auto ResizeIfPossibleImpl(Collection& c, ssize_t size, less_special_) -> decltype(c.size(), void()) {
 	assert(c.size() == size);
 }
 
 
 template <typename Collection, typename ValueType>
-auto ResizeIfPossibleImpl(Collection& c, unsigned int size, general_) -> void {
+auto ResizeIfPossibleImpl(Collection& c, ssize_t size, general_) -> void {
 }
 
 template <typename Collection, typename ValueType>
-void ResizeIfPossible(Collection& c, unsigned int size) {
+void ResizeIfPossible(Collection& c, ssize_t size) {
 	ResizeIfPossibleImpl<Collection, ValueType>(c, size, special_());
 }
 
 template <typename Collection, typename ValueType>
-auto PushBackIfPossibleImpl(Collection& c, unsigned int index, ValueType&& value, special_) -> decltype(c.reserve(0), void()) {
+auto PushBackIfPossibleImpl(Collection& c, ssize_t index, ValueType&& value, special_) -> decltype(c.reserve(0), void()) {
 	c.push_back(move(value));
 }
 
 template <typename Collection, typename ValueType>
-auto PushBackIfPossibleImpl(Collection& c, unsigned int index, ValueType&& value, general_) -> void {
+auto PushBackIfPossibleImpl(Collection& c, ssize_t index, ValueType&& value, general_) -> void {
 	c[index] = value;
 }
 
 template <typename Collection, typename ValueType>
-void PushBackIfPossible(Collection& c, unsigned int index, ValueType&& value) {
+void PushBackIfPossible(Collection& c, ssize_t index, ValueType&& value) {
 	PushBackIfPossibleImpl<Collection, ValueType>(c, index, move(value), special_());
 }
 

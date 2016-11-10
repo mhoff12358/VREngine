@@ -130,10 +130,23 @@ void Headset::UpdateGamePoses() {
 
 		// Generate a new body frame and data.
 		int64_t new_body_frame_time;
+		Vector4 floor_plane;
 		HRESULT hr;
 		hr = body_frame_reader_->AcquireLatestFrame(&body_frame_);
 		if (SUCCEEDED(hr)) {
 			hr = body_frame_->get_RelativeTime(&new_body_frame_time);
+		}
+		if (SUCCEEDED(hr)) {
+			hr = body_frame_->get_FloorClipPlane(&floor_plane);
+		}
+		if (SUCCEEDED(hr)) {
+			if ((floor_plane.x != floor_clip_plane_.x) ||
+				(floor_plane.y != floor_clip_plane_.y) ||
+				(floor_plane.z != floor_clip_plane_.z) ||
+				(floor_plane.w != floor_clip_plane_.w)) {
+				std::cout << floor_plane.x << "\t" << floor_plane.y << "\t" << floor_plane.z << "\t" << floor_plane.w << std::endl;
+				floor_clip_plane_ = floor_plane;
+			}
 		}
 		if (SUCCEEDED(hr)) {
 			hr = body_frame_->GetAndRefreshBodyData(BODY_COUNT, raw_bodies_.data());
@@ -155,8 +168,11 @@ void Headset::UpdateGamePoses() {
 					tracking_hr = raw_body->get_TrackingId(&tracking_id);
 					if (SUCCEEDED(tracking_hr)) {
 						bodies_[body_index].FillFromIBody(tracking_id, raw_body);
-						if (tracking_ids_.count(tracking_id) == 0) {
-							tracking_ids_.insert(tracking_id);
+						auto ids_iterator = tracking_ids_.begin();
+						while ((ids_iterator != tracking_ids_.end()) && (*ids_iterator != tracking_id))
+							++ids_iterator;
+						if (ids_iterator == tracking_ids_.end()) {
+							tracking_ids_.push_back(tracking_id);
 							new_tracked_ids_.push_back(tracking_id);
 							std::cout << "New tracking ID: " << tracking_id << std::endl;
 						}
@@ -168,6 +184,56 @@ void Headset::UpdateGamePoses() {
 			body_frame_time_delta_ = -1;
 		}
 	}
+	if (IsHeadsetInitialized() && IsKinectInitialized()) {
+		/*vr::TrackedDeviceIndex_t hmd_index = tracked_device_by_class_[GetDeviceClassIndex(vr::TrackedDeviceClass_HMD)][0];
+		vr::TrackedDeviceIndex_t controller_index = tracked_device_by_class_[GetDeviceClassIndex(vr::TrackedDeviceClass_Controller)][0];
+		if ((controller_index != vr::k_unTrackedDeviceIndexInvalid) && logic_controller_states_[controller_index].ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) {
+			if ((hmd_index != vr::k_unTrackedDeviceIndexInvalid) && (controller_index != vr::k_unTrackedDeviceIndexInvalid) && (!tracking_ids_.empty())) {
+				Body& body = GetBody(tracking_ids_[0]);
+				Joint& joint = body.GetJoint(JointType_Head);
+				if (body.filled_ && (joint.TrackingState == TrackingState_Tracked)) {
+					Location head_location = logic_poses_[hmd_index].location_;
+					std::cout << "Found in both" << std::endl;
+					coordinate_mapping_data_.push_back({ {joint.Position.X, joint.Position.Y, joint.Position.Z, 1.0f, head_location[0], head_location[2]} });
+				}
+			}
+		} else if (!coordinate_mapping_data_.empty()) {
+			boost::numeric::ublas::matrix<float> lhs(coordinate_mapping_data_.size(), 4);
+			boost::numeric::ublas::matrix<float> rhs(coordinate_mapping_data_.size(), 2);
+			unsigned int row = 0;
+			for (const array<float, 6>& data : coordinate_mapping_data_) {
+				for (int column = 0; column < 4; column++) {
+					lhs(row, column) = data[column];
+				}
+				for (int column = 4; column < 6; column++) {
+					rhs(row, column - 4) = data[column];
+				}
+				row++;
+			}
+			//boost::numeric::ublas::matrix<float> inverse;
+			//InvertMatrix(lhs, inverse);
+			boost::numeric::ublas::matrix<float> solution;
+			if (!Solve(lhs, rhs, solution)) {
+				ClearCoordinateMapping();
+			}
+			else {
+				DirectX::XMFLOAT4 first_solution(solution(0, 0), solution(1, 0), solution(2, 0), solution(3, 0));
+				DirectX::XMFLOAT4 second_solution(solution(0, 1), solution(1, 1), solution(2, 1), solution(3, 1));
+				DirectX::XMFLOAT4 floor_plane(floor_clip_plane_.x, floor_clip_plane_.y, floor_clip_plane_.z, floor_clip_plane_.w);
+				DirectX::XMFLOAT4 w(0, 0, 0, 1);
+				coordinate_mapping_.r[0] = DirectX::XMLoadFloat4(&first_solution);
+				coordinate_mapping_.r[1] = DirectX::XMLoadFloat4(&floor_plane);
+				coordinate_mapping_.r[2] = DirectX::XMLoadFloat4(&second_solution);
+				coordinate_mapping_.r[3] = DirectX::XMLoadFloat4(&w);
+				std::cout << "JIOFEJOIFE" << std::endl;
+			}
+		}*/
+	}
+}
+
+void Headset::ClearCoordinateMapping() {
+	coordinate_mapping_data_.clear();
+	coordinate_mapping_ = DirectX::XMMatrixIdentity();
 }
 
 Body& Headset::GetBody(uint64_t tracking_id) {
@@ -238,7 +304,7 @@ void Headset::UnregisterTrackedObject(vr::TrackedDeviceIndex_t index) {
 	if (index >= vr::k_unMaxTrackedDeviceCount) {
 		return;
 	}
-	for (auto& object_index : tracked_device_by_class_[tracked_device_classes_[index]]) {
+	for (auto& object_index : tracked_device_by_class_[GetDeviceClassIndex(tracked_device_classes_[index])]) {
 		if (object_index == index) {
 			object_index = vr::k_unTrackedDeviceIndexInvalid;
 		}
@@ -298,3 +364,35 @@ Pose Headset::DecomposePoseFromMatrix(const vr::HmdMatrix34_t& matrix) {
 		DirectX::XMVectorGetW(head_rot));
 	return result_pose;
 }
+
+/*bool Solve(boost::numeric::ublas::matrix<float>& lhs, boost::numeric::ublas::matrix<float>& rhs, boost::numeric::ublas::matrix<float>& solution) {
+	auto lhsT = boost::numeric::ublas::trans(lhs);
+	boost::numeric::ublas::matrix<float> temp = boost::numeric::ublas::prod(lhsT, lhs);
+	boost::numeric::ublas::matrix<float> inv;
+	if (!InvertMatrix(temp, inv)) {
+		return false;
+	}
+	solution = boost::numeric::ublas::prod(boost::numeric::ublas::prod(inv, lhsT), rhs);
+	return true;
+}
+
+bool InvertMatrix(boost::numeric::ublas::matrix<float>& input, boost::numeric::ublas::matrix<float>& inverse)
+{
+	typedef boost::numeric::ublas::permutation_matrix<std::size_t> pmatrix;
+
+	// create a permutation matrix for the LU-factorization
+	pmatrix pm(input.size1());
+
+	// perform LU-factorization
+	int res = boost::numeric::ublas::lu_factorize(input, pm);
+	if (res != 0)
+		return false;
+
+	// create identity matrix of "inverse"
+	inverse.assign(boost::numeric::ublas::identity_matrix<float> (input.size1()));
+
+	// backsubstitute to get the inverse
+	boost::numeric::ublas::lu_substitute(input, pm, inverse);
+
+	return true;
+}*/

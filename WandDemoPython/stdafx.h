@@ -14,3 +14,5 @@ using boost::python::enum_;
 using boost::python::dict;
 using boost::python::raw_function;
 using boost::python::make_function;
+
+#include "BoostPointerMagic.h"

@@ -15,6 +15,7 @@ namespace game_scene {
 	}
 	EntitySpecification& EntitySpecification::SetShaders(NewShaderDetails shader_details) {
 		shader_details_ = move(shader_details);
+		shader_stages_ = shader_details_.stages_;
 		return *this;
 	}
 	EntitySpecification& EntitySpecification::SetShaderStages(ShaderStages shader_stages) {
