@@ -99,7 +99,7 @@ void GrabbableObjectHandler::SetGrabbedActor(unsigned char controller_number, Ac
 		Command(
 			Target(scene_->FindByName("HeadsetInterface")),
 			make_unique<commands::HeadsetListenerRegistration>(
-				true, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
+				true, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT, controller_number)));
 }
 
 void GrabbableObjectHandler::UnsetGrabbedActor(unsigned char controller_number) {
@@ -108,7 +108,7 @@ void GrabbableObjectHandler::UnsetGrabbedActor(unsigned char controller_number) 
 		Command(
 			Target(scene_->FindByName("HeadsetInterface")),
 			make_unique<commands::HeadsetListenerRegistration>(
-				false, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT)));
+				false, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT, controller_number)));
 	grabbed_actor_[controller_number] = ActorId::UnsetId;
 }
 

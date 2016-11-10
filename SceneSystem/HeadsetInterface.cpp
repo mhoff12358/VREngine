@@ -28,9 +28,19 @@ void HeadsetInterface::AddedToScene() {
 	controller_graphics_[0] = CreateControllerActor();
 	controller_graphics_[1] = CreateControllerActor();
 	
-	for (ActorId& listener_group : listener_groups_) {
-		listener_group = scene_->AddActorGroup();
+	for (auto& controller_listener_groups : listener_groups_) {
+		for (ActorId& listener_group : controller_listener_groups) {
+			listener_group = scene_->AddActorGroup();
+		}
 	}
+}
+
+void HeadsetInterface::RegisterOrUnregisterActor(bool register_not_unregister, ActorId actor, unsigned char controller_index, ListenerId listener_id) {
+	if (register_not_unregister) {
+		scene_->AddActorToGroup(actor, listener_groups_[controller_index][static_cast<size_t>(listener_id)]);
+	} else {
+		scene_->RemoveActorFromGroup(actor, listener_groups_[controller_index][static_cast<size_t>(listener_id)]);
+	} 
 }
 
 void HeadsetInterface::HandleCommand(const CommandArgs& args) {
@@ -38,15 +48,17 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 	case HeadsetInterfaceCommand::REGISTER_LISTENER:
 	{
 		const commands::HeadsetListenerRegistration& registration = dynamic_cast<const commands::HeadsetListenerRegistration&>(args);
-		if (registration.register_not_unregister_) {
-			scene_->AddActorToGroup(registration.actor_to_register_, listener_groups_[static_cast<size_t>(registration.listener_id_)]);
+		if (registration.controller_number_ == 2) {
+			for (unsigned char i = 0; i < 2; i++) {
+				RegisterOrUnregisterActor(registration.register_not_unregister_, registration.actor_to_register_, i, registration.listener_id_);
+			}
 		} else {
-			scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_groups_[static_cast<size_t>(registration.listener_id_)]);
-		} 
+			RegisterOrUnregisterActor(registration.register_not_unregister_, registration.actor_to_register_, registration.controller_number_, registration.listener_id_);
+		}
 	}
 	break;
 	case InputCommand::TICK:
-		for (unsigned int i = 0; i < 2; i++) {
+		for (unsigned char i = 0; i < 2; i++) {
 			vr::TrackedDeviceIndex_t controller_index = headset_.GetDeviceIndex(vr::TrackedDeviceClass_Controller, i);
 			if (controller_index == vr::k_unTrackedDeviceIndexInvalid) {
 				if (controller_connectedness_[i]) {
@@ -63,7 +75,7 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 			// Update the controller pose.
 			Pose new_controller_position = headset_.GetGamePose(controller_index);
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-				Target(listener_groups_[static_cast<size_t>(ListenerId::CONTROLLER_MOVEMENT)]),
+				Target(listener_groups_[i][static_cast<size_t>(ListenerId::CONTROLLER_MOVEMENT)]),
 				make_unique<commands::ControllerMovement>(
 					i,
 					new_controller_position.location_,
@@ -79,13 +91,13 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-void HeadsetInterface::HandleNewControllerState(int hand_index, vr::VRControllerState_t new_state) {
+void HeadsetInterface::HandleNewControllerState(unsigned char hand_index, vr::VRControllerState_t new_state) {
 	bool trigger_is_pulled = HeadsetHelpers::IsTriggerPulled(new_state);
 	bool trigger_was_pulled = HeadsetHelpers::IsTriggerPulled(controller_states_[hand_index]);
 	// If the trigger's state has changed, alert all listeners.
 	if (trigger_is_pulled != trigger_was_pulled) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			Target(listener_groups_[static_cast<size_t>(ListenerId::TRIGGER_STATE_CHANGE)]),
+			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TRIGGER_STATE_CHANGE)]),
 			make_unique<commands::TriggerStateChange>(
 				hand_index, controller_positions_[hand_index].location_, trigger_is_pulled)));
 	}
@@ -97,7 +109,7 @@ void HeadsetInterface::HandleNewControllerState(int hand_index, vr::VRController
 	if ((vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & new_state.ulButtonTouched) &&
 		(vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & controller_states_[hand_index].ulButtonTouched)) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			Target(listener_groups_[static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
+			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
 			make_unique<commands::TouchpadMotion>(
 				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE,
 				hand_index,
@@ -108,7 +120,7 @@ void HeadsetInterface::HandleNewControllerState(int hand_index, vr::VRController
 	if ((vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & new_state.ulButtonPressed) &&
 		(vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & controller_states_[hand_index].ulButtonPressed)) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			Target(listener_groups_[static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
+			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
 			make_unique<commands::TouchpadMotion>(
 				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_DRAG,
 				hand_index,

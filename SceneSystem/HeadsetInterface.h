@@ -38,13 +38,14 @@ public:
 	};
 
 private:
-	void HandleNewControllerState(int hand_index, vr::VRControllerState_t new_state);
+	void HandleNewControllerState(unsigned char hand_index, vr::VRControllerState_t new_state);
+	void HeadsetInterface::RegisterOrUnregisterActor(bool register_not_unregister, ActorId actor, unsigned char controller_index, ListenerId listener_id);
 
 	array<bool, 2> controller_connectedness_;
 	array<Pose, 2> controller_positions_;
 	array<vr::VRControllerState_t, 2> controller_states_;
 	array<ActorId, 2> controller_graphics_;
-	array<ActorId, static_cast<size_t>(ListenerId::NUM_LISTENERS)> listener_groups_;
+	array<array<ActorId, static_cast<size_t>(ListenerId::NUM_LISTENERS)>, 2> listener_groups_;
 
 	Headset& headset_;
 };
@@ -66,15 +67,18 @@ public:
 	HeadsetListenerRegistration(
 		bool register_not_unregister,
 		ActorId actor_to_register,
-		actors::HeadsetInterface::ListenerId listener_id) : 
+		actors::HeadsetInterface::ListenerId listener_id,
+		unsigned char controller_number = 2) : 
 		CommandArgs(HeadsetInterfaceCommand::REGISTER_LISTENER),
 		register_not_unregister_(register_not_unregister),
 		actor_to_register_(actor_to_register),
-		listener_id_(listener_id) {}
+		listener_id_(listener_id),
+		controller_number_(controller_number) {}
 
 	bool register_not_unregister_;
 	ActorId actor_to_register_;
 	actors::HeadsetInterface::ListenerId listener_id_;
+	unsigned char controller_number_;
 };
 
 class ControllerInformation : public CommandArgs {
