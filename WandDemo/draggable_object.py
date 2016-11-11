@@ -59,6 +59,10 @@ class DraggableObject(sc.DelegatingActor):
 	def HandleGrabbed(self, args):
 		if args.held:
 			self.controller_location_delta = self.current_location - args.position.location
+			self.scene.MakeCommandAfter(
+				self.scene.FrontOfCommands(),
+				sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+				sc.RemoveGrabbableObject(self.id))
 		else:
 			self.scene.MakeCommandAfter(
 				self.scene.FrontOfCommands(),
