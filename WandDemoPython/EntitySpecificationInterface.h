@@ -10,25 +10,37 @@ void EntitySpecificationInterface() {
 		.def(init<string>())
 		.def(init<string, string>());
 
-	class_<ShaderStages>("ShaderStages", no_init)
-		.def("Vertex", &ShaderStages::Vertex)
+	class_<ShaderIdentifier>("ShaderIdentifier", init<>())
+		.def(init<string, ShaderStage>())
+		.def(init<string, ShaderStage, VertexType>())
+		.def(init<string, VertexType>())
+		.def(init<string, string, ShaderStage>())
+		.def(init<string, string, ShaderStage, VertexType>())
+		.def(init<string, string, VertexType>())
+		.def("GetUnsetShader", &ShaderIdentifier::GetUnsetShader)
+		.staticmethod("GetUnsetShader");
+	CreateVector<ShaderIdentifier>("ShaderIdentifier");
+
+	class_<ShaderStage>("ShaderStage", no_init)
+		.def("Vertex", &ShaderStage::Vertex)
 		.staticmethod("Vertex")
-		.def("Geometry", &ShaderStages::Geometry)
+		.def("Geometry", &ShaderStage::Geometry)
 		.staticmethod("Geometry")
-		.def("Pixel", &ShaderStages::Pixel)
-		.staticmethod("Pixel")
+		.def("Pixel", &ShaderStage::Pixel)
+		.staticmethod("Pixel");
+
+	CreateVector<ShaderStage>("ShaderStage");
+
+	class_<ShaderStages>("ShaderStages", init<vector<ShaderStage>>())
 		.def("All", &ShaderStages::All)
-		.staticmethod("All")
-		.def("And", &ShaderStages::and);
+		.staticmethod("All");
 
 	CreateListToCollection<vector<float>, game_scene::ShaderSettingsValue>(
 		CreateIndexing<size_t, vector<float>, game_scene::ShaderSettingsValue>(
 			class_<game_scene::ShaderSettingsValue>("ShaderSettingsValue", no_init)));
 
 	class_<game_scene::NewShaderDetails>("ShaderDetails")
-		.def(init<string, VertexType>())
-		.def(init<string, VertexType, bool>())
-		.def(init<string, VertexType, ShaderStages>());
+		.def(init<const vector<ShaderIdentifier>&>());
 
 	class_<game_scene::NewIndividualTextureDetails>("IndividualTextureDetails", init<string, ShaderStages, int, int>());
 	CreateVector<game_scene::NewIndividualTextureDetails>("IndividualTextureDetails");

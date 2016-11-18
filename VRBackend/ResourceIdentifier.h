@@ -1,6 +1,8 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Vertices.h"
+#include "ShaderStages.h"
 
 class ResourceIdentifier {
 public:
@@ -23,6 +25,34 @@ public:
 	static string GetConstantModelName(string description) {
 		return unique_identifier + description;
 	}
+};
+
+class ShaderIdentifier {
+public:
+	ShaderIdentifier();
+	ShaderIdentifier(string file_name, ShaderStage shader_stage);
+	ShaderIdentifier(string file_name, ShaderStage shader_stage, VertexType vertex_type);
+	ShaderIdentifier(string file_name, VertexType vertex_type);
+	ShaderIdentifier(string file_name, string function_name, ShaderStage shader_stage);
+	ShaderIdentifier(string file_name, string function_name, ShaderStage shader_stage, VertexType vertex_type);
+	ShaderIdentifier(string file_name, string function_name, VertexType vertex_type);
+
+	static bool IsPrecompiledFile(const string& file_name);
+	static ShaderIdentifier GetUnsetShader(ShaderStage stage);
+
+	const string& GetFileName() const;
+	const string& GetFunctionName() const;
+	const VertexType& GetVertexType() const;
+	const ShaderStage& GetShaderStage() const;
+	bool GetPrecompiled() const;
+	bool IsEmpty() const;
+
+private:
+	bool precompiled_ = false;
+	string file_name_;
+	string function_name_ = "";
+	VertexType vertex_type_;
+	ShaderStage shader_stage_;
 };
 
 class ModelIdentifier {

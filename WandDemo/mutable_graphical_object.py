@@ -10,16 +10,14 @@ class MutableGraphicalObject(sc.DelegatingActor):
 		
 	@delegater(sc.CommandType.ADDED_TO_SCENE)
 	def HandleAddToScene(self, args):
-		scene = self.GetScene()
-
-		latest_command = scene.FrontOfCommands()
-		latest_command = scene.MakeCommandAfter(
+		latest_command = self.scene.FrontOfCommands()
+		latest_command = self.scene.MakeCommandAfter(
 			latest_command,
-			sc.Target(scene.FindByName("IOInterface")),
+			sc.Target(self.scene.FindByName("IOInterface")),
 			sc.IOListenerRegistration(
 				True, self.id, sc.ListenerId.KEY_PRESS, ord(' ')))
 
-		self.graphics_resources = sc.GraphicsResources.GetGraphicsResources(scene)
+		self.graphics_resources = sc.GraphicsResources.GetGraphicsResources(self.scene)
 
 		model_generator = sc.ModelGenerator(sc.VertexType.texture, sc.D3DTopology.TRIANGLELIST)
 		model_generator.AddVertexBatch(sc.Vertices(
@@ -38,9 +36,9 @@ class MutableGraphicalObject(sc.DelegatingActor):
 			self.graphics_resources.GetEntityHandler(),
 			sc.ModelStorageDescription(False, True, False))
 
-		self.graphics_object_id = scene.AddAndConstructGraphicsObject().id
+		self.graphics_object_id = self.scene.AddAndConstructGraphicsObject().id
 		self.graphics_object_model_name = sc.ResourceIdentifier.GetNewModelName("mutable_square")
-		latest_command = scene.MakeCommandAfter(
+		latest_command = self.scene.MakeCommandAfter(
 			latest_command,
 			sc.Target(self.graphics_object_id),
 			sc.CreateGraphicsObject(
@@ -59,7 +57,7 @@ class MutableGraphicalObject(sc.DelegatingActor):
 						.SetComponent("square")
 	,)),
 				 sc.VectorComponentInfo((sc.ComponentInfo("", "square"),))))
-		latest_command = scene.MakeCommandAfter(
+		latest_command = self.scene.MakeCommandAfter(
 			latest_command,
 			sc.Target(self.graphics_object_id),
 			sc.PlaceComponent(

@@ -4,6 +4,7 @@ import scripts.player
 import scripts.mutable_graphical_object
 import scripts.kinect_body_display
 import scripts.draggable_object
+import scripts.path_draggable_object
 
 class DummyActor(sc.DelegatingActor):
 	command_delegation = sc.DelegatingActor.GetDefaultDelegation()
@@ -20,6 +21,14 @@ class DummyActor(sc.DelegatingActor):
 		print("RECEIVED COMMAND OF TYPE TICK", command_args.duration)
 	command_delegation[sc.InputCommand.TICK] = HandleTICK
 
+class Line(object):
+	def __init__(self, p0, p1):
+		self.p0 = p0
+		self.p1 = p1
+
+	def at(self, t):
+		return (1-t) * self.p0 + t * self.p1
+
 def first_load(resources):
 	print("STARTING FIRST LOAD")
 	sc.ParseResources(resources)
@@ -29,7 +38,8 @@ def first_load(resources):
 	#graphics_object = scripts.mutable_graphical_object.MutableGraphicalObject()
 	#scene.AddActor(graphics_object)
 
-	scene.AddActor(scripts.draggable_object.DraggableObject())
+	scene.AddActor(scripts.path_draggable_object.PathDraggableObject(
+		(Line(sc.Location(0, 0, 0), sc.Location(0, 2, 0)),)))
 
 	#body_display = scripts.kinect_body_display.KinectBodyDisplay()
 	#scene.AddActor(body_display)

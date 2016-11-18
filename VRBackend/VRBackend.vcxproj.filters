@@ -272,5 +272,8 @@
     <ClCompile Include="ShaderStages.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Pose.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

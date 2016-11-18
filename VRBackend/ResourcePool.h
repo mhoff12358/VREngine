@@ -52,6 +52,8 @@ public:
 
 	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con);
 
+	vector<char> ReadFileToBytes(const string& file_name);
+
 	Model LoadExistingModel(ModelIdentifier model_name);
 	Model LoadModelFromFile(ModelIdentifier model_name, const ObjLoader::OutputFormat& model_output_format);
 	Model LoadModelFromVertices(ModelIdentifier model_name, const Vertices& vertices, D3D_PRIMITIVE_TOPOLOGY primitive_type, ModelStorageDescription model_storage, map<string, ModelSlice> parts = {});
@@ -62,15 +64,19 @@ public:
 
 	PixelShader LoadPixelShader(string file_name);
 	PixelShader LoadPixelShader(string file_name, string function_name);
+	PixelShader LoadPixelShader(const ShaderIdentifier& shader_identifier);
 	PixelShader LoadExistingPixelShader(string file_name);
 
 	VertexShader LoadVertexShader(string file_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
 	VertexShader LoadVertexShader(string file_name, VertexType vertex_type);
 	VertexShader LoadVertexShader(string file_name, string function_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size);
+	VertexShader LoadVertexShader(string file_name, string function_name, VertexType vertex_type);
+	VertexShader LoadVertexShader(const ShaderIdentifier& shader_identifier);
 	VertexShader LoadExistingVertexShader(string file_name);
 
 	GeometryShader LoadGeometryShader(string file_name);
 	GeometryShader LoadGeometryShader(string file_name, string function_name);
+	GeometryShader LoadGeometryShader(const ShaderIdentifier& shader_identifier);
 	GeometryShader LoadExistingGeometryShader(string file_name);
 
 	Texture& LoadTexture(string file_name);

@@ -5,9 +5,10 @@
 #include "VRBackend/EntityHandler.h"
 #include "VRBackend/Shaders.h"
 #include "VRBackend/ShaderSettings.h"
+#include "VRBackend/ShaderStages.h"
 
 Component::Component(ID3D11Device* device_interface)
-	: transformation_buffer_(ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::GEOMETRY_STAGE)), children_(NULL), parent_transformation_(NULL), num_children_(0)
+	: transformation_buffer_(ShaderStages(ShaderStage::VERTEX_STAGE | ShaderStage::GEOMETRY_STAGE)), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
 	transformation_buffer_.CreateBuffer(device_interface);
 }
@@ -24,8 +25,6 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entit
 	number_of_entities_ = static_cast<unsigned int>(std::distance(first_model, end_of_models));
 	assert(number_of_entities_ > 0);
 
-	//ConstantBufferTyped<TransformationMatrixAndInvTransData>* trans = new ConstantBufferTyped<TransformationMatrixAndInvTransData>(CB_PS_VERTEX_SHADER);
-	//trans->CreateBuffer(device_interface);
 	vector<Model>::iterator current_model = first_model;
 	first_entity_ = entity_handler.AddEntity(Entity(
 		ES_NORMAL,
@@ -33,7 +32,6 @@ void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entit
 		ShaderSettings(NULL),
 		*current_model,
 		&transformation_buffer_), entity_group_name);
-	//trans));
 	for (++current_model; current_model != end_of_models; ++current_model) {
 		entity_handler.AddEntity(Entity(
 			ES_NORMAL,

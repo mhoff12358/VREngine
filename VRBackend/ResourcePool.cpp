@@ -4,6 +4,8 @@
 #include "EntityHandler.h"
 #include "Texture.h"
 
+#include <fstream>
+
 ResourcePool::ResourcePool(EntityHandler& entity_handler) : entity_handler_(entity_handler)
 {
 	lastest_model_number = 0;
@@ -17,6 +19,18 @@ ResourcePool::~ResourcePool()
 {
 }
 
+vector<char> ResourcePool::ReadFileToBytes(const string& file_name) {
+	vector<char> data;
+	std::ifstream file_stream(file_name.c_str(), std::ios::in | std::ios::binary);
+	if (!file_stream.is_open()) {
+		return data;
+	}
+	file_stream.seekg(0, file_stream.end);
+	data.resize(file_stream.tellg());
+	file_stream.seekg(0, file_stream.beg);
+	file_stream.read(data.data(), data.size());
+	return data;
+}
 
 void ResourcePool::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con) {
 	device_interface = dev;
@@ -176,12 +190,45 @@ PixelShader ResourcePool::LoadPixelShader(std::string file_name, std::string fun
 	return new_pixel_shader;
 }
 
+PixelShader ResourcePool::LoadPixelShader(const ShaderIdentifier& shader_identifier) {
+	auto existing_pixel_shader = pixel_shader_lookup.find(shader_identifier.GetFileName());
+	if (existing_pixel_shader != pixel_shader_lookup.end()) {
+		return pixel_shaders[existing_pixel_shader->second];
+	}
+
+	if (!shader_identifier.GetPrecompiled()) {
+		if (shader_identifier.GetFunctionName().empty()) {
+			return LoadPixelShader(shader_identifier.GetFileName());
+		} else {
+			return LoadPixelShader(shader_identifier.GetFileName(), shader_identifier.GetFunctionName());
+		}
+	}
+
+	vector<char> bytes = ReadFileToBytes(shader_identifier.GetFileName());
+	if (bytes.empty()) {
+		std::cout << "Attempting to load empty precompiled shader" << std::endl;
+	}
+	ID3D11PixelShader* new_dx_pixel_shader;
+	HRESULT result = device_interface->CreatePixelShader(bytes.data(), bytes.size(), nullptr, &new_dx_pixel_shader);
+
+	PixelShader new_pixel_shader(new_dx_pixel_shader);
+
+	pixel_shaders.push_back(new_pixel_shader);
+	pixel_shader_lookup[shader_identifier.GetFileName()] = pixel_shaders.size() - 1;
+
+	return new_pixel_shader;
+}
+
 VertexShader ResourcePool::LoadVertexShader(std::string file_name, VertexType vertex_type) {
 	return LoadVertexShader(file_name, vertex_type.GetVertexType(), vertex_type.GetSizeVertexType());
 }
 
 VertexShader ResourcePool::LoadVertexShader(std::string file_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
 	return LoadVertexShader(file_name, "VShader", ied, ied_size);
+}
+
+VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string function_name, VertexType vertex_type) {
+	return LoadVertexShader(file_name, "VShader", vertex_type.GetVertexType(), vertex_type.GetSizeVertexType());
 }
 
 VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string function_name, const D3D11_INPUT_ELEMENT_DESC ied[], int ied_size) {
@@ -198,7 +245,7 @@ VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string f
 	if (vertex_shader_blob == NULL) {
 		std::cout << std::string((const char*)vertex_shader_error_blob->GetBufferPointer()) << std::endl;
 	}
-	device_interface->CreateVertexShader(vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), NULL, &new_dx_vertex_shader);
+	device_interface->CreateVertexShader(vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), nullptr, &new_dx_vertex_shader);
 	device_interface->CreateInputLayout(ied, ied_size, vertex_shader_blob->GetBufferPointer(), vertex_shader_blob->GetBufferSize(), &new_dx_input_layout);
 
 	if (new_dx_input_layout == nullptr) {
@@ -209,6 +256,41 @@ VertexShader ResourcePool::LoadVertexShader(std::string file_name, std::string f
 
 	vertex_shaders.push_back(new_vertex_shader);
 	vertex_shader_lookup[file_name] = vertex_shaders.size() - 1;
+
+	return new_vertex_shader;
+}
+
+VertexShader ResourcePool::LoadVertexShader(const ShaderIdentifier& shader_identifier) {
+	auto existing_vertex_shader = vertex_shader_lookup.find(shader_identifier.GetFileName());
+	if (existing_vertex_shader != vertex_shader_lookup.end()) {
+		return vertex_shaders[existing_vertex_shader->second];
+	}
+
+	if (!shader_identifier.GetPrecompiled()) {
+		if (shader_identifier.GetFunctionName().empty()) {
+			return LoadVertexShader(shader_identifier.GetFileName(), shader_identifier.GetVertexType());
+		} else {
+			return LoadVertexShader(shader_identifier.GetFileName(), shader_identifier.GetFunctionName(), shader_identifier.GetVertexType());
+		}
+	}
+
+	vector<char> bytes = ReadFileToBytes(shader_identifier.GetFileName());
+	if (bytes.empty()) {
+		std::cout << "Attempting to load empty precompiled shader" << std::endl;
+	}
+	ID3D11VertexShader* new_dx_vertex_shader;
+	ID3D11InputLayout* new_dx_input_layout;
+	HRESULT result = device_interface->CreateVertexShader(bytes.data(), bytes.size(), nullptr, &new_dx_vertex_shader);
+	HRESULT result2 = device_interface->CreateInputLayout(shader_identifier.GetVertexType().GetVertexType(), shader_identifier.GetVertexType().GetSizeVertexType(), bytes.data(), bytes.size(), &new_dx_input_layout);
+
+	if (new_dx_input_layout == nullptr) {
+		std::cout << "Error creating input layout" << std::endl;
+	}
+
+	VertexShader new_vertex_shader(new_dx_input_layout, new_dx_vertex_shader);
+
+	vertex_shaders.push_back(new_vertex_shader);
+	vertex_shader_lookup[shader_identifier.GetFileName()] = vertex_shaders.size() - 1;
 
 	return new_vertex_shader;
 }
@@ -252,6 +334,35 @@ GeometryShader ResourcePool::LoadGeometryShader(std::string file_name, std::stri
 
 	geometry_shaders.push_back(new_geometry_shader);
 	geometry_shader_lookup[file_name] = geometry_shaders.size() - 1;
+
+	return new_geometry_shader;
+}
+
+GeometryShader ResourcePool::LoadGeometryShader(const ShaderIdentifier& shader_identifier) {
+	auto existing_geometry_shader = geometry_shader_lookup.find(shader_identifier.GetFileName());
+	if (existing_geometry_shader != geometry_shader_lookup.end()) {
+		return geometry_shaders[existing_geometry_shader->second];
+	}
+
+	if (!shader_identifier.GetPrecompiled()) {
+		if (shader_identifier.GetFunctionName().empty()) {
+			return LoadGeometryShader(shader_identifier.GetFileName());
+		} else {
+			return LoadGeometryShader(shader_identifier.GetFileName(), shader_identifier.GetFunctionName());
+		}
+	}
+
+	vector<char> bytes = ReadFileToBytes(shader_identifier.GetFileName());
+	if (bytes.empty()) {
+		std::cout << "Attempting to load empty precompiled shader" << std::endl;
+	}
+	ID3D11GeometryShader* new_dx_geometry_shader;
+	HRESULT result = device_interface->CreateGeometryShader(bytes.data(), bytes.size(), nullptr, &new_dx_geometry_shader);
+
+	GeometryShader new_geometry_shader(new_dx_geometry_shader);
+
+	geometry_shaders.push_back(new_geometry_shader);
+	geometry_shader_lookup[shader_identifier.GetFileName()] = geometry_shaders.size() - 1;
 
 	return new_geometry_shader;
 }

@@ -29,14 +29,14 @@ void ComponentHeirarchy::GetRequiredResources(vector<ResourceIdent>* resources) 
 			ResourceIdent::TEXTURE,
 			texture_details.name_));
 	}
-	if (shader_file_definition_.ShouldLoadStage(ShaderStage::VERTEX)) {
-		resources->push_back(ResourceIdent(ResourceIdent::VERTEX_SHADER, shader_file_definition_.StageFileName(ShaderStage::VERTEX), vertex_shader_input_type_));
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::Vertex())) {
+		resources->push_back(ResourceIdent(ResourceIdent::VERTEX_SHADER, shader_file_definition_.StageFileName(ShaderStage::Vertex()), vertex_shader_input_type_));
 	}
-	if (shader_file_definition_.ShouldLoadStage(ShaderStage::GEOMETRY)) {
-		resources->push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, shader_file_definition_.StageFileName(ShaderStage::GEOMETRY)));
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::Geometry())) {
+		resources->push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, shader_file_definition_.StageFileName(ShaderStage::Geometry())));
 	}
-	if (shader_file_definition_.ShouldLoadStage(ShaderStage::PIXEL)) {
-		resources->push_back(ResourceIdent(ResourceIdent::PIXEL_SHADER, shader_file_definition_.StageFileName(ShaderStage::PIXEL)));
+	if (shader_file_definition_.ShouldLoadStage(ShaderStage::Pixel())) {
+		resources->push_back(ResourceIdent(ResourceIdent::PIXEL_SHADER, shader_file_definition_.StageFileName(ShaderStage::Pixel())));
 	}
 }
 
@@ -120,14 +120,14 @@ void GraphicsObject::CreateSettingsEntity(
 	VertexShader vertex_shader;
 	GeometryShader geometry_shader(false);
 	PixelShader pixel_shader;
-	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::VERTEX)) {
-		vertex_shader = graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::VERTEX));
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::Vertex())) {
+		vertex_shader = graphics_resources.resource_pool_.LoadExistingVertexShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::Vertex()));
 	}
-	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::GEOMETRY)) {
-		geometry_shader = graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::GEOMETRY));
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::Geometry())) {
+		geometry_shader = graphics_resources.resource_pool_.LoadExistingGeometryShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::Geometry()));
 	}
-	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::PIXEL)) {
-		pixel_shader = graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::PIXEL));
+	if (heirarchy.shader_file_definition_.ShouldLoadStage(ShaderStage::Pixel())) {
+		pixel_shader = graphics_resources.resource_pool_.LoadExistingPixelShader(heirarchy.shader_file_definition_.StageFileName(ShaderStage::Pixel()));
 	}
 	
 	unique_ptr<ConstantBuffer>& shader_settings_buffer = get<1>(components_[reserved_space]);

@@ -142,7 +142,9 @@ void TextureCopyDesc::AllocateAdditionalResources(PipelineTexturePlanner& planne
 }
 
 void RepeatedStageDescTmp::UpdateStringWithRepetitionNum(string* mutable_string, unsigned int repetition_number) {
-	*mutable_string = *mutable_string + "|" + std::to_string(repetition_number);
+	if (!mutable_string->empty()) {
+		*mutable_string = *mutable_string + "|" + std::to_string(repetition_number);
+	}
 }
 
 template<>

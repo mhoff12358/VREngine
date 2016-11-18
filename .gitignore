@@ -4,4 +4,6 @@
 !*.h
 !*.py
 !*.ipp
+!*.hlsl
+!*.hlsli
 x64

@@ -80,12 +80,21 @@
     <ClInclude Include="CollisionShapeInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BezierCurvesInterface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">
       <Filter>Python Files</Filter>
     </Text>
     <Text Include="scene_system_internal.py">
+      <Filter>Python Files</Filter>
+    </Text>
+    <Text Include="delegating_actor.py">
+      <Filter>Python Files</Filter>
+    </Text>
+    <Text Include="actor.py">
       <Filter>Python Files</Filter>
     </Text>
   </ItemGroup>

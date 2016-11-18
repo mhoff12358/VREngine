@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorId.h" />
+    <ClInclude Include="BezierCurve.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandArgs.h" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClCompile Include="ActorGroups.cpp" />
     <ClCompile Include="ActorId.cpp" />
+    <ClCompile Include="BezierCurve.cpp" />
     <ClCompile Include="CollisionShape.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandArgs.cpp" />
@@ -168,6 +170,7 @@
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
     <ClCompile Include="Registry.cpp" />
+    <ClCompile Include="ResourceDefinitions.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderSettings.cpp" />
     <ClCompile Include="Shmactor.cpp" />

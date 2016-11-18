@@ -232,6 +232,7 @@
     <ClCompile Include="PipelineStageDesc.cpp" />
     <ClCompile Include="PipelineStageWithRenderMode.cpp" />
     <ClCompile Include="PipelineTexturePlanner.cpp" />
+    <ClCompile Include="Pose.cpp" />
     <ClCompile Include="ProcessingEffect.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="RenderEntities.cpp" />

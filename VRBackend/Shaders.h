@@ -2,13 +2,6 @@
 
 #include "stdafx.h"
 
-enum class ShaderStage : unsigned char {
-	VERTEX = 0,
-	GEOMETRY = 1,
-	PIXEL = 2,
-	NUM_STAGES
-};
-
 class VertexShader
 {
 public:

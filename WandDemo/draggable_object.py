@@ -18,9 +18,6 @@ class DraggableObject(sc.DelegatingActor):
 			sc.PlaceComponent(
 				"Sphere",
 				sc.Pose(self.current_location, sc.Scale(self.radius))))
-
-	def SetColor(self, rgba):
-		pass
 		
 	@delegater(sc.CommandType.ADDED_TO_SCENE)
 	def HandleAddToScene(self, args):

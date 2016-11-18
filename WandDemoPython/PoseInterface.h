@@ -1,5 +1,6 @@
 #pragma once
 #include "stdafx.h"
+#include "StlHelper.h"
 
 #include "VRBackend/Pose.h"
 
@@ -15,13 +16,16 @@ void PoseInterface() {
 		.def(boost::python::self + boost::python::self)
 		.def(boost::python::self - boost::python::self)
 		.def(boost::python::self * float())
+		.def(float() * boost::python::self)
 		.def(boost::python::self * Scale())
 		.def(boost::python::self / float())
 		.def(boost::python::self += boost::python::self)
 		.def(boost::python::self -= boost::python::self)
 		.def(boost::python::self *= float())
 		.def(boost::python::self /= float())
-		.def("get", &Location::operator[]);
+		.def("get", &Location::operator[])
+		.def("__len__", +static_cast<size_t(*)(const Location&)>([](const Location&)->size_t {return 3;}))
+		.def("__getitem__", +static_cast<float(*)(Location&, size_t)>([](Location& self, size_t index)->float {return self[index];}));
 
 	class_<Quaternion>("Quaternion")
 		.def(init<float, float, float, float>())
@@ -59,4 +63,9 @@ void PoseInterface() {
 		.def_readonly("scale", &Pose::scale_)
 		.def_readonly("orientation", &Pose::orientation_)
 		.def("ApplyAfter", &Pose::ApplyAfter);
+
+	CreateVector<Location>("Location");
+	CreateVector<Scale>("Scale");
+	CreateVector<Quaternion>("Quaternion");
+	CreateVector<Pose>("Pose");
 }

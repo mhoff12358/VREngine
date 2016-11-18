@@ -145,6 +145,7 @@
     <ClCompile Include="SceneSystemPython.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BezierCurvesInterface.h" />
     <ClInclude Include="BoostPointerMagic.h" />
     <ClInclude Include="CollisionShapeInterface.h" />
     <ClInclude Include="EntitySpecificationInterface.h" />
@@ -180,6 +181,18 @@
     <ProjectReference Include="..\SceneSystem\SceneSystem.vcxproj">
       <Project>{a9b212e5-71cd-49f9-bfe9-4b48aaca885c}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="delegating_actor.py">
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+    </Text>
+    <Text Include="actor.py">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+    </Text>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

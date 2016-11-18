@@ -2,7 +2,8 @@
 
 #include "stdafx.h"
 
-struct ShaderStages {
+struct ShaderStage {
+public:
 	enum StageId : unsigned char {
 		VERTEX_STAGE = 0x1,
 		GEOMETRY_STAGE = 0x2,
@@ -16,27 +17,23 @@ struct ShaderStages {
 		NUMBER_STAGES = 3
 	};
 
-	explicit ShaderStages(unsigned char id) : stages_(id) {}
-	ShaderStages() : ShaderStages(0) {}
+	ShaderStage() : ShaderStage(0) {}
 
-	static ShaderStages Vertex() { return ShaderStages(VERTEX_STAGE); }
-	static ShaderStages Geometry() { return ShaderStages(GEOMETRY_STAGE); }
-	static ShaderStages Pixel() { return ShaderStages(PIXEL_STAGE); }
-	static ShaderStages All() { return ShaderStages(VERTEX_STAGE | GEOMETRY_STAGE | PIXEL_STAGE); }
+	static ShaderStage Vertex() { return ShaderStage(VERTEX_STAGE); }
+	static ShaderStage Geometry() { return ShaderStage(GEOMETRY_STAGE); }
+	static ShaderStage Pixel() { return ShaderStage(PIXEL_STAGE); }
 
-	ShaderStages and(ShaderStages other) { return ShaderStages(stages_ | other.stages_); }
-
-	static ShaderStages GetFromString(const string& name);
-	static ShaderStages GetFromStageNumber(unsigned char stage_number) {
+	static ShaderStage GetFromString(const string& name);
+	static ShaderStage GetFromStageNumber(unsigned char stage_number) {
 		switch (stage_number) {
 		case VERTEX_NUMBER:
-			return ShaderStages(VERTEX_STAGE);
+			return ShaderStage(VERTEX_STAGE);
 		case PIXEL_NUMBER:
-			return ShaderStages(PIXEL_STAGE);
+			return ShaderStage(PIXEL_STAGE);
 		case GEOMETRY_NUMBER:
-			return ShaderStages(GEOMETRY_STAGE);
+			return ShaderStage(GEOMETRY_STAGE);
 		default:
-			return ShaderStages(0);
+			return ShaderStage(0);
 		}
 	}
 
@@ -44,5 +41,41 @@ struct ShaderStages {
 	bool IsGeometryStage() const { return (stages_ & GEOMETRY_STAGE) != 0; }
 	bool IsPixelStage() const { return (stages_ & PIXEL_STAGE) != 0; }
 
+	unsigned char ToStageNumber() const {
+		switch (stages_) {
+		case VERTEX_STAGE:
+			return VERTEX_NUMBER;
+		case GEOMETRY_STAGE:
+			return GEOMETRY_NUMBER;
+		case PIXEL_STAGE:
+			return PIXEL_NUMBER;
+		default:
+			return NUMBER_STAGES;
+		}
+	}
+
+	unsigned char GetStages() const { return stages_;  } 
+
+protected:
+	explicit ShaderStage(unsigned char id) : stages_(id) {
+		assert(id == VERTEX_STAGE || id == GEOMETRY_STAGE || id == PIXEL_STAGE || id == 0);
+	}
+
 	unsigned char stages_;
+};
+
+struct ShaderStages : public ShaderStage {
+public:	
+	ShaderStages(const ShaderStage& stage) : ShaderStage(stage) {}
+	ShaderStages(const vector<ShaderStage>& stages) : ShaderStage(0) {
+		for (const ShaderStage& stage : stages) {
+			stages_ |= stage.GetStages();
+		}
+	}
+	ShaderStages(unsigned char id) : ShaderStage() { stages_ = id; }
+	ShaderStages() : ShaderStage() {}
+	
+	static ShaderStages All() { return ShaderStages(VERTEX_STAGE | GEOMETRY_STAGE | PIXEL_STAGE); }
+
+	ShaderStages and(ShaderStages other) { return ShaderStages(stages_ | other.stages_); }
 };

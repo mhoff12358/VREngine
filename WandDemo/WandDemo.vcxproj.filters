@@ -52,6 +52,9 @@
     <Filter Include="Nichijou Graph\Python Files">
       <UniqueIdentifier>{677b2fb8-4e85-4a18-ba8c-db7630b2b275}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\Entity Shader Parts">
+      <UniqueIdentifier>{91ff7e60-b252-4982-8710-e9ad529ac24a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -60,6 +63,9 @@
     </Text>
     <Text Include="skybox_textured.hlsl">
       <Filter>Resource Files\Entity Shaders</Filter>
+    </Text>
+    <Text Include="path_draggable_object.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>
@@ -231,6 +237,15 @@
     </FxCompile>
     <FxCompile Include="timeline.hlsl">
       <Filter>Resource Files\Entity Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="vs_location_passthrough.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_blue.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_solidcolor.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -405,6 +420,18 @@
     </None>
     <None Include="draggable_object.py">
       <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="shared_matrices.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="cbuff_solid_color.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="vertex_types.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="pixel_types.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
   </ItemGroup>
 </Project>

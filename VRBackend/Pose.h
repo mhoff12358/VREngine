@@ -42,6 +42,8 @@ struct Location {
 	array<float, 3> location_;
 };
 
+Location operator*(float scale, const Location& other);
+
 struct Pose {
 	Pose(Location location, Quaternion orientation, Scale scale) : orientation_(orientation), location_(location), scale_(scale) {}
 	Pose(Location location, Quaternion orientation) : orientation_(orientation), location_(location), scale_() {}

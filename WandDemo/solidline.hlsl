@@ -35,7 +35,7 @@ cbuffer line_details : register(b2)
 	float width;
 };
 
-VOut VShader(float4 position : POSITION)
+VOut VShader(float4 position : SV_POSITION)
 {
 	VOut output;
 
@@ -55,6 +55,7 @@ void GShader(
 	float3 right = float3(model_view[0][0], model_view[0][1], model_view[0][2]);
 	float3 up = float3(model_view[1][0], model_view[1][1], model_view[1][2]);
 	float4 perp_vec = width * float4(normalize(cross(cross(right, up), line_vec)), 0);
+	/*
 	GOut element1;
 	element1.pos = mul(view_projection, input[0].pos + perp_vec);
 	element1.color = color;
@@ -79,11 +80,30 @@ void GShader(
 	element13.pos = mul(view_projection, input[1].pos + perp_vec);
 	element13.color = color;
 	output.Append(element13);
+	*/
+	/*
+	GOut element;
+	element.color = float4(1, 1, 1, 1);
+	element.pos = mul(view_projection, float4(0, 0, 0, 1));
+	output.Append(element);
+	element.pos = mul(view_projection, float4(1, 0, 0, 1));
+	output.Append(element);
+	element.pos = mul(view_projection, float4(0, 1, 0, 1));
+	output.Append(element);*/
+	GOut element;
+	element.color = float4(1, 1, 1, 1);
+	element.pos = float4(0, 0, -1, 1);
+	output.Append(element);
+	element.pos = float4(1, 0, -1, 1);
+	output.Append(element);
+	element.pos = float4(0, 1, -1, 1);
+	output.Append(element);
 }
 
 POut PShader(GOut output) : SV_TARGET
 {
 	POut result;
 	result.t1 = output.color;
+	result.t1 = float4(1, 1, 1, 1);
 	return result;
 }

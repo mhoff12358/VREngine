@@ -1,15 +1,15 @@
 #include "stdafx.h"
 #include "ShaderStages.h"
 
-ShaderStages ShaderStages::GetFromString(const string& name) {
+ShaderStage ShaderStage::GetFromString(const string& name) {
 	if (name == "vertex") {
-		return ShaderStages(ShaderStages::VERTEX_STAGE);
+		return ShaderStage(ShaderStage::VERTEX_STAGE);
 	} else if (name == "geometry") {
-		return ShaderStages(ShaderStages::GEOMETRY_STAGE);
+		return ShaderStage(ShaderStage::GEOMETRY_STAGE);
 	} else if (name == "pixel") {
-		return ShaderStages(ShaderStages::PIXEL_STAGE);
+		return ShaderStage(ShaderStage::PIXEL_STAGE);
 	} else {
 		assert(false);
-		return ShaderStages(0);
+		return ShaderStage(0);
 	}
 }

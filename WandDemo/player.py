@@ -44,4 +44,4 @@ class Player(sc.DelegatingActor):
 		print(args.key)
 
 	def PushPose(self):
-		self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw)))
+		self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Location(0, 0, 3), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw)))

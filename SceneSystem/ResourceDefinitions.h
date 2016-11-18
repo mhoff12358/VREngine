@@ -65,49 +65,28 @@ struct NewTextureDetails {
 };
 
 struct NewShaderDetails {
-	NewShaderDetails() {}
-	NewShaderDetails(const string& filename, VertexType vertex_type, bool include_geometry_shader = true)
-		: vertex_type_(std::move(vertex_type)), stages_(include_geometry_shader ? ShaderStages::All() : ShaderStages::Vertex().and(ShaderStages::Pixel())) {
-		idents_[0] = filename;
-		idents_[1] = include_geometry_shader ? filename : ResourceIdentifier::GetConstantModelName("unset_geometry_shader");
-		idents_[2] = filename;
-	};
-	NewShaderDetails(const string& filename, VertexType vertex_type, ShaderStages stages)
-		: vertex_type_(std::move(vertex_type)), stages_(stages) {
-		idents_[0] = stages.IsVertexStage() ? filename : "";
-		idents_[1] = stages.IsGeometryStage() ? filename : "";
-		idents_[2] = stages.IsPixelStage() ? filename : "";
-	}
+	NewShaderDetails();
+	NewShaderDetails(const vector<ShaderIdentifier>& idents);
 
 	bool IsActive() const {
 		bool is_active = false;
-		for (const string& ident : idents_) {
-			is_active |= !ident.empty();
+		for (const ShaderIdentifier& ident : idents_) {
+			is_active |= !ident.IsEmpty();
 		}
 		return is_active;
-	}
-	vector<ResourceIdent> ToResourceIdents() const {
-		vector<ResourceIdent> resources;
-		if (!idents_[0].empty())
-			resources.push_back(ResourceIdent(ResourceIdent::VERTEX_SHADER, idents_[0], vertex_type_));
-		if (!idents_[1].empty())
-			resources.push_back(ResourceIdent(ResourceIdent::GEOMETRY_SHADER, idents_[1]));
-		if (!idents_[2].empty())
-			resources.push_back(ResourceIdent(ResourceIdent::PIXEL_SHADER, idents_[2]));
-		return resources;
 	}
 
 	Shaders GetShaders(ResourcePool& resources) const {
 		return Shaders(
-			idents_[0].empty() ? VertexShader() : resources.LoadVertexShader(idents_[0], vertex_type_),
-			idents_[2].empty() ? PixelShader() : resources.LoadPixelShader(idents_[2]),
-			idents_[1].empty() ? GeometryShader(false) : resources.LoadGeometryShader(idents_[1])
+			idents_[ShaderStage::VERTEX_NUMBER].IsEmpty() ? VertexShader() : resources.LoadVertexShader(idents_[ShaderStage::VERTEX_NUMBER]),
+			idents_[ShaderStage::PIXEL_NUMBER].IsEmpty() ? PixelShader() : resources.LoadPixelShader(idents_[ShaderStage::PIXEL_NUMBER]),
+			idents_[ShaderStage::GEOMETRY_NUMBER].IsEmpty() ? GeometryShader(false) : resources.LoadGeometryShader(idents_[ShaderStage::GEOMETRY_NUMBER])
 		);
 	}
 
-	array<string, 3> idents_;
-	VertexType vertex_type_;
-	ShaderStages stages_;
+	ShaderStages GetShaderStages() const;
+
+	array<ShaderIdentifier, ShaderStage::NUMBER_STAGES> idents_;
 };
 
 struct NewModelDetails {

@@ -119,8 +119,9 @@
       </DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)scripts" &amp; copy *.py "$(OutDir)scripts\"</Command>
+      <Command>mkdir "$(OutDir)scripts" &amp; copy *.py "$(OutDir)scripts\" &amp; copy "$(OutDir)*.cso" "$(ProjectDir)"</Command>
     </PostBuildEvent>
+    <FxCompile />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -163,6 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Text Include="path_draggable_object.py" />
     <Text Include="ReadMe.txt" />
     <Text Include="quaternion.lua" />
     <Text Include="skybox_textured.hlsl">
@@ -227,6 +229,20 @@
     <FxCompile Include="fluid.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="ps_blue.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="ps_solidcolor.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </DeploymentContent>
     </FxCompile>
     <FxCompile Include="solidline.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -318,6 +334,14 @@
     <FxCompile Include="timeline.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </FxCompile>
+    <FxCompile Include="vs_location_passthrough.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+      </DeploymentContent>
+    </FxCompile>
     <FxCompile Include="vertical_conv.hlsl">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -401,6 +425,8 @@
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />
     <None Include="first_load.py" />
+    <None Include="pixel_types.hlsli" />
+    <None Include="shared_matrices.hlsli" />
     <None Include="kinect_body_display.py" />
     <None Include="laser.lua" />
     <None Include="LiquidContainer.lua" />
@@ -413,10 +439,12 @@
     <None Include="projectile.lua" />
     <None Include="reticle.lua" />
     <None Include="skybox.lua" />
+    <None Include="cbuff_solid_color.hlsli" />
     <None Include="sun.lua" />
     <None Include="target.lua" />
     <None Include="terrain.lua" />
     <None Include="tower_scene.lua" />
+    <None Include="vertex_types.hlsli" />
     <None Include="wall.lua" />
     <None Include="water_flow.lua" />
     <None Include="weapons.lua" />
