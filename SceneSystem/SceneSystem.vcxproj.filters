@@ -87,9 +87,6 @@
     <ClInclude Include="EntitySpecification.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KinectInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GrabbableObjectHandler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -165,9 +162,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderSettings.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="KinectInterface.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GrabbableObjectHandler.cpp">

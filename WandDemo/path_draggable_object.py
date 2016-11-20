@@ -69,9 +69,9 @@ class PathDraggableObject(sc.DelegatingActor):
 							path_model_generator))
 						.SetShaders(sc.ShaderDetails(
 							sc.VectorShaderIdentifier((
-								sc.ShaderIdentifier("solidline.hlsl", sc.ShaderStage.Vertex(), sc.VertexType.location),
-								sc.ShaderIdentifier("solidline.hlsl", sc.ShaderStage.Geometry()),
-								sc.ShaderIdentifier("solidline.hlsl", sc.ShaderStage.Pixel()),
+								sc.ShaderIdentifier("vs_location_passthrough.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
+								sc.ShaderIdentifier("gs_thick_line.cso", sc.ShaderStage.Geometry()),
+								sc.ShaderIdentifier("ps_color_width.cso", sc.ShaderStage.Pixel()),
 								))))
 						.SetShaderSettingsValue(sc.ShaderSettingsValue((
 							sc.VectorFloat((0.5, 0.5, 0.5, 1)),

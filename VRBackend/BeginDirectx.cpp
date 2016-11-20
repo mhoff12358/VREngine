@@ -8,9 +8,8 @@
 #include "ResourcePool.h"
 #include "ProcessingEffect.h"
 #include "RenderingPipeline.h"
-#include "Kinect.h"
 
-VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinect_sensor, std::string resource_location) {
+VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, std::string resource_location) {
 	VRBackendBasics graphics_objects;
 
 	graphics_objects.oculus = new Headset;
@@ -33,7 +32,7 @@ VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinec
 	ProcessingEffect::CreateProcessingEffectResources(graphics_objects.resource_pool);
 
 	// Initialize the oculus resources and inject them
-	graphics_objects.oculus->Initialize(headset_system, kinect_sensor);
+	graphics_objects.oculus->Initialize(headset_system);
 	graphics_objects.input_handler->SetHeadsetState(graphics_objects.oculus);
 	if (headset_system != nullptr) {
 		graphics_objects.render_pipeline = new ToHeadsetRenderingPipeline();

@@ -138,9 +138,6 @@
     <ClInclude Include="BlendDesc.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Body.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="dx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -264,9 +261,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="BlendDesc.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Body.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ShaderStages.cpp">

@@ -65,12 +65,6 @@
     <ClInclude Include="ModelCreationInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="KinectInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectBackingClassesInterface.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="GrabbableObjectHandlerInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>

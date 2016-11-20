@@ -6,7 +6,6 @@
 namespace vr {
 	class IVRSystem;
 }
-struct IKinectSensor;
 class EntityHandler;
 class Headset;
 class InputHandler;
@@ -23,4 +22,4 @@ typedef struct {
 	EntityHandler* entity_handler;
 } VRBackendBasics;
 
-VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, IKinectSensor* kinect_sensor, std::string resource_location);
+VRBackendBasics BeginDirectx(vr::IVRSystem* headset_system, std::string resource_location);

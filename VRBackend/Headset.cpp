@@ -4,20 +4,13 @@
 #include "Texture.h"
 
 Headset::Headset() {
-	for (IBody*& body : raw_bodies_) {
-		body = nullptr;
-	}
 }
 
 bool Headset::IsHeadsetInitialized() {
 	return system_ != nullptr;
 }
 
-bool Headset::IsKinectInitialized() {
-	return sensor_ != nullptr;
-}
-
-void Headset::Initialize(vr::IVRSystem* system, IKinectSensor* sensor) {
+void Headset::Initialize(vr::IVRSystem* system) {
 	if (system) {
 		vr::EVRInitError error;
 		system_ = system;
@@ -40,23 +33,6 @@ void Headset::Initialize(vr::IVRSystem* system, IKinectSensor* sensor) {
 
 		for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
 			RegisterTrackedObject(i);
-		}
-	}
-	if (sensor) {
-		HRESULT hr;
-		sensor_ = sensor;
-
-		IBodyFrameSource* body_frame_source_ = nullptr;
-		hr = sensor_->get_CoordinateMapper(&coordinate_mapper_);
-		if (SUCCEEDED(hr)) {
-			hr = sensor_->get_BodyFrameSource(&body_frame_source_);
-		}
-		if (SUCCEEDED(hr)) {
-			hr = body_frame_source_->OpenReader(&body_frame_reader_);
-		}
-
-		if (FAILED(hr)) {
-			sensor_ = nullptr;
 		}
 	}
 }
@@ -121,136 +97,6 @@ void Headset::UpdateGamePoses() {
 			}
 		}
 	}
-	if (IsKinectInitialized()) {
-		// Release any old body frame and data if they still exist.
-		if (body_frame_) {
-			body_frame_->Release();
-			body_frame_ = nullptr;
-		}
-
-		// Generate a new body frame and data.
-		int64_t new_body_frame_time;
-		Vector4 floor_plane;
-		HRESULT hr;
-		hr = body_frame_reader_->AcquireLatestFrame(&body_frame_);
-		if (SUCCEEDED(hr)) {
-			hr = body_frame_->get_RelativeTime(&new_body_frame_time);
-		}
-		if (SUCCEEDED(hr)) {
-			hr = body_frame_->get_FloorClipPlane(&floor_plane);
-		}
-		if (SUCCEEDED(hr)) {
-			if ((floor_plane.x != floor_clip_plane_.x) ||
-				(floor_plane.y != floor_clip_plane_.y) ||
-				(floor_plane.z != floor_clip_plane_.z) ||
-				(floor_plane.w != floor_clip_plane_.w)) {
-				std::cout << floor_plane.x << "\t" << floor_plane.y << "\t" << floor_plane.z << "\t" << floor_plane.w << std::endl;
-				floor_clip_plane_ = floor_plane;
-			}
-		}
-		if (SUCCEEDED(hr)) {
-			hr = body_frame_->GetAndRefreshBodyData(BODY_COUNT, raw_bodies_.data());
-		}
-		if (SUCCEEDED(hr)) {
-			hr = body_frame_->get_FloorClipPlane(&floor_clip_plane_);
-		}
-		if (SUCCEEDED(hr)) {
-			body_frame_time_delta_ = new_body_frame_time - body_frame_time_;
-			body_frame_time_ = new_body_frame_time;
-			for (size_t body_index = 0; body_index < BODY_COUNT; body_index++) {
-				IBody* raw_body = raw_bodies_[body_index];
-				bodies_[body_index].Empty();
-				BOOLEAN is_tracked = FALSE;
-				HRESULT tracking_hr;
-				tracking_hr = raw_body->get_IsTracked(&is_tracked);
-				if (SUCCEEDED(tracking_hr) && is_tracked) {
-					TrackingId tracking_id;
-					tracking_hr = raw_body->get_TrackingId(&tracking_id);
-					if (SUCCEEDED(tracking_hr)) {
-						bodies_[body_index].FillFromIBody(tracking_id, raw_body);
-						auto ids_iterator = tracking_ids_.begin();
-						while ((ids_iterator != tracking_ids_.end()) && (*ids_iterator != tracking_id))
-							++ids_iterator;
-						if (ids_iterator == tracking_ids_.end()) {
-							tracking_ids_.push_back(tracking_id);
-							new_tracked_ids_.push_back(tracking_id);
-							std::cout << "New tracking ID: " << tracking_id << std::endl;
-						}
-					}
-				}
-			}
-		}
-		if (FAILED(hr) && (hr != E_PENDING)) {
-			body_frame_time_delta_ = -1;
-		}
-	}
-	if (IsHeadsetInitialized() && IsKinectInitialized()) {
-		/*vr::TrackedDeviceIndex_t hmd_index = tracked_device_by_class_[GetDeviceClassIndex(vr::TrackedDeviceClass_HMD)][0];
-		vr::TrackedDeviceIndex_t controller_index = tracked_device_by_class_[GetDeviceClassIndex(vr::TrackedDeviceClass_Controller)][0];
-		if ((controller_index != vr::k_unTrackedDeviceIndexInvalid) && logic_controller_states_[controller_index].ulButtonPressed & vr::ButtonMaskFromId(vr::k_EButton_Grip)) {
-			if ((hmd_index != vr::k_unTrackedDeviceIndexInvalid) && (controller_index != vr::k_unTrackedDeviceIndexInvalid) && (!tracking_ids_.empty())) {
-				Body& body = GetBody(tracking_ids_[0]);
-				Joint& joint = body.GetJoint(JointType_Head);
-				if (body.filled_ && (joint.TrackingState == TrackingState_Tracked)) {
-					Location head_location = logic_poses_[hmd_index].location_;
-					std::cout << "Found in both" << std::endl;
-					coordinate_mapping_data_.push_back({ {joint.Position.X, joint.Position.Y, joint.Position.Z, 1.0f, head_location[0], head_location[2]} });
-				}
-			}
-		} else if (!coordinate_mapping_data_.empty()) {
-			boost::numeric::ublas::matrix<float> lhs(coordinate_mapping_data_.size(), 4);
-			boost::numeric::ublas::matrix<float> rhs(coordinate_mapping_data_.size(), 2);
-			unsigned int row = 0;
-			for (const array<float, 6>& data : coordinate_mapping_data_) {
-				for (int column = 0; column < 4; column++) {
-					lhs(row, column) = data[column];
-				}
-				for (int column = 4; column < 6; column++) {
-					rhs(row, column - 4) = data[column];
-				}
-				row++;
-			}
-			//boost::numeric::ublas::matrix<float> inverse;
-			//InvertMatrix(lhs, inverse);
-			boost::numeric::ublas::matrix<float> solution;
-			if (!Solve(lhs, rhs, solution)) {
-				ClearCoordinateMapping();
-			}
-			else {
-				DirectX::XMFLOAT4 first_solution(solution(0, 0), solution(1, 0), solution(2, 0), solution(3, 0));
-				DirectX::XMFLOAT4 second_solution(solution(0, 1), solution(1, 1), solution(2, 1), solution(3, 1));
-				DirectX::XMFLOAT4 floor_plane(floor_clip_plane_.x, floor_clip_plane_.y, floor_clip_plane_.z, floor_clip_plane_.w);
-				DirectX::XMFLOAT4 w(0, 0, 0, 1);
-				coordinate_mapping_.r[0] = DirectX::XMLoadFloat4(&first_solution);
-				coordinate_mapping_.r[1] = DirectX::XMLoadFloat4(&floor_plane);
-				coordinate_mapping_.r[2] = DirectX::XMLoadFloat4(&second_solution);
-				coordinate_mapping_.r[3] = DirectX::XMLoadFloat4(&w);
-				std::cout << "JIOFEJOIFE" << std::endl;
-			}
-		}*/
-	}
-}
-
-void Headset::ClearCoordinateMapping() {
-	coordinate_mapping_data_.clear();
-	coordinate_mapping_ = DirectX::XMMatrixIdentity();
-}
-
-Body& Headset::GetBody(uint64_t tracking_id) {
-	size_t body_index = 0;
-	for (; body_index < BODY_COUNT; body_index++) {
-		if (bodies_[body_index].tracking_id_ == tracking_id) {
-			break;
-		}
-	}
-	return bodies_[body_index];
-}
-
-vector<uint64_t> Headset::GetNewTrackedIds() {
-	if (new_tracked_ids_.empty()) {
-		return{};
-	}
-	return std::move(new_tracked_ids_);
 }
 
 Pose Headset::GetHeadPose() const {

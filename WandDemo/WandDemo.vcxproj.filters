@@ -247,6 +247,12 @@
     <FxCompile Include="ps_solidcolor.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
+    <FxCompile Include="gs_thick_line.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_color_width.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -415,9 +421,6 @@
     <None Include="mutable_graphical_object.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
-    <None Include="kinect_body_display.py">
-      <Filter>Nichijou Graph\Python Files</Filter>
-    </None>
     <None Include="draggable_object.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
@@ -431,6 +434,9 @@
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
     <None Include="pixel_types.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="cbuff_color_width.hlsli">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
   </ItemGroup>

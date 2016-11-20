@@ -166,7 +166,6 @@
     <ClInclude Include="AsyncEntityBuffer.h" />
     <ClInclude Include="BeginDirectx.h" />
     <ClInclude Include="BlendDesc.h" />
-    <ClInclude Include="Body.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="ConvolutionEffectDesc.h" />
     <ClInclude Include="dx.h" />
@@ -213,7 +212,6 @@
     <ClCompile Include="AsyncEntityBuffer.cpp" />
     <ClCompile Include="BeginDirectx.cpp" />
     <ClCompile Include="BlendDesc.cpp" />
-    <ClCompile Include="Body.cpp" />
     <ClCompile Include="ConstantBuffer.cpp" />
     <ClCompile Include="ConvolutionEffectDesc.cpp" />
     <ClCompile Include="Entity.cpp" />

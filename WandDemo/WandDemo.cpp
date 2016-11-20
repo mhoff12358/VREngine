@@ -7,8 +7,6 @@ using std::unique_ptr;
 
 #include "stdafx.h"
 
-#include "Kinect.h"
-
 #include "VRBackend/BeginDirectx.h"
 #include "VRBackend/TimeTracker.h"
 #include "VRBackend/TextureView.h"
@@ -29,7 +27,6 @@ using std::unique_ptr;
 #include "SceneSystem/InputCommandArgs.h"
 #include "SceneSystem/GraphicsObject.h"
 #include "SceneSystem/HeadsetInterface.h"
-#include "SceneSystem/KinectInterface.h"
 #include "SceneSystem/IOInterface.h"
 #include "NichijouGraph.h"
 #include "SceneSystem/Sprite.h"
@@ -140,13 +137,6 @@ void UpdateLoop() {
 				make_unique<game_scene::actors::HeadsetInterface>(*graphics_objects.oculus)));
 		scene.AddActorToGroup(headset_interface, tick_registry);
 	}
-	if (graphics_objects.oculus->IsKinectInitialized()) {
-		game_scene::ActorId kinect_interface = scene.RegisterByName(
-			"KinectInterface",
-			scene.AddActor(
-				make_unique<game_scene::actors::KinectInterface>(*graphics_objects.oculus)));
-		scene.AddActorToGroup(kinect_interface, tick_registry);
-	}
 	game_scene::ActorId grabbable_object_handler = scene.RegisterByName(
 		"GrabbableObjectHandler",
 		scene.AddActor(
@@ -252,20 +242,7 @@ int _tmain(int argc, _TCHAR* argv[])
 		hmd_active = true;
 	}
 
-	bool kinect_desired = false;
-	IKinectSensor* kinect_sensor = nullptr;
-	if (kinect_desired) {
-		HRESULT hr;
-		hr = GetDefaultKinectSensor(&kinect_sensor);
-		if (SUCCEEDED(hr)) {
-			hr = kinect_sensor->Open();
-		}
-		if (FAILED(hr)) {
-			kinect_sensor = nullptr;
-		}
-	}
-
-	graphics_objects = BeginDirectx(headset_system, kinect_sensor, "");
+	graphics_objects = BeginDirectx(headset_system, "");
 
 	int stage_repetition = hmd_active ? 2 : 0;
 

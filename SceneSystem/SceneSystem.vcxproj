@@ -135,7 +135,6 @@
     <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="InputCommandArgs.h" />
     <ClInclude Include="IOInterface.h" />
-    <ClInclude Include="KinectInterface.h" />
     <ClInclude Include="NewGraphicsObject.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
@@ -165,7 +164,6 @@
     <ClCompile Include="HeadsetInterface.cpp" />
     <ClCompile Include="InputCommandArgs.cpp" />
     <ClCompile Include="IOInterface.cpp" />
-    <ClCompile Include="KinectInterface.cpp" />
     <ClCompile Include="NewGraphicsObject.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />

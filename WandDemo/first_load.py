@@ -2,7 +2,6 @@ import scene_system as sc
 import collections
 import scripts.player
 import scripts.mutable_graphical_object
-import scripts.kinect_body_display
 import scripts.draggable_object
 import scripts.path_draggable_object
 
@@ -40,9 +39,6 @@ def first_load(resources):
 
 	scene.AddActor(scripts.path_draggable_object.PathDraggableObject(
 		(Line(sc.Location(0, 0, 0), sc.Location(0, 2, 0)),)))
-
-	#body_display = scripts.kinect_body_display.KinectBodyDisplay()
-	#scene.AddActor(body_display)
 
 	import code
 	a = globals()

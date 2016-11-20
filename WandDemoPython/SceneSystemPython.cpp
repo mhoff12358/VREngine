@@ -31,8 +31,6 @@
 #include "GraphicsResourcesInterface.h"
 #include "PoseInterface.h"
 #include "ModelCreationInterface.h"
-#include "KinectInterface.h"
-#include "KinectBackingClassesInterface.h"
 #include "GrabbableObjectHandlerInterface.h"
 #include "CollisionShapeInterface.h"
 
@@ -44,7 +42,6 @@ BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
-BOOST_PTR_MAGIC(game_scene::commands::ListenForBodies)
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
@@ -117,8 +114,6 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	GraphicsObjectInterface(scene_registration);
 	IOInterfaceInterface(scene_registration);
 	HeadsetInterface();
-	KinectBackingClassesInterface();
-	KinectInterface(scene_registration);
 	GraphicsResourcesInterface();
 	PoseInterface();
 	ModelCreationInterface();
