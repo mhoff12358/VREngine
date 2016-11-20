@@ -253,6 +253,9 @@
     <FxCompile Include="ps_color_width.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
+    <FxCompile Include="vs_location_apply_mvp.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -438,6 +441,9 @@
     </None>
     <None Include="cbuff_color_width.hlsli">
       <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="path.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
     </None>
   </ItemGroup>
 </Project>

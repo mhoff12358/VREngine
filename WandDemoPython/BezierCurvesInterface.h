@@ -5,5 +5,5 @@
 
 void BezierCurvesInterface() {
 	class_<BezierCurve>("BezierCurve", init<vector<Location>>)
-		.def("at", &BezierCurve::At);
+		.def("At", &BezierCurve::At);
 }

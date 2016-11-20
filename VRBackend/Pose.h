@@ -10,6 +10,7 @@ struct Scale {
 	Scale() : Scale(1.0f) {}
 
 	Scale operator*(const Scale& other) const { return Scale(scale_[0] * other[0], scale_[1] * other[1], scale_[2] * other[2]); }
+	bool operator==(const Scale& other) const { return (scale_[0] == other[0]) && (scale_[1] == other[1]) && (scale_[2] == other[2]); }
 	float operator[](size_t index) const { return scale_[index]; }
 	float& get(size_t index) { return scale_[index]; }
 
@@ -34,10 +35,13 @@ struct Location {
 	void operator*=(float scale) { for (int i = 0; i < 3; i++) { location_[i] *= scale; } }
 	void operator/=(float scale) { *this *= 1.0f / scale; }
 	Location Rotate(const Quaternion& rotation) const { return Location(rotation.ApplyToVector(location_)); }
+	bool operator==(const Location& other) const { return (location_[0] == other[0]) && (location_[1] == other[1]) && (location_[2] == other[2]); }
 
 	float GetLengthSquared() const { return pow(location_[0], 2.0f) + pow(location_[1], 2.0f) + pow(location_[2], 2.0f); }
 	float GetLength() const { return pow(GetLengthSquared(), 0.5f); }
 	Location GetNormalized() const { return *this / GetLength(); }
+
+	float Dot(const Location& other) const { return (location_[0] * other.location_[0]) + (location_[1] * other.location_[1]) + (location_[2] * other.location_[2]); }
 
 	array<float, 3> location_;
 };
@@ -63,6 +67,10 @@ struct Pose {
 			DirectX::XMMatrixScaling(scale_[0], scale_[1], scale_[2]) *
 			DirectX::XMMatrixRotationQuaternion(DirectX::XMVectorSet(orientation_.x, orientation_.y, orientation_.z, orientation_.w)) *
 			DirectX::XMMatrixTranslation(location_[0], location_[1], location_[2]);
+	}
+
+	bool operator==(const Pose& other) const {
+		return (scale_ == other.scale_) && (orientation_ == other.orientation_) && (location_ == other.location_);
 	}
 
 	Scale scale_;

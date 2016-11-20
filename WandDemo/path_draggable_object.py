@@ -1,36 +1,19 @@
 import scene_system as sc
+from itertools import *
 
 class PathDraggableObject(sc.DelegatingActor):
 	command_delegation = sc.DelegatingActor.GetDefaultDelegation()
 	delegater = sc.delegate_for_command(command_delegation)
 
-	def __init__(self, paths, circular = False, path_sample_rates = None, path_sample_rate = 5):
+	def __init__(self, paths, path_sample_rates = None, path_sample_rate = 5):
 		super().__init__()
-		
-		if path_sample_rates is None:
-			path_sample_rates = (path_sample_rate,) * len(paths)
-		else:
-			assert(len(path_sample_rates) == len(paths))
-
-		self.current_location = sc.Location(0, 1, 0)
-		self.controller_location_delta = sc.Location(0, 0, 0)
-		self.radius = 0.1
 
 		self.paths = paths
-		self.circular = circular
-		self.path_vertices = self.BuildPathVertices(path_sample_rates)
+		self.path_vertices = self.paths.CreateSamples(path_sample_rates, path_sample_rate)
 
-	def BuildPathVertices(self, path_sample_rates):
-		path_vertices = [sc.ArrayFloat3(self.paths[0].at(0))]
-		for path, sample_rate in zip(self.paths, path_sample_rates):
-			for sample_fraction in range(0, sample_rate):
-				vertex_location = path.at((sample_fraction + 1) / sample_rate)
-				path_vertices.append(sc.ArrayFloat3(vertex_location))
-		return [
-			sc.ArrayFloat3((0, 0, 0)),
-			sc.ArrayFloat3((0, 1, 0)),
-			sc.ArrayFloat3((1, 0, 0)),
-			]
+		self.current_location = self.paths.At(0)
+		self.controller_location_delta = sc.Location(0, 0, 0)
+		self.radius = 0.1
 
 	def PlaceSelf(self, latest_command):
 		return self.scene.MakeCommandAfter(
@@ -47,10 +30,10 @@ class PathDraggableObject(sc.DelegatingActor):
 		self.graphics_resources = sc.GraphicsResources.GetGraphicsResources(self.scene)
 
 		self.path_id = self.scene.AddAndConstructGraphicsObject().id
-		path_model_generator = sc.ModelGenerator(sc.VertexType.location, sc.D3DTopology.LINESTRIP)
+		path_model_generator = sc.ModelGenerator(sc.VertexType.location, sc.D3DTopology.LINESTRIP_ADJ)
 		path_model_generator.AddVertexBatch(sc.Vertices(
 			sc.VertexType.location,
-			sc.VectorArrayFloat3(self.path_vertices)))
+			sc.VectorArrayFloat3(chain((sc.ArrayFloat3((0, 0, 0)),), self.path_vertices, (self.path_vertices[-2],)))))
 		path_model_generator.SetParts(sc.MapStringToModelSlice({"path":sc.ModelSlice(6, 0)}))
 		path_model_generator.Finalize(
 			self.graphics_resources.GetDeviceInterface(),
@@ -75,7 +58,7 @@ class PathDraggableObject(sc.DelegatingActor):
 								))))
 						.SetShaderSettingsValue(sc.ShaderSettingsValue((
 							sc.VectorFloat((0.5, 0.5, 0.5, 1)),
-							sc.VectorFloat((1.0,)))))
+							sc.VectorFloat((0.05,)))))
 						.SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))
 						.SetComponent("path"),)),
 				sc.VectorComponentInfo((sc.ComponentInfo("", "path"),))))
@@ -98,7 +81,7 @@ class PathDraggableObject(sc.DelegatingActor):
 							sc.ModelIdentifier("sphere.obj|Sphere")))
 						.SetShaders(sc.ShaderDetails(
 							sc.VectorShaderIdentifier((
-								sc.ShaderIdentifier("vs_location_passthrough.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
+								sc.ShaderIdentifier("vs_location_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
 								sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel()),
 								))))
 						.SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0.5, 0, 0)),)))
@@ -113,8 +96,13 @@ class PathDraggableObject(sc.DelegatingActor):
 	@delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
 	def HandleControllerMovementWhileGrabbed(self, args):
 		self.scene = self.GetScene()
-		self.current_location = args.position.location + self.controller_location_delta
-		self.PlaceSelf(self.scene.FrontOfCommands())
+		self.ProposeLocation(args.position.location + self.controller_location_delta)
+
+	def ProposeLocation(self, new_location):
+		nearest = self.paths.FindNearest(new_location, return_distance_squared = True)
+		if nearest.found:
+			self.current_location = self.paths.At(nearest.sample)
+			self.PlaceSelf(self.scene.FrontOfCommands())
 
 	@delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
 	def HandleGrabbed(self, args):

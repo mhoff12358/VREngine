@@ -78,6 +78,10 @@ Quaternion Quaternion::Inverse() const {
 	return Quaternion(-x, -y, -z, w);
 }
 
+bool Quaternion::operator==(const Quaternion& other) const {
+	return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w);
+}
+
 Quaternion Quaternion::StripAxis(AxisID axis) const {
 	Quaternion new_quaternion = *this;
 	if ((axis & AID_X) != 0) {

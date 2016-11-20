@@ -9,6 +9,10 @@ public:
 	Location At(float t);
 	Location EvaluateAtT(float t);
 
+	// This returns a pair (sample, distance_squared)
+	// If return_distance_squared is false, then the second value is NaN
+	pair<float, float> FindNearset(const Location& location, bool return_distance_squared);
+
 	static unsigned int BinomialCoefficient(unsigned int n, unsigned int i);
 	static unsigned int RawBinomialCoefficient(unsigned int n, unsigned int i);
 	static const array<array<unsigned int, 7>, 7> binomial_coefficient_lookup;

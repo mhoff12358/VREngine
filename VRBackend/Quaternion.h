@@ -32,7 +32,8 @@ public:
 	Quaternion ToPower(const float& other) const;
 	Quaternion Inverse() const;
 	Quaternion StripAxis(AxisID axis) const;
-	
+	bool operator==(const Quaternion& other) const;
+
 	float x, y, z, w;
 
 	static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, float weight);

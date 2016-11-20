@@ -45,16 +45,39 @@ void PushBackIfPossible(Collection& c, ssize_t index, ValueType&& value) {
 template <typename ValueType, typename Collection>
 Collection* CreateFromList(object iterable) {
 	unique_ptr<Collection> c = make_unique<Collection>();
+	bool has_len = false;
+	ssize_t iter_len;
 	try {
-		ssize_t iterable_size = boost::python::len(iterable);
-		ResizeIfPossible<Collection, ValueType>(*c, iterable_size);
-		for (ssize_t i = 0; i < iterable_size; i++) {
-			ValueType v = extract<ValueType>(iterable[i]);
-			PushBackIfPossible<Collection, ValueType>(*c, i, move(v));
-		}
+		iter_len = boost::python::len(iterable);
+		ResizeIfPossible<Collection, ValueType>(*c, iter_len);
+		has_len = true;
 	}
 	catch (error_already_set) {
-		PyErr_Print();
+		// It is acceptable to not be able to load the length
+		PyErr_Clear();
+	}
+	if (has_len) {
+		try {
+			for (ssize_t i = 0; i < iter_len; ++i) {
+				ValueType v = extract<ValueType>(iterable[i]);
+				PushBackIfPossible<Collection, ValueType>(*c, i, move(v));
+			}
+		}
+		catch (error_already_set) {
+			PyErr_Print();
+		}
+	} else {
+		try {
+			boost::python::stl_input_iterator<ValueType> begin(iterable), end;
+			size_t index = 0;
+			for (; begin != end; ++begin) {
+				PushBackIfPossible<Collection, ValueType>(*c, index, move(*begin));
+				++index;
+			}
+		}
+		catch (error_already_set) {
+			PyErr_Print();
+		}
 	}
 	return c.release();
 }
@@ -93,11 +116,44 @@ auto& CreateDictToMap(boost::python::class_<PyType> c) {
 }
 
 template <typename PyType>
+auto CreateReprImpl(const PyType& collection, special_) -> decltype(std::to_string(*collection.cbegin()), string()) {
+	string repr = string(typeid(PyType).name()) + ": [";
+	for (size_t i = 0; i < collection.size(); i++) {
+		repr += std::to_string(collection[i]) + ", ";
+	}
+	return repr + "]";
+}
+
+template <typename PyType>
+auto CreateReprImpl(const PyType& collection, less_special_) -> decltype(collection.begin()->size(), string()) {
+	string repr = string(typeid(PyType).name()) + ": [";
+	for (size_t i = 0; i < collection.size(); i++) {
+		repr += CreateReprImpl(collection[i], special_()) + ", ";
+	}
+	return repr + "]";
+}
+
+template <typename PyType>
+auto CreateReprImpl(const PyType& collection, general_) -> string {
+	string repr = string(typeid(PyType).name()) + ": [";
+	for (size_t i = 0; i < collection.size(); i++) {
+		repr += "Unknown, ";
+	}
+	return repr + "]";
+}
+
+template <typename PyType>
+string CreateRepr(const PyType& c) {
+	return CreateReprImpl(c, special_());
+}
+
+template <typename PyType>
 auto& CreateIteration(boost::python::class_<PyType> c) {
 	return c
 		.def("size", &PyType::size)
 		.def("__len__", &PyType::size)
-		.def("__iter__", boost::python::iterator<PyType>());
+		.def("__iter__", boost::python::iterator<PyType>())
+		.def("__repr__", &CreateRepr<PyType>);
 }
 
 template<typename T, size_t N>

@@ -8,7 +8,7 @@
 
 RenderEntities::RenderEntities(ID3D11Device* dev, ID3D11DeviceContext* dev_con, const RenderEntitiesDesc& description)
 	: PipelineStageWithRenderMode(description),
-	camera_transformation_buffer_(ShaderStages(ShaderStages::VERTEX_STAGE | ShaderStages::PIXEL_STAGE))
+	camera_transformation_buffer_(ShaderStages::All())
 {
 	assert(description.type_ == PST_RENDER_ENTITIES);
 

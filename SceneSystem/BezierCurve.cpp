@@ -5,16 +5,20 @@ BezierCurve::BezierCurve(vector<Location> control_points)
 	: control_points_(std::move(control_points)) {}
 
 Location BezierCurve::At(float t) {
-	return EvaluateAtT(t);
-}
-
-Location BezierCurve::EvaluateAtT(float t) {
 	const int n = control_points_.size();
 	Location result = Location(0, 0, 0);
 	for (int index = 0; index < n; index++) {
 		result += (pow(t, n - index) * pow(1 - t, index) * BinomialCoefficient(n, index)) * control_points_[index];
 	}
 	return result;
+}
+
+Location BezierCurve::EvaluateAtT(float t) {
+	return At(t);
+}
+
+pair<float, float> FindNearset(const Location& location) {
+	return make_pair(0, 0);
 }
 
 const array<array<unsigned int, 7>, 7> BezierCurve::binomial_coefficient_lookup = { {
