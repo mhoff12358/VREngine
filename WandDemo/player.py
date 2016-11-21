@@ -37,6 +37,8 @@ class Player(sc.DelegatingActor):
 	def HandleMouseMovement(self, args):
 		self.yaw += args.motion[0] * -0.002
 		self.yaw = self.yaw % (3.14 * 2)
+		self.pitch += args.motion[1] * -0.002
+		self.pitch = self.pitch % (3.14 * 2)
 		self.PushPose()
 
 	@delegater(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
@@ -44,4 +46,4 @@ class Player(sc.DelegatingActor):
 		print(args.key)
 
 	def PushPose(self):
-		self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Location(0, 0, 3), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw)))
+		self.entity_handler.MutableCamera("player_head").SetPose(sc.Pose(sc.Location(0, 0, 3), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw) * sc.Quaternion.RotationAboutAxis(sc.AxisID.x, self.pitch)))
