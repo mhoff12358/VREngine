@@ -19,7 +19,7 @@ void IOInterfaceInterface(class_<game_scene::Scene, boost::noncopyable>& scene_r
 
 	class_<game_scene::commands::IOListenerRegistration, bases<game_scene::CommandArgs>, std::auto_ptr<game_scene::commands::IOListenerRegistration>, boost::noncopyable>("IOListenerRegistration",
 		init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId>())
-		//.def(init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId, vector<unsigned char>>())
+		.def(init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId, vector<unsigned char>>())
 		.def(init<bool, game_scene::ActorId, game_scene::actors::IOInterface::ListenerId, unsigned char>());
 	scene_registration.def("MakeCommandAfter", &PyScene::MakeCommandAfter<game_scene::commands::IOListenerRegistration>);
 
@@ -27,5 +27,6 @@ void IOInterfaceInterface(class_<game_scene::Scene, boost::noncopyable>& scene_r
 		.def_readonly("motion", &game_scene::commands::MouseMotion::motion_);
 
 	class_<game_scene::commands::KeyToggle, bases<game_scene::CommandArgs>, boost::noncopyable>("KeyToggle", no_init)
-		.def_readonly("key", &game_scene::commands::KeyToggle::key_);
+		.def_readonly("key", &game_scene::commands::KeyToggle::key_)
+		.def_readonly("pressed", &game_scene::commands::KeyToggle::pressed_);
 }

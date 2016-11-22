@@ -31,7 +31,7 @@ void RenderEntities::Apply(ID3D11Device* dev, ID3D11DeviceContext* dev_con, Rend
 	
 	const PipelineCamera& camera = groups_to_draw[0].cameras[camera_index_];
 	camera_transformation_buffer_.SetAllTransformations(
-		camera.GetViewProjectionMatrix(), camera.GetViewProjectionMatrix(), camera.GetOrientationProjectionMatrix());
+		camera.GetViewMatrix(), camera.GetViewInverseMatrix(), camera.GetViewProjectionMatrix(), camera.GetOrientationProjectionMatrix());
 	camera_transformation_buffer_.PushBuffer(dev_con);
 	camera_transformation_buffer_.Prepare(dev, dev_con, PER_FRAME_CONSTANT_BUFFER_REGISTER);
 

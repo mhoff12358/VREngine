@@ -111,8 +111,9 @@ void XM_CALLCONV ConstantBufferTyped<TransformationMatrixAndInvTransData>::SetTr
 	SetDirty();
 }
 
-void XM_CALLCONV ConstantBufferTyped<ViewProjectionMatrixData>::SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix) {
+void XM_CALLCONV ConstantBufferTyped<ViewProjectionMatrixData>::SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_inverse_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix) {
 	DirectX::XMStoreFloat4x4(&buffer_data.view_matrix, view_matrix);
+	DirectX::XMStoreFloat4x4(&buffer_data.view_inv_matrix, view_inverse_matrix);
 	DirectX::XMStoreFloat4x4(&buffer_data.view_proj_matrix, view_projection_matrix);
 	DirectX::XMStoreFloat4x4(&buffer_data.orient_proj_matrix, orientation_projection_matrix);
 	SetDirty();

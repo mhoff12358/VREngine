@@ -13,6 +13,7 @@ public:
 
 	const DirectX::XMMATRIX& GetViewProjectionMatrix() const;
 	const DirectX::XMMATRIX& GetViewMatrix() const;
+	const DirectX::XMMATRIX& GetViewInverseMatrix() const;
 	const DirectX::XMMATRIX& GetOrientationProjectionMatrix() const;
 
 	void SetOrthoProjection(float width, float height, float near_z, float far_z);
@@ -29,9 +30,12 @@ private:
 	DirectX::XMMATRIX location_matrix_;
 	DirectX::XMMATRIX orientation_matrix_;
 	DirectX::XMMATRIX projection_matrix_;
+	DirectX::XMMATRIX location_inverse_matrix_;
+	DirectX::XMMATRIX orientation_inverse_matrix_;
 
 	// Calculated matrices
 	DirectX::XMMATRIX view_matrix_;
+	DirectX::XMMATRIX view_inverse_matrix_;
 	DirectX::XMMATRIX view_projection_matrix_;
 	DirectX::XMMATRIX orientation_projection_matrix_;
 

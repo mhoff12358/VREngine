@@ -23,7 +23,6 @@ public:
 
 	std::array<float, 3> ApplyToVector(std::array<float, 3> input_vec) const;
 
-
 	float ImaginaryMagnitude();
 	float Magnitude();
 

@@ -29,6 +29,7 @@ void PoseInterface() {
 		.def(boost::python::self *= float())
 		.def(boost::python::self /= float())
 		.def("__eq__", &Location::operator==)
+		.def("Rotate", &Location::Rotate)
 		.def("get", &Location::operator[])
 		.def("__len__", +static_cast<size_t(*)(const Location&)>([](const Location&)->size_t {return 3; }))
 		.def("__getitem__", +static_cast<float(*)(Location&, size_t)>([](Location& self, size_t index)->float {return self[index]; }))

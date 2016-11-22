@@ -33,7 +33,7 @@ class PathDraggableObject(sc.DelegatingActor):
 		path_model_generator = sc.ModelGenerator(sc.VertexType.location, sc.D3DTopology.LINESTRIP_ADJ)
 		path_model_generator.AddVertexBatch(sc.Vertices(
 			sc.VertexType.location,
-			sc.VectorArrayFloat3(chain((sc.ArrayFloat3((0, 0, 0)),), self.path_vertices, (self.path_vertices[-2],)))))
+			sc.VectorArrayFloat3(chain(self.path_vertices[:1], self.path_vertices, self.path_vertices[-1:]))))
 		path_model_generator.SetParts(sc.MapStringToModelSlice({"path":sc.ModelSlice(6, 0)}))
 		path_model_generator.Finalize(
 			self.graphics_resources.GetDeviceInterface(),

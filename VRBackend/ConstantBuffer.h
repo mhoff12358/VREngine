@@ -15,6 +15,7 @@ struct TransformationMatrixData {
 
 struct ViewProjectionMatrixData {
 	DirectX::XMFLOAT4X4 view_matrix;
+	DirectX::XMFLOAT4X4 view_inv_matrix;
 	DirectX::XMFLOAT4X4 view_proj_matrix;
 	DirectX::XMFLOAT4X4 orient_proj_matrix;
 };
@@ -164,7 +165,7 @@ class ConstantBufferTyped<ViewProjectionMatrixData> : public ConstantBufferTyped
 public:
 	ConstantBufferTyped(ShaderStages stages) : ConstantBufferTypedTemp(stages) {}
 
-	void XM_CALLCONV SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix);
+	void XM_CALLCONV SetAllTransformations(DirectX::XMMATRIX view_matrix, DirectX::XMMATRIX view_inverse_matrix, DirectX::XMMATRIX view_projection_matrix, DirectX::XMMATRIX orientation_projection_matrix);
 };
 
 template <>

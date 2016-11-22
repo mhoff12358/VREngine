@@ -26,6 +26,7 @@ void PipelineCamera::SetRawProjection(DirectX::XMMATRIX projection_matrix) {
 
 void PipelineCamera::SetLocation(array<float, 3> location) {
 	location_matrix_ = DirectX::XMMatrixTranslation(-location[0], -location[1], -location[2]);
+	location_inverse_matrix_ = DirectX::XMMatrixTranslation(location[0], location[1], location[2]);
 	SetDirty();
 }
 
@@ -36,6 +37,8 @@ void PipelineCamera::SetLocation(const Location& location) {
 void PipelineCamera::SetOrientation(array<float, 4> orientation) {
 	orientation_matrix_ = DirectX::XMMatrixRotationQuaternion(
 		DirectX::XMVectorSet(-orientation[0], -orientation[1], -orientation[2], orientation[3]));
+	orientation_inverse_matrix_ = DirectX::XMMatrixRotationQuaternion(
+		DirectX::XMVectorSet(orientation[0], orientation[1], orientation[2], orientation[3]));
 	SetDirty();
 }
 
@@ -51,6 +54,7 @@ void PipelineCamera::SetPose(const Pose& pose) {
 void PipelineCamera::BuildMatrices() {
 	orientation_projection_matrix_ = orientation_matrix_ * projection_matrix_;
 	view_matrix_ = location_matrix_ * orientation_matrix_;
+	view_inverse_matrix_ = orientation_inverse_matrix_ * location_inverse_matrix_;
 	view_projection_matrix_ = view_matrix_ * projection_matrix_;
 }
 
@@ -67,6 +71,10 @@ void PipelineCamera::SetDirty() {
 
 const DirectX::XMMATRIX& PipelineCamera::GetViewMatrix() const {
 	return view_matrix_;
+}
+
+const DirectX::XMMATRIX& PipelineCamera::GetViewInverseMatrix() const {
+	return view_inverse_matrix_;
 }
 
 const DirectX::XMMATRIX& PipelineCamera::GetViewProjectionMatrix() const {
