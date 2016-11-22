@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "Quaternion.h"
 
+bool FloatsAlmostEqual(float a, float b, float tolerance = 1e-6f);
+
 struct Scale {
 	Scale(float x, float y, float z) : scale_({x, y, z}) {}
 	Scale(array<float, 3> scale) : scale_(scale) {}
@@ -35,7 +37,7 @@ struct Location {
 	void operator*=(float scale) { for (int i = 0; i < 3; i++) { location_[i] *= scale; } }
 	void operator/=(float scale) { *this *= 1.0f / scale; }
 	Location Rotate(const Quaternion& rotation) const { return Location(rotation.ApplyToVector(location_)); }
-	bool operator==(const Location& other) const { return (location_[0] == other[0]) && (location_[1] == other[1]) && (location_[2] == other[2]); }
+	bool operator==(const Location& other) const { return FloatsAlmostEqual(location_[0], other[0]) && FloatsAlmostEqual(location_[1], other[1]) && FloatsAlmostEqual(location_[2], other[2]); }
 
 	float GetLengthSquared() const { return pow(location_[0], 2.0f) + pow(location_[1], 2.0f) + pow(location_[2], 2.0f); }
 	float GetLength() const { return pow(GetLengthSquared(), 0.5f); }

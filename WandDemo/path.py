@@ -1,4 +1,5 @@
 import scene_system as sc
+import math
 
 class PathPart(object):
 	def At(self, sample):
@@ -57,7 +58,7 @@ class Path(PathPart):
 		self.cutoffs = [path_lengths[0],] * len(self.paths)
 		for i in range(1, len(self.paths)):
 			self.cutoffs[i] = self.cutoffs[i-1] + path_lengths[i]
-		assert(self.cutoffs[-1] == 1)
+		assert(math.isclose(self.cutoffs[-1], 1))
 
 	def AssertConnected(self):
 		for i in range(1, len(self.paths)):

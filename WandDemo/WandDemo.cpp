@@ -233,7 +233,7 @@ void UpdateLoop() {
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_active = false;
-	bool hmd_desired = false;
+	bool hmd_desired = true;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
