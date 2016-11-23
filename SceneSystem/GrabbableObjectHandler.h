@@ -14,6 +14,8 @@ class TriggerStateChange;
 class GrabbableObjectCommand {
 public:
 DECLARE_COMMAND(GrabbableObjectCommand, ADD_GRABBABLE_OBJECT)
+DECLARE_COMMAND(GrabbableObjectCommand, REPOSE_GRABBABLE_OBJECT)
+DECLARE_COMMAND(GrabbableObjectCommand, ENDISABLE_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, REMOVE_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, OBJECT_GRABBED)
 };
@@ -27,6 +29,28 @@ public:
 
 	ActorId grabbable_actor_;
 	vector<CollisionShape> grab_shapes_;
+};
+
+class ReposeGrabbableObject : public CommandArgs {
+public:
+	ReposeGrabbableObject(ActorId grabbable_actor, Pose pose, int shape_index = -1) :
+		CommandArgs(GrabbableObjectCommand::REPOSE_GRABBABLE_OBJECT),
+		grabbable_actor_(grabbable_actor), pose_(pose), shape_index_(shape_index) {}
+
+	ActorId grabbable_actor_;
+	Pose pose_;
+	int shape_index_;
+};
+
+class EnDisableGrabbableObject : public CommandArgs {
+public:
+	EnDisableGrabbableObject(ActorId grabbable_actor, bool enable, int shape_index = -1) :
+		CommandArgs(GrabbableObjectCommand::ENDISABLE_GRABBABLE_OBJECT),
+		grabbable_actor_(grabbable_actor), enable_(enable), shape_index_(shape_index) {}
+
+	ActorId grabbable_actor_;
+	bool enable_;
+	int shape_index_;
 };
 
 class RemoveGrabbableObject : public CommandArgs {
@@ -55,6 +79,8 @@ public:
 
 	void HandleCommand(const CommandArgs& args) override;
 	void HandleAddGrabbableObject(const AddGrabbableObject& args);
+	void HandleReposeGrabbableObject(const ReposeGrabbableObject& args);
+	void HandleEnDisableGrabbableObject(const EnDisableGrabbableObject& args);
 	void HandleRemoveGrabbableObject(const RemoveGrabbableObject& args);
 	void HandleTriggerChange(const commands::TriggerStateChange& args);
 
@@ -65,6 +91,8 @@ public:
 	void RemoveGrabInformation(ActorId actor_id);
 
 private:
+	vector<CollisionShape>& GetCollisionShapes(ActorId actor_id);
+
 	vector<pair<ActorId, vector<CollisionShape>>> grab_collisions_;
 	set<ActorId> grabbable_actors_;
 	array<ActorId, 2> grabbed_actor_ = { ActorId::UnsetId, ActorId::UnsetId };

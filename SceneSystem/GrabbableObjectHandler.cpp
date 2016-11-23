@@ -25,6 +25,12 @@ void GrabbableObjectHandler::HandleCommand(const CommandArgs& args) {
 	case GrabbableObjectCommand::REMOVE_GRABBABLE_OBJECT:
 		HandleRemoveGrabbableObject(dynamic_cast<const RemoveGrabbableObject&>(args));
 		break;
+	case GrabbableObjectCommand::ENDISABLE_GRABBABLE_OBJECT:
+		HandleEnDisableGrabbableObject(dynamic_cast<const EnDisableGrabbableObject&>(args));
+		break;
+	case GrabbableObjectCommand::REPOSE_GRABBABLE_OBJECT:
+		HandleReposeGrabbableObject(dynamic_cast<const ReposeGrabbableObject&>(args));
+		break;
 	case HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE:
 		HandleTriggerChange(dynamic_cast<const commands::TriggerStateChange&>(args));
 		break;
@@ -37,6 +43,28 @@ void GrabbableObjectHandler::HandleAddGrabbableObject(const AddGrabbableObject& 
 		RemoveGrabInformation(args.grabbable_actor_);
 	}
 	AddGrabInformation(args.grabbable_actor_, args.grab_shapes_);
+}
+
+void GrabbableObjectHandler::HandleReposeGrabbableObject(const ReposeGrabbableObject& args) {
+	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
+	if (args.shape_index_ == -1) {
+		for (CollisionShape& shape : collision_shapes) {
+			shape.SetPose(args.pose_);
+		}
+	} else {
+		collision_shapes[args.shape_index_].SetPose(args.pose_);
+	}
+}
+
+void GrabbableObjectHandler::HandleEnDisableGrabbableObject(const EnDisableGrabbableObject& args) {
+	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
+	if (args.shape_index_ == -1) {
+		for (CollisionShape& shape : collision_shapes) {
+			shape.EnDisable(args.enable_);
+		}
+	} else {
+		collision_shapes[args.shape_index_].EnDisable(args.enable_);
+	}
 }
 
 void GrabbableObjectHandler::HandleRemoveGrabbableObject(const RemoveGrabbableObject& args) {
@@ -122,4 +150,18 @@ ActorId GrabbableObjectHandler::FindCollidingActor(const CollisionShape& control
 	}
 	return ActorId::UnsetId;
 }
+
+vector<CollisionShape>& GrabbableObjectHandler::GetCollisionShapes(ActorId actor_id) {
+	size_t index = 0;
+	while (
+		(actor_id != grab_collisions_[index].first) &&
+		(index != grab_collisions_.size())) {
+		index++;
+	}
+	if (index == grab_collisions_.size()) {
+		grab_collisions_.emplace_back();
+	}
+	return grab_collisions_[index].second;
+}
+
 }

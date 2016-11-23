@@ -1,6 +1,6 @@
 from scene_system_ import *
 from . import actor
-import collections
+import collections, copy
 
 class DelegatingActor(actor.Actor):
 	def DefaultHandleCommand(self, command_args):
@@ -12,14 +12,14 @@ class DelegatingActor(actor.Actor):
 
 	@classmethod
 	def GetDefaultDelegation(cls):
-		return collections.defaultdict(DelegatingActor.GetDefaultHandleCommand)
+		return copy.copy(cls.command_delegation)
 
 	def HandleCommand(self, command_args):
 		if command_args.Type() == CommandType.ADDED_TO_SCENE:
 			self.scene = self.GetScene()
 		self.command_delegation[command_args.Type()](self, command_args)
-	   
-DelegatingActor.command_delegation = DelegatingActor.GetDefaultDelegation()
+
+DelegatingActor.command_delegation = collections.defaultdict(DelegatingActor.GetDefaultHandleCommand)
 
 def delegate_for_command(delegation):
 	def sub_fn(command_type):

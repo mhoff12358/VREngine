@@ -1,67 +1,53 @@
 import scene_system as sc
 
 class DraggableObject(sc.DelegatingActor):
-	command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-	delegater = sc.delegate_for_command(command_delegation)
+    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
+    delegater = sc.delegate_for_command(command_delegation)
 
-	def __init__(self):
-		super().__init__()
+    def __init__(self, collision_shapes, starting_pose = sc.Pose()):
+        super().__init__()
 
-		self.current_location = sc.Location(0, 1, 0)
-		self.controller_location_delta = sc.Location(0, 0, 0)
-		self.radius = 0.1
+        self.current_pose = starting_pose
+        self.collision_shapes, self.collision_shape_offsets = zip(*collision_shapes)
+        for shape in self.collision_shapes:
+            shape.SetPose(self.current_pose)
 
-	def PlaceSelf(self, latest_command):
-		return self.scene.MakeCommandAfter(
-			latest_command,
-			sc.Target(self.graphics_object_id),
-			sc.PlaceComponent(
-				"Sphere",
-				sc.Pose(self.current_location, sc.Scale(self.radius))))
-		
-	@delegater(sc.CommandType.ADDED_TO_SCENE)
-	def HandleAddToScene(self, args):
-		latest_command = self.scene.FrontOfCommands()
+        self.controller_pose_delta = sc.Pose()
 
-		self.graphics_object_id = self.scene.AddAndConstructGraphicsObject().id
-		latest_command = self.scene.MakeCommandAfter(
-			latest_command,
-			sc.Target(self.graphics_object_id),
-			sc.CreateGraphicsObject(
-				"basic",
-				sc.VectorEntitySpecification((
-					sc.EntitySpecification("sphere") \
-						.SetModel(sc.ModelDetails(
-							sc.ModelIdentifier("sphere.obj|Sphere")))
-						.SetShaders(sc.ShaderDetails(
-							"solidcolor.hlsl",
-							sc.VertexType.location,
-							sc.ShaderStages.Vertex().And(sc.ShaderStages.Pixel())))
-						.SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0.5, 0, 0)),)))
-						.SetComponent("Sphere"),)),
-				 sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
-		latest_command = self.PlaceSelf(latest_command)
-		latest_command = self.scene.MakeCommandAfter(
-			latest_command,
-			sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
-			sc.AddGrabbableObject(self.id, sc.VectorCollisionShape((sc.CollisionShape(self.current_location, self.radius),))))
+    def ProposePose(self, proposed_pose):
+        self.current_pose = proposed_pose
 
-	@delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
-	def HandleControllerMovementWhileGrabbed(self, args):
-		self.scene = self.GetScene()
-		self.current_location = args.position.location + self.controller_location_delta
-		self.PlaceSelf(self.scene.FrontOfCommands())
+    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    def HandleAddToScene(self, args):
+        latest_command = self.scene.FrontOfCommands()
+        latest_command = self.scene.MakeCommandAfter(
+            latest_command,
+            sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+            sc.AddGrabbableObject(
+                self.id,
+                sc.VectorCollisionShape(self.collision_shapes)))
+        self.collision_shapes = None
 
-	@delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
-	def HandleGrabbed(self, args):
-		if args.held:
-			self.controller_location_delta = self.current_location - args.position.location
-			self.scene.MakeCommandAfter(
-				self.scene.FrontOfCommands(),
-				sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
-				sc.RemoveGrabbableObject(self.id))
-		else:
-			self.scene.MakeCommandAfter(
-				self.scene.FrontOfCommands(),
-				sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
-				sc.AddGrabbableObject(self.id, sc.VectorCollisionShape((sc.CollisionShape(self.current_location, self.radius),))))
+    @delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
+    def HandleControllerMovementWhileGrabbed(self, args):
+        self.scene = self.GetScene()
+        proposed_pose = self.controller_pose_delta.ApplyAfter(args.position)
+        self.ProposePose(proposed_pose)
+
+    @delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
+    def HandleGrabbed(self, args):
+        if args.held:
+            self.controller_pose_delta = args.position.Delta(self.current_pose)
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+                sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+                sc.EnDisableGrabbableObject(self.id, False))
+        else:
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+								sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+								sc.ReposeGrabbableObject(self.id, self.current_pose))
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+								sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+								sc.EnDisableGrabbableObject(self.id, True))

@@ -71,10 +71,12 @@ void PoseInterface() {
 		.def(init<Location>())
 		.def(init<Quaternion>())
 		.def(init<Scale>())
-		.def_readonly("location", &Pose::location_)
-		.def_readonly("scale", &Pose::scale_)
-		.def_readonly("orientation", &Pose::orientation_)
+		.def_readwrite("location", &Pose::location_)
+		.def_readwrite("scale", &Pose::scale_)
+		.def_readwrite("orientation", &Pose::orientation_)
 		.def("ApplyAfter", &Pose::ApplyAfter)
+		.def("Inverse", &Pose::Inverse)
+		.def("Delta", &Pose::Delta)
 		.def("__eq__", &Pose::operator==);
 
 	CreateVector<Location>("Location");

@@ -4,11 +4,14 @@
 
 class CollisionShape {
 public:
-	CollisionShape(Location location, float radius);
+	CollisionShape(Pose pose, float radius, bool enabled = true);
 
 	bool Intersect(const CollisionShape& other) const;
+	void SetPose(const Pose& pose);
+	void EnDisable(bool enable);
 
 private:
 	Location location_;
 	float radius_;
+	bool enabled_;
 };

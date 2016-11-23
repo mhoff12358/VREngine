@@ -61,7 +61,18 @@ struct Pose {
 	Pose() : location_(), orientation_(Quaternion::Identity()), scale_() {}
 
 	Pose ApplyAfter(const Pose& other) const {
+		assert((scale_[0] == 1) && (scale_[1] == 1) && (scale_[2] == 1));
 		return Pose(location_ + (other.location_ * scale_).Rotate(orientation_), orientation_ * other.orientation_, scale_ * other.scale_);
+	}
+
+	Pose Inverse() const {
+		assert((scale_[0] == 1) && (scale_[1] == 1) && (scale_[2] == 1));
+		Quaternion rotation_inverse = orientation_.Inverse();
+		return Pose(location_.Inverse().Rotate(rotation_inverse), rotation_inverse);
+	}
+
+	Pose Delta(const Pose& other) const {
+		return other.ApplyAfter(Inverse());
 	}
 
 	DirectX::XMMATRIX GetMatrix() const {
