@@ -93,11 +93,11 @@ public:
 
 class ControllerMovement : public ControllerInformation {
 public:
-	ControllerMovement(unsigned char controller_number, Pose controller_position, Location movement_vector) :
+	ControllerMovement(unsigned char controller_number, Pose controller_position, Pose movement) :
 		ControllerInformation(HeadsetInterfaceCommand::LISTEN_CONTROLLER_MOVEMENT, controller_number, controller_position),
-		movement_vector_(movement_vector) {}
+		movement_(movement) {}
 
-	Location movement_vector_;
+	Pose movement_;
 };
 
 class TriggerStateChange : public ControllerInformation {

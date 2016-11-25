@@ -74,7 +74,7 @@ Shmactor* Scene::FindActor(const ActorId& actor_id) {
 	if (actor_iter == actor_lookup_.end()) {
 		return nullptr;
 	}
-	return actor_lookup_[actor_id].get();
+	return actor_iter->second;
 }
 
 vector<ActorId> Scene::ExpandTarget(const Target& target) {
@@ -114,8 +114,35 @@ tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<
 	ActorId new_id = NextActorId();
 	new_actor->SetId(new_id);
 	new_actor->SetScene(this);
-	actor_lookup_.emplace(new_id, move(new_actor));
-	actor_lookup_[new_id]->AddedToScene();
+	actor_lookup_.emplace(new_id, new_actor.get());
+	actor_lookup_unique_.emplace(new_id, move(new_actor));
+	actor_lookup_unique_[new_id]->AddedToScene();
+	if (args == nullptr) {
+		args = make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE);
+	}
+	assert(args->Type() == CommandType::ADDED_TO_SCENE);
+	return tuple<ActorId, CommandQueueLocation>(new_id, MakeCommandAfter(initialize_after, Command(Target(new_id), move(args))));
+}
+
+ActorId Scene::AddActor(Shmactor& new_actor, unique_ptr<CommandArgs> args) {
+	return get<0>(AddActorReturnInitialize(new_actor, move(args)));
+}
+
+ActorId Scene::AddActor(Shmactor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+	return get<0>(AddActorReturnInitialize(new_actor, initialize_after, move(args)));
+}
+
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Shmactor& new_actor, unique_ptr<CommandArgs> args) {
+	return AddActorReturnInitialize(new_actor, FrontOfCommands(), move(args));
+}
+
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Shmactor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+	ActorId new_id = NextActorId();
+	new_actor.SetId(new_id);
+	new_actor.SetScene(this);
+	actor_lookup_.emplace(new_id, &new_actor);
+	actor_lookup_non_unique_.emplace(new_id, &new_actor);
+	new_actor.AddedToScene();
 	if (args == nullptr) {
 		args = make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE);
 	}

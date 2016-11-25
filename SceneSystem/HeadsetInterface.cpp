@@ -78,8 +78,8 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 				Target(listener_groups_[i][static_cast<size_t>(ListenerId::CONTROLLER_MOVEMENT)]),
 				make_unique<commands::ControllerMovement>(
 					i,
-					new_controller_position.location_,
-					new_controller_position.location_ - controller_positions_[i].location_)));
+					new_controller_position,
+					controller_positions_[i].Delta(new_controller_position))));
 			controller_positions_[i] = new_controller_position;
 			scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 				Target(controller_graphics_[i]),
@@ -99,7 +99,7 @@ void HeadsetInterface::HandleNewControllerState(unsigned char hand_index, vr::VR
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
 			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TRIGGER_STATE_CHANGE)]),
 			make_unique<commands::TriggerStateChange>(
-				hand_index, controller_positions_[hand_index].location_, trigger_is_pulled)));
+				hand_index, controller_positions_[hand_index], trigger_is_pulled)));
 	}
 
 	vr::VRControllerAxis_t touchpad_delta;
@@ -113,7 +113,7 @@ void HeadsetInterface::HandleNewControllerState(unsigned char hand_index, vr::VR
 			make_unique<commands::TouchpadMotion>(
 				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_SLIDE,
 				hand_index,
-				controller_positions_[hand_index].location_,
+				controller_positions_[hand_index],
 				new_state.rAxis[0],
 				touchpad_delta)));
 	}
@@ -124,7 +124,7 @@ void HeadsetInterface::HandleNewControllerState(unsigned char hand_index, vr::VR
 			make_unique<commands::TouchpadMotion>(
 				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_DRAG,
 				hand_index,
-				controller_positions_[hand_index].location_,
+				controller_positions_[hand_index],
 				new_state.rAxis[0],
 				touchpad_delta)));
 	}

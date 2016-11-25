@@ -186,7 +186,7 @@ void NichijouGraph::HandleCommand(const CommandArgs& args) {
 						Target(vertex_actor.second),
 						make_unique<WrappedCommandArgs<Location>>(
 							NichijouCommand::MOVE_VERTEX_LOCATION,
-							controller_movement.movement_vector_)));
+							controller_movement.movement_.location_)));
 			}
 		}
 	}

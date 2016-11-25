@@ -21,7 +21,7 @@ void HeadsetInterface() {
 		.def_readonly("position", &game_scene::commands::ControllerInformation::controller_position_);
 
 	class_<game_scene::commands::ControllerMovement, bases<game_scene::commands::ControllerInformation>, boost::noncopyable>("ControllerMovement", no_init)
-		.def_readonly("movement_vector", &game_scene::commands::ControllerMovement::movement_vector_);
+		.def_readonly("movement", &game_scene::commands::ControllerMovement::movement_);
 
 	class_<game_scene::commands::TriggerStateChange, bases<game_scene::commands::ControllerInformation>, boost::noncopyable>("TriggerStateChange", no_init)
 		.def_readonly("is_pulled", &game_scene::commands::TriggerStateChange::is_pulled_);

@@ -119,7 +119,7 @@
       </DelayLoadDLLs>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir "$(OutDir)scripts" &amp; copy *.py "$(OutDir)scripts\" &amp; copy "$(OutDir)*.cso" "$(ProjectDir)"</Command>
+      <Command>copy *.py "$(OutDir)" &amp; copy "$(OutDir)*.cso" "$(ProjectDir)"</Command>
     </PostBuildEvent>
     <FxCompile />
   </ItemDefinitionGroup>
@@ -444,6 +444,7 @@
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="cpp_interface.lua" />
+    <None Include="draggable_graphics.py" />
     <None Include="draggable_object.py" />
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />

@@ -1,5 +1,5 @@
 import scene_system as sc
-from scripts import player, mutable_graphical_object, draggable_object, path_draggable_object, path
+import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics
 import collections
 import math
 
@@ -37,12 +37,8 @@ def first_load(resources):
 
     num_samples = 10
     theta_samples = tuple(
-        math.pi *
-        2 *
-        i /
-        num_samples for i in range(
-            num_samples +
-            1))
+        math.pi * 2 * i / num_samples for i in range(
+            num_samples + 1))
     lines = tuple(
         path.Line(
             sc.Location(
@@ -62,6 +58,38 @@ def first_load(resources):
             0.1) for i in range(num_samples))
     scene.AddActor(path_draggable_object.PathDraggableObject(
         path.Path(lines, circular=True), path_sample_rate=1))
+
+    drag_obj = draggable_object.DraggableObject(
+        ((sc.CollisionShape(sc.Pose(), 0.1), sc.Pose()),),
+        sc.Pose(sc.Location(0, 1, 0)))
+    scene.AddActor(drag_obj)
+    latest_command = scene.FrontOfCommands()
+    square_id = scene.AddAndConstructGraphicsObject().id
+    square_pose = sc.Pose(sc.Location(0, 1, 0), sc.Scale(0.25))
+    latest_command = scene.MakeCommandAfter(
+        latest_command,
+        sc.Target(square_id),
+        sc.CreateGraphicsObject(
+            "basic",
+                sc.VectorEntitySpecification((
+                    sc.EntitySpecification("Square")
+                    .SetModel(sc.ModelDetails(
+                        sc.ModelIdentifier("square.obj|Square")))
+                    .SetShaders(sc.ShaderDetails(
+                        sc.VectorShaderIdentifier((
+                            sc.ShaderIdentifier("textured.hlsl", sc.ShaderStage.Vertex(), sc.VertexType.texture),
+                            sc.ShaderIdentifier("textured.hlsl", sc.ShaderStage.Pixel())))))
+                    .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0, 0, 0)), sc.VectorFloat((1,)))))
+                    .SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))
+                    .SetComponent("Square"),)),
+                sc.VectorComponentInfo((sc.ComponentInfo("", "Square"),))))
+    drag_graph = draggable_graphics.DraggableGraphics(
+        scene = scene,
+        draggable_actor = drag_obj,
+        graphics_id = square_id,
+        graphics_component = "Square",
+        graphics_pose = sc.Pose(sc.Scale(0.25)))
+
 
     import code
     a = globals()

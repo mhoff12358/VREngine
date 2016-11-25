@@ -149,7 +149,7 @@ void UpdateLoop() {
 	game_scene::ActorId added_actor;
 	try {
 		object main_namespace = import("__main__").attr("__dict__");
-		exec("import scripts.first_load as first_load", main_namespace);
+		exec("import first_load", main_namespace);
 		object loaded_module = main_namespace["first_load"];
 
 		dict inputs;

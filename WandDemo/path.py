@@ -1,7 +1,6 @@
 import scene_system as sc
 import math
 
-
 class PathPart(object):
 
     def At(self, sample):

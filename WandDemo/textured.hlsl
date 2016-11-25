@@ -1,3 +1,5 @@
+#include "shared_matrices.hlsli"
+
 struct VOut
 {
 	float4 position : SV_POSITION;
@@ -12,19 +14,7 @@ struct POut
 Texture2D model_skin : register(t0);
 sampler skin_sampler : register(s0);
 
-cbuffer shared_matrices : register(b0)
-{
-	matrix <float, 4, 4> view;
-	matrix <float, 4, 4> view_projection;
-};
-
-cbuffer personal_matrices : register(b1)
-{
-	matrix <float, 4, 4> model;
-	matrix <float, 4, 4> model_inv_trans;
-};
-
-VOut VShader(float4 position : POSITION, float2 tex_coord : TEXCOORD0)
+VOut VShader(float4 position : SV_POSITION, float2 tex_coord : TEXCOORD0)
 {
 	VOut output;
 

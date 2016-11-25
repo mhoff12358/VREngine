@@ -74,7 +74,7 @@ void GrabbableObjectHandler::HandleRemoveGrabbableObject(const RemoveGrabbableOb
 void GrabbableObjectHandler::HandleTriggerChange(const commands::TriggerStateChange& args) {
 	if (args.is_pulled_) {
 		ActorId collided_actor = FindCollidingActor(
-			CollisionShape(args.controller_position_.location_, 0));
+			CollisionShape(args.controller_position_, 0));
 		if (collided_actor != ActorId::UnsetId) {
 			// Alert to the actor that it was grabbed.
 			scene_->MakeCommandAfter(

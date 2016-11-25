@@ -4,6 +4,8 @@
 
 #include "VRBackend/Pose.h"
 
+#include <string>
+
 string PrintLocation(const Location& location) {
 	return "Location: [" + std::to_string(location[0]) + ", " + std::to_string(location[1]) + ", " + std::to_string(location[2]) + "]";
 }
@@ -14,6 +16,8 @@ void PoseInterface() {
 		.def(init<float, float, float>())
 		.def(boost::python::self * boost::python::self)
 		.def("__eq__", &Scale::operator==)
+		.def("__repr__", static_cast<string(*)(const Scale&)>(&std::to_string))
+		.def("__str__", static_cast<string(*)(const Scale&)>(&std::to_string))
 		.def("get", &Scale::operator[]);
 
 	class_<Location>("Location")
@@ -30,6 +34,8 @@ void PoseInterface() {
 		.def(boost::python::self /= float())
 		.def("__eq__", &Location::operator==)
 		.def("Rotate", &Location::Rotate)
+		.def("__repr__", static_cast<string(*)(const Location&)>(&std::to_string))
+		.def("__str__", static_cast<string(*)(const Location&)>(&std::to_string))
 		.def("get", &Location::operator[])
 		.def("__len__", +static_cast<size_t(*)(const Location&)>([](const Location&)->size_t {return 3; }))
 		.def("__getitem__", +static_cast<float(*)(Location&, size_t)>([](Location& self, size_t index)->float {return self[index]; }))
@@ -47,6 +53,8 @@ void PoseInterface() {
 		.def("Inverse", &Quaternion::Inverse)
 		.def("__eq__", &Quaternion::operator==)
 		.def("StripAxis", &Quaternion::StripAxis)
+		.def("__repr__", static_cast<string(*)(const Quaternion&)>(&std::to_string))
+		.def("__str__", static_cast<string(*)(const Quaternion&)>(&std::to_string))
 		.def("Slerp", &Quaternion::Slerp)
 		.staticmethod("Slerp")
 		.def("Identity", &Quaternion::Identity)
@@ -77,7 +85,9 @@ void PoseInterface() {
 		.def("ApplyAfter", &Pose::ApplyAfter)
 		.def("Inverse", &Pose::Inverse)
 		.def("Delta", &Pose::Delta)
-		.def("__eq__", &Pose::operator==);
+		.def("__eq__", &Pose::operator==)
+		.def("__repr__", static_cast<string(*)(const Pose&)>(&std::to_string))
+		.def("__str__", static_cast<string(*)(const Pose&)>(&std::to_string));
 
 	CreateVector<Location>("Location");
 	CreateVector<Scale>("Scale");

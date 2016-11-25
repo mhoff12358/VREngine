@@ -61,20 +61,20 @@ void AddActorSubclassCreation(class_<game_scene::Scene, boost::noncopyable>& sce
 		.def(("AddAndConstruct" + subclass_name + "After").c_str(), &AddAndConstructActorAfter<ActorSubclass>);
 }
 
-game_scene::ActorId AddActor(game_scene::Scene& self, PyActor* new_actor) {
-	return self.AddActor(unique_ptr<game_scene::Shmactor>(new_actor));
+game_scene::ActorId AddActor(game_scene::Scene& self, PyActor& new_actor) {
+	return self.AddActor(dynamic_cast<game_scene::Shmactor&>(new_actor));
 }
 
-game_scene::ActorId AddActorAfter(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	return self.AddActor(unique_ptr<game_scene::Shmactor>(new_actor), initialize_after);
+game_scene::ActorId AddActorAfter(game_scene::Scene& self, PyActor& new_actor, game_scene::CommandQueueLocation initialize_after) {
+	return self.AddActor(dynamic_cast<game_scene::Shmactor&>(new_actor), initialize_after);
 }
 
-tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddActorReturnInitialize(game_scene::Scene& self, PyActor* new_actor) {
-	return self.AddActorReturnInitialize(unique_ptr<game_scene::Shmactor>(new_actor));
+tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddActorReturnInitialize(game_scene::Scene& self, PyActor& new_actor) {
+	return self.AddActorReturnInitialize(dynamic_cast<game_scene::Shmactor&>(new_actor));
 }
 
-tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddActorAfterReturnInitialize(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	return self.AddActorReturnInitialize(unique_ptr<game_scene::Shmactor>(new_actor), initialize_after);
+tuple<game_scene::ActorId, game_scene::CommandQueueLocation> AddActorAfterReturnInitialize(game_scene::Scene& self, PyActor& new_actor, game_scene::CommandQueueLocation initialize_after) {
+	return self.AddActorReturnInitialize(dynamic_cast<game_scene::Shmactor&>(new_actor), initialize_after);
 }
 
 template <typename T>

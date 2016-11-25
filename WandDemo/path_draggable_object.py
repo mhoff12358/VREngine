@@ -1,5 +1,5 @@
 import scene_system as sc
-import scripts.draggable_object as draggable_object
+import draggable_object
 from itertools import *
 
 class PathDraggableObject(draggable_object.DraggableObject):
@@ -119,8 +119,9 @@ class PathDraggableObject(draggable_object.DraggableObject):
         nearest = self.paths.FindNearest(
             proposed_pose.location, return_distance_squared=True)
         if not nearest.found:
-            return
+            return False
 
         self.current_pose = proposed_pose
         self.current_pose.location = self.paths.At(nearest.sample)
         self.PlaceSelf(self.scene.FrontOfCommands())
+        return True

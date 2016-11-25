@@ -445,5 +445,8 @@
     <None Include="path.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="draggable_graphics.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
