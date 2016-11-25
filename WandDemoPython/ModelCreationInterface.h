@@ -28,6 +28,7 @@ void ModelCreationInterface() {
 	class_<VertexType>("VertexType", no_init)
 		.def_readonly("location", &VertexType::vertex_type_location)
 		.def_readonly("texture", &VertexType::vertex_type_texture)
+		.def_readonly("texture_skip_normal", &VertexType::vertex_type_texture_skip_normal)
 		.def_readonly("normal", &VertexType::vertex_type_normal)
 		.def_readonly("all", &VertexType::vertex_type_all)
 		.def_readonly("xyuv", &VertexType::xyuv);

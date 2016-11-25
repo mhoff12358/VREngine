@@ -11,10 +11,14 @@ Component::Component(ID3D11Device* device_interface)
 	: transformation_buffer_(ShaderStages(ShaderStage::VERTEX_STAGE | ShaderStage::GEOMETRY_STAGE)), children_(NULL), parent_transformation_(NULL), num_children_(0)
 {
 	transformation_buffer_.CreateBuffer(device_interface);
+	combined_transformation_ = DirectX::XMMatrixIdentity();
+	SetLocalTransformation(DirectX::XMMatrixIdentity());
 }
 
 Component::Component()
 	: transformation_buffer_(ShaderStages()) {
+	combined_transformation_ = DirectX::XMMatrixIdentity();
+	SetLocalTransformation(DirectX::XMMatrixIdentity());
 }
 
 void Component::AddEntitiesToHandler(EntityHandler& entity_handler, string entity_group_name, vector<Model> models) {

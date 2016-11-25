@@ -256,6 +256,12 @@
     <FxCompile Include="vs_location_apply_mvp.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
+    <FxCompile Include="vs_texture_apply_mvp.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_textured.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -447,6 +453,12 @@
     </None>
     <None Include="draggable_graphics.py">
       <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="cannon.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="texture0.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
   </ItemGroup>
 </Project>

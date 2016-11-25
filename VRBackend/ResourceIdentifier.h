@@ -14,7 +14,11 @@ public:
 		return name.substr(0, name.find(object_delimiter));
 	};
 	static string GetSubmodel(string name) {
-		return name.substr(max(name.find(object_delimiter) + 1, name.length()));
+		size_t delimiter_index = name.find(object_delimiter);
+		if (delimiter_index != string::npos) {
+			return name.substr(delimiter_index + 1);
+		}
+		return "";
 	}
 	static string AddSubmodel(string name, string submodel) {
 		return name + object_delimiter + submodel;

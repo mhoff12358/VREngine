@@ -45,9 +45,13 @@ void EntitySpecificationInterface() {
 	class_<game_scene::NewIndividualTextureDetails>("IndividualTextureDetails", init<string, ShaderStages, int, int>());
 	CreateVector<game_scene::NewIndividualTextureDetails>("IndividualTextureDetails");
 
+	class_<ModelModifier>("ModelModifier", init<array<int, 3>, array<float, 3>, array<bool, 2>>());
+	class_<ObjLoader::OutputFormat>("OutputFormat", init<ModelModifier, VertexType, bool>());
+
 	class_<game_scene::NewModelDetails>("ModelDetails")
 		.def(init<const ModelIdentifier&>())
-		.def(init<const ModelIdentifier&, std::shared_ptr<ModelGenerator>>());
+		.def(init<const ModelIdentifier&, std::shared_ptr<ModelGenerator>>())
+		.def(init<const ModelIdentifier&, ObjLoader::OutputFormat>());
 
 	class_<game_scene::EntitySpecification>("EntitySpecification", init<string>())
 		.def("SetShaderStages", &game_scene::EntitySpecification::SetShaderStages, boost::python::return_self<>())

@@ -5,13 +5,14 @@ class DraggableObject(sc.DelegatingActor):
     command_delegation = sc.DelegatingActor.GetDefaultDelegation()
     delegater = sc.delegate_for_command(command_delegation)
 
-    def __init__(self, collision_shapes, starting_pose = sc.Pose()):
+    def __init__(self, collision_shapes, starting_pose = sc.Pose(), offset_pose = sc.Pose()):
         super().__init__()
 
         self.current_pose = starting_pose
+        self.offset_pose = offset_pose
         self.collision_shapes, self.collision_shape_offsets = zip(*collision_shapes)
         for shape in self.collision_shapes:
-            shape.SetPose(self.current_pose)
+            shape.SetPose(self.current_pose.ApplyAfter(self.offset_pose))
 
         self.controller_pose_delta = sc.Pose()
 
@@ -19,6 +20,13 @@ class DraggableObject(sc.DelegatingActor):
 
     def SetPoseUpdatedCallback(self, callback):
         self.pose_updated_callback = callback
+
+    def SetOffsetPose(self, offset_pose):
+        self.offset_pose = offset_pose
+        self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+                            sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
+                            sc.ReposeGrabbableObject(self.id, self.current_pose.ApplyAfter(self.offset_pose)))
 
     def ProposePose(self, proposed_pose):
         self.current_pose = proposed_pose
@@ -40,17 +48,14 @@ class DraggableObject(sc.DelegatingActor):
     @delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
     def HandleControllerMovementWhileGrabbed(self, args):
         self.scene = self.GetScene()
-        proposed_pose = self.controller_pose_delta.ApplyAfter(args.position)
-        print(args.position, proposed_pose, self.controller_pose_delta)
-        #import pdb; pdb.set_trace()
+        proposed_pose = self.controller_pose_delta.ApplyAfter(args.position.Delta(self.offset_pose))
         if self.ProposePose(proposed_pose) and self.pose_updated_callback is not None:
             self.pose_updated_callback(self.current_pose)
 
     @delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
     def HandleGrabbed(self, args):
         if args.held:
-            self.controller_pose_delta = self.current_pose.Delta(args.position)
-            print(args.position, self.current_pose, self.controller_pose_delta)
+            self.controller_pose_delta = self.current_pose.Delta(args.position.Delta(self.offset_pose))
             self.scene.MakeCommandAfter(
                 self.scene.FrontOfCommands(),
                 sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
@@ -59,7 +64,7 @@ class DraggableObject(sc.DelegatingActor):
             self.scene.MakeCommandAfter(
                 self.scene.FrontOfCommands(),
 								sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
-								sc.ReposeGrabbableObject(self.id, self.current_pose))
+								sc.ReposeGrabbableObject(self.id, self.current_pose.ApplyAfter(self.offset_pose)))
             self.scene.MakeCommandAfter(
                 self.scene.FrontOfCommands(),
 								sc.Target(self.scene.FindByName("GrabbableObjectHandler")),

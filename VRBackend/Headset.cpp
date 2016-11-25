@@ -83,9 +83,6 @@ void Headset::UpdateGamePoses() {
 		for (unsigned int i = 0; i < vr::k_unMaxTrackedDeviceCount; i++) {
 			if (tracked_device_classes_[i] != vr::TrackedDeviceClass_Invalid) {
 				logic_poses_[i] = DecomposePoseFromMatrix(logic_trackings_[i].mDeviceToAbsoluteTracking);
-				if (tracked_device_classes_[i] == vr::TrackedDeviceClass_Controller) {
-					std::cout << std::to_string(logic_poses_[i].orientation_) << std::endl;
-				}
 			}
 		}
 

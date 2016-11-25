@@ -25,6 +25,7 @@ public:
 
 	static const VertexType vertex_type_location;
 	static const VertexType vertex_type_texture;
+	static const VertexType vertex_type_texture_skip_normal;
 	static const VertexType vertex_type_normal;
 	static const VertexType vertex_type_all;
 
