@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "Target.h"
-#include "Shmactor.h"
+#include "Actor.h"
 #include "CommandArgs.h"
 
 namespace game_scene {
@@ -69,7 +69,7 @@ void Scene::ExecuteCommand(const Command& command) {
 	FlushCommandQueue();
 }
 
-Shmactor* Scene::FindActor(const ActorId& actor_id) {
+Actor* Scene::FindActor(const ActorId& actor_id) {
 	auto actor_iter = actor_lookup_.find(actor_id);
 	if (actor_iter == actor_lookup_.end()) {
 		return nullptr;
@@ -98,19 +98,19 @@ vector<ActorId> Scene::ExpandTarget(const Target& target) {
 	return actors_to_return;
 }
 
-ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(move(new_actor), move(args)));
 }
 
-ActorId Scene::AddActor(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(move(new_actor), initialize_after, move(args)));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args) {
 	return AddActorReturnInitialize(move(new_actor), FrontOfCommands(), move(args));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Shmactor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	ActorId new_id = NextActorId();
 	new_actor->SetId(new_id);
 	new_actor->SetScene(this);

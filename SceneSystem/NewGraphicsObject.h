@@ -3,7 +3,7 @@
 
 #include "CommandArgs.h"
 #include "EntitySpecification.h"
-#include "Shmactor.h"
+#include "Actor.h"
 #include "Component.h"
 
 namespace game_scene {
@@ -48,9 +48,9 @@ public:
 
 namespace actors {
 
-class NewGraphicsObject : public Shmactor {
+class NewGraphicsObject : public Actor {
 public:
-	NewGraphicsObject() : Shmactor(), first_entity_id_(0), number_of_entities_(0) {}
+	NewGraphicsObject() : Actor(), first_entity_id_(0), number_of_entities_(0) {}
 
 	void HandleCommand(const CommandArgs& args) override;
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Shmactor.h"
+#include "Actor.h"
 #include "VRBackend/ResourcePool.h"
 #include "Component.h"
 #include "GraphicsResources.h"
@@ -107,7 +107,7 @@ public:
 	ComponentHeirarchy heirarchy_;
 };
 
-class GraphicsObject : public Shmactor {
+class GraphicsObject : public Actor {
 public:
 	GraphicsObject() {}
 	GraphicsObject(const GraphicsObject&) = delete;

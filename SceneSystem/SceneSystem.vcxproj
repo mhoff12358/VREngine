@@ -119,6 +119,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Actor.h" />
     <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorId.h" />
     <ClInclude Include="BezierCurve.h" />
@@ -142,12 +143,12 @@
     <ClInclude Include="ResourceDefinitions.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="ShaderSettings.h" />
-    <ClInclude Include="Shmactor.h" />
     <ClInclude Include="Sprite.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Target.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Actor.cpp" />
     <ClCompile Include="ActorGroups.cpp" />
     <ClCompile Include="ActorId.cpp" />
     <ClCompile Include="BezierCurve.cpp" />
@@ -171,7 +172,6 @@
     <ClCompile Include="ResourceDefinitions.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="ShaderSettings.cpp" />
-    <ClCompile Include="Shmactor.cpp" />
     <ClCompile Include="Sprite.cpp" />
     <ClCompile Include="Target.cpp" />
   </ItemGroup>

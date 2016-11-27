@@ -14,5 +14,9 @@ using boost::python::enum_;
 using boost::python::dict;
 using boost::python::raw_function;
 using boost::python::make_function;
+using boost::python::error_already_set;
+using boost::python::extract;
 
 #include "BoostPointerMagic.h"
+
+#include "VRBackend/stl.h"

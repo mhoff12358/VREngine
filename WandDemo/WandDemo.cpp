@@ -117,7 +117,7 @@ void UpdateLoop() {
 	game_scene::Scene scene;
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
-	unique_ptr<game_scene::Shmactor> new_actor = 
+	unique_ptr<game_scene::Actor> new_actor = 
 			make_unique<game_scene::actors::GraphicsResources>(
 				*graphics_objects.resource_pool,
 				*graphics_objects.entity_handler,

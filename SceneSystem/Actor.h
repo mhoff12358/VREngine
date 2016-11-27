@@ -11,13 +11,13 @@ class Scene;
 class QueryArgs;
 class Target;
 
-class Shmactor
+class Actor
 {
 public:
-	Shmactor();
-	Shmactor(const Shmactor& other) = delete;
-	Shmactor operator=(const Shmactor& other) = delete;
-	virtual ~Shmactor();
+	Actor();
+	Actor(const Actor& other) = delete;
+	Actor operator=(const Actor& other) = delete;
+	virtual ~Actor();
 
 	// Overridable behaviors
 	virtual void HandleCommand(const CommandArgs& args);

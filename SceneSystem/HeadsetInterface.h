@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#include "Shmactor.h"
+#include "Actor.h"
 #include "openvr.h"
 #include "CommandArgs.h"
 #include "VRBackend/Pose.h"
@@ -16,7 +16,7 @@ namespace HeadsetHelpers {
 bool IsTriggerPulled(const vr::VRControllerState_t& state);
 }  // HeadsetHelpers
 
-class HeadsetInterface : public Shmactor {
+class HeadsetInterface : public Actor {
 public:
 	HeadsetInterface(Headset& headset) :
 		headset_(headset),
