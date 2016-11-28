@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "SceneSystem/Shmactor.h"
+#include "SceneSystem/Actor.h"
 #include "SceneSystem/QueryArgs.h"
 #include "SceneSystem/QueryResult.h"
 #include "SceneSystem/CommandArgs.h"
@@ -42,7 +42,7 @@ public:
 
 namespace actors {
 
-class NichijouGraph : public Shmactor {
+class NichijouGraph : public Actor {
 public:
 	void HandleCommand(const CommandArgs& args) override;
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
@@ -66,7 +66,7 @@ private:
 	float timeline_max_position_ = 1.0f;
 };
 
-class NichijouVertex : public Shmactor {
+class NichijouVertex : public Actor {
 public:
 	NichijouVertex(object configuration, object vertex, ActorId graph) : configuration_(configuration), vertex_(vertex), graph_(graph) {}
 
@@ -85,7 +85,7 @@ private:
 	bool visible_ = true;
 };
 
-class NichijouEdge : public Shmactor {
+class NichijouEdge : public Actor {
 public:
 	NichijouEdge(object configuration, object edge, ActorId graph, string model_name) :
 		configuration_(configuration), edge_(edge), graph_(graph), model_name_(model_name) {}

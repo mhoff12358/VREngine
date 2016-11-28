@@ -1,9 +1,9 @@
 #pragma once
 
 #include "boost/python.hpp"
-#include "SceneSystem/Shmactor.h"
+#include "SceneSystem/Actor.h"
 /*
-struct WrapActor : game_scene::Shmactor, boost::python::wrapper<game_scene::Shmactor>
+struct WrapActor : game_scene::Actor, boost::python::wrapper<game_scene::Actor>
 {
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override HandleCommand = this->get_override("HandleCommand"))

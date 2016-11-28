@@ -45,13 +45,13 @@ BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
-		.def("HandleCommand", &game_scene::Shmactor::HandleCommand, &PyActor::default_HandleCommand)
-		.def("AddedToScene", &game_scene::Shmactor::AddedToScene, &PyActor::default_AddedToScene)
+		.def("HandleCommand", &game_scene::Actor::HandleCommand, &PyActor::default_HandleCommand)
+		.def("AddedToScene", &game_scene::Actor::AddedToScene, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
 		.def("EmbedSelf", &PyActor::EmbedSelf)
-		.def("GetScene", &game_scene::Shmactor::GetScene, return_value_policy<reference_existing_object>())
+		.def("GetScene", &game_scene::Actor::GetScene, return_value_policy<reference_existing_object>())
 		.add_property("id", &PyActor::GetId)
-		.def("SetScene", &game_scene::Shmactor::SetScene);
+		.def("SetScene", &game_scene::Actor::SetScene);
 
 	class_<game_scene::QueryArgs, boost::noncopyable>("QueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);

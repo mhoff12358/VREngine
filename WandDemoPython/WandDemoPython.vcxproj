@@ -141,8 +141,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BezierCurvesInterface.cpp" />
+    <ClCompile Include="CollisionShapeInterface.cpp" />
+    <ClCompile Include="EntitySpecificationInterface.cpp" />
+    <ClCompile Include="GrabbableObjectHandlerInterface.cpp" />
+    <ClCompile Include="GraphicsObjectInterface.cpp" />
+    <ClCompile Include="GraphicsResourcesInterface.cpp" />
+    <ClCompile Include="HeadsetInterface.cpp" />
+    <ClCompile Include="IOInterfaceInterface.cpp" />
+    <ClCompile Include="ModelCreationInterface.cpp" />
+    <ClCompile Include="PoseInterface.cpp" />
     <ClCompile Include="PyActor.cpp" />
+    <ClCompile Include="PyScene.cpp" />
     <ClCompile Include="SceneSystemPython.cpp" />
+    <ClCompile Include="StlInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BezierCurvesInterface.h" />

@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#include "Shmactor.h"
+#include "Actor.h"
 #include "CommandArgs.h"
 
 class InputHandler;
@@ -10,7 +10,7 @@ class InputHandler;
 namespace game_scene {
 namespace actors {
 
-class IOInterface : public Shmactor {
+class IOInterface : public Actor {
 public:
 	IOInterface(InputHandler& input_handler);
 

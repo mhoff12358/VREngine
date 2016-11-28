@@ -1,7 +1,7 @@
 #pragma once
 #include "stdafx.h"
 
-#include "Shmactor.h"
+#include "Actor.h"
 #include "CommandArgs.h"
 #include "CollisionShape.h"
 #include "HeadsetInterface.h"
@@ -73,7 +73,7 @@ public:
 	bool held_;
 };
 
-class GrabbableObjectHandler : public Shmactor {
+class GrabbableObjectHandler : public Actor {
 public:
 	GrabbableObjectHandler();
 

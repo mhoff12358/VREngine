@@ -28,6 +28,7 @@ using std::make_tuple;
 using std::make_pair;
 using std::get;
 using std::unique_ptr;
+using std::make_unique;
 using std::move;
 using std::mutex;
 using std::max;

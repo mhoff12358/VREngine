@@ -3,6 +3,8 @@
 
 #include <type_traits>
 
+#include "PythonClassHelpers.h"
+
 struct general_ {};
 struct less_special_ : general_ {};
 struct special_ : less_special_ {};

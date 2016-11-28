@@ -4,10 +4,10 @@
 #include "SceneSystem/stdafx.h"
 
 #include "SceneSystem/BoostPythonWrapper.h"
-#include "SceneSystem/Shmactor.h"
+#include "SceneSystem/Actor.h"
 #include "SceneSystem/Scene.h"
 
-struct PyActor : public game_scene::Shmactor, public boost::python::wrapper<game_scene::Shmactor> {
+struct PyActor : public game_scene::Actor, public boost::python::wrapper<game_scene::Actor> {
 public:
 	object self_;
 	// Wrap existing calls that work to be virtualizable through Python.
@@ -19,10 +19,10 @@ public:
 				PyErr_Print();
 			}
 		}
-		Shmactor::HandleCommand(args);
+		Actor::HandleCommand(args);
 	}
 	void default_HandleCommand(const game_scene::CommandArgs& args) {
-		this->Shmactor::HandleCommand(args);
+		this->Actor::HandleCommand(args);
 	}
 
 	void AddedToScene() {
@@ -33,10 +33,10 @@ public:
 				PyErr_Print();
 			}
 		}
-		Shmactor::AddedToScene();
+		Actor::AddedToScene();
 	}
 	void default_AddedToScene() {
-		this->Shmactor::AddedToScene();
+		this->Actor::AddedToScene();
 	}
 
 	// Creates a wrapper for the AnswerQuery call that passes around query results as auto_ptrs rather than unique_ptrs.

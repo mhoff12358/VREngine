@@ -1,7 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
-#include "Shmactor.h"
+#include "Actor.h"
 #include "CommandArgs.h"
 
 #include "VRBackend/ResourcePool.h"
@@ -25,7 +25,7 @@ enum class GraphicsResourceId {
 	DEVICE_INTERFACE,
 };
 
-class GraphicsResources : public Shmactor {
+class GraphicsResources : public Actor {
 public:
 	GraphicsResources(
 		ResourcePool& resource_pool, EntityHandler& entity_handler, ID3D11Device* device_interface)
