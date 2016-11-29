@@ -23,7 +23,7 @@ class Cannon(sc.DelegatingActor):
                  scene: sc.Scene):
         super().__init__()
 
-        self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4), sc.Scale(0.25))
+        self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4))
         self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0) * self.cannon_pose.scale).ApplyAfter(self.cannon_pose)
 
         self.scene = scene
@@ -81,13 +81,14 @@ class Cannon(sc.DelegatingActor):
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
             sc.Target(square_id),
-            sc.PlaceComponent("Cannon", self.cannon_pose))
+            sc.PlaceComponent("Whole", self.cannon_pose))
         drag_graph = draggable_graphics.DraggableGraphics(
             scene = scene,
             draggable_actor = self.drag_obj,
             graphics_id = square_id,
             graphics_component = "Cover",
-            graphics_pose = self.cannon_pose)
+            graphics_pose = sc.Pose(),
+            parent_pose = self.cannon_pose)
 
 
         # Makes the circular path
