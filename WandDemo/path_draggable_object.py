@@ -1,6 +1,7 @@
 import scene_system as sc
 import draggable_object
 from itertools import *
+import copy
 
 class PathDraggableObject(draggable_object.DraggableObject):
     command_delegation = draggable_object.DraggableObject.GetDefaultDelegation()
@@ -14,7 +15,7 @@ class PathDraggableObject(draggable_object.DraggableObject):
             path_sample_rates, path_sample_rate)
 
         super().__init__(((sc.CollisionShape(sc.Pose(), self.radius), sc.Pose()),),
-                         sc.Pose(self.paths.At(0)), draw_ball = True)
+                         starting_pose = sc.Pose(self.paths.At(0)), draw_ball = True)
 
     def SetOffsetPose(self, offset_pose):
         super().SetOffsetPose(offset_pose)
@@ -85,5 +86,6 @@ class PathDraggableObject(draggable_object.DraggableObject):
         if not nearest.found:
             return None
 
-        proposed_pose.location = self.paths.At(nearest.sample)
-        return correct_pose
+        corrected_pose = copy.copy(proposed_pose)
+        corrected_pose.location = self.paths.At(nearest.sample)
+        return corrected_pose

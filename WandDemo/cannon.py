@@ -17,13 +17,22 @@ class Cannon(sc.DelegatingActor):
 
     @delegater(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):
-        self.drag_circle.SetOffsetPose(sc.Pose(sc.Location(2*args.position.x, 2*args.position.y, 0)))
+#        self.drag_circle.SetOffsetPose(sc.Pose(sc.Location(2*args.position.x, 2*args.position.y, 0)))
+
+        self.cannon_pose.location = self.cannon_start_pose.location + sc.Location(0, args.position.y, 0)
+        self.cannon_pose.orientation = sc.Quaternion.RotationAboutAxis(sc.AxisID.x, args.position.x)
+        self.drag_obj.SetOffsetPose(self.cannon_pose)
+        latest_command = self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+            sc.Target(self.cannon_id),
+            sc.PlaceComponent("Whole", self.cannon_pose))
 
     def __init__(self,
                  scene: sc.Scene):
         super().__init__()
 
-        self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4), sc.Scale(0.25))
+        self.cannon_start_pose = sc.Pose(sc.Location(0, 1, 0))
+        self.cannon_pose = sc.Pose(self.cannon_start_pose.location, sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4), sc.Scale(0.25))
         self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0))
 
         self.scene = scene
@@ -34,10 +43,10 @@ class Cannon(sc.DelegatingActor):
             draw_ball = True)
         scene.AddActor(self.drag_obj)
         latest_command = scene.FrontOfCommands()
-        square_id = scene.AddAndConstructGraphicsObject().id
+        self.cannon_id = scene.AddAndConstructGraphicsObject().id
         latest_command = scene.MakeCommandAfter(
             latest_command,
-            sc.Target(square_id),
+            sc.Target(self.cannon_id),
             sc.CreateGraphicsObject(
                 "basic",
                     sc.VectorEntitySpecification((
@@ -80,15 +89,14 @@ class Cannon(sc.DelegatingActor):
                                             sc.ComponentInfo("Whole", "Cannon")))))
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
-            sc.Target(square_id),
+            sc.Target(self.cannon_id),
             sc.PlaceComponent("Whole", self.cannon_pose))
         drag_graph = draggable_graphics.DraggableGraphics(
             scene = scene,
             draggable_actor = self.drag_obj,
-            graphics_id = square_id,
+            graphics_id = self.cannon_id,
             graphics_component = "Cover",
-            graphics_pose = sc.Pose(),
-            parent_pose = self.cannon_pose)
+            graphics_pose = sc.Pose())
 
 
         # Makes the circular path
@@ -101,14 +109,14 @@ class Cannon(sc.DelegatingActor):
                 sc.Location(
                     math.cos(
                         theta_samples[i]),
-                    2,
+                    1,
                     math.sin(
                         theta_samples[i])),
                 sc.Location(
                     math.cos(
                         theta_samples[
                             i + 1]),
-                    2,
+                    1,
                     math.sin(
                         theta_samples[
                             i + 1])),

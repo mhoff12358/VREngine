@@ -34,9 +34,12 @@ class DraggableObject(sc.DelegatingActor):
         return latest_command
 
     def SetOffsetPose(self, offset_pose):
+        self.current_pose = self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose).ApplyAfter(offset_pose).UnapplyAfter(offset_pose)
+        print(self.current_pose)
         self.offset_pose = copy.copy(offset_pose)
         self.ReposeCollisionShapes(self.scene.FrontOfCommands())
         self.PlaceCollisionSphere(self.scene.FrontOfCommands())
+        self.MakePoseUpdatedCallbacks()
 
     def ProposePose(self, proposed_pose):
         return proposed_pose

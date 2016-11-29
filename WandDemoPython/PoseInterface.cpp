@@ -87,6 +87,7 @@ void PoseInterface() {
 		.def_readwrite("scale", &Pose::scale_)
 		.def_readwrite("orientation", &Pose::orientation_)
 		.def("ApplyAfter", &Pose::ApplyAfter)
+		.def("UnapplyAfter", &Pose::UnapplyAfter)
 		.def("Inverse", &Pose::Inverse)
 		.def("Delta", &Pose::Delta)
 		.def("__str__", (string(*)(const Pose&))&std::to_string)

@@ -63,7 +63,7 @@ struct Pose {
 	Pose();
 
 	Pose ApplyAfter(const Pose& other) const;
-	Pose ApplyBefore(const Pose& other) const;
+	Pose UnapplyAfter(const Pose& other) const;
 
 	Pose Inverse() const;
 
