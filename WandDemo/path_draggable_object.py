@@ -14,15 +14,19 @@ class PathDraggableObject(draggable_object.DraggableObject):
             path_sample_rates, path_sample_rate)
 
         super().__init__(((sc.CollisionShape(sc.Pose(), self.radius), sc.Pose()),),
-                         sc.Pose(self.paths.At(0)))
+                         sc.Pose(self.paths.At(0)), draw_ball = True)
 
-    def PlaceSelf(self, latest_command):
+    def SetOffsetPose(self, offset_pose):
+        super().SetOffsetPose(offset_pose)
+        self.PlacePath(self.scene.FrontOfCommands())
+
+    def PlacePath(self, latest_command):
         return self.scene.MakeCommandAfter(
             latest_command,
-            sc.Target(self.graphics_object_id),
+            sc.Target(self.path_id),
             sc.PlaceComponent(
-                "Sphere",
-                sc.Pose(self.current_pose.location, self.current_pose.orientation, sc.Scale(self.radius))))
+                "path",
+                self.offset_pose))
 
     @delegater(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
@@ -73,55 +77,13 @@ class PathDraggableObject(draggable_object.DraggableObject):
                     .SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))
                     .SetComponent("path"),)),
                 sc.VectorComponentInfo((sc.ComponentInfo("", "path"),))))
-        latest_command = self.scene.MakeCommandAfter(
-            latest_command,
-            sc.Target(self.path_id),
-            sc.PlaceComponent(
-                "path",
-                sc.Pose(sc.Location(0, 0, 0))))
-
-        self.graphics_object_id = self.scene.AddAndConstructGraphicsObject().id
-        latest_command = self.scene.MakeCommandAfter(
-            latest_command,
-            sc.Target(
-                self.graphics_object_id),
-            sc.CreateGraphicsObject(
-                "basic",
-                sc.VectorEntitySpecification(
-                    (sc.EntitySpecification("sphere") .SetModel(
-                        sc.ModelDetails(
-                            sc.ModelIdentifier("sphere.obj|Sphere"))) .SetShaders(
-                        sc.ShaderDetails(
-                            sc.VectorShaderIdentifier(
-                                (sc.ShaderIdentifier(
-                                    "vs_location_apply_mvp.cso",
-                                    sc.ShaderStage.Vertex(),
-                                    sc.VertexType.location),
-                                 sc.ShaderIdentifier(
-                                    "ps_solidcolor.cso",
-                                    sc.ShaderStage.Pixel()),
-                                 )))) .SetShaderSettingsValue(
-                        sc.ShaderSettingsValue(
-                            (sc.VectorFloat(
-                                (0.5,
-                                 0,
-                                 0)),
-                             ))) .SetComponent("Sphere"),
-                     )),
-                sc.VectorComponentInfo(
-                    (sc.ComponentInfo(
-                        "",
-                        "Sphere"),
-                     ))))
-        latest_command = self.PlaceSelf(latest_command)
+        latest_command = self.PlacePath(latest_command)
 
     def ProposePose(self, proposed_pose):
         nearest = self.paths.FindNearest(
             proposed_pose.location, return_distance_squared=True)
         if not nearest.found:
-            return False
+            return None
 
-        self.current_pose = proposed_pose
-        self.current_pose.location = self.paths.At(nearest.sample)
-        self.PlaceSelf(self.scene.FrontOfCommands())
-        return True
+        proposed_pose.location = self.paths.At(nearest.sample)
+        return correct_pose

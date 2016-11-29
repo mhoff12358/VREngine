@@ -120,7 +120,7 @@ void HeadsetInterface::HandleNewControllerState(unsigned char hand_index, vr::VR
 	if ((vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & new_state.ulButtonPressed) &&
 		(vr::ButtonMaskFromId(vr::k_EButton_SteamVR_Touchpad) & controller_states_[hand_index].ulButtonPressed)) {
 		scene_->MakeCommandAfter(scene_->FrontOfCommands(), Command(
-			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TOUCHPAD_SLIDE)]),
+			Target(listener_groups_[hand_index][static_cast<size_t>(ListenerId::TOUCHPAD_DRAG)]),
 			make_unique<commands::TouchpadMotion>(
 				HeadsetInterfaceCommand::LISTEN_TOUCHPAD_DRAG,
 				hand_index,

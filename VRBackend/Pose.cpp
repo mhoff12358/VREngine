@@ -53,7 +53,7 @@ float& Location::get(size_t index) { return location_[index]; }
 Location Location::operator+(const Location& other) const { return Location(location_[0] + other[0], location_[1] + other[1], location_[2] + other[2]); }
 Location Location::operator-(const Location& other) const { return Location(location_[0] - other[0], location_[1] - other[1], location_[2] - other[2]); }
 Location Location::operator*(float scale) const { return Location(scale * location_[0], scale * location_[1], scale * location_[2]); }
-Location Location::operator*(Scale scale) const { return Location(scale[0] * location_[0], scale[1] * location_[1], scale[2] * location_[2]); }
+Location Location::operator*(const Scale& scale) const { return Location(scale[0] * location_[0], scale[1] * location_[1], scale[2] * location_[2]); }
 Location Location::operator/(float scale) const { return *this * (1.0f / scale); }
 void Location::operator+=(const Location& other) { for (int i = 0; i < 3; i++) { location_[i] += other.location_[i]; } }
 void Location::operator-=(const Location& other) { for (int i = 0; i < 3; i++) { location_[i] -= other.location_[i]; } }
@@ -79,7 +79,6 @@ Pose::Pose(Scale scale) : orientation_(), location_(), scale_(scale) {}
 Pose::Pose() : location_(), orientation_(Quaternion::Identity()), scale_() {}
 
 Pose Pose::ApplyAfter(const Pose& other) const {
-	assert((scale_[0] == 1) && (scale_[1] == 1) && (scale_[2] == 1));
 	return Pose(location_.Rotate(other.orientation_) + other.location_, other.orientation_ * orientation_, scale_ * other.scale_);
 }
 

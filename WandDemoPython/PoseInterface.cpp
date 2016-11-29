@@ -9,14 +9,18 @@ string PrintLocation(const Location& location) {
 }
 
 void PoseInterface() {
-	class_<Scale>("Scale")
+	auto scale = class_<Scale>("Scale")
 		.def(init<float>())
 		.def(init<float, float, float>())
+		.def("Inverse", &Scale::Inverse)
 		.def(boost::python::self * boost::python::self)
+		.def("__str__", (string(*)(const Scale&))&std::to_string)
+		.def("__repr__", (string(*)(const Scale&))&std::to_string)
 		.def("__eq__", &Scale::operator==)
-		.def("get", &Scale::operator[]);
+		.def("get", &Scale::operator[])
+		.def("__copy__", &CopyObject<Scale>);
 
-	class_<Location>("Location")
+	auto location =class_<Location>("Location")
 		.def(init<float, float, float>())
 		.def(boost::python::self + boost::python::self)
 		.def(boost::python::self - boost::python::self)
@@ -30,13 +34,17 @@ void PoseInterface() {
 		.def(boost::python::self /= float())
 		.def("__eq__", &Location::operator==)
 		.def("Rotate", &Location::Rotate)
+		.def("Inverse", &Location::Inverse)
 		.def("get", &Location::operator[])
 		.def("__len__", +static_cast<size_t(*)(const Location&)>([](const Location&)->size_t {return 3; }))
 		.def("__getitem__", +static_cast<float(*)(Location&, size_t)>([](Location& self, size_t index)->float {return self[index]; }))
+		.def("__str__", (string(*)(const Location&))&std::to_string)
+		.def("__repr__", (string(*)(const Location&))&std::to_string)
 		.def("GetLength", &Location::GetLength)
 		.def("GetLengthSquared", &Location::GetLengthSquared)
 		.def("GetNormalized", &Location::GetNormalized)
-		.def("Dot", &Location::Dot);
+		.def("Dot", &Location::Dot)
+		.def("__copy__", &CopyObject<Location>);
 
 	class_<Quaternion>("Quaternion")
 		.def(init<float, float, float, float>())
@@ -47,12 +55,16 @@ void PoseInterface() {
 		.def("Inverse", &Quaternion::Inverse)
 		.def("__eq__", &Quaternion::operator==)
 		.def("StripAxis", &Quaternion::StripAxis)
+		.def("Inverse", &Quaternion::Inverse)
+		.def("__str__", (string(*)(const Quaternion&))&std::to_string)
+		.def("__repr__", (string(*)(const Quaternion&))&std::to_string)
 		.def("Slerp", &Quaternion::Slerp)
 		.staticmethod("Slerp")
 		.def("Identity", &Quaternion::Identity)
 		.staticmethod("Identity")
 		.def("RotationAboutAxis", &Quaternion::RotationAboutAxis)
-		.staticmethod("RotationAboutAxis");
+		.staticmethod("RotationAboutAxis")
+		.def("__copy__", &CopyObject<Quaternion>);
 
 	enum_<AxisID>("AxisID")
 		.value("x", AID_X)
@@ -71,11 +83,16 @@ void PoseInterface() {
 		.def(init<Location>())
 		.def(init<Quaternion>())
 		.def(init<Scale>())
-		.def_readonly("location", &Pose::location_)
-		.def_readonly("scale", &Pose::scale_)
-		.def_readonly("orientation", &Pose::orientation_)
+		.def_readwrite("location", &Pose::location_)
+		.def_readwrite("scale", &Pose::scale_)
+		.def_readwrite("orientation", &Pose::orientation_)
 		.def("ApplyAfter", &Pose::ApplyAfter)
-		.def("__eq__", &Pose::operator==);
+		.def("Inverse", &Pose::Inverse)
+		.def("Delta", &Pose::Delta)
+		.def("__str__", (string(*)(const Pose&))&std::to_string)
+		.def("__repr__", (string(*)(const Pose&))&std::to_string)
+		.def("__eq__", &Pose::operator==)
+		.def("__copy__", &CopyObject<Pose>);
 
 	CreateVector<Location>("Location");
 	CreateVector<Scale>("Scale");

@@ -113,7 +113,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	EntitySpecificationInterface();
 	GraphicsObjectInterface(scene_registration);
 	IOInterfaceInterface(scene_registration);
-	HeadsetInterface();
+	HeadsetInterface(scene_registration);
 	GraphicsResourcesInterface();
 	PoseInterface();
 	ModelCreationInterface();

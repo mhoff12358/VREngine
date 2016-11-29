@@ -202,3 +202,13 @@ template <typename T>
 struct CreateArraysWithVector<T, 0> {
 	static void Create(string name) {}
 };
+
+template <typename T>
+const T CopyObject(const T& v) {
+	return v;
+}
+
+template <typename PyClass, typename T>
+void CreateCopy(PyClass& py_class) {
+	py_class.def("__copy__", &CopyObject<T>);
+}

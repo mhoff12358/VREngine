@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "ModelCreationInterface.h"
 #include "StlHelper.h"
+#include "VRBackend/ObjLoader.h"
 #include "VRBackend/ResourceIdentifier.h"
 
 template<size_t N>
@@ -44,6 +45,9 @@ void ModelCreationInterface() {
 		.value("LINESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_LINESTRIP_ADJ)
 		.value("TRIANGLELIST_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ)
 		.value("TRIANGLESTRIP_ADJ", D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP_ADJ);
+
+	class_<ModelModifier>("ModelModifier", init<array<int, 3>, array<float, 3>, array<bool, 2>>());
+	class_<ObjLoader::OutputFormat>("OutputFormat", init<ModelModifier, VertexType, bool>());
 
 	class_<ModelGenerator, std::shared_ptr<ModelGenerator>, boost::noncopyable>("ModelGenerator")
 		.def(init<VertexType, D3D_PRIMITIVE_TOPOLOGY>())

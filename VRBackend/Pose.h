@@ -32,7 +32,7 @@ struct Location {
 	Location operator+(const Location& other) const;
 	Location operator-(const Location& other) const;
 	Location operator*(float scale) const;
-	Location operator*(Scale scale) const;
+	Location operator*(const Scale& scale) const;
 	Location operator/(float scale) const;
 	void operator+=(const Location& other);
 	void operator-=(const Location& other);

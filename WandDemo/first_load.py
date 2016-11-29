@@ -35,31 +35,8 @@ def first_load(resources):
                    path.Line(sc.Location(1, 0.5, 0), sc.Location(0, 1, 0), 0.1))),
         path_sample_rate=1))
 
-    num_samples = 10
-    theta_samples = tuple(
-        math.pi * 2 * i / num_samples for i in range(
-            num_samples + 1))
-    lines = tuple(
-        path.Line(
-            sc.Location(
-                math.cos(
-                    theta_samples[i]),
-                2,
-                math.sin(
-                    theta_samples[i])),
-            sc.Location(
-                math.cos(
-                    theta_samples[
-                        i + 1]),
-                2,
-                math.sin(
-                    theta_samples[
-                        i + 1])),
-            0.1) for i in range(num_samples))
-    scene.AddActor(path_draggable_object.PathDraggableObject(
-        path.Path(lines, circular=True), path_sample_rate=1))
-
     cannon1 = cannon.Cannon(scene)
+    scene.AddActor(cannon1)
 
     import code
     a = globals()

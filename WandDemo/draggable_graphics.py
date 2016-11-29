@@ -14,14 +14,14 @@ class DraggableGraphics(object):
         self.graphics_component = graphics_component
         self.graphics_pose = graphics_pose
 
-        def DraggedClosure(new_pose):
-            self.Dragged(new_pose)
+        def DraggedClosure(*args, **kwargs):
+            self.Dragged(*args, **kwargs)
         self.draggable_actor.SetPoseUpdatedCallback(DraggedClosure)
 
-    def Dragged(self, new_pose):
+    def Dragged(self, relative_pose, global_pose):
         self.scene.MakeCommandAfter(
             self.scene.FrontOfCommands(),
             sc.Target(self.graphics_id),
             sc.PlaceComponent(
                 self.graphics_component,
-                new_pose.ApplyAfter(self.graphics_pose)))
+                self.graphics_pose.ApplyAfter(relative_pose)))

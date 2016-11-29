@@ -5,11 +5,12 @@
 #include "StlHelper.h"
 
 void StlInterface() {
-	CreateArray<int, 2>("Int");
+	CreateArraysWithVector<int, 3>::Create("Int");
+	CreateArraysWithVector<bool, 3>::Create("Bool");
+	CreateArraysWithVector<float, 12>::Create("Float");
+
 	CreateVector<unsigned char>("UnsignedChar");
 	CreateVector<float>("Float");
-
-	CreateArraysWithVector<float, 12>::Create("Float");
 
 	CreateMap<string, float>("String", "Float");
 }

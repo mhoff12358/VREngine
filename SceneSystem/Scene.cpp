@@ -124,19 +124,20 @@ tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<
 	return tuple<ActorId, CommandQueueLocation>(new_id, MakeCommandAfter(initialize_after, Command(Target(new_id), move(args))));
 }
 
-ActorId Scene::AddActor(Shmactor& new_actor, unique_ptr<CommandArgs> args) {
+
+ActorId Scene::AddActor(Actor& new_actor, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(new_actor, move(args)));
 }
 
-ActorId Scene::AddActor(Shmactor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(new_actor, initialize_after, move(args)));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Shmactor& new_actor, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, unique_ptr<CommandArgs> args) {
 	return AddActorReturnInitialize(new_actor, FrontOfCommands(), move(args));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Shmactor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	ActorId new_id = NextActorId();
 	new_actor.SetId(new_id);
 	new_actor.SetScene(this);

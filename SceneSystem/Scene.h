@@ -34,6 +34,10 @@ public:
 	ActorId AddActor(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args = nullptr);
 	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args = nullptr);
 	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args = nullptr);
+	ActorId AddActor(Actor& new_actor, unique_ptr<CommandArgs> args = nullptr);
+	ActorId AddActor(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args = nullptr);
+	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(Actor& new_actor, unique_ptr<CommandArgs> args = nullptr);
+	tuple<ActorId, CommandQueueLocation> AddActorReturnInitialize(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args = nullptr);
 	ActorId AddActorGroup();
 	void AddActorToGroup(ActorId actor, ActorId group);
 	void RemoveActorFromGroup(ActorId actor, ActorId group);
@@ -48,8 +52,9 @@ private:
 	vector<unique_ptr<CommandArgs>> command_flush_arg_storage_;
 
 	CommandQueue commands_;
-	map<ActorId, unique_ptr<Actor>> actor_lookup_;
+	map<ActorId, unique_ptr<Actor>> actor_lookup_unique_;
 	map<ActorId, Actor*> actor_lookup_non_unique_;
+	map<ActorId, Actor*> actor_lookup_;
 	ActorGroups actor_groups_;
 	queue<ActorId> actors_to_be_deleted_;
 	// The value depends on the existance of the key. Deleting the key requires alerting the value.
