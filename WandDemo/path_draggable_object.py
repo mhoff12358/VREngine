@@ -81,11 +81,11 @@ class PathDraggableObject(draggable_object.DraggableObject):
         latest_command = self.PlacePath(latest_command)
 
     def ProposePose(self, proposed_pose):
+        proposed_pose = self.offset_pose.ApplyAfter(proposed_pose).Delta(self.offset_pose)
         nearest = self.paths.FindNearest(
             proposed_pose.location, return_distance_squared=True)
         if not nearest.found:
             return None
 
-        corrected_pose = copy.copy(proposed_pose)
-        corrected_pose.location = self.paths.At(nearest.sample)
-        return corrected_pose
+        proposed_pose.location = self.paths.At(nearest.sample)
+        return proposed_pose.ApplyAfter(self.offset_pose).UnapplyAfter(self.offset_pose)

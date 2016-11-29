@@ -17,15 +17,15 @@ class Cannon(sc.DelegatingActor):
 
     @delegater(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):
-#        self.drag_circle.SetOffsetPose(sc.Pose(sc.Location(2*args.position.x, 2*args.position.y, 0)))
+        self.drag_circle.SetOffsetPose(sc.Pose(sc.Location(2*args.position.x, 2*args.position.y, 0)))
 
-        self.cannon_pose.location = self.cannon_start_pose.location + sc.Location(0, args.position.y, 0)
-        self.cannon_pose.orientation = sc.Quaternion.RotationAboutAxis(sc.AxisID.x, args.position.x)
-        self.drag_obj.SetOffsetPose(self.cannon_pose)
-        latest_command = self.scene.MakeCommandAfter(
-            self.scene.FrontOfCommands(),
-            sc.Target(self.cannon_id),
-            sc.PlaceComponent("Whole", self.cannon_pose))
+#        self.cannon_pose.location = self.cannon_start_pose.location + sc.Location(0, args.position.y, 0)
+#        self.cannon_pose.orientation = sc.Quaternion.RotationAboutAxis(sc.AxisID.x, args.position.x)
+#        self.drag_obj.SetOffsetPose(self.cannon_pose)
+#        latest_command = self.scene.MakeCommandAfter(
+#            self.scene.FrontOfCommands(),
+#            sc.Target(self.cannon_id),
+#            sc.PlaceComponent("Whole", self.cannon_pose))
 
     def __init__(self,
                  scene: sc.Scene):
