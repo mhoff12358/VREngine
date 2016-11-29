@@ -79,7 +79,7 @@ Pose::Pose(Scale scale) : orientation_(), location_(), scale_(scale) {}
 Pose::Pose() : location_(), orientation_(Quaternion::Identity()), scale_() {}
 
 Pose Pose::ApplyAfter(const Pose& other) const {
-	return Pose(location_.Rotate(other.orientation_) + other.location_, other.orientation_ * orientation_, scale_ * other.scale_);
+	return Pose((location_ * other.scale_).Rotate(other.orientation_) + other.location_, other.orientation_ * orientation_, scale_ * other.scale_);
 }
 
 Pose Pose::Inverse() const {
@@ -88,7 +88,7 @@ Pose Pose::Inverse() const {
 
 Pose Pose::Delta(const Pose& other) const {
 	Quaternion inv = other.orientation_.Inverse() * orientation_;
-	return Pose((location_ - other.location_).Rotate(other.orientation_.Inverse()), inv);
+	return Pose((location_ - other.location_).Rotate(other.orientation_.Inverse()) * other.scale_.Inverse(), inv);
 }
 
 DirectX::XMMATRIX Pose::GetMatrix() const {

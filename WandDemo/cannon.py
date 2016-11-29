@@ -23,7 +23,7 @@ class Cannon(sc.DelegatingActor):
                  scene: sc.Scene):
         super().__init__()
 
-        self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4))
+        self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4), sc.Scale(0.25))
         self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0))
 
         self.scene = scene
