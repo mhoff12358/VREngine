@@ -87,7 +87,7 @@ class DraggableObject(sc.DelegatingActor):
 
     def MakePoseUpdatedCallbacks(self):
         if self.pose_updated_callback is not None:
-            self.pose_updated_callback(self.current_pose, self.GetPoseWithOffset())
+            self.pose_updated_callback(self.current_pose, self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose))
 
     @delegater(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):

@@ -24,13 +24,13 @@ class Cannon(sc.DelegatingActor):
         super().__init__()
 
         self.cannon_pose = sc.Pose(sc.Location(0, 1, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.y, 3.14/4))
-        self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0) * self.cannon_pose.scale).ApplyAfter(self.cannon_pose)
+        self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0))
 
         self.scene = scene
         self.drag_obj = draggable_object.DraggableObject(
-            collision_shapes = ((sc.CollisionShape(sc.Pose(), 0.1), sc.Pose()),),
+            collision_shapes = ((sc.CollisionShape(sc.Pose(), 0.1), self.cover_position),),
             starting_pose = sc.Pose(sc.Location(0, 0, 0)),
-            offset_pose = self.cover_position,
+            offset_pose = self.cannon_pose,
             draw_ball = True)
         scene.AddActor(self.drag_obj)
         latest_command = scene.FrontOfCommands()

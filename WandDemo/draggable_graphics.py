@@ -21,12 +21,10 @@ class DraggableGraphics(object):
             self.Dragged(*args, **kwargs)
         self.draggable_actor.SetPoseUpdatedCallback(DraggedClosure)
 
-    def Dragged(self, relative_pose, global_pose):
-        x = sc.Pose((self.parent_pose.location.Rotate(relative_pose.orientation) + relative_pose.location - self.parent_pose.location).Rotate(self.parent_pose.orientation.Inverse()),
-                    self.parent_pose.orientation.Inverse() * relative_pose.orientation * self.parent_pose.orientation)
+    def Dragged(self, global_pose, relative_pose):
         self.scene.MakeCommandAfter(
             self.scene.FrontOfCommands(),
             sc.Target(self.graphics_id),
             sc.PlaceComponent(
                 self.graphics_component,
-                self.graphics_pose.ApplyAfter(x)))
+                self.graphics_pose.ApplyAfter(relative_pose)))
