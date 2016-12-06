@@ -5,7 +5,13 @@ class DraggableObject(sc.DelegatingActor):
     command_delegation = sc.DelegatingActor.GetDefaultDelegation()
     delegater = sc.delegate_for_command(command_delegation)
 
-    def __init__(self, collision_shapes: typing.Iterable[typing.Tuple[sc.CollisionShape, sc.Pose]], starting_pose: sc.Pose = sc.Pose(), offset_pose: sc.Pose = sc.Pose(), draw_ball: bool = False):
+    def __init__(
+        self,
+        collision_shapes: typing.Iterable[typing.Tuple[sc.CollisionShape, sc.Pose]],
+        starting_pose: sc.Pose = sc.Pose(),
+        offset_pose: sc.Pose = sc.Pose(),
+        draw_ball: bool = False,
+        pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None):
         super().__init__()
 
         self.stored_pose = copy.copy(starting_pose)
@@ -15,7 +21,7 @@ class DraggableObject(sc.DelegatingActor):
 
         self.grab_pose = sc.Pose()
 
-        self.pose_updated_callback = None
+        self.pose_updated_callback = pose_updated_callback
 
         self.collision_sphere_id = draw_ball
 
@@ -35,7 +41,6 @@ class DraggableObject(sc.DelegatingActor):
 
     def SetOffsetPose(self, offset_pose):
         self.current_pose = self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose).ApplyAfter(offset_pose).UnapplyAfter(offset_pose)
-        print(self.current_pose)
         self.offset_pose = copy.copy(offset_pose)
         self.ReposeCollisionShapes(self.scene.FrontOfCommands())
         self.PlaceCollisionSphere(self.scene.FrontOfCommands())

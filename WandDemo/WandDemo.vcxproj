@@ -459,6 +459,7 @@
     <None Include="cpp_interface.lua" />
     <None Include="draggable_graphics.py" />
     <None Include="draggable_object.py" />
+    <None Include="drag_direction_graphics.py" />
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />
     <None Include="first_load.py" />

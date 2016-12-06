@@ -460,5 +460,8 @@
     <None Include="texture0.hlsli">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
+    <None Include="drag_direction_graphics.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -128,4 +128,9 @@
       <Filter>Python Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="registration.py">
+      <Filter>Python Files</Filter>
+    </None>
+  </ItemGroup>
 </Project>

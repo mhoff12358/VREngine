@@ -86,10 +86,11 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("AddActorToGroup", &game_scene::Scene::AddActorToGroup)
 		.def("RemoveActorFromGroup", &game_scene::Scene::RemoveActorFromGroup);
 
-	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", no_init)
+	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", init<>())
 		.def("Register", &game_scene::RegistryMap::Register)
 		.def("IdFromName", &game_scene::RegistryMap::IdFromName)
-		.def("LookupName", &game_scene::RegistryMap::LookupName);
+		.def("LookupName", &game_scene::RegistryMap::LookupName)
+		.def("AddRegistrationsFrom", &game_scene::RegistryMap::AddRegistrationsFrom);
 
 	class_<game_scene::CommandType, boost::noncopyable>("CommandType", no_init)
 		.def_readonly("ADDED_TO_SCENE", &game_scene::CommandType::ADDED_TO_SCENE);

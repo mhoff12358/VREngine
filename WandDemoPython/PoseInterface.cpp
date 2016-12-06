@@ -64,6 +64,8 @@ void PoseInterface() {
 		.staticmethod("Identity")
 		.def("RotationAboutAxis", &Quaternion::RotationAboutAxis)
 		.staticmethod("RotationAboutAxis")
+		.def("RotationBetweenLocations", (Quaternion(*)(const Location&, const Location&, float))&Quaternion::RotationBetweenLocations)
+		.staticmethod("RotationBetweenLocations")
 		.def("__copy__", &CopyObject<Quaternion>);
 
 	enum_<AxisID>("AxisID")

@@ -242,6 +242,7 @@
     <ClCompile Include="Shaders.cpp" />
     <ClCompile Include="ShaderSettings.cpp" />
     <ClCompile Include="ShaderStages.cpp" />
+    <ClCompile Include="stl.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TextureCopy.cpp" />
     <ClCompile Include="TextureView.cpp" />

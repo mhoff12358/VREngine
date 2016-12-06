@@ -1,12 +1,29 @@
 #include "stdafx.h"
 #include "Quaternion.h"
 
-float dot(array<float, 3> u, array<float, 3> v) {
+float dot(const array<float, 3>& u, const array<float, 3>& v) {
 	return u[0] * v[0] + u[1] * v[1] + u[2] * v[2];
 }
 
-array<float, 3> cross(array<float, 3> u, array<float, 3> v) {
+array<float, 3> cross(const array<float, 3>& u, const array<float, 3>& v) {
 	return array<float, 3>({ u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0] });
+}
+
+unsigned int get_nonzero_index(const array<float, 3>& u, const array<float, 3>& v) {
+	for (unsigned int i = 0; i < 3; i++) {
+		if (!FloatsAlmostEqual(u[i], 0) && !FloatsAlmostEqual(v[i], 0)) {
+			return i;
+		}
+	}
+	return 3;
+}
+
+bool get_same_direction(const array<float, 3>& u, const array<float, 3>& v) {
+	unsigned int i = get_nonzero_index(u, v);
+	if ((i < 3) && u[i] / v[i] < 0) {
+		return false;
+	}
+	return true;
 }
 
 array<float, 3> vertex_normalize(array<float, 3> in_vert) {
@@ -122,6 +139,17 @@ Quaternion Quaternion::Slerp(const Quaternion& q0, const Quaternion& q1, float w
 
 Quaternion Quaternion::RotationBetweenVectors(const std::array<float, 3>& start_vec, const std::array<float, 3>& end_vec, float proportion_of_angle) {
 	std::array<float, 3> rotation_vector = cross(start_vec, end_vec);
+	if (FloatsAlmostEqual(rotation_vector[0], 0) && FloatsAlmostEqual(rotation_vector[1], 0) && FloatsAlmostEqual(rotation_vector[2], 0)) {
+		// The input vectors are some scale of eachother or one is the zero vector
+		// If they are a positive scale or one is the 0 vector then the result should be the identity Quaternion
+		// Otherwise they are negative scales of each other and the rotation should be a 180 degree rotation through an arbitrary axis
+		if (get_same_direction(start_vec, end_vec)) {
+			return Quaternion::Identity();
+		}
+		else {
+			return Quaternion::RotationAboutAxis(AID_X, 3.14159265359);
+		}
+	}
 	rotation_vector = vertex_normalize(rotation_vector);
 	float dot_prod = ::dot(vertex_normalize(start_vec), vertex_normalize(end_vec));
 	dot_prod = max(min(dot_prod, 1.0f), -1.0f);
@@ -131,6 +159,10 @@ Quaternion Quaternion::RotationBetweenVectors(const std::array<float, 3>& start_
 		rotation_vector[1] * sin(angle_between / 2.0f),
 		rotation_vector[2] * sin(angle_between / 2.0f),
 		cos(angle_between / 2.0f));
+}
+
+Quaternion Quaternion::RotationBetweenLocations(const Location& start_loc, const Location& end_loc, float proportion_of_angle) {
+	return RotationBetweenVectors(start_loc.location_, end_loc.location_, proportion_of_angle);
 }
 
 Quaternion Quaternion::Identity() {

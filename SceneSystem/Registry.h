@@ -16,6 +16,8 @@ constexpr IdType FNV(const char* string) {
 
 class RegistryMap {
 public:
+	void AddRegistrationsFrom(RegistryMap& other);
+
 	IdType Register(string new_value) {
 		GetRegistries().push_back(new_value);
 		const auto& mapping = GetMapping();

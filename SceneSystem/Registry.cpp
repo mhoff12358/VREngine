@@ -13,4 +13,10 @@ RegistryMap& CommandRegistry::GetRegistry() {
 	return mapping;
 }
 
+void RegistryMap::AddRegistrationsFrom(RegistryMap& other) {
+	for (const string& registration : other.GetRegistries()) {
+		Register(registration);
+	}
+}
+
 }  // game_scene

@@ -35,7 +35,34 @@ def first_load(resources):
                    path.Line(sc.Location(1, 0.5, 0), sc.Location(0, 1, 0), 0.1))),
         path_sample_rate=1))
 
-    cannon1 = cannon.Cannon(scene)
+    # Makes the circular path
+    num_samples = 10
+    theta_samples = tuple(
+        math.pi * 2 * i / num_samples for i in range(
+            num_samples + 1))
+    lines = tuple(
+        path.Line(
+            sc.Location(
+                math.cos(
+                    theta_samples[i]),
+                1,
+                math.sin(
+                    theta_samples[i])),
+            sc.Location(
+                math.cos(
+                    theta_samples[
+                        i + 1]),
+                1,
+                math.sin(
+                    theta_samples[
+                        i + 1])),
+            0.1) for i in range(num_samples))
+    drag_circle = path_draggable_object.PathDraggableObject(
+        path.Path(lines, circular=True), path_sample_rate=1)
+    scene.AddActor(drag_circle)
+
+
+    cannon1 = cannon.Cannon()
     scene.AddActor(cannon1)
 
     import code
