@@ -1,5 +1,5 @@
 import scene_system as sc
-import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, cannon, shell
+import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, mech_system, shell
 import collections
 import math
 
@@ -62,10 +62,33 @@ def first_load(resources):
     scene.AddActor(drag_circle)
 
 
-    cannon1 = cannon.Cannon()
-    scene.AddActor(cannon1)
-    shell1 = shell.Shell()
-    scene.AddActor(shell1)
+    mech = mech_system.MechSystem(
+        cannon_details = (
+            {
+                "starting_pose": sc.Pose(sc.Location(0, 1, 0)),
+                "size": 0.5,
+            },
+        ),
+        shell_details = (
+            {
+                "shell_attributes" : shell.ShellAttributes(power = 0),
+                "starting_pose" : sc.Pose(sc.Location(-1, 1, -0.5)),
+             },
+            {
+                "shell_attributes" : shell.ShellAttributes(power = 1, is_flare = True),
+                "starting_pose" : sc.Pose(sc.Location(-1, 1, 0)),
+             },
+            {
+                "shell_attributes" : shell.ShellAttributes(power = 1),
+                "starting_pose" : sc.Pose(sc.Location(-1, 1, 0.5)),
+             }
+            ))
+    scene.AddActor(mech)
+
+    #cannon1 = cannon.Cannon()
+    #scene.AddActor(cannon1)
+    #shell1 = shell.Shell(sc.Pose(sc.Location(-1, 1, 0)))
+    #scene.AddActor(shell1)
 
     import code
     a = globals()

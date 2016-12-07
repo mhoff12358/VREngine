@@ -1,5 +1,5 @@
 import scene_system as sc
-import draggable_object
+import draggable_object, path
 from itertools import *
 import copy
 
@@ -82,13 +82,15 @@ class PathDraggableObject(draggable_object.DraggableObject):
                 sc.VectorComponentInfo((sc.ComponentInfo("", "path"),))))
         latest_command = self.PlacePath(latest_command)
 
+    default_pose_updated_extra_response = {"path_sample" : path.NearestPoint(sample = 0, found = True, distance_squared = 0)}
+    
     def ProposePose(self, proposed_pose):
         proposed_pose = self.offset_pose.ApplyAfter(proposed_pose).Delta(self.offset_pose)
         nearest = self.paths.FindNearest(
             proposed_pose.location, return_distance_squared=True)
         if not nearest.found:
-            return None
+            return (None, None)
 
         new_pose = self.paths.At(nearest.sample)
         new_pose.scale = proposed_pose.scale
-        return new_pose.ApplyAfter(self.offset_pose).UnapplyAfter(self.offset_pose)
+        return (new_pose.ApplyAfter(self.offset_pose).UnapplyAfter(self.offset_pose), {"path_sample" : nearest})

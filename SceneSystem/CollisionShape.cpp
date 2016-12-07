@@ -11,7 +11,6 @@ bool CollisionShape::Intersect(const CollisionShape& other) const {
 		return false;
 	}
 	float radius_sum = other.radius_ + radius_;
-	std::cout << (location_ - other.location_).GetLengthSquared() << std::endl;
 	return (location_ - other.location_).GetLengthSquared() <= pow(radius_sum, 2);
 }
 

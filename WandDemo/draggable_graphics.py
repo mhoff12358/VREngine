@@ -1,6 +1,6 @@
 import scene_system as sc
 import draggable_object
-import copy
+import copy, functools
 
 class DraggableGraphics(object):
     def __init__(self,
@@ -18,11 +18,9 @@ class DraggableGraphics(object):
         self.current_dragged_pose = sc.Pose()
         self.delta_pose = copy.copy(delta_pose)
 
-        def DraggedClosure(*args, **kwargs):
-            self.Dragged(*args, **kwargs)
-        self.draggable_actor.SetPoseUpdatedCallback(DraggedClosure)
+        self.draggable_actor.AddPoseUpdatedCallback(functools.partial(self.Dragged))
 
-    def Dragged(self, global_pose, relative_pose):
+    def Dragged(self, global_pose, relative_pose, **kwargs):
         self.current_dragged_pose = copy.copy(relative_pose)
         self.ReposeGraphics()
 

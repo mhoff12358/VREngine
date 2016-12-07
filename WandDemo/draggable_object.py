@@ -12,7 +12,8 @@ class DraggableObject(sc.DelegatingActor):
         offset_pose: sc.Pose = sc.Pose(),
         preface_pose: sc.Pose = sc.Pose(),
         draw_ball: bool = False,
-        pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None):
+        pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None,
+        pose_updated_callbacks: typing.Iterator[typing.Callable[[sc.Pose, sc.Pose], None]] = ()):
         super().__init__()
 
         self.stored_pose = copy.copy(starting_pose)
@@ -23,15 +24,17 @@ class DraggableObject(sc.DelegatingActor):
 
         self.grab_pose = sc.Pose()
 
-        self.pose_updated_callback = pose_updated_callback
+        self.pose_updated_callbacks = list(pose_updated_callbacks)
+        if pose_updated_callback is not None:
+            self.pose_updated_callbacks.append(pose_updated_callback)
 
         self.collision_sphere_id = draw_ball
 
     def GetPoseWithOffset(self):
         return self.offset_pose.ApplyAfter(self.current_pose)
 
-    def SetPoseUpdatedCallback(self, callback):
-        self.pose_updated_callback = callback
+    def AddPoseUpdatedCallback(self, callback):
+        self.pose_updated_callbacks.append(callback)
 
     def ReposeCollisionShapes(self, latest_command):
         for i in range(len(self.collision_shape_offsets)):
@@ -49,7 +52,7 @@ class DraggableObject(sc.DelegatingActor):
         self.MakePoseUpdatedCallbacks()
 
     def ProposePose(self, proposed_pose):
-        return proposed_pose
+        return (proposed_pose, None)
 
     def MakeCollisionSphere(self):
         self.collision_sphere_id = self.scene.AddAndConstructGraphicsObject().id
@@ -96,9 +99,12 @@ class DraggableObject(sc.DelegatingActor):
                     "Sphere",
                     sc.Pose(draw_pose.location, draw_pose.orientation, sc.Scale(0.075))))
 
-    def MakePoseUpdatedCallbacks(self):
-        if self.pose_updated_callback is not None:
-            self.pose_updated_callback(self.current_pose, self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose))
+    default_pose_updated_extra_response = {}
+    def MakePoseUpdatedCallbacks(self, extra_response = None):
+        if extra_response is None:
+            extra_response = self.default_pose_updated_extra_response
+        for callback in self.pose_updated_callbacks:
+            callback(self.current_pose, self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose), **extra_response)
 
     @delegater(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
@@ -118,15 +124,17 @@ class DraggableObject(sc.DelegatingActor):
             self.collision_sphere_id = None
         self.MakePoseUpdatedCallbacks()
 
-    @delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
-    def HandleControllerMovementWhileGrabbed(self, args):
-        proposed_pose = self.controller_pose_delta.ApplyAfter(args.position)
-        responded_pose = self.ProposePose(proposed_pose)
+    def SetNewPose(self, new_pose):
+        (responded_pose, extra_response) = self.ProposePose(new_pose)
         if responded_pose is not None:
             self.current_pose = responded_pose
-            self.MakePoseUpdatedCallbacks()
+            self.MakePoseUpdatedCallbacks(extra_response)
             if self.collision_sphere_id is not None:
                 self.PlaceCollisionSphere(self.scene.FrontOfCommands())
+
+    @delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
+    def HandleControllerMovementWhileGrabbed(self, args):
+        self.SetNewPose(self.controller_pose_delta.ApplyAfter(args.position))
 
     @delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
     def HandleGrabbed(self, args):

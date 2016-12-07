@@ -1,26 +1,26 @@
 import scene_system as sc
 import math
 
+class NearestPoint(object):
+
+    def __init__(self, sample, found, distance_squared=None):
+        self.sample = sample
+        self.found = found
+        self.distance_squared = distance_squared
+
 class PathPart(object):
 
     def At(self, sample):
         return sc.Pose()
 
     def FindNearest(self, location, return_distance_squared=False):
-        return self.NearestPoint(
+        return NearestPoint(
             sample=0,
             found=False,
             distance_squared=0 if return_distance_squared else None)
 
     def AsPath(self):
         return Path((self,))
-
-    class NearestPoint(object):
-
-        def __init__(self, sample, found, distance_squared=None):
-            self.sample = sample
-            self.found = found
-            self.distance_squared = distance_squared
 
 
 class Line(PathPart):
@@ -57,7 +57,7 @@ class Line(PathPart):
         else:
             dist_squared = b.GetLengthSquared() - pow(projected_length, 2)
 
-        return PathPart.NearestPoint(
+        return NearestPoint(
             sample, dist_squared <= self.radius_sq, dist_squared)
 
 
@@ -98,7 +98,7 @@ class Path(PathPart):
         return path_vertices
 
     def FindNearest(self, location, return_distance_squared=False):
-        nearest = PathPart.NearestPoint(
+        nearest = NearestPoint(
             sample=float('inf'),
             found=False,
             distance_squared=float('inf'))
