@@ -8,13 +8,15 @@ class DraggableGraphics(object):
                  draggable_actor: draggable_object.DraggableObject,
                  graphics_id: sc.ActorId,
                  graphics_component: str,
-                 graphics_pose: sc.Pose = sc.Pose()):
+                 graphics_pose: sc.Pose = sc.Pose(),
+                 delta_pose: sc.Pose = sc.Pose()):
         self.scene = scene
         self.draggable_actor = draggable_actor
         self.graphics_id = graphics_id
         self.graphics_component = graphics_component
         self.graphics_pose = copy.copy(graphics_pose)
         self.current_dragged_pose = sc.Pose()
+        self.delta_pose = copy.copy(delta_pose)
 
         def DraggedClosure(*args, **kwargs):
             self.Dragged(*args, **kwargs)
@@ -34,4 +36,4 @@ class DraggableGraphics(object):
             sc.Target(self.graphics_id),
             sc.PlaceComponent(
                 self.graphics_component,
-                self.graphics_pose.ApplyAfter(self.current_dragged_pose)))
+                self.graphics_pose.ApplyAfter(self.current_dragged_pose.UnapplyAfter(self.delta_pose))))

@@ -10,6 +10,7 @@ class DraggableObject(sc.DelegatingActor):
         collision_shapes: typing.Iterable[typing.Tuple[sc.CollisionShape, sc.Pose]],
         starting_pose: sc.Pose = sc.Pose(),
         offset_pose: sc.Pose = sc.Pose(),
+        preface_pose: sc.Pose = sc.Pose(),
         draw_ball: bool = False,
         pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None):
         super().__init__()
@@ -17,6 +18,7 @@ class DraggableObject(sc.DelegatingActor):
         self.stored_pose = copy.copy(starting_pose)
         self.current_pose = copy.copy(self.stored_pose)
         self.offset_pose = copy.copy(offset_pose)
+        self.preface_pose = copy.copy(preface_pose)
         self.collision_shapes, self.collision_shape_offsets = zip(*collision_shapes)
 
         self.grab_pose = sc.Pose()
@@ -85,13 +87,14 @@ class DraggableObject(sc.DelegatingActor):
         return latest_command
 
     def PlaceCollisionSphere(self, latest_command):
-        draw_pose = self.collision_shape_offsets[0].ApplyAfter(self.GetPoseWithOffset())
-        self.scene.MakeCommandAfter(
-            latest_command,
-            sc.Target(self.collision_sphere_id),
-            sc.PlaceComponent(
-                "Sphere",
-                sc.Pose(draw_pose.location, draw_pose.orientation, sc.Scale(0.075))))
+        if self.collision_sphere_id is not None:
+            draw_pose = self.collision_shape_offsets[0].ApplyAfter(self.GetPoseWithOffset())
+            self.scene.MakeCommandAfter(
+                latest_command,
+                sc.Target(self.collision_sphere_id),
+                sc.PlaceComponent(
+                    "Sphere",
+                    sc.Pose(draw_pose.location, draw_pose.orientation, sc.Scale(0.075))))
 
     def MakePoseUpdatedCallbacks(self):
         if self.pose_updated_callback is not None:

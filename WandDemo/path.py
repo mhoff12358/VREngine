@@ -4,13 +4,16 @@ import math
 class PathPart(object):
 
     def At(self, sample):
-        return sc.Location(0, 0, 0)
+        return sc.Pose()
 
     def FindNearest(self, location, return_distance_squared=False):
         return self.NearestPoint(
             sample=0,
             found=False,
             distance_squared=0 if return_distance_squared else None)
+
+    def AsPath(self):
+        return Path((self,))
 
     class NearestPoint(object):
 
@@ -22,15 +25,20 @@ class PathPart(object):
 
 class Line(PathPart):
 
-    def __init__(self, p0, p1, radius):
+    def __init__(self, p0, p1, radius, o0 = sc.Quaternion.Identity(), o1 = None):
         self.start = p0
         delta = (p1 - p0)
         self.direction = delta.GetNormalized()
         self.length = delta.GetLength()
         self.radius_sq = pow(radius, 2)
+        self.start_orientation = o0
+        if o1 is not None:
+            self.delta_rotation = o0.Inverse() * o1
+        else:
+            self.delta_rotation = sc.Quaternion.Identity()
 
     def At(self, t):
-        return self.start + self.direction * (t * self.length)
+        return sc.Pose(self.start + self.direction * (t * self.length), self.start_orientation * self.delta_rotation.ToPower(t))
 
     def FindNearest(self, location, return_distance_squared=False):
         b = location - self.start
@@ -82,10 +90,10 @@ class Path(PathPart):
         else:
             assert(len(path_sample_rates) == len(self.paths))
 
-        path_vertices = [sc.ArrayFloat3(self.paths[0].At(0))]
+        path_vertices = [sc.ArrayFloat3(self.paths[0].At(0).location)]
         for path, sample_rate in zip(self.paths, path_sample_rates):
             for sample_fraction in range(0, sample_rate):
-                vertex_location = path.At((sample_fraction + 1) / sample_rate)
+                vertex_location = path.At((sample_fraction + 1) / sample_rate).location
                 path_vertices.append(sc.ArrayFloat3(vertex_location))
         return path_vertices
 

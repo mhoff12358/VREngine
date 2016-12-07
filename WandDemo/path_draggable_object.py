@@ -7,15 +7,17 @@ class PathDraggableObject(draggable_object.DraggableObject):
     command_delegation = draggable_object.DraggableObject.GetDefaultDelegation()
     delegater = sc.delegate_for_command(command_delegation)
 
-    def __init__(self, paths, path_sample_rates=None, path_sample_rate=5):
+    def __init__(self, paths, path_sample_rates=None, path_sample_rate=5, *args, **kwargs):
         self.radius = 0.1
 
         self.paths = paths
         self.path_vertices = self.paths.CreateSamples(
             path_sample_rates, path_sample_rate)
 
+        self.path_start = self.paths.At(0)
+
         super().__init__(((sc.CollisionShape(sc.Pose(), self.radius), sc.Pose()),),
-                         starting_pose = sc.Pose(self.paths.At(0)), draw_ball = True)
+                         starting_pose = self.path_start, *args, **kwargs)
 
     def SetOffsetPose(self, offset_pose):
         super().SetOffsetPose(offset_pose)
@@ -87,5 +89,6 @@ class PathDraggableObject(draggable_object.DraggableObject):
         if not nearest.found:
             return None
 
-        proposed_pose.location = self.paths.At(nearest.sample)
-        return proposed_pose.ApplyAfter(self.offset_pose).UnapplyAfter(self.offset_pose)
+        new_pose = self.paths.At(nearest.sample)
+        new_pose.scale = proposed_pose.scale
+        return new_pose.ApplyAfter(self.offset_pose).UnapplyAfter(self.offset_pose)

@@ -476,6 +476,7 @@
     <None Include="positionable.lua" />
     <None Include="projectile.lua" />
     <None Include="reticle.lua" />
+    <None Include="shell.py" />
     <None Include="skybox.lua" />
     <None Include="cbuff_solid_color.hlsli" />
     <None Include="sun.lua" />

@@ -463,5 +463,8 @@
     <None Include="drag_direction_graphics.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="shell.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

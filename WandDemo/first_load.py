@@ -1,5 +1,5 @@
 import scene_system as sc
-import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, cannon
+import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, cannon, shell
 import collections
 import math
 
@@ -64,6 +64,8 @@ def first_load(resources):
 
     cannon1 = cannon.Cannon()
     scene.AddActor(cannon1)
+    shell1 = shell.Shell()
+    scene.AddActor(shell1)
 
     import code
     a = globals()
