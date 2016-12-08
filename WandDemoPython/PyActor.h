@@ -48,7 +48,7 @@ public:
 		} catch (error_already_set) {
 			PyErr_Print();
 		}
-		return extract<std::auto_ptr<game_scene::QueryResult>>(a);
+		return extract<std::auto_ptr<game_scene::QueryResult>>(a.attr("Extract")());
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) override;
 

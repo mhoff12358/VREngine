@@ -44,12 +44,11 @@ class Cannon(sc.DelegatingActor):
     def TryLoadShell(self, shell_id) -> bool:
         if self.cover_status != CoverStatus.OPEN or self.IsLoaded():
             return False
-        import pdb; pdb.set_trace()
         query_args = sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES))
         target = sc.Target(shell_id)
-        shell_attr_res =self.scene.AskQuery(target, query_args)
+        shell_attr_res = self.scene.AskQuery(target, query_args)
         self.loaded_shell_attributes = shell_attr_res.shell_attributes
-        print("Loaded: ", loaded_shell_attributes.power, loaded_shell_attributes.is_flare)
+        print("Loaded: ", self.loaded_shell_attributes.power, self.loaded_shell_attributes.is_flare)
         return True
 
     def GetLoadingCollision(self):

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "PyScene.h"
+#include "PyQueryResult.h"
 
 namespace PyScene {
 
@@ -28,8 +29,19 @@ boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, PyAc
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
 
-std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args) {
-	return std::auto_ptr<game_scene::QueryResult>(self.AskQuery(target, args).release());
+//std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args) {
+//	return std::auto_ptr<game_scene::QueryResult>(self.AskQuery(target, args).release());
+//}
+
+object AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args) {
+	game_scene::QueryResult* a = self.AskQuery(target, args).release();
+	PyQueryResult* b = dynamic_cast<PyQueryResult*>(a);
+	if (b) {
+		return b->self_;
+	}
+	object c;
+	c = object(std::auto_ptr<game_scene::QueryResult>(a));
+	return c;
 }
 
 }  // PyScene

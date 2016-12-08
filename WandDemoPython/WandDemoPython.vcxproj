@@ -152,6 +152,7 @@
     <ClCompile Include="ModelCreationInterface.cpp" />
     <ClCompile Include="PoseInterface.cpp" />
     <ClCompile Include="PyActor.cpp" />
+    <ClCompile Include="PyQueryResult.cpp" />
     <ClCompile Include="PyScene.cpp" />
     <ClCompile Include="SceneSystemPython.cpp" />
     <ClCompile Include="StlInterface.cpp" />
@@ -206,6 +207,7 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
+    <None Include="query_result.py" />
     <None Include="registration.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

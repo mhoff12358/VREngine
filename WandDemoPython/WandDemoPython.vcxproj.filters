@@ -60,6 +60,9 @@
     <ClCompile Include="PyScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PyQueryResult.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PyActor.h">
@@ -133,6 +136,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="registration.py">
+      <Filter>Python Files</Filter>
+    </None>
+    <None Include="query_result.py">
       <Filter>Python Files</Filter>
     </None>
   </ItemGroup>

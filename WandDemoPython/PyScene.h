@@ -59,6 +59,7 @@ game_scene::CommandQueueLocation MakeCommandAfter(game_scene::Scene& self, game_
 	return self.MakeCommandAfter(location, game_scene::Command(target, unique_ptr<game_scene::CommandArgs>(dynamic_cast<game_scene::CommandArgs*>(args.release()))));
 }
 
-std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args);
+//std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args);
+object AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args);
 
 }  // PyScene

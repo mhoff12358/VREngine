@@ -63,8 +63,7 @@ class Shell(sc.DelegatingActor):
 
     @delegater.RegisterQuery(int(ShellQueries.GET_ATTRIBUTES))
     def HandleGetAttributes(self, args):
-        return sc.Temp(int(ShellQueries.GET_ATTRIBUTES))
-        #return RespondShellAttributes(copy.copy(self.shell_attributes))
+        return RespondShellAttributes(copy.copy(self.shell_attributes))
 
     def LoadGraphicsResources(self, latest_command):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
