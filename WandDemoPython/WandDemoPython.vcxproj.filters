@@ -113,6 +113,9 @@
     <ClInclude Include="BezierCurvesInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="PyQueryResult.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="__init__.py">

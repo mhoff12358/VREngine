@@ -4,8 +4,7 @@ from itertools import *
 import copy
 
 class PathDraggableObject(draggable_object.DraggableObject):
-    command_delegation = draggable_object.DraggableObject.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(draggable_object.DraggableObject)
 
     def __init__(self, paths, path_sample_rates=None, path_sample_rate=5, *args, **kwargs):
         self.radius = 0.1
@@ -31,7 +30,7 @@ class PathDraggableObject(draggable_object.DraggableObject):
                 "path",
                 self.offset_pose))
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         super().HandleAddToScene(args)
         latest_command = self.scene.FrontOfCommands()

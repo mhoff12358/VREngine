@@ -2,14 +2,13 @@ import scene_system as sc
 
 
 class MutableGraphicalObject(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     def __init__(self):
         super(sc.DelegatingActor, self).__init__()
         self.EmbedSelf(self)
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.scene.MakeCommandAfter(
@@ -68,7 +67,7 @@ class MutableGraphicalObject(sc.DelegatingActor):
                 "square",
                 sc.Pose(sc.Location(0, 0, -3))))
 
-    @delegater(sc.IOInterfaceCommand.LISTEN_KEY_PRESS)
+    @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_KEY_PRESS)
     def HandleKeyToggle(self, args):
         model_mutation = sc.ModelMutation()
         model_mutation.AddVertexBlock(

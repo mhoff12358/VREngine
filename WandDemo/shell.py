@@ -16,8 +16,7 @@ class RespondShellAttributes(sc.QueryResult):
         self.shell_attributes = shell_attributes
 
 class Shell(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     def __init__(self, shell_attributes: ShellAttributes, starting_pose: sc.Pose = sc.Pose(), size: float = 1, reposed_callback = None):
         super().__init__()
@@ -45,7 +44,7 @@ class Shell(sc.DelegatingActor):
     def GetLoadingCollision(self):
         return self.loading_collision
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.LoadGraphicsResources(latest_command)
@@ -62,10 +61,10 @@ class Shell(sc.DelegatingActor):
             graphics_component = "Cylinder",
             graphics_pose = sc.Pose(sc.Scale(0.1, 0.2, 0.1)))
 
-    @delegater(ShellQueries.GET_ATTRIBUTES)
+    @delegater.RegisterQuery(int(ShellQueries.GET_ATTRIBUTES))
     def HandleGetAttributes(self, args):
-        import pdb; pdb.set_trace()
-        return RespondShellAttributes(copy.copy(self.shell_attributes))
+        return sc.Temp(int(ShellQueries.GET_ATTRIBUTES))
+        #return RespondShellAttributes(copy.copy(self.shell_attributes))
 
     def LoadGraphicsResources(self, latest_command):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id

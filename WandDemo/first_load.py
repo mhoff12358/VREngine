@@ -5,19 +5,15 @@ import math
 
 
 class DummyActor(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     def __init__(self):
         super(DummyActor, self).__init__()
         self.EmbedSelf(self)
 
-    def AnswerQuery(self, query_args):
-        print("RECEIVED QUERY ARGS OF TYPE", query_args.Type())
-        return QueryResult(query_args.Type())
-
+    @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTICK(self, command_args):
         print("RECEIVED COMMAND OF TYPE TICK", command_args.duration)
-    command_delegation[sc.InputCommand.TICK] = HandleTICK
 
 
 def first_load(resources):

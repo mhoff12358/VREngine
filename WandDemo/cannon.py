@@ -16,8 +16,7 @@ class CoverStatus(enum.Enum):
     CLOSED = 2
 
 class Cannon(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     def __init__(self, starting_pose: sc.Pose, size: float):
         super().__init__()
@@ -73,7 +72,7 @@ class Cannon(sc.DelegatingActor):
         else:
             self.SetCoverStatus(CoverStatus.MIXED)
 
-    @delegater(CannonCommands.AIM_CANNON)
+    @delegater.RegisterCommand(CannonCommands.AIM_CANNON)
     def HandleAimCannon(self, args: AimCannon):
         self.cannon_pose.orientation = args.aim
         self.UpdateCannonPose()
@@ -87,12 +86,12 @@ class Cannon(sc.DelegatingActor):
         self.cover_drag.SetOffsetPose(self.cannon_pose)
         self.loading_collision.SetPose(self.loading_collision_center.ApplyAfter(self.cannon_pose))
 
-    @delegater(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
+    @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):
         if self.IsLoaded() and self.cover_status == CoverStatus.CLOSED:
             self.Fire()
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
         self.scene.MakeCommandAfter(
             self.scene.FrontOfCommands(),

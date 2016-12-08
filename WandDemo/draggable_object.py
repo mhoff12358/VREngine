@@ -2,8 +2,7 @@ import scene_system as sc
 import collections, copy, typing
 
 class DraggableObject(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     def __init__(
         self,
@@ -106,7 +105,7 @@ class DraggableObject(sc.DelegatingActor):
         for callback in self.pose_updated_callbacks:
             callback(self.current_pose, self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose), **extra_response)
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.scene.MakeCommandAfter(
@@ -132,11 +131,11 @@ class DraggableObject(sc.DelegatingActor):
             if self.collision_sphere_id is not None:
                 self.PlaceCollisionSphere(self.scene.FrontOfCommands())
 
-    @delegater(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
+    @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
     def HandleControllerMovementWhileGrabbed(self, args):
         self.SetNewPose(self.controller_pose_delta.ApplyAfter(args.position))
 
-    @delegater(sc.GrabbableObjectCommand.OBJECT_GRABBED)
+    @delegater.RegisterCommand(sc.GrabbableObjectCommand.OBJECT_GRABBED)
     def HandleGrabbed(self, args):
         if args.held:
             self.controller_pose_delta = self.current_pose.Delta(args.position)

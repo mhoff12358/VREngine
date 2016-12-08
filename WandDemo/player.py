@@ -2,8 +2,7 @@ import scene_system as sc
 
 
 class Player(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     motion_modifiers = {
         ord('W'): (2, -1),
@@ -25,7 +24,7 @@ class Player(sc.DelegatingActor):
         self.motion_scale = 0
         self.move_speed = 0.003
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
         print("Player added to the scene")
         scene = self.GetScene()
@@ -50,7 +49,7 @@ class Player(sc.DelegatingActor):
                 sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
         self.entity_handler = graphics_resources.GetEntityHandler()
 
-    @delegater(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
+    @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
         self.yaw += args.motion[0] * -0.002
         self.yaw = self.yaw % (3.14 * 2)
@@ -60,7 +59,7 @@ class Player(sc.DelegatingActor):
             sc.AxisID.y, self.yaw) * sc.Quaternion.RotationAboutAxis(sc.AxisID.x, self.pitch)
         self.PushPose()
 
-    @delegater(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
+    @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
     def HandleKeyToggle(self, args):
         if args.key in self.motion_modifiers:
             motion_modifier = self.motion_modifiers[args.key]
@@ -76,7 +75,7 @@ class Player(sc.DelegatingActor):
             else:
                 self.motion_scale = 0
 
-    @delegater(sc.InputCommand.TICK)
+    @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTick(self, args):
         if self.motion_scale:
             self.location += self.motion.Rotate(

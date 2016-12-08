@@ -20,6 +20,7 @@
 
 #include "PyActor.h"
 #include "PyScene.h"
+#include "PyQueryResult.h"
 #include "StlHelper.h"
 #include "PythonClassHelpers.h"
 
@@ -38,10 +39,16 @@ BOOST_PTR_MAGIC_STRUCT(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
+//BOOST_PTR_MAGIC_STRUCT(PyQueryResult)
 BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
+
+class Temp : public game_scene::QueryResult {
+public:
+	Temp(game_scene::IdType a) : game_scene::QueryResult(a) {}
+};
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
@@ -56,8 +63,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	class_<game_scene::QueryArgs, boost::noncopyable>("QueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);
 
-	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("QueryResult", init<game_scene::IdType>())
+	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("RawQueryResult", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryResult::Type);
+
+	//class_<Temp, bases<game_scene::QueryResult>, boost::noncopyable>("Temp", init<game_scene::IdType>());
+
+	class_<PyQueryResult, bases<game_scene::QueryResult>, boost::noncopyable>("QueryResult", init<object, game_scene::IdType>());
+		//.def("__init__", &PyQueryResult::Factory);
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("CommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

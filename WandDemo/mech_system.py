@@ -3,8 +3,7 @@ import shell, cannon
 import math, functools
 
 class MechSystem(sc.DelegatingActor):
-    command_delegation = sc.DelegatingActor.GetDefaultDelegation()
-    delegater = sc.delegate_for_command(command_delegation)
+    delegater = sc.Delegater(sc.DelegatingActor)
 
     default_cannon_details = {
         "starting_pose": sc.Pose(),
@@ -42,7 +41,7 @@ class MechSystem(sc.DelegatingActor):
         actual_shell_details.update(shell_details)
         return shell.Shell(reposed_callback = self.shell_reposed_callback, **actual_shell_details)
 
-    @delegater(sc.CommandType.ADDED_TO_SCENE)
+    @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
         self.cannons = list(map(self.CannonDetailsToCannon, self.cannon_details))
         self.cannon_details = None
