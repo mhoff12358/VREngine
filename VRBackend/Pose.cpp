@@ -78,6 +78,18 @@ Pose::Pose(Quaternion orientation) : orientation_(orientation), location_(), sca
 Pose::Pose(Scale scale) : orientation_(), location_(), scale_(scale) {}
 Pose::Pose() : location_(), orientation_(Quaternion::Identity()), scale_() {}
 
+Pose Pose::WithoutLocation() const {
+	return Pose(orientation_, scale_);
+}
+
+Pose Pose::WithoutOrientation() const {
+	return Pose(location_, scale_);
+}
+
+Pose Pose::WithoutScale() const {
+	return Pose(location_, orientation_);
+}
+
 Pose Pose::ApplyAfter(const Pose& other) const {
 	return Pose((location_ * other.scale_).Rotate(other.orientation_) + other.location_, other.orientation_ * orientation_, scale_ * other.scale_);
 }

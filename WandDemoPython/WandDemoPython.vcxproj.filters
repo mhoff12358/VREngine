@@ -133,13 +133,11 @@
     <Text Include="actor.py">
       <Filter>Python Files</Filter>
     </Text>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="registration.py">
+    <Text Include="command_and_query.py">
       <Filter>Python Files</Filter>
-    </None>
-    <None Include="command_and_query.py">
+    </Text>
+    <Text Include="registration.py">
       <Filter>Python Files</Filter>
-    </None>
+    </Text>
   </ItemGroup>
 </Project>

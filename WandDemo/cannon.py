@@ -3,11 +3,11 @@ import draggable_graphics, draggable_object, path_draggable_object, path, drag_d
 import math, enum, functools, copy
 
 class CannonCommands(sc.CommandRegistration):
-    AIM_CANNON = None
+    AIM_CANNON = ()
 
 class AimCannon(sc.CommandArgs):
     def __init__(self, orientation: sc.Quaternion):
-        super().__init__(int(CannonCommands.AIM_CANNON))
+        super().__init__(CannonCommands.AIM_CANNON)
         self.aim = orientation
 
 class CoverStatus(enum.Enum):
@@ -39,7 +39,7 @@ class Cannon(sc.DelegatingActor):
 
     def Fire(self):
         if self.IsLoaded() and self.cover_status == CoverStatus.CLOSED:
-            shell_attr_res = self.scene.AskQuery(sc.Target(self.loaded_shell_id), sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES)))
+            shell_attr_res = self.scene.AskQuery(sc.Target(self.loaded_shell_id), sc.QueryArgs(shell.ShellQueries.GET_ATTRIBUTES))
             loaded_shell_attributes = shell_attr_res.shell_attributes
             print(loaded_shell_attributes.power, loaded_shell_attributes.is_flare)
             self.scene.MakeCommandAfter(
@@ -51,7 +51,7 @@ class Cannon(sc.DelegatingActor):
     def TryLoadShell(self, shell_id) -> bool:
         if self.cover_status != CoverStatus.OPEN or self.IsLoaded():
             return False
-        shell_attr_res = self.scene.AskQuery(sc.Target(shell_id), sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES)))
+        shell_attr_res = self.scene.AskQuery(sc.Target(shell_id), sc.QueryArgs(shell.ShellQueries.GET_ATTRIBUTES))
         loaded_shell_attributes = shell_attr_res.shell_attributes
         if loaded_shell_attributes.spent:
             return False
@@ -89,7 +89,7 @@ class Cannon(sc.DelegatingActor):
         self.UpdateCannonPose()
 
     def GetLoadingPose(self):
-        return self.loading_collision_center.ApplyAfter(self.cannon_pose)
+        return self.loading_collision_center.ApplyAfter(self.cannon_pose).WithoutScale()
 
     def UpdateCannonPose(self):
         latest_command = self.scene.FrontOfCommands()

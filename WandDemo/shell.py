@@ -9,25 +9,25 @@ class ShellAttributes(object):
         self.spent = spent
 
 class ShellQueries(sc.QueryRegistration):
-    GET_ATTRIBUTES = None
+    GET_ATTRIBUTES = ()
 
 class ShellCommands(sc.CommandRegistration):
-    LOAD = None
-    FIRE = None
+    LOAD = ()
+    FIRE = ()
 
 class RespondShellAttributes(sc.QueryResult):
     def __init__(self, shell_attributes: ShellAttributes):
-        super().__init__(int(ShellQueries.GET_ATTRIBUTES))
+        super().__init__(ShellQueries.GET_ATTRIBUTES)
         self.shell_attributes = shell_attributes
 
 class LoadShell(sc.CommandArgs):
     def __init__(self, load_pose: sc.Pose):
-        super().__init__(int(ShellCommands.LOAD))
+        super().__init__(ShellCommands.LOAD)
         self.load_pose = copy.copy(load_pose)
 
 class FireShell(sc.CommandArgs):
     def __init__(self):
-        super().__init__(int(ShellCommands.FIRE))
+        super().__init__(ShellCommands.FIRE)
 
 class Shell(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
@@ -43,8 +43,8 @@ class Shell(sc.DelegatingActor):
         self.reposed_callback = reposed_callback
 
         starting_pose = copy.copy(starting_pose)
-        starting_pose.scale = sc.Scale(size)
         self.SetShellPose(starting_pose)
+        self.scale = sc.Scale(size)
 
     def SetShellPose(self, shell_pose):
         self.shell_pose = shell_pose
@@ -73,19 +73,20 @@ class Shell(sc.DelegatingActor):
             draggable_actor = self.draggable_shell,
             graphics_id = self.graphics_id,
             graphics_component = "Cylinder",
-            graphics_pose = sc.Pose())
+            graphics_pose = sc.Pose(self.scale))
 
-    @delegater.RegisterCommand(int(ShellCommands.LOAD))
+    @delegater.RegisterCommand(ShellCommands.LOAD)
     def HandleLoadShell(self, args: LoadShell):
+        import pdb; pdb.set_trace()
         self.draggable_shell.MoveToPose(args.load_pose)
         self.draggable_shell.DisableGrabbing()
 
-    @delegater.RegisterCommand(int(ShellCommands.FIRE))
+    @delegater.RegisterCommand(ShellCommands.FIRE)
     def HandleFireShell(self, args):
         self.draggable_shell.EnableGrabbing()
         self.shell_attributes.spent = True
 
-    @delegater.RegisterQuery(int(ShellQueries.GET_ATTRIBUTES))
+    @delegater.RegisterQuery(ShellQueries.GET_ATTRIBUTES)
     def HandleGetAttributes(self, args):
         return RespondShellAttributes(copy.copy(self.shell_attributes))
 

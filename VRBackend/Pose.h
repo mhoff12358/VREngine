@@ -62,6 +62,10 @@ struct Pose {
 	explicit Pose(Scale scale);
 	Pose();
 
+	Pose WithoutLocation() const;
+	Pose WithoutOrientation() const;
+	Pose WithoutScale() const;
+
 	Pose ApplyAfter(const Pose& other) const;
 	Pose UnapplyAfter(const Pose& other) const;
 

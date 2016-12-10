@@ -18,16 +18,38 @@ def AddQueryType(new_query_name: str):
     return SceneSystemGlobals.query_registry.Register(new_query_name)
 
 
-class CommandRegistration(enum.Enum):
+class CommandRegistration(enum.IntEnum):
+    def __new__(cls, *args):
+        obj = int.__new__(cls)
+        obj._value_ = None
+        return obj
+
     def __init__(self, *args):
-        self.id = AddCommandType(str(self.__class__) + self.name)
+        self._value_ = AddCommandType(str(self.__class__) + self.name)
 
-    def __int__(self):
-        return self.id
+    def __eq__(self, other):
+        return self is other
 
-class QueryRegistration(enum.Enum):
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self, **kwargs):
+        return super().__hash__(**kwargs)
+
+class QueryRegistration(enum.IntEnum):
+    def __new__(cls, *args):
+        obj = int.__new__(cls)
+        obj._value_ = None
+        return obj
+
     def __init__(self, *args):
-        self.id = AddQueryType(str(self.__class__) + self.name)
+        self._value_ = AddQueryType(str(self.__class__) + self.name)
 
-    def __int__(self):
-        return self.id
+    def __eq__(self, other):
+        return self is other
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self, **kwargs):
+        return super().__hash__(**kwargs)

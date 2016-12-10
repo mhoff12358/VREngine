@@ -66,8 +66,6 @@ void GrabbableObjectHandler::HandleEnDisableGrabbableObject(const EnDisableGrabb
 	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
 	if (args.shape_index_ == -1) {
 		for (CollisionShape& shape : collision_shapes) {
-			if (args.enable_) {
-			}
 			shape.EnDisable(args.enable_);
 		}
 	} else {

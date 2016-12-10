@@ -134,7 +134,8 @@ class DraggableObject(sc.DelegatingActor):
 
     @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
     def HandleControllerMovementWhileGrabbed(self, args):
-        self.SetNewPose(self.controller_pose_delta.ApplyAfter(args.position))
+        if self.controller_pose_delta is not None:
+            self.SetNewPose(self.controller_pose_delta.ApplyAfter(args.position))
 
     @delegater.RegisterCommand(sc.GrabbableObjectCommand.OBJECT_GRABBED)
     def HandleGrabbed(self, args):
@@ -157,20 +158,18 @@ class DraggableObject(sc.DelegatingActor):
         self.ReposeCollisionShapes(self.scene.FrontOfCommands())
 
     def DisableGrabbing(self):
-        pass
-#        latest_command = self.scene.MakeCommandAfter(
-#            self.scene.FrontOfCommands(),
-#			self.grabbable_object_handler,
-#            sc.DropGrabbableObject(self.id))
-#        self.scene.MakeCommandAfter(
-#            latest_command,
-#			self.grabbable_object_handler,
-#            sc.EnDisableGrabbableObject(self.id, False))
-#        self.controller_pose_delta = None
+        latest_command = self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+			self.grabbable_object_handler,
+            sc.DropGrabbableObject(self.id))
+        self.scene.MakeCommandAfter(
+            latest_command,
+			self.grabbable_object_handler,
+            sc.EnDisableGrabbableObject(self.id, False))
+        self.controller_pose_delta = None
 
     def EnableGrabbing(self):
-        pass
-#        self.scene.MakeCommandAfter(
-#            latest_command,
-#			self.grabbable_object_handler,
-#            sc.EnDisableGrabbableObject(self.id, True))
+        self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+			self.grabbable_object_handler,
+            sc.EnDisableGrabbableObject(self.id, True))
