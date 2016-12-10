@@ -60,7 +60,7 @@
     <ClCompile Include="PyScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="PyQueryResult.cpp">
+    <ClCompile Include="PyCommandAndQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -116,7 +116,7 @@
     <ClInclude Include="BezierCurvesInterface.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PyQueryResult.h">
+    <ClInclude Include="PyCommandAndQuery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -138,7 +138,7 @@
     <None Include="registration.py">
       <Filter>Python Files</Filter>
     </None>
-    <None Include="query_result.py">
+    <None Include="command_and_query.py">
       <Filter>Python Files</Filter>
     </None>
   </ItemGroup>

@@ -11,7 +11,7 @@ class MechSystem(sc.DelegatingActor):
         }
     default_shell_details = {
         "starting_pose": sc.Pose(),
-        "size": 1
+        "size": 0.125
         }
 
     def __init__(self, cannon_details = (), shell_details = ()):

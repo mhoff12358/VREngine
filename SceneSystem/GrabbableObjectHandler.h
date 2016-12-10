@@ -17,6 +17,8 @@ DECLARE_COMMAND(GrabbableObjectCommand, ADD_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, REPOSE_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, ENDISABLE_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, REMOVE_GRABBABLE_OBJECT)
+DECLARE_COMMAND(GrabbableObjectCommand, DROP_GRABBABLE_OBJECT)
+
 DECLARE_COMMAND(GrabbableObjectCommand, OBJECT_GRABBED)
 };
 
@@ -53,6 +55,14 @@ public:
 	int shape_index_;
 };
 
+class DropGrabbableObject : public CommandArgs {
+public:
+	DropGrabbableObject(ActorId grabbable_actor) :
+		CommandArgs(GrabbableObjectCommand::DROP_GRABBABLE_OBJECT), grabbable_actor_(grabbable_actor) {}
+
+	ActorId grabbable_actor_;
+};
+
 class RemoveGrabbableObject : public CommandArgs {
 public:
 	RemoveGrabbableObject(ActorId grabbable_actor)
@@ -63,7 +73,7 @@ public:
 
 class ObjectGrabbed : public commands::ControllerInformation {
 public:
-	ObjectGrabbed(bool held, unsigned char controller_number, Pose controller_position) :
+	ObjectGrabbed(bool held, unsigned char controller_number, Pose controller_position = Pose()) :
 		commands::ControllerInformation(
 			GrabbableObjectCommand::OBJECT_GRABBED,
 			controller_number,
@@ -82,7 +92,11 @@ public:
 	void HandleReposeGrabbableObject(const ReposeGrabbableObject& args);
 	void HandleEnDisableGrabbableObject(const EnDisableGrabbableObject& args);
 	void HandleRemoveGrabbableObject(const RemoveGrabbableObject& args);
+	void HandleDropGrabbableObject(const DropGrabbableObject& args);
 	void HandleTriggerChange(const commands::TriggerStateChange& args);
+
+	void DropActor(ActorId actor_id);
+	void DropController(unsigned char controller_number);
 
 	ActorId FindCollidingActor(const CollisionShape& controller_shape);
 	void SetGrabbedActor(unsigned char controller_number, ActorId grabbed_actor);

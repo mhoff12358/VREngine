@@ -3,6 +3,7 @@
 
 #include "SceneSystem/Scene.h"
 #include "PyActor.h"
+#include "PyCommandAndQuery.h"
 
 namespace PyScene {
 
@@ -59,7 +60,11 @@ game_scene::CommandQueueLocation MakeCommandAfter(game_scene::Scene& self, game_
 	return self.MakeCommandAfter(location, game_scene::Command(target, unique_ptr<game_scene::CommandArgs>(dynamic_cast<game_scene::CommandArgs*>(args.release()))));
 }
 
-//std::auto_ptr<game_scene::QueryResult> AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args);
+inline game_scene::CommandQueueLocation MakeCommandAfterWithPythonArgs(game_scene::Scene& self, game_scene::CommandQueueLocation location, game_scene::Target target, object args) {
+	return self.MakeCommandAfter(location, game_scene::Command(target, make_unique<PyCommandArgs>(args)));
+}
+
 object AskQuery(game_scene::Scene& self, const game_scene::Target& target, const game_scene::QueryArgs& args);
+object AskQueryWithPythonArgs(game_scene::Scene& self, const game_scene::Target& target, object args);
 
 }  // PyScene

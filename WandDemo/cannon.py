@@ -22,8 +22,8 @@ class Cannon(sc.DelegatingActor):
         super().__init__()
         self.cannon_pose = copy.copy(starting_pose)
         self.cannon_pose.scale = sc.Scale(size)
-        self.cover_position = sc.Pose(sc.Location(-0.43, 0.75, 0))
-        self.cover_end_position = sc.Pose(sc.Location(-0.3, 1.536, 0))
+        self.cover_position = sc.Pose(sc.Location(-0.62794, 0.78524, 0))
+        self.cover_end_position = sc.Pose(sc.Location(-0.51281, 1.4757, 0))
         self.rotation_start = sc.Location(0, -0.4, 0)
         self.cover_drag = None # type: path_draggable_object.PathDraggableObject
         self.draggable_cover = None # type: draggable_graphics.DraggableGraphics
@@ -32,23 +32,35 @@ class Cannon(sc.DelegatingActor):
         self.cover_status = CoverStatus.CLOSED
         self.loading_collision_center = sc.Pose(sc.Location(-0.187, 0.71171, 0))
         self.loading_collision = sc.CollisionShape(self.loading_collision_center, 0)
-        self.loaded_shell_attributes = None
+        self.loaded_shell_id = None
 
     def IsLoaded(self):
-        return self.loaded_shell_attributes is not None
+        return self.loaded_shell_id is not None
 
     def Fire(self):
-        print(self.loaded_shell_attributes.power, self.loaded_shell_attributes.is_flare)
-        self.loaded_shell_attributes = None
+        if self.IsLoaded() and self.cover_status == CoverStatus.CLOSED:
+            shell_attr_res = self.scene.AskQuery(sc.Target(self.loaded_shell_id), sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES)))
+            loaded_shell_attributes = shell_attr_res.shell_attributes
+            print(loaded_shell_attributes.power, loaded_shell_attributes.is_flare)
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+                sc.Target(self.loaded_shell_id),
+                shell.FireShell())
+            self.loaded_shell_id = None
 
     def TryLoadShell(self, shell_id) -> bool:
         if self.cover_status != CoverStatus.OPEN or self.IsLoaded():
             return False
-        query_args = sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES))
-        target = sc.Target(shell_id)
-        shell_attr_res = self.scene.AskQuery(target, query_args)
-        self.loaded_shell_attributes = shell_attr_res.shell_attributes
-        print("Loaded: ", self.loaded_shell_attributes.power, self.loaded_shell_attributes.is_flare)
+        shell_attr_res = self.scene.AskQuery(sc.Target(shell_id), sc.QueryArgs(int(shell.ShellQueries.GET_ATTRIBUTES)))
+        loaded_shell_attributes = shell_attr_res.shell_attributes
+        if loaded_shell_attributes.spent:
+            return False
+        self.loaded_shell_id = shell_id
+        print("Loaded: ", loaded_shell_attributes.power, loaded_shell_attributes.is_flare)
+        self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+            sc.Target(self.loaded_shell_id),
+            shell.LoadShell(self.GetLoadingPose()))
         return True
 
     def GetLoadingCollision(self):
@@ -76,6 +88,9 @@ class Cannon(sc.DelegatingActor):
         self.cannon_pose.orientation = args.aim
         self.UpdateCannonPose()
 
+    def GetLoadingPose(self):
+        return self.loading_collision_center.ApplyAfter(self.cannon_pose)
+
     def UpdateCannonPose(self):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.scene.MakeCommandAfter(
@@ -83,12 +98,11 @@ class Cannon(sc.DelegatingActor):
             sc.Target(self.cannon_id),
             sc.PlaceComponent("Whole", self.cannon_pose))
         self.cover_drag.SetOffsetPose(self.cannon_pose)
-        self.loading_collision.SetPose(self.loading_collision_center.ApplyAfter(self.cannon_pose))
+        self.loading_collision.SetPose(self.GetLoadingPose())
 
     @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):
-        if self.IsLoaded() and self.cover_status == CoverStatus.CLOSED:
-            self.Fire()
+        self.Fire()
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
@@ -103,7 +117,8 @@ class Cannon(sc.DelegatingActor):
         # The draggable object that controls where the cover can be slid.
         self.cover_drag = path_draggable_object.PathDraggableObject(
             paths = path.Line(p0 = self.cover_position.location, p1 = self.cover_end_position.location, radius = 0.1).AsPath(),
-            path_sample_rate = 1,
+            draw_path = False,
+            draw_ball = False,
             pose_updated_callback = functools.partial(self.CoverDragged))
         (_, latest_command) = self.scene.AddActorAfterReturnInitialize(self.cover_drag, latest_command)
         # Enforces that when the cover is dragged the model is updated.

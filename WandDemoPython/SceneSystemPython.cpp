@@ -20,7 +20,7 @@
 
 #include "PyActor.h"
 #include "PyScene.h"
-#include "PyQueryResult.h"
+#include "PyCommandAndQuery.h"
 #include "StlHelper.h"
 #include "PythonClassHelpers.h"
 
@@ -39,6 +39,8 @@ BOOST_PTR_MAGIC_STRUCT(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
+BOOST_PTR_MAGIC_STRUCT(PyCommandArgs)
+BOOST_PTR_MAGIC_STRUCT(PyQueryArgs)
 BOOST_PTR_MAGIC_STRUCT(PyQueryResult)
 BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
@@ -50,6 +52,11 @@ public:
 	Temp(game_scene::IdType a) : game_scene::QueryResult(a) {}
 };
 
+object a(boost::python::tuple args, boost::python::dict kwargs) {
+	int b = boost::python::len(args);
+	return object();
+}
+
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
 		.def("HandleCommand", &game_scene::Actor::HandleCommand, &PyActor::default_HandleCommand)
@@ -60,23 +67,14 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.add_property("id", &PyActor::GetId)
 		.def("SetScene", &game_scene::Actor::SetScene);
 
-	class_<game_scene::QueryArgs, boost::noncopyable>("QueryArgs", init<game_scene::IdType>())
+	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
+		.def("Type", &game_scene::CommandArgs::Type);
+
+	class_<game_scene::QueryArgs, std::auto_ptr<game_scene::QueryArgs>, boost::noncopyable>("RawQueryArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::QueryArgs::Type);
 
 	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("RawQueryResult", init<game_scene::IdType>())
-		.def("Type", &game_scene::QueryResult::Type)
-		.def("Extract", &ExtractRawQueryResult);
-
-	//class_<Temp, bases<game_scene::QueryResult>, boost::noncopyable>("Temp", init<game_scene::IdType>());
-
-
-	//class_<boost::python::wrapper<game_scene::QueryResult>, boost::noncopyable>("AAA", no_init);
-	class_<PyQueryResult, std::auto_ptr<PyQueryResult>, bases<game_scene::QueryResult>, boost::noncopyable>("TmpQueryResult", init<object, game_scene::IdType>())
-		.def("Extract", &ExtractQueryResult)
-		.def_readonly("s", &PyQueryResult::self_);
-
-	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("CommandArgs", init<game_scene::IdType>())
-		.def("Type", &game_scene::CommandArgs::Type);
+		.def("Type", &game_scene::QueryResult::Type);
 
 	class_<game_scene::CommandQueueLocation>("CommandQueueLocation", no_init);
 
@@ -91,7 +89,6 @@ BOOST_PYTHON_MODULE(scene_system_) {
 
 	auto scene_registration = class_<game_scene::Scene, boost::noncopyable>("Scene", no_init)
 		.def("RegisterDependency", &game_scene::Scene::RegisterDependency)
-		.def("AskQuery", &PyScene::AskQuery)
 		.def("FrontOfCommands", &game_scene::Scene::FrontOfCommands)
 		.def("AddActor", &PyScene::AddActor)
 		.def("AddActorAfter", &PyScene::AddActorAfter)
@@ -100,7 +97,11 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("RegisterByName", &game_scene::Scene::RegisterByName)
 		.def("FindByName", &game_scene::Scene::FindByName)
 		.def("AddActorToGroup", &game_scene::Scene::AddActorToGroup)
-		.def("RemoveActorFromGroup", &game_scene::Scene::RemoveActorFromGroup);
+		.def("RemoveActorFromGroup", &game_scene::Scene::RemoveActorFromGroup)
+		.def("AskQuery", &PyScene::AskQuery)
+		.def("AskQuery", &PyScene::AskQueryWithPythonArgs)
+		.def("MakeCommandAfter", &PyScene::MakeCommandAfter<game_scene::CommandArgs>)
+		.def("MakeCommandAfter", &PyScene::MakeCommandAfterWithPythonArgs);
 
 	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", init<>())
 		.def("Register", &game_scene::RegistryMap::Register)

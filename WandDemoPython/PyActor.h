@@ -7,6 +7,8 @@
 #include "SceneSystem/Actor.h"
 #include "SceneSystem/Scene.h"
 
+#include "PyCommandAndQuery.h"
+
 struct PyActor : public game_scene::Actor, public boost::python::wrapper<game_scene::Actor> {
 public:
 	object self_;
@@ -14,7 +16,12 @@ public:
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override HandleCommand = this->get_override("HandleCommand")) {
 			try {
-				HandleCommand(boost::ref(args));
+				const PyCommandArgs* downcast_args = dynamic_cast<const PyCommandArgs*>(&args);
+				if (downcast_args) {
+					HandleCommand(downcast_args->self_);
+				} else {
+					HandleCommand(boost::ref(args));
+				}
 			} catch (error_already_set) {
 				PyErr_Print();
 			}
@@ -42,13 +49,23 @@ public:
 	// Creates a wrapper for the AnswerQuery call that passes around query results as auto_ptrs rather than unique_ptrs.
 	//object PyAnswerQuery(const game_scene::QueryArgs& args) {
 	std::auto_ptr<game_scene::QueryResult> PyAnswerQuery(const game_scene::QueryArgs& args) {
-		object a;
+		object raw_result;
 		try {
-			a = this->get_override("AnswerQuery")(boost::ref(args));
+			const PyQueryArgs* downcast_args = dynamic_cast<const PyQueryArgs*>(&args);
+			if (downcast_args) {
+				raw_result = this->get_override("AnswerQuery")(downcast_args->self_);
+			} else {
+				raw_result = this->get_override("AnswerQuery")(boost::ref(args));
+			}
 		} catch (error_already_set) {
 			PyErr_Print();
 		}
-		return extract<std::auto_ptr<game_scene::QueryResult>>(a.attr("Extract")());
+		extract<std::auto_ptr<game_scene::QueryResult>> extract_attempt(raw_result);
+		if (extract_attempt.check()) {
+			return static_cast<std::auto_ptr<game_scene::QueryResult>>(extract_attempt);
+		} else {
+			return std::auto_ptr<game_scene::QueryResult>(make_unique<PyQueryResult>(raw_result).release());
+		}
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) override;
 

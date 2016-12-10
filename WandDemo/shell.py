@@ -3,17 +3,31 @@ import draggable_graphics, draggable_object, path, drag_direction_graphics
 import math, functools, typing, copy
 
 class ShellAttributes(object):
-    def __init__(self, power, is_flare = False):
+    def __init__(self, power, is_flare = False, spent = False):
         self.power = power
         self.is_flare = is_flare
+        self.spent = spent
 
 class ShellQueries(sc.QueryRegistration):
     GET_ATTRIBUTES = None
+
+class ShellCommands(sc.CommandRegistration):
+    LOAD = None
+    FIRE = None
 
 class RespondShellAttributes(sc.QueryResult):
     def __init__(self, shell_attributes: ShellAttributes):
         super().__init__(int(ShellQueries.GET_ATTRIBUTES))
         self.shell_attributes = shell_attributes
+
+class LoadShell(sc.CommandArgs):
+    def __init__(self, load_pose: sc.Pose):
+        super().__init__(int(ShellCommands.LOAD))
+        self.load_pose = copy.copy(load_pose)
+
+class FireShell(sc.CommandArgs):
+    def __init__(self):
+        super().__init__(int(ShellCommands.FIRE))
 
 class Shell(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
@@ -59,7 +73,17 @@ class Shell(sc.DelegatingActor):
             draggable_actor = self.draggable_shell,
             graphics_id = self.graphics_id,
             graphics_component = "Cylinder",
-            graphics_pose = sc.Pose(sc.Scale(0.1, 0.2, 0.1)))
+            graphics_pose = sc.Pose())
+
+    @delegater.RegisterCommand(int(ShellCommands.LOAD))
+    def HandleLoadShell(self, args: LoadShell):
+        self.draggable_shell.MoveToPose(args.load_pose)
+        self.draggable_shell.DisableGrabbing()
+
+    @delegater.RegisterCommand(int(ShellCommands.FIRE))
+    def HandleFireShell(self, args):
+        self.draggable_shell.EnableGrabbing()
+        self.shell_attributes.spent = True
 
     @delegater.RegisterQuery(int(ShellQueries.GET_ATTRIBUTES))
     def HandleGetAttributes(self, args):

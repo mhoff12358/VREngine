@@ -31,6 +31,9 @@ void GrabbableObjectHandler::HandleCommand(const CommandArgs& args) {
 	case GrabbableObjectCommand::REPOSE_GRABBABLE_OBJECT:
 		HandleReposeGrabbableObject(dynamic_cast<const ReposeGrabbableObject&>(args));
 		break;
+	case GrabbableObjectCommand::DROP_GRABBABLE_OBJECT:
+		HandleDropGrabbableObject(dynamic_cast<const DropGrabbableObject&>(args));
+		break;
 	case HeadsetInterfaceCommand::LISTEN_TRIGGER_STATE_CHANGE:
 		HandleTriggerChange(dynamic_cast<const commands::TriggerStateChange&>(args));
 		break;
@@ -43,6 +46,9 @@ void GrabbableObjectHandler::HandleAddGrabbableObject(const AddGrabbableObject& 
 		RemoveGrabInformation(args.grabbable_actor_);
 	}
 	AddGrabInformation(args.grabbable_actor_, args.grab_shapes_);
+}
+
+void GrabbableObjectHandler::HandleDropGrabbableObject(const DropGrabbableObject& args) {
 }
 
 void GrabbableObjectHandler::HandleReposeGrabbableObject(const ReposeGrabbableObject& args) {
@@ -60,6 +66,8 @@ void GrabbableObjectHandler::HandleEnDisableGrabbableObject(const EnDisableGrabb
 	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
 	if (args.shape_index_ == -1) {
 		for (CollisionShape& shape : collision_shapes) {
+			if (args.enable_) {
+			}
 			shape.EnDisable(args.enable_);
 		}
 	} else {
@@ -86,15 +94,30 @@ void GrabbableObjectHandler::HandleTriggerChange(const commands::TriggerStateCha
 		}
 	} else {
 		if (grabbed_actor_[args.controller_number_] != ActorId::UnsetId) {
-			// Alert to the actor that it was released.
-			scene_->MakeCommandAfter(
-				scene_->FrontOfCommands(),
-				Command(
-					Target(grabbed_actor_[args.controller_number_]),
-					make_unique<ObjectGrabbed>(false, args.controller_number_, args.controller_position_)));
-			UnsetGrabbedActor(args.controller_number_);
+			DropController(args.controller_number_);
 		}
 	}
+}
+
+void GrabbableObjectHandler::DropActor(ActorId actor_id) {
+	if (actor_id == ActorId::UnsetId) {
+		return;
+	}
+	for (unsigned char controller_number = 0; controller_number < grabbed_actor_.size(); controller_number++) {
+		if (grabbed_actor_[controller_number] == actor_id) {
+			DropController(controller_number);
+		}
+	}
+}
+
+void GrabbableObjectHandler::DropController(unsigned char controller_number) {
+	// Alert to the actor that it was released.
+	scene_->MakeCommandAfter(
+		scene_->FrontOfCommands(),
+		Command(
+			Target(grabbed_actor_[controller_number]),
+			make_unique<ObjectGrabbed>(false, controller_number)));
+	UnsetGrabbedActor(controller_number);
 }
 
 void GrabbableObjectHandler::AddGrabInformation(ActorId actor_id, vector<CollisionShape> collision) {
