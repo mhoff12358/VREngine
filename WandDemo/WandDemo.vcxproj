@@ -464,6 +464,7 @@
     <None Include="funnel.lua" />
     <None Include="glowy_console.lua" />
     <None Include="first_load.py" />
+    <None Include="lighter.py" />
     <None Include="mech_system.py" />
     <None Include="path.py" />
     <None Include="pixel_types.hlsli" />

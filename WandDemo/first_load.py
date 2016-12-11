@@ -32,15 +32,15 @@ def first_load(resources):
         shell_details = (
             {
                 "shell_attributes" : shell.ShellAttributes(power = 0.5, color = (1, 1, 0)),
-                "starting_pose" : sc.Pose(sc.Location(-1, 1, -0.5)),
+                "starting_pose" : sc.Pose(sc.Location(1, 1, -0.5)),
              },
             {
                 "shell_attributes" : shell.ShellAttributes(power = 1, color = (0, 1, 1), is_flare = True),
-                "starting_pose" : sc.Pose(sc.Location(-1, 1, 0)),
+                "starting_pose" : sc.Pose(sc.Location(1, 1, 0)),
              },
             {
                 "shell_attributes" : shell.ShellAttributes(power = 1.5, color = (1, 0, 1)),
-                "starting_pose" : sc.Pose(sc.Location(-1, 1, 0.5)),
+                "starting_pose" : sc.Pose(sc.Location(1, 1, 0.5)),
              }
             ),
         pitch_wheel_args = {

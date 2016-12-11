@@ -27,6 +27,8 @@ class Cannon(sc.DelegatingActor):
         self.cover_status = CoverStatus.CLOSED
         self.loading_collision_center = sc.Pose(sc.Location(-0.187, 0.71171, 0))
         self.loading_collision = sc.CollisionShape(self.loading_collision_center, 0)
+        self.wick_collision_center = sc.Pose(sc.Location(0, -.675, 0))
+        self.wick_collision = sc.CollisionShape(self.wick_collision_center, 0)
         self.loaded_shell_id = None
 
     def UpdatePitch(self, pitch_delta):
@@ -82,6 +84,9 @@ class Cannon(sc.DelegatingActor):
     def GetLoadingCollision(self):
         return self.loading_collision
 
+    def GetWickCollision(self):
+        return self.wick_collision
+
     def SetCoverStatus(self, cover_status: CoverStatus):
         if self.cover_status != cover_status:
             print(cover_status.name)
@@ -97,6 +102,9 @@ class Cannon(sc.DelegatingActor):
 
     def GetLoadingPose(self):
         return self.loading_collision_center.ApplyAfter(self.cannon_pose).WithoutScale()
+
+    def GetWickPose(self):
+        return self.wick_collision_center.ApplyAfter(self.cannon_pose).WithoutScale()
 
     def GetEjectedPose(self):
         ejected_pose = copy.copy(self.loading_collision_center)
@@ -114,6 +122,7 @@ class Cannon(sc.DelegatingActor):
             sc.PlaceComponent("Whole", self.cannon_pose))
         self.cover_drag.SetOffsetPose(self.cannon_pose)
         self.loading_collision.SetPose(self.GetLoadingPose())
+        self.wick_collision.SetPose(self.GetWickPose())
         if self.loaded_shell_id is not None:
             self.scene.MakeCommandAfter(
                 self.scene.FrontOfCommands(),
@@ -122,7 +131,8 @@ class Cannon(sc.DelegatingActor):
 
     @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):
-        self.Fire()
+        pass
+        #self.Fire()
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
