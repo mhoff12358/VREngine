@@ -1,5 +1,5 @@
 import scene_system as sc
-import shell, cannon
+import shell, cannon, wheel
 import math, functools
 
 class MechSystem(sc.DelegatingActor):
@@ -14,13 +14,18 @@ class MechSystem(sc.DelegatingActor):
         "size": 0.1
         }
 
-    def __init__(self, cannon_details = (), shell_details = ()):
+    def __init__(self, cannon_details = (), shell_details = (), pitch_wheel_args = {}, yaw_wheel_args = {}):
         super().__init__()
-        self.cannon_details = tuple(cannon_details)
-        self.shell_details = tuple(shell_details)
-        self.cannons = []
-        self.shells = []
         self.shell_reposed_callback = functools.partial(self.ShellReposed)
+
+        self.cannons = list(map(self.CannonDetailsToCannon, cannon_details))
+        self.shells = list(map(self.ShellDetailsToShell, shell_details))
+        pitch_wheel_args = dict(pitch_wheel_args)
+        pitch_wheel_args["spun_callbacks"] = [functools.partial(cannon.UpdatePitch) for cannon in self.cannons]
+        self.pitch_wheel = wheel.Wheel(**pitch_wheel_args)
+        yaw_wheel_args = dict(yaw_wheel_args)
+        yaw_wheel_args["spun_callbacks"] = [functools.partial(cannon.UpdateYaw) for cannon in self.cannons]
+        self.yaw_wheel = wheel.Wheel(**yaw_wheel_args)
 
     def ShellReposed(self, shell):
         shell_loading_collision = shell.GetLoadingCollision()
@@ -43,11 +48,9 @@ class MechSystem(sc.DelegatingActor):
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
-        self.cannons = list(map(self.CannonDetailsToCannon, self.cannon_details))
-        self.cannon_details = None
         for cannon in self.cannons:
             self.scene.AddActor(cannon)
-        self.shells = list(map(self.ShellDetailsToShell, self.shell_details))
-        self.shell_details = None
         for shell in self.shells:
             self.scene.AddActor(shell)
+        self.scene.AddActor(self.pitch_wheel)
+        self.scene.AddActor(self.yaw_wheel)

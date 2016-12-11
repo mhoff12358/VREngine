@@ -5,13 +5,25 @@ import copy, functools
 class Wheel(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
 
-    def __init__(self, pose: sc.Pose, crank_height, color = (0.5, 0, 0)):
+    def __init__(self, pose: sc.Pose, spun_callback = None, spun_callbacks = (), crank_height = 1, color = (0.5, 0, 0)):
         super().__init__()
         self.color = color
         self.pose = copy.copy(pose)
         self.crank_height = crank_height
+        self.last_path_sample = 0
+        self.spun_callbacks = list(spun_callbacks)
+        if spun_callback is not None:
+            self.spun_callbacks.append(spun_callback)
 
-    def Dragged(self, global_pose, relative_pose, **kwargs):
+    def AddCallback(self, callback):
+        self.spun_callbacks.append(callback)
+
+    def Dragged(self, global_pose, relative_pose, path_sample, **kwargs):
+        sample = path_sample.sample
+        path_sample_delta = ((sample - self.last_path_sample + 0.5) % 1) - 0.5
+        for callback in self.spun_callbacks:
+            callback(path_sample_delta)
+        self.last_path_sample = sample
         self.scene.MakeCommandAfter(
             self.scene.FrontOfCommands(),
             sc.Target(self.graphics_id),
@@ -35,7 +47,7 @@ class Wheel(sc.DelegatingActor):
                 right_vec = sc.Location(0, 0, -1),
                 radius = 1,
                 num_samples = 20,
-                tube_radius = 0.15
+                tube_radius = 0.25
                 ),
             draw_ball = False,
             draw_path = False,

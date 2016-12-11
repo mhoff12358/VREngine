@@ -42,11 +42,16 @@ def first_load(resources):
                 "shell_attributes" : shell.ShellAttributes(power = 1.5, color = (1, 0, 1)),
                 "starting_pose" : sc.Pose(sc.Location(-1, 1, 0.5)),
              }
-            ))
+            ),
+        pitch_wheel_args = {
+            "pose": sc.Pose(sc.Location(0, 1.25, 1), sc.Quaternion.RotationAboutLocation(sc.Location(1, 0, 0), 3.14/2), sc.Scale(0.35)),
+            "crank_height": 0.5,
+            },
+        yaw_wheel_args = {
+            "pose": sc.Pose(sc.Location(1, 1.25, 1), sc.Quaternion.RotationAboutLocation(sc.Location(1, 0, 0), 3.14/2), sc.Scale(0.35)),
+            "crank_height": 0.5,
+            })
     scene.AddActor(mech)
-
-    wheel1 = wheel.Wheel(pose = sc.Pose(sc.Location(0, 1.25, 1), sc.Quaternion.RotationAboutLocation(sc.Location(1, 0, 0), 3.14/2), sc.Scale(0.5)), crank_height = 1)
-    scene.AddActor(wheel1)
 
     import code
     a = globals()

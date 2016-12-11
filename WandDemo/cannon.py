@@ -2,14 +2,6 @@ import scene_system as sc
 import draggable_graphics, draggable_object, path_draggable_object, path, drag_direction_graphics, shell, cannon_ball
 import math, enum, functools, copy
 
-class CannonCommands(sc.CommandRegistration):
-    AIM_CANNON = ()
-
-class AimCannon(sc.CommandArgs):
-    def __init__(self, orientation: sc.Quaternion):
-        super().__init__(CannonCommands.AIM_CANNON)
-        self.aim = orientation
-
 class CoverStatus(enum.Enum):
     OPEN = 0
     MIXED = 1
@@ -22,6 +14,8 @@ class Cannon(sc.DelegatingActor):
         super().__init__()
         self.cannon_pose = copy.copy(starting_pose)
         self.cannon_pose.scale = sc.Scale(size)
+        self.pitch = 0
+        self.yaw = 0
         self.cover_position = sc.Pose(sc.Location(-0.62794, 0.78524, 0))
         self.cover_end_position = sc.Pose(sc.Location(-0.51281, 1.4757, 0))
         self.rotation_start = sc.Location(0, -0.4, 0)
@@ -34,6 +28,18 @@ class Cannon(sc.DelegatingActor):
         self.loading_collision_center = sc.Pose(sc.Location(-0.187, 0.71171, 0))
         self.loading_collision = sc.CollisionShape(self.loading_collision_center, 0)
         self.loaded_shell_id = None
+
+    def UpdatePitch(self, pitch_delta):
+        self.pitch += pitch_delta
+        self.UpdatedRotation()
+
+    def UpdateYaw(self, yaw_delta):
+        self.yaw += yaw_delta
+        self.UpdatedRotation()
+
+    def UpdatedRotation(self):
+        self.cannon_pose.orientation = sc.Quaternion.RotationAboutAxis(sc.AxisID.y, self.yaw) * sc.Quaternion.RotationAboutAxis(sc.AxisID.x, self.pitch)
+        self.UpdateCannonPose()
 
     def IsLoaded(self):
         return self.loaded_shell_id is not None
@@ -81,10 +87,6 @@ class Cannon(sc.DelegatingActor):
             print(cover_status.name)
         self.cover_status = cover_status
 
-    def CannonRotationObjectDragged(self, global_pose: sc.Pose, relative_pose: sc.Pose, **kwargs):
-        self.cannon_pose.orientation = sc.Quaternion.RotationBetweenLocations(self.rotation_start, relative_pose.location, 1)
-        self.UpdateCannonPose()
-
     def CoverDragged(self, global_pose: sc.Pose, relative_pose: sc.Pose, path_sample: path.NearestPoint, **kwargs):
         if path_sample.sample == 0:
             self.SetCoverStatus(CoverStatus.CLOSED)
@@ -92,11 +94,6 @@ class Cannon(sc.DelegatingActor):
             self.SetCoverStatus(CoverStatus.OPEN)
         else:
             self.SetCoverStatus(CoverStatus.MIXED)
-
-    @delegater.RegisterCommand(CannonCommands.AIM_CANNON)
-    def HandleAimCannon(self, args: AimCannon):
-        self.cannon_pose.orientation = args.aim
-        self.UpdateCannonPose()
 
     def GetLoadingPose(self):
         return self.loading_collision_center.ApplyAfter(self.cannon_pose).WithoutScale()
@@ -152,14 +149,6 @@ class Cannon(sc.DelegatingActor):
             graphics_component = "Cover",
             graphics_pose = sc.Pose(),
             delta_pose = self.cover_position)
-        # Allows the user to rotate the cannon manually.
-        self.cannon_rotate = draggable_object.DraggableObject(
-            collision_shapes = ((sc.CollisionShape(sc.Pose(), 0.1), sc.Pose()),),
-            starting_pose = sc.Pose(self.rotation_start),
-            draw_ball = True,
-            offset_pose = self.cannon_pose,
-            pose_updated_callback = functools.partial(self.CannonRotationObjectDragged))
-        (_, latest_command) = self.scene.AddActorAfterReturnInitialize(self.cannon_rotate, latest_command)
 
 
     def LoadGraphicsObjects(self, latest_command):
