@@ -3,8 +3,9 @@ import draggable_graphics, draggable_object, path, drag_direction_graphics
 import math, functools, typing, copy
 
 class ShellAttributes(object):
-    def __init__(self, power, is_flare = False, spent = False):
+    def __init__(self, power, color = (0.75, 0.75, 0.75), is_flare = False, spent = False):
         self.power = power
+        self.color = color
         self.is_flare = is_flare
         self.spent = spent
 
@@ -14,6 +15,8 @@ class ShellQueries(sc.QueryRegistration):
 class ShellCommands(sc.CommandRegistration):
     LOAD = ()
     FIRE = ()
+
+    UPDATE_LOAD_POSE = ()
 
 class RespondShellAttributes(sc.QueryResult):
     def __init__(self, shell_attributes: ShellAttributes):
@@ -25,12 +28,19 @@ class LoadShell(sc.CommandArgs):
         super().__init__(ShellCommands.LOAD)
         self.load_pose = copy.copy(load_pose)
 
+class UpdateLoadPose(sc.CommandArgs):
+    def __init__(self, load_pose: sc.Pose):
+        super().__init__(ShellCommands.UPDATE_LOAD_POSE)
+        self.load_pose = copy.copy(load_pose)
+
 class FireShell(sc.CommandArgs):
     def __init__(self):
         super().__init__(ShellCommands.FIRE)
 
 class Shell(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
+
+    spent_color = (0.1, 0.1, 0.1)
 
     def __init__(self, shell_attributes: ShellAttributes, starting_pose: sc.Pose = sc.Pose(), size: float = 1, reposed_callback = None):
         super().__init__()
@@ -77,14 +87,23 @@ class Shell(sc.DelegatingActor):
 
     @delegater.RegisterCommand(ShellCommands.LOAD)
     def HandleLoadShell(self, args: LoadShell):
-        import pdb; pdb.set_trace()
         self.draggable_shell.MoveToPose(args.load_pose)
         self.draggable_shell.DisableGrabbing()
+
+    @delegater.RegisterCommand(ShellCommands.UPDATE_LOAD_POSE)
+    def HandleLoadShell(self, args: UpdateLoadPose):
+        self.draggable_shell.MoveToPose(args.load_pose)
 
     @delegater.RegisterCommand(ShellCommands.FIRE)
     def HandleFireShell(self, args):
         self.draggable_shell.EnableGrabbing()
         self.shell_attributes.spent = True
+        self.scene.MakeCommandAfter(
+            self.scene.FrontOfCommands(),
+            sc.Target(self.graphics_id),
+            sc.SetEntityShaderValues(
+                "Shell",
+                sc.ShaderSettingsValue((sc.VectorFloat(self.spent_color),))))
 
     @delegater.RegisterQuery(ShellQueries.GET_ATTRIBUTES)
     def HandleGetAttributes(self, args):
@@ -112,7 +131,7 @@ class Shell(sc.DelegatingActor):
                         sc.VectorShaderIdentifier((
                             sc.ShaderIdentifier("vs_location_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
                             sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
-                    .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((0.75, 0.75, 0.75)),)))
+                    .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.shell_attributes.color),)))
                     .SetComponent("Cylinder"),)),
                 sc.VectorComponentInfo((sc.ComponentInfo("", "Cylinder"),))))
         return latest_command

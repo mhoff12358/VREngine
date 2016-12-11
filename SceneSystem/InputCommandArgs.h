@@ -20,6 +20,7 @@ public:
 		: CommandArgs(InputCommand::TICK), duration_(duration) {
 	}
 
+	// In milliseconds
 	const int duration_;
 };
 

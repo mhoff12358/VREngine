@@ -1,5 +1,5 @@
 import scene_system as sc
-import draggable_graphics, draggable_object, path_draggable_object, path, drag_direction_graphics, shell
+import draggable_graphics, draggable_object, path_draggable_object, path, drag_direction_graphics, shell, cannon_ball
 import math, enum, functools, copy
 
 class CannonCommands(sc.CommandRegistration):
@@ -25,6 +25,7 @@ class Cannon(sc.DelegatingActor):
         self.cover_position = sc.Pose(sc.Location(-0.62794, 0.78524, 0))
         self.cover_end_position = sc.Pose(sc.Location(-0.51281, 1.4757, 0))
         self.rotation_start = sc.Location(0, -0.4, 0)
+        self.firing_pose = sc.Pose(sc.Location(0, 2, 0))
         self.cover_drag = None # type: path_draggable_object.PathDraggableObject
         self.draggable_cover = None # type: draggable_graphics.DraggableGraphics
         self.cannon_rotate = None # type: draggable_object.DraggableObject
@@ -46,7 +47,16 @@ class Cannon(sc.DelegatingActor):
                 self.scene.FrontOfCommands(),
                 sc.Target(self.loaded_shell_id),
                 shell.FireShell())
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+                sc.Target(self.loaded_shell_id),
+                shell.UpdateLoadPose(self.GetEjectedPose()))
             self.loaded_shell_id = None
+            firing_pose = self.GetFiringPose()
+            self.scene.AddActor(cannon_ball.CannonBall(
+                loaded_shell_attributes,
+                firing_pose,
+                sc.Location(0, 1, 0).Rotate(firing_pose.orientation)))
 
     def TryLoadShell(self, shell_id) -> bool:
         if self.cover_status != CoverStatus.OPEN or self.IsLoaded():
@@ -91,6 +101,14 @@ class Cannon(sc.DelegatingActor):
     def GetLoadingPose(self):
         return self.loading_collision_center.ApplyAfter(self.cannon_pose).WithoutScale()
 
+    def GetEjectedPose(self):
+        ejected_pose = copy.copy(self.loading_collision_center)
+        ejected_pose.location += sc.Location(-1, 0, 0)
+        return ejected_pose.ApplyAfter(self.cannon_pose).WithoutScale()
+
+    def GetFiringPose(self):
+        return self.firing_pose.ApplyAfter(self.cannon_pose).WithoutScale()
+
     def UpdateCannonPose(self):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.scene.MakeCommandAfter(
@@ -99,6 +117,11 @@ class Cannon(sc.DelegatingActor):
             sc.PlaceComponent("Whole", self.cannon_pose))
         self.cover_drag.SetOffsetPose(self.cannon_pose)
         self.loading_collision.SetPose(self.GetLoadingPose())
+        if self.loaded_shell_id is not None:
+            self.scene.MakeCommandAfter(
+                self.scene.FrontOfCommands(),
+                sc.Target(self.loaded_shell_id),
+                shell.UpdateLoadPose(self.GetLoadingPose()))
 
     @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_TOUCHPAD_DRAG)
     def HandleTouchpadDrag(self, args):

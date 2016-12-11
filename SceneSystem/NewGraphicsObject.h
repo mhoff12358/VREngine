@@ -12,8 +12,7 @@ class NewGraphicsObjectCommand {
 public:
 	DECLARE_COMMAND(NewGraphicsObjectCommand, CREATE);
 	DECLARE_COMMAND(NewGraphicsObjectCommand, PLACE_COMPONENT);
-	DECLARE_COMMAND(NewGraphicsObjectCommand, SET_SHADER_VALUES);
-	DECLARE_COMMAND(NewGraphicsObjectCommand, SET_ENTITY_DRAWN);
+	DECLARE_COMMAND(NewGraphicsObjectCommand, SET_ENTITY_SHADER_VALUES);
 };
 
 namespace commands {
@@ -44,25 +43,62 @@ public:
 	Pose pose_;
 };
 
+class SetEntityShaderValues : public CommandArgs {
+public:
+	SetEntityShaderValues(string entity_name, ShaderSettingsValue value) :
+		CommandArgs(NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES),
+		entity_name_(entity_name),
+		value_(std::move(value)) {}
+
+	string entity_name_;
+	ShaderSettingsValue value_;
+};
+
 }  // namespace commands
 
 namespace actors {
 
 class NewGraphicsObject : public Actor {
 public:
-	NewGraphicsObject() : Actor(), first_entity_id_(0), number_of_entities_(0) {}
+	NewGraphicsObject() : Actor(), entities_(0, 0) {}
 
 	void HandleCommand(const CommandArgs& args) override;
 
 private:
+	struct EntityRange {
+		EntityRange() : first_entity_(0), number_of_entities_(0) {}
+		EntityRange(unsigned int first_entity, unsigned int number_of_entities) :
+			first_entity_(first_entity), number_of_entities_(number_of_entities) {}
+		unsigned int first_entity_;
+		unsigned int number_of_entities_;
+
+		EntityRange EvaluateInRange(const EntityRange& outer_range) {
+			assert(number_of_entities_ <= (outer_range.number_of_entities_ - first_entity_));
+			return EntityRange(first_entity_ + outer_range.first_entity_, number_of_entities_);
+		}
+
+		unsigned int GetMainEntity() {
+			if (number_of_entities_ == 0) {
+				return first_entity_;
+			}
+			return first_entity_ + number_of_entities_ - 1;
+		}
+
+		unsigned int GetTextureEntity(unsigned int texture_index) {
+			assert(texture_index < number_of_entities_);
+			return first_entity_ + texture_index;
+		}
+	};
+
 	void InitializeEntities(const commands::CreateNewGraphicsObject& args);
 	void PlaceComponent(const commands::PlaceNewComponent& args);
+	void SetShaderValues(const commands::SetEntityShaderValues& args);
 
 	Component* GetTransformByName(const string& transform_name);
+	EntityRange GetEntitiesByName(const string& entity_name);
 
-	unsigned int first_entity_id_;
-	unsigned int number_of_entities_;
-	map<string, unsigned int> entity_lookup_;
+	EntityRange entities_;
+	map<string, EntityRange> entity_lookup_;
 	vector<unique_ptr<ConstantBuffer>> constant_buffers_;
 
 	vector<Component> transforms_;

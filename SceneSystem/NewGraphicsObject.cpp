@@ -18,6 +18,9 @@ void NewGraphicsObject::HandleCommand(const CommandArgs& args) {
 	case NewGraphicsObjectCommand::PLACE_COMPONENT:
 		PlaceComponent(dynamic_cast<const commands::PlaceNewComponent&>(args));
 		break;
+	case NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES:
+		SetShaderValues(dynamic_cast<const commands::SetEntityShaderValues&>(args));
+		break;
 	default:
 		FailToHandleCommand(args);
 	}
@@ -34,9 +37,8 @@ void NewGraphicsObject::InitializeEntities(const commands::CreateNewGraphicsObje
 	}
 
 	vector<Entity> entities;
-	unsigned int entity_number = 0;
 	for (const EntitySpecification& entity_spec : args.entities_) {
-		entity_lookup_[entity_spec.entity_name_] = entity_number++;
+		unsigned int first_entity_number = entities.size();
 		// Emplaces the constant buffer for the shader settings (or a placeholding nullptr
 		// if there should be no shader settings).
 		if (entity_spec.shader_settings_format_.empty()) {
@@ -81,11 +83,12 @@ void NewGraphicsObject::InitializeEntities(const commands::CreateNewGraphicsObje
 			transform,
 			texture_views.back()
 		);
+		entity_lookup_[entity_spec.entity_name_] = EntityRange(first_entity_number, entities.size() - first_entity_number);
 	}
 	EntityHandler& entity_handler = graphics_resources.entity_handler_;
 
-	first_entity_id_ = entity_handler.AddEntities(entities, args.entity_group_name_);
-	number_of_entities_ = entities.size();
+	unsigned int num_entities = entities.size();
+	entities_ = EntityRange(entity_handler.AddEntities(entities, args.entity_group_name_), num_entities);
 }
 
 void NewGraphicsObject::PlaceComponent(const commands::PlaceNewComponent& args) {
@@ -93,6 +96,15 @@ void NewGraphicsObject::PlaceComponent(const commands::PlaceNewComponent& args) 
 	if (component) {
 		component->SetLocalTransformation(args.pose_.GetMatrix());
 	}
+}
+
+void NewGraphicsObject::SetShaderValues(const commands::SetEntityShaderValues& args) {
+	EntityRange all_entities = GetEntitiesByName(args.entity_name_);
+	unsigned int shaded_entity = all_entities.GetMainEntity();
+
+	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(scene_);
+	EntityHandler& entity_handler = graphics_resources.entity_handler_;
+	args.value_.SetIntoConstantBuffer(entity_handler.GetShaderSettings(shaded_entity));
 }
 
 Component* NewGraphicsObject::GetTransformByName(const string& transform_name) {
@@ -104,6 +116,16 @@ Component* NewGraphicsObject::GetTransformByName(const string& transform_name) {
 		component = &transforms_[transform_index->second];
 	}
 	return component;
+}
+
+NewGraphicsObject::EntityRange NewGraphicsObject::GetEntitiesByName(const string& entity_name) {
+	auto entity_range = entity_lookup_.find(entity_name);
+	if (entity_range == entity_lookup_.end()) {
+		std::cout << "FAILED TO FIND ENTITY BY NAME " << entity_name << std::endl;
+		return EntityRange(0, 0);
+	} else {
+		return entity_range->second.EvaluateInRange(entities_);
+	}
 }
 
 }  // actors

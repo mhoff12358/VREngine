@@ -450,6 +450,7 @@
   <ItemGroup>
     <None Include="bottle.lua" />
     <None Include="cannon.py" />
+    <None Include="cannon_ball.py" />
     <None Include="cbuff_color_width.hlsli" />
     <None Include="class.lua" />
     <None Include="cockpit.lua" />

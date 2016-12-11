@@ -146,12 +146,13 @@ class DraggableObject(sc.DelegatingActor):
 				self.grabbable_object_handler,
                 sc.EnDisableGrabbableObject(self.id, False))
         else:
-            self.controller_pose_delta = None
-            self.ReposeCollisionShapes(self.scene.FrontOfCommands())
-            self.scene.MakeCommandAfter(
-                self.scene.FrontOfCommands(),
-				self.grabbable_object_handler,
-				sc.EnDisableGrabbableObject(self.id, True))
+            if self.controller_pose_delta is not None:
+                self.controller_pose_delta = None
+                self.ReposeCollisionShapes(self.scene.FrontOfCommands())
+                self.scene.MakeCommandAfter(
+                    self.scene.FrontOfCommands(),
+                    self.grabbable_object_handler,
+                    sc.EnDisableGrabbableObject(self.id, True))
 
     def MoveToPose(self, new_pose):
         self.SetNewPose(new_pose)

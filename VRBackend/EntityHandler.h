@@ -83,7 +83,7 @@ ConstantBufferTyped<T>* EntityHandler::GetEntityObjectSettingsTyped(unsigned int
 }
 
 template <typename T>
-void EntityHandler::SetEntityObjectSettings(unsigned int entity_id, const T& new_settings) {
+void EntityHandler::SetEntityObjectSettings(unsigned int external_entity_id, const T& new_settings) {
 	EntityId entity_offset = entity_map[external_entity_id];
 	*dynamic_cast<T*>(ReferenceEntity(entity_offset).object_settings->EditBufferData()) = new_settings;
 }

@@ -469,5 +469,8 @@
     <None Include="mech_system.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="cannon_ball.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

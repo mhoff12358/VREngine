@@ -44,8 +44,6 @@ BOOST_PTR_MAGIC_STRUCT(PyQueryArgs)
 BOOST_PTR_MAGIC_STRUCT(PyQueryResult)
 BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
-BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
-BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 
 class Temp : public game_scene::QueryResult {
 public:
