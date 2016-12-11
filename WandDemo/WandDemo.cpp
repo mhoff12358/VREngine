@@ -232,6 +232,12 @@ void UpdateLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+
+	game_scene::CommandQueue a;
+	game_scene::CommandQueueLocation b = a.GetNewFront();
+	a.InsertCommand(b, game_scene::Command(game_scene::Target(game_scene::ActorId::UnsetId), nullptr));
+	a.InsertCommand(b, game_scene::Command(game_scene::Target(game_scene::ActorId::AllActors), nullptr));
+
 	bool hmd_active = false;
 	bool hmd_desired = true;
 	bool hmd_found = vr::VR_IsHmdPresent();

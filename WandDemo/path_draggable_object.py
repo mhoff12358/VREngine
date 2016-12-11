@@ -20,14 +20,14 @@ class PathDraggableObject(draggable_object.DraggableObject):
         super().__init__(((sc.CollisionShape(sc.Pose(), self.radius), sc.Pose()),),
                          starting_pose = self.path_start, *args, **kwargs)
 
-    def SetOffsetPose(self, offset_pose):
-        super().SetOffsetPose(offset_pose)
+    def SetOffsetPose(self, offset_pose, *args, **kwargs):
+        super().SetOffsetPose(offset_pose, *args, **kwargs)
         if self.draw_path:
-            self.PlacePath(self.scene.FrontOfCommands())
+            self.PlacePath()
 
-    def PlacePath(self, latest_command):
+    def PlacePath(self):
         return self.scene.MakeCommandAfter(
-            latest_command,
+            self.scene.BackOfNewCommands(),
             sc.Target(self.path_id),
             sc.PlaceComponent(
                 "path",
@@ -35,9 +35,6 @@ class PathDraggableObject(draggable_object.DraggableObject):
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
-        super().HandleAddToScene(args)
-        latest_command = self.scene.FrontOfCommands()
-
         if self.draw_path:
             self.graphics_resources = sc.GraphicsResources.GetGraphicsResources(
                 self.scene)
@@ -61,8 +58,8 @@ class PathDraggableObject(draggable_object.DraggableObject):
                 sc.ModelStorageDescription(False, True, False))
             self.path_model_name = sc.ResourceIdentifier.GetNewModelName(
                 "draggable_path")
-            latest_command = self.scene.MakeCommandAfter(
-                latest_command,
+            self.scene.MakeCommandAfter(
+                self.scene.BackOfNewCommands(),
                 sc.Target(self.path_id),
                 sc.CreateGraphicsObject(
                     "basic",
@@ -83,7 +80,9 @@ class PathDraggableObject(draggable_object.DraggableObject):
                         .SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("terrain.png", sc.ShaderStages.All(), 0, 0),)))
                         .SetComponent("path"),)),
                     sc.VectorComponentInfo((sc.ComponentInfo("", "path"),))))
-            latest_command = self.PlacePath(latest_command)
+            self.PlacePath()
+
+        super().HandleAddToScene(args)
 
     default_pose_updated_extra_response = {"path_sample" : path.NearestPoint(sample = 0, found = True, distance_squared = 0)}
     

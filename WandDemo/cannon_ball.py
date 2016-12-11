@@ -1,7 +1,6 @@
 import scene_system as sc
 import draggable_graphics, shell
 
-
 class CannonBall(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
     cannon_ball_size = 0.15

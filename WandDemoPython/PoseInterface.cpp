@@ -4,10 +4,6 @@
 #include "StlHelper.h"
 #include "VRBackend/Pose.h"
 
-string PrintLocation(const Location& location) {
-	return "Location: [" + std::to_string(location[0]) + ", " + std::to_string(location[1]) + ", " + std::to_string(location[2]) + "]";
-}
-
 void PoseInterface() {
 	auto scale = class_<Scale>("Scale")
 		.def(init<float>())
@@ -44,6 +40,7 @@ void PoseInterface() {
 		.def("GetLengthSquared", &Location::GetLengthSquared)
 		.def("GetNormalized", &Location::GetNormalized)
 		.def("Dot", &Location::Dot)
+		.def("Cross", &Location::Cross)
 		.def("__copy__", &CopyObject<Location>);
 
 	class_<Quaternion>("Quaternion")
@@ -64,6 +61,8 @@ void PoseInterface() {
 		.staticmethod("Identity")
 		.def("RotationAboutAxis", &Quaternion::RotationAboutAxis)
 		.staticmethod("RotationAboutAxis")
+		.def("RotationAboutLocation", &Quaternion::RotationAboutLocation)
+		.staticmethod("RotationAboutLocation")
 		.def("RotationBetweenLocations", (Quaternion(*)(const Location&, const Location&, float))&Quaternion::RotationBetweenLocations)
 		.staticmethod("RotationBetweenLocations")
 		.def("__copy__", &CopyObject<Quaternion>);

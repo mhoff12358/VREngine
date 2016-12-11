@@ -490,6 +490,7 @@
     <None Include="wall.lua" />
     <None Include="water_flow.lua" />
     <None Include="weapons.lua" />
+    <None Include="wheel.py" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SceneSystem\SceneSystem.vcxproj">

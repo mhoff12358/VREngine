@@ -22,6 +22,7 @@ public:
 	void RegisterDependency(const Target& depender, const Target& dependent);
 	CommandQueueLocation MakeCommandAfter(CommandQueueLocation location, Command command);
 	CommandQueueLocation FrontOfCommands();
+	CommandQueueLocation BackOfNewCommands();
 	unique_ptr<QueryResult> AskQuery(const Target& target, const QueryArgs& args);
 	void OwnCommandArgsForFlushDuration(CommandArgs* args_to_own);
 
@@ -52,6 +53,7 @@ private:
 	vector<unique_ptr<CommandArgs>> command_flush_arg_storage_;
 
 	CommandQueue commands_;
+	CommandQueueLocation back_of_current_commands_;
 	map<ActorId, unique_ptr<Actor>> actor_lookup_unique_;
 	map<ActorId, Actor*> actor_lookup_non_unique_;
 	map<ActorId, Actor*> actor_lookup_;

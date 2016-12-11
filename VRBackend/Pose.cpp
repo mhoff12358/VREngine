@@ -66,6 +66,12 @@ float Location::GetLengthSquared() const { return pow(location_[0], 2.0f) + pow(
 float Location::GetLength() const { return pow(GetLengthSquared(), 0.5f); }
 Location Location::GetNormalized() const { return *this / GetLength(); }
 
+Location Location::Cross(const Location& other) const {
+	return Location(
+		location_[1] * other.location_[2] - location_[2] * other.location_[1],
+		location_[2] * other.location_[0] - location_[0] * other.location_[2],
+		location_[0] * other.location_[1] - location_[1] * other.location_[0]);
+}
 float Location::Dot(const Location& other) const { return (location_[0] * other.location_[0]) + (location_[1] * other.location_[1]) + (location_[2] * other.location_[2]); }
 
 

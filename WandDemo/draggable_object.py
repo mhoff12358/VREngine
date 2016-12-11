@@ -9,7 +9,6 @@ class DraggableObject(sc.DelegatingActor):
         collision_shapes: typing.Iterable[typing.Tuple[sc.CollisionShape, sc.Pose]],
         starting_pose: sc.Pose = sc.Pose(),
         offset_pose: sc.Pose = sc.Pose(),
-        preface_pose: sc.Pose = sc.Pose(),
         draw_ball: bool = False,
         pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None,
         pose_updated_callbacks: typing.Iterator[typing.Callable[[sc.Pose, sc.Pose], None]] = ()):
@@ -17,7 +16,6 @@ class DraggableObject(sc.DelegatingActor):
 
         self.current_pose = copy.copy(starting_pose)
         self.offset_pose = copy.copy(offset_pose)
-        self.preface_pose = copy.copy(preface_pose)
         self.collision_shapes, self.collision_shape_offsets = zip(*collision_shapes)
 
         self.grab_pose = sc.Pose()
@@ -34,19 +32,18 @@ class DraggableObject(sc.DelegatingActor):
     def AddPoseUpdatedCallback(self, callback):
         self.pose_updated_callbacks.append(callback)
 
-    def ReposeCollisionShapes(self, latest_command):
+    def ReposeCollisionShapes(self):
         for i in range(len(self.collision_shape_offsets)):
-            latest_command = self.scene.MakeCommandAfter(
-                latest_command,
+            self.scene.MakeCommandAfter(
+                self.scene.BackOfNewCommands(),
                 sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
                 sc.ReposeGrabbableObject(self.id, self.collision_shape_offsets[i].ApplyAfter(self.GetPoseWithOffset())))
-        return latest_command
 
     def SetOffsetPose(self, offset_pose):
         self.current_pose = self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose).ApplyAfter(offset_pose).UnapplyAfter(offset_pose)
         self.offset_pose = copy.copy(offset_pose)
-        self.ReposeCollisionShapes(self.scene.FrontOfCommands())
-        self.PlaceCollisionSphere(self.scene.FrontOfCommands())
+        self.ReposeCollisionShapes()
+        self.PlaceCollisionSphere()
         self.MakePoseUpdatedCallbacks()
 
     def ProposePose(self, proposed_pose):
@@ -54,8 +51,8 @@ class DraggableObject(sc.DelegatingActor):
 
     def MakeCollisionSphere(self):
         self.collision_sphere_id = self.scene.AddAndConstructGraphicsObject().id
-        latest_command = self.scene.MakeCommandAfter(
-            self.scene.FrontOfCommands(),
+        self.scene.MakeCommandAfter(
+            self.scene.BackOfNewCommands(),
             sc.Target(self.collision_sphere_id),
             sc.CreateGraphicsObject(
                 "basic",
@@ -85,13 +82,12 @@ class DraggableObject(sc.DelegatingActor):
                         "",
                         "Sphere"),
                      ))))
-        return latest_command
 
-    def PlaceCollisionSphere(self, latest_command):
+    def PlaceCollisionSphere(self):
         if self.collision_sphere_id is not None:
             draw_pose = self.collision_shape_offsets[0].ApplyAfter(self.GetPoseWithOffset())
             self.scene.MakeCommandAfter(
-                latest_command,
+                self.scene.BackOfNewCommands(),
                 sc.Target(self.collision_sphere_id),
                 sc.PlaceComponent(
                     "Sphere",
@@ -108,21 +104,22 @@ class DraggableObject(sc.DelegatingActor):
     def HandleAddToScene(self, args):
         self.grabbable_object_handler = sc.Target(self.scene.FindByName("GrabbableObjectHandler"))
 
-        latest_command = self.scene.FrontOfCommands()
-        latest_command = self.scene.MakeCommandAfter(
-            latest_command,
+        self.scene.MakeCommandAfter(
+            self.scene.BackOfNewCommands(),
             self.grabbable_object_handler,
             sc.AddGrabbableObject(
                 self.id,
                 sc.VectorCollisionShape(self.collision_shapes)))
-        latest_command = self.ReposeCollisionShapes(latest_command)
+        self.ReposeCollisionShapes()
         self.collision_shapes = None
         if self.collision_sphere_id:
-            latest_command = self.MakeCollisionSphere()
-            self.PlaceCollisionSphere(latest_command)
+            self.MakeCollisionSphere()
+            self.PlaceCollisionSphere()
         else:
             self.collision_sphere_id = None
-        self.MakePoseUpdatedCallbacks()
+        offset_pose = self.offset_pose
+        self.offset_pose = sc.Pose()
+        self.SetOffsetPose(offset_pose)
 
     def SetNewPose(self, new_pose):
         (responded_pose, extra_response) = self.ProposePose(new_pose)
@@ -130,7 +127,7 @@ class DraggableObject(sc.DelegatingActor):
             self.current_pose = responded_pose
             self.MakePoseUpdatedCallbacks(extra_response)
             if self.collision_sphere_id is not None:
-                self.PlaceCollisionSphere(self.scene.FrontOfCommands())
+                self.PlaceCollisionSphere()
 
     @delegater.RegisterCommand(sc.HeadsetInterfaceCommand.LISTEN_CONTROLLER_MOVEMENT)
     def HandleControllerMovementWhileGrabbed(self, args):
@@ -142,35 +139,35 @@ class DraggableObject(sc.DelegatingActor):
         if args.held:
             self.controller_pose_delta = self.current_pose.Delta(args.position)
             self.scene.MakeCommandAfter(
-                self.scene.FrontOfCommands(),
+                self.scene.BackOfNewCommands(),
 				self.grabbable_object_handler,
                 sc.EnDisableGrabbableObject(self.id, False))
         else:
             if self.controller_pose_delta is not None:
                 self.controller_pose_delta = None
-                self.ReposeCollisionShapes(self.scene.FrontOfCommands())
+                self.ReposeCollisionShapes()
                 self.scene.MakeCommandAfter(
-                    self.scene.FrontOfCommands(),
+                    self.scene.BackOfNewCommands(),
                     self.grabbable_object_handler,
                     sc.EnDisableGrabbableObject(self.id, True))
 
     def MoveToPose(self, new_pose):
         self.SetNewPose(new_pose)
-        self.ReposeCollisionShapes(self.scene.FrontOfCommands())
+        self.ReposeCollisionShapes()
 
     def DisableGrabbing(self):
-        latest_command = self.scene.MakeCommandAfter(
-            self.scene.FrontOfCommands(),
+        self.scene.MakeCommandAfter(
+            self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
             sc.DropGrabbableObject(self.id))
         self.scene.MakeCommandAfter(
-            latest_command,
+            self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
             sc.EnDisableGrabbableObject(self.id, False))
         self.controller_pose_delta = None
 
     def EnableGrabbing(self):
         self.scene.MakeCommandAfter(
-            self.scene.FrontOfCommands(),
+            self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
             sc.EnDisableGrabbableObject(self.id, True))

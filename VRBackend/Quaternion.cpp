@@ -96,7 +96,8 @@ Quaternion Quaternion::Inverse() const {
 }
 
 bool Quaternion::operator==(const Quaternion& other) const {
-	return (x == other.x) && (y == other.y) && (z == other.z) && (w == other.w);
+	return (FloatsAlmostEqual(x, other.x) && FloatsAlmostEqual(y, other.y) && FloatsAlmostEqual(z, other.z) && FloatsAlmostEqual(w, other.w))
+		|| (FloatsAlmostEqual(x, -other.x) && FloatsAlmostEqual(y, -other.y) && FloatsAlmostEqual(z, -other.z) && FloatsAlmostEqual(w, -other.w));
 }
 
 Quaternion Quaternion::StripAxis(AxisID axis) const {
@@ -127,6 +128,15 @@ Quaternion Quaternion::RotationAboutAxis(AxisID axis, float angle_in_radians) {
 		std::cerr << "Rotation about combined axis" << std::endl;
 		return Quaternion::Identity();
 	}
+}
+
+Quaternion Quaternion::RotationAboutLocation(Location location, float angle_in_radians) {
+	Location modified_location = location * (-sin(angle_in_radians / 2.0f));
+	return Quaternion(
+		modified_location.location_[0],
+		modified_location.location_[1],
+		modified_location.location_[2],
+		cos(angle_in_radians / 2.0f));
 }
 
 Quaternion Quaternion::Slerp(const Quaternion& q0, const Quaternion& q1, float weight) {

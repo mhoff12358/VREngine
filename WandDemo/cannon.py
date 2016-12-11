@@ -139,7 +139,7 @@ class Cannon(sc.DelegatingActor):
         latest_command = self.LoadGraphicsObjects(latest_command)
         # The draggable object that controls where the cover can be slid.
         self.cover_drag = path_draggable_object.PathDraggableObject(
-            paths = path.Line(p0 = self.cover_position.location, p1 = self.cover_end_position.location, radius = 0.1).AsPath(),
+            paths = path.Line(p0 = self.cover_position.location, p1 = self.cover_end_position.location, tube_radius = 0.1).AsPath(),
             draw_path = False,
             draw_ball = False,
             pose_updated_callback = functools.partial(self.CoverDragged))

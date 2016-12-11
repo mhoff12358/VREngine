@@ -89,6 +89,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	auto scene_registration = class_<game_scene::Scene, boost::noncopyable>("Scene", no_init)
 		.def("RegisterDependency", &game_scene::Scene::RegisterDependency)
 		.def("FrontOfCommands", &game_scene::Scene::FrontOfCommands)
+		.def("BackOfNewCommands", &game_scene::Scene::BackOfNewCommands)
 		.def("AddActor", &PyScene::AddActor)
 		.def("AddActorAfter", &PyScene::AddActorAfter)
 		.def("AddActorReturnInitialize", &PyScene::AddActorReturnInitialize)

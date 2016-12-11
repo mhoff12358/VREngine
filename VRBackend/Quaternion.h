@@ -42,6 +42,7 @@ public:
 	static Quaternion RotationBetweenVectors(const std::array<float, 3>& start_vec, const std::array<float, 3>& end_vec, float proportion_of_angle = 1.0f);
 	static Quaternion RotationBetweenLocations(const Location& start_loc, const Location& end_loc, float proportion_of_angle = 1.0f);
 	static Quaternion RotationAboutAxis(AxisID axis, float angle_in_radians);
+	static Quaternion RotationAboutLocation(Location location, float angle_in_radians);
 	static Quaternion Identity();
 
 private:

@@ -25,12 +25,12 @@ class PathPart(object):
 
 class Line(PathPart):
 
-    def __init__(self, p0, p1, radius, o0 = sc.Quaternion.Identity(), o1 = None):
+    def __init__(self, p0, p1, tube_radius, o0 = sc.Quaternion.Identity(), o1 = None):
         self.start = p0
         delta = (p1 - p0)
         self.direction = delta.GetNormalized()
         self.length = delta.GetLength()
-        self.radius_sq = pow(radius, 2)
+        self.radius_sq = pow(tube_radius, 2)
         self.start_orientation = o0
         if o1 is not None:
             self.delta_rotation = o0.Inverse() * o1
@@ -124,3 +124,21 @@ class Path(PathPart):
 
         return self.paths[subpath_index].At(
             (sample - previous_cutoff) / (next_cutoff - previous_cutoff))
+
+
+class CirclePath(Path):
+    def __init__(self, radius, center, right_vec, up_vec, num_samples, tube_radius = 0.1, *args, **kwargs):
+        right_vec = right_vec.GetNormalized() * radius
+        up_vec = up_vec.GetNormalized() * radius
+        normal = up_vec.Cross(right_vec).GetNormalized()
+        theta_samples = tuple(
+            math.pi * 2 * i / num_samples for i in range(
+                num_samples + 1))
+        lines = tuple(
+            Line(
+                p0 = center + math.cos(theta_samples[i]) * right_vec + math.sin(theta_samples[i]) * up_vec,
+                p1 = center + math.cos(theta_samples[i+1]) * right_vec + math.sin(theta_samples[i+1]) * up_vec,
+                o0 = sc.Quaternion.RotationAboutLocation(normal, theta_samples[i]),
+                o1 = sc.Quaternion.RotationAboutLocation(normal, theta_samples[i+1]),
+                tube_radius = tube_radius) for i in range(num_samples))
+        super().__init__(paths = lines, circular = True, *args, **kwargs)

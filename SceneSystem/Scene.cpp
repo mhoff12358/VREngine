@@ -8,6 +8,7 @@ namespace game_scene {
 
 Scene::Scene() : next_actor_id_(ActorId::FirstId) {
 	actor_lookup_non_unique_[ActorId(5)] = nullptr;
+	back_of_current_commands_ = FrontOfCommands();
 }
 
 Scene::~Scene() {
@@ -26,11 +27,19 @@ void Scene::RegisterDependency(const Target& depender, const Target& dependent) 
 }
 
 CommandQueueLocation Scene::MakeCommandAfter(CommandQueueLocation location, Command command) {
-	return commands_.InsertCommand(location, move(command));
+	CommandQueueLocation new_location = commands_.InsertCommand(location, move(command));
+	if (location == back_of_current_commands_) {
+		back_of_current_commands_ = new_location;
+	}
+	return new_location;
 }
 
 CommandQueueLocation Scene::FrontOfCommands() {
 	return commands_.GetNewFront();
+}
+
+CommandQueueLocation Scene::BackOfNewCommands() {
+	return back_of_current_commands_;
 }
 
 unique_ptr<QueryResult> Scene::AskQuery(const Target& target, const QueryArgs& args) {
@@ -56,6 +65,7 @@ void Scene::FlushCommandQueue() {
 	while (!commands_.IsEmpty()) {
 		Command active_command = commands_.PopActiveCommand();
 		for (const ActorId& actor_id : ExpandTarget(active_command.GetTarget())) {
+			back_of_current_commands_ = FrontOfCommands();
 			FindActor(actor_id)->HandleCommand(active_command.GetArgs());
 		}
 	}
@@ -64,6 +74,7 @@ void Scene::FlushCommandQueue() {
 
 void Scene::ExecuteCommand(const Command& command) {
 	for (const ActorId& actor_id : ExpandTarget(command.GetTarget())) {
+		back_of_current_commands_ = FrontOfCommands();
 		FindActor(actor_id)->HandleCommand(command.GetArgs());
 	}
 	FlushCommandQueue();
@@ -107,7 +118,7 @@ ActorId Scene::AddActor(unique_ptr<Actor> new_actor, CommandQueueLocation initia
 }
 
 tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args) {
-	return AddActorReturnInitialize(move(new_actor), FrontOfCommands(), move(args));
+	return AddActorReturnInitialize(move(new_actor), BackOfNewCommands(), move(args));
 }
 
 tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {

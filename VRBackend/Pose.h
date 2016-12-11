@@ -45,6 +45,7 @@ struct Location {
 	float GetLength() const;
 	Location GetNormalized() const;
 
+	Location Cross(const Location& other) const;
 	float Dot(const Location& other) const;
 
 	array<float, 3> location_;
