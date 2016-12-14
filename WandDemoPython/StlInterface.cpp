@@ -13,4 +13,5 @@ void StlInterface() {
 	CreateVector<float>("Float");
 
 	CreateMap<string, float>("String", "Float");
+	CreateSet<int>("Int");
 }

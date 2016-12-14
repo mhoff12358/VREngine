@@ -123,6 +123,7 @@
     <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorId.h" />
     <ClInclude Include="BezierCurve.h" />
+    <ClInclude Include="CollisionCollection.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="Command.h" />
     <ClInclude Include="CommandArgs.h" />
@@ -152,6 +153,7 @@
     <ClCompile Include="ActorGroups.cpp" />
     <ClCompile Include="ActorId.cpp" />
     <ClCompile Include="BezierCurve.cpp" />
+    <ClCompile Include="CollisionCollection.cpp" />
     <ClCompile Include="CollisionShape.cpp" />
     <ClCompile Include="Command.cpp" />
     <ClCompile Include="CommandArgs.cpp" />

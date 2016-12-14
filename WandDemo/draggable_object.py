@@ -37,7 +37,7 @@ class DraggableObject(sc.DelegatingActor):
             self.scene.MakeCommandAfter(
                 self.scene.BackOfNewCommands(),
                 sc.Target(self.scene.FindByName("GrabbableObjectHandler")),
-                sc.ReposeGrabbableObject(self.id, self.collision_shape_offsets[i].ApplyAfter(self.GetPoseWithOffset())))
+                sc.ReposeCollideableObject(self.id, self.collision_shape_offsets[i].ApplyAfter(self.GetPoseWithOffset())))
 
     def SetOffsetPose(self, offset_pose):
         self.current_pose = self.offset_pose.ApplyAfter(self.current_pose).Delta(self.offset_pose).ApplyAfter(offset_pose).UnapplyAfter(offset_pose)
@@ -107,7 +107,7 @@ class DraggableObject(sc.DelegatingActor):
         self.scene.MakeCommandAfter(
             self.scene.BackOfNewCommands(),
             self.grabbable_object_handler,
-            sc.AddGrabbableObject(
+            sc.AddCollideableObject(
                 self.id,
                 sc.VectorCollisionShape(self.collision_shapes)))
         self.ReposeCollisionShapes()
@@ -141,7 +141,7 @@ class DraggableObject(sc.DelegatingActor):
             self.scene.MakeCommandAfter(
                 self.scene.BackOfNewCommands(),
 				self.grabbable_object_handler,
-                sc.EnDisableGrabbableObject(self.id, False))
+                sc.EnDisableCollideableObject(self.id, False))
         else:
             if self.controller_pose_delta is not None:
                 self.controller_pose_delta = None
@@ -149,7 +149,7 @@ class DraggableObject(sc.DelegatingActor):
                 self.scene.MakeCommandAfter(
                     self.scene.BackOfNewCommands(),
                     self.grabbable_object_handler,
-                    sc.EnDisableGrabbableObject(self.id, True))
+                    sc.EnDisableCollideableObject(self.id, True))
 
     def MoveToPose(self, new_pose):
         self.SetNewPose(new_pose)
@@ -163,11 +163,11 @@ class DraggableObject(sc.DelegatingActor):
         self.scene.MakeCommandAfter(
             self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
-            sc.EnDisableGrabbableObject(self.id, False))
+            sc.EnDisableCollideableObject(self.id, False))
         self.controller_pose_delta = None
 
     def EnableGrabbing(self):
         self.scene.MakeCommandAfter(
             self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
-            sc.EnDisableGrabbableObject(self.id, True))
+            sc.EnDisableCollideableObject(self.id, True))

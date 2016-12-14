@@ -5,6 +5,7 @@
 #include "CommandArgs.h"
 #include "CollisionShape.h"
 #include "HeadsetInterface.h"
+#include "CollisionCollection.h"
 
 namespace game_scene {
 namespace commands {
@@ -13,60 +14,14 @@ class TriggerStateChange;
 
 class GrabbableObjectCommand {
 public:
-DECLARE_COMMAND(GrabbableObjectCommand, ADD_GRABBABLE_OBJECT)
-DECLARE_COMMAND(GrabbableObjectCommand, REPOSE_GRABBABLE_OBJECT)
-DECLARE_COMMAND(GrabbableObjectCommand, ENDISABLE_GRABBABLE_OBJECT)
-DECLARE_COMMAND(GrabbableObjectCommand, REMOVE_GRABBABLE_OBJECT)
 DECLARE_COMMAND(GrabbableObjectCommand, DROP_GRABBABLE_OBJECT)
-
 DECLARE_COMMAND(GrabbableObjectCommand, OBJECT_GRABBED)
-};
-
-class AddGrabbableObject : public CommandArgs {
-public:
-	AddGrabbableObject(ActorId grabbable_actor, vector<CollisionShape>& grab_shapes) :
-		CommandArgs(GrabbableObjectCommand::ADD_GRABBABLE_OBJECT),
-		grabbable_actor_(grabbable_actor),
-		grab_shapes_(std::move(grab_shapes)) {}
-
-	ActorId grabbable_actor_;
-	vector<CollisionShape> grab_shapes_;
-};
-
-class ReposeGrabbableObject : public CommandArgs {
-public:
-	ReposeGrabbableObject(ActorId grabbable_actor, Pose pose, int shape_index = -1) :
-		CommandArgs(GrabbableObjectCommand::REPOSE_GRABBABLE_OBJECT),
-		grabbable_actor_(grabbable_actor), pose_(pose), shape_index_(shape_index) {}
-
-	ActorId grabbable_actor_;
-	Pose pose_;
-	int shape_index_;
-};
-
-class EnDisableGrabbableObject : public CommandArgs {
-public:
-	EnDisableGrabbableObject(ActorId grabbable_actor, bool enable, int shape_index = -1) :
-		CommandArgs(GrabbableObjectCommand::ENDISABLE_GRABBABLE_OBJECT),
-		grabbable_actor_(grabbable_actor), enable_(enable), shape_index_(shape_index) {}
-
-	ActorId grabbable_actor_;
-	bool enable_;
-	int shape_index_;
 };
 
 class DropGrabbableObject : public CommandArgs {
 public:
 	DropGrabbableObject(ActorId grabbable_actor) :
 		CommandArgs(GrabbableObjectCommand::DROP_GRABBABLE_OBJECT), grabbable_actor_(grabbable_actor) {}
-
-	ActorId grabbable_actor_;
-};
-
-class RemoveGrabbableObject : public CommandArgs {
-public:
-	RemoveGrabbableObject(ActorId grabbable_actor)
-		: CommandArgs(GrabbableObjectCommand::REMOVE_GRABBABLE_OBJECT), grabbable_actor_(grabbable_actor) {}
 
 	ActorId grabbable_actor_;
 };
@@ -83,32 +38,21 @@ public:
 	bool held_;
 };
 
-class GrabbableObjectHandler : public Actor {
+class GrabbableObjectHandler : public CollisionCollection {
 public:
 	GrabbableObjectHandler();
 
 	void HandleCommand(const CommandArgs& args) override;
-	void HandleAddGrabbableObject(const AddGrabbableObject& args);
-	void HandleReposeGrabbableObject(const ReposeGrabbableObject& args);
-	void HandleEnDisableGrabbableObject(const EnDisableGrabbableObject& args);
-	void HandleRemoveGrabbableObject(const RemoveGrabbableObject& args);
 	void HandleDropGrabbableObject(const DropGrabbableObject& args);
 	void HandleTriggerChange(const commands::TriggerStateChange& args);
 
 	void DropActor(ActorId actor_id);
 	void DropController(unsigned char controller_number);
 
-	ActorId FindCollidingActor(const CollisionShape& controller_shape);
 	void SetGrabbedActor(unsigned char controller_number, ActorId grabbed_actor);
 	void UnsetGrabbedActor(unsigned char controller_number);
-	void AddGrabInformation(ActorId actor_id, vector<CollisionShape> collision);
-	void RemoveGrabInformation(ActorId actor_id);
 
 private:
-	vector<CollisionShape>& GetCollisionShapes(ActorId actor_id);
-
-	vector<pair<ActorId, vector<CollisionShape>>> grab_collisions_;
-	set<ActorId> grabbable_actors_;
 	array<ActorId, 2> grabbed_actor_ = { ActorId::UnsetId, ActorId::UnsetId };
 };
 }

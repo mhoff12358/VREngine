@@ -3,12 +3,13 @@
 
 #include "PyScene.h"
 #include "StlHelper.h"
+#include "SceneSystem/CollisionCollection.h"
 #include "SceneSystem/GrabbableObjectHandler.h"
 
-BOOST_PTR_MAGIC(game_scene::AddGrabbableObject)
-BOOST_PTR_MAGIC(game_scene::RemoveGrabbableObject)
-BOOST_PTR_MAGIC(game_scene::EnDisableGrabbableObject)
-BOOST_PTR_MAGIC(game_scene::ReposeGrabbableObject)
+BOOST_PTR_MAGIC(game_scene::AddCollideableObject)
+BOOST_PTR_MAGIC(game_scene::RemoveCollideableObject)
+BOOST_PTR_MAGIC(game_scene::EnDisableCollideableObject)
+BOOST_PTR_MAGIC(game_scene::ReposeCollideableObject)
 BOOST_PTR_MAGIC(game_scene::DropGrabbableObject)
 
 void GrabbableObjectHandlerInterface(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
@@ -16,48 +17,48 @@ void GrabbableObjectHandlerInterface(class_<game_scene::Scene, boost::noncopyabl
 		.def_readonly("OBJECT_GRABBED", &game_scene::GrabbableObjectCommand::OBJECT_GRABBED);
 
 	class_<
-		game_scene::AddGrabbableObject,
-		std::auto_ptr<game_scene::AddGrabbableObject>,
+		game_scene::AddCollideableObject,
+		std::auto_ptr<game_scene::AddCollideableObject>,
 		bases<game_scene::CommandArgs>,
 		boost::noncopyable>(
-			"AddGrabbableObject",
+			"AddCollideableObject",
 			init<game_scene::ActorId, vector<CollisionShape>&>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::AddGrabbableObject>);
+		&PyScene::MakeCommandAfter<game_scene::AddCollideableObject>);
 
 	class_<
-		game_scene::RemoveGrabbableObject,
-		std::auto_ptr<game_scene::RemoveGrabbableObject>,
+		game_scene::RemoveCollideableObject,
+		std::auto_ptr<game_scene::RemoveCollideableObject>,
 		bases<game_scene::CommandArgs>,
 		boost::noncopyable>(
-			"RemoveGrabbableObject",
+			"RemoveCollideableObject",
 			init<game_scene::ActorId>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::RemoveGrabbableObject>);
+		&PyScene::MakeCommandAfter<game_scene::RemoveCollideableObject>);
 
 	class_<
-		game_scene::EnDisableGrabbableObject,
-		std::auto_ptr<game_scene::EnDisableGrabbableObject>,
+		game_scene::EnDisableCollideableObject,
+		std::auto_ptr<game_scene::EnDisableCollideableObject>,
 		bases<game_scene::CommandArgs>,
 		boost::noncopyable>(
-			"EnDisableGrabbableObject",
+			"EnDisableCollideableObject",
 			init<game_scene::ActorId, bool>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::EnDisableGrabbableObject>);
+		&PyScene::MakeCommandAfter<game_scene::EnDisableCollideableObject>);
 
 	class_<
-		game_scene::ReposeGrabbableObject,
-		std::auto_ptr<game_scene::ReposeGrabbableObject>,
+		game_scene::ReposeCollideableObject,
+		std::auto_ptr<game_scene::ReposeCollideableObject>,
 		bases<game_scene::CommandArgs>,
 		boost::noncopyable>(
-			"ReposeGrabbableObject",
+			"ReposeCollideableObject",
 			init<game_scene::ActorId, Pose>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::ReposeGrabbableObject>);
+		&PyScene::MakeCommandAfter<game_scene::ReposeCollideableObject>);
 
 	class_<
 		game_scene::DropGrabbableObject,

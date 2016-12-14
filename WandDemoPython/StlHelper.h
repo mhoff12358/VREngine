@@ -16,7 +16,7 @@ auto ResizeIfPossibleImpl(Collection& c, ssize_t size, special_) -> decltype(c.r
 
 template <typename Collection, typename ValueType>
 auto ResizeIfPossibleImpl(Collection& c, ssize_t size, less_special_) -> decltype(c.size(), void()) {
-	assert(c.size() == size);
+	assert((c.size() == 0) || (c.size() == size));
 }
 
 
@@ -32,6 +32,11 @@ void ResizeIfPossible(Collection& c, ssize_t size) {
 template <typename Collection, typename ValueType>
 auto PushBackIfPossibleImpl(Collection& c, ssize_t index, ValueType&& value, special_) -> decltype(c.reserve(0), void()) {
 	c.push_back(move(value));
+}
+
+template <typename Collection, typename ValueType>
+auto PushBackIfPossibleImpl(Collection& c, ssize_t index, ValueType&& value, less_special_) -> decltype(c.insert(c.end(), ValueType()), void()) {
+	c.insert(c.end(), move(value));
 }
 
 template <typename Collection, typename ValueType>
@@ -182,6 +187,12 @@ template<typename Key, typename Value>
 void CreateMap(string key_name, string value_name) {
 	typedef map<Key, Value> MapType;
 	CreateDictToMap<Key, Value, MapType>(CreateIndexing<Key, Value, MapType>(CreateClass<MapType>("Map" + key_name + "To" + value_name)));
+}
+
+template<typename Key>
+void CreateSet(string key_name) {
+	typedef set<Key> PyType;
+	CreateListToCollection<Key, PyType>(CreateClass<PyType>("Set" + key_name));
 }
 
 template<typename T, size_t N>
