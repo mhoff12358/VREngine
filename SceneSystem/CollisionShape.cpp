@@ -2,7 +2,7 @@
 #include "CollisionShape.h"
 
 CollisionShape::CollisionShape(Pose pose, float radius, bool enabled)
-	: location_(pose.location_), radius_(radius), enabled_(enabled) {
+	: pose_(pose), radius_(radius), enabled_(enabled) {
 
 }
 
@@ -11,7 +11,7 @@ bool CollisionShape::Intersect(const CollisionShape& other) const {
 		return false;
 	}
 	float radius_sum = other.radius_ + radius_;
-	return (location_ - other.location_).GetLengthSquared() <= pow(radius_sum, 2);
+	return (pose_.location_ - other.pose_.location_).GetLengthSquared() <= pow(radius_sum, 2);
 }
 
 bool CollisionShape::Intersect(const vector<CollisionShape>& others) const {
@@ -24,11 +24,15 @@ bool CollisionShape::Intersect(const vector<CollisionShape>& others) const {
 }
 
 void CollisionShape::SetPose(const Pose& pose) {
-	location_ = pose.location_;
+	pose_ = pose;
 }
 
 void CollisionShape::EnDisable(bool enable) {
 	enabled_ = enable;
+}
+
+Pose CollisionShape::GetPose() const {
+	return pose_;
 }
 
 ColoredCollisionShape::ColoredCollisionShape(int color, set<int> accepted_colors, Pose pose, float radius, bool enabled) :

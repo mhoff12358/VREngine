@@ -11,7 +11,8 @@ void CollisionShapeInterface() {
 		.def("Intersect", a)
 		.def("Intersect", b)
 		.def("SetPose", &CollisionShape::SetPose)
-		.def("EnDisable", &CollisionShape::EnDisable);
+		.def("EnDisable", &CollisionShape::EnDisable)
+		.def("GetPose", &CollisionShape::GetPose);
 
 	class_<ColoredCollisionShape, bases<CollisionShape>, boost::noncopyable>("ColoredCollisionShape", init<int, set<int>, Pose, float>())
 		.def("Intersect", &ColoredCollisionShape::Intersect);

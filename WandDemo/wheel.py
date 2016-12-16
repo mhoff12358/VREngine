@@ -47,7 +47,7 @@ class Wheel(sc.DelegatingActor):
                 right_vec = sc.Location(0, 0, -1),
                 radius = 1,
                 num_samples = 20,
-                tube_radius = 0.25
+                tube_radius = 0.5
                 ),
             draw_ball = False,
             draw_path = False,

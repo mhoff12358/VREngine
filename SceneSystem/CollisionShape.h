@@ -11,9 +11,10 @@ public:
 	bool Intersect(const vector<CollisionShape>& others) const;
 	void SetPose(const Pose& pose);
 	void EnDisable(bool enable);
+	Pose GetPose() const;
 
 private:
-	Location location_;
+	Pose pose_;
 	float radius_;
 	bool enabled_;
 };
