@@ -455,6 +455,7 @@
     <None Include="class.lua" />
     <None Include="cockpit.lua" />
     <None Include="cockpit_scene.lua" />
+    <None Include="combinable.py" />
     <None Include="cone.lua" />
     <None Include="console.lua" />
     <None Include="cpp_interface.lua" />

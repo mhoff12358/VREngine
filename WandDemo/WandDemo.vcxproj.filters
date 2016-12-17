@@ -478,5 +478,8 @@
     <None Include="lighter.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="combinable.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
