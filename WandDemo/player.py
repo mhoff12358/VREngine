@@ -4,6 +4,14 @@ import scene_system as sc
 class Player(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
 
+    num_motion_modifiers = {
+        ord('1'): (2, -1),
+        ord('2'): (2, 1),
+        ord('3'): (0, -1),
+        ord('4'): (0, 1),
+        ord('5'): (1, -1),
+        ord('6'): (1, 1),
+    }
     motion_modifiers = {
         ord('W'): (2, -1),
         ord('S'): (2, 1),
@@ -34,7 +42,8 @@ class Player(sc.DelegatingActor):
             scene.FrontOfCommands(), sc.Target(
                 scene.FindByName("IOInterface")), sc.IOListenerRegistration(
                 True, self.id, sc.ListenerId.KEY_TOGGLE, sc.VectorUnsignedChar(
-                    (ord('W'), ord('A'), ord('S'), ord('D'), ord('Q'), ord('E'),))))
+                    (ord('W'), ord('A'), ord('S'), ord('D'), ord('Q'), ord('E'),
+                     ord('1'), ord('2'), ord('3'), ord('4'), ord('5'), ord('6'), ))))
         scene.MakeCommandAfter(
             scene.FrontOfCommands(),
             sc.Target(scene.FindByName("IOInterface")),
@@ -48,6 +57,7 @@ class Player(sc.DelegatingActor):
                 scene.FindByName("GraphicsResources")), sc.QueryArgs(
                 sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
         self.entity_handler = graphics_resources.GetEntityHandler()
+        self.entity_handler.MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(0.5, 0.5, 0.5)
 
     @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):

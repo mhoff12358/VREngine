@@ -162,7 +162,7 @@ class Cannon(sc.DelegatingActor):
 
     def LoadGraphicsObjects(self, latest_command):
         self.cannon_id = self.scene.AddAndConstructGraphicsObject().id
-        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_textured.cso")
+        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_textured", lighting = True)
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
             sc.Target(self.cannon_id),

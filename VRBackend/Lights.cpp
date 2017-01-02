@@ -80,3 +80,18 @@ void LightSystem::Update(const LightSystem& other) {
 	*this = other;
 	dirty_ = false;
 }
+
+AmbientLight& LightSystem::MutableAmbientLight() {
+	dirty_ = true;
+	return ambient_light_;
+}
+
+array<PointLight, LightSystem::num_point_lights>& LightSystem::MutablePointLights() {
+	dirty_ = true;
+	return point_lights_;
+}
+
+array<DirectionalLight, LightSystem::num_directional_lights>& LightSystem::MutableDirectionalLights() {
+	dirty_ = true;
+	return directional_lights_;
+}

@@ -34,6 +34,7 @@
 #include "ModelCreationInterface.h"
 #include "GrabbableObjectHandlerInterface.h"
 #include "CollisionShapeInterface.h"
+#include "LightInterface.h"
 
 BOOST_PTR_MAGIC_STRUCT(PyActor)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
@@ -137,4 +138,5 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	ModelCreationInterface();
 	GrabbableObjectHandlerInterface(scene_registration);
 	CollisionShapeInterface();
+	LightInterface();
 }

@@ -48,6 +48,10 @@ public:
 	void Push(ID3D11DeviceContext* device_context);
 	void Prepare(ID3D11Device* device, ID3D11DeviceContext* device_context);
 
+	AmbientLight& MutableAmbientLight();
+	array<PointLight, num_point_lights>& MutablePointLights();
+	array<DirectionalLight, num_directional_lights>& MutableDirectionalLights();
+
 	void Update(const LightSystem& other);
 
 private:

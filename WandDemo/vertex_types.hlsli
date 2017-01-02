@@ -1,3 +1,6 @@
+#ifndef VERTEX_TYPES
+#define VERTEX_TYPES
+
 struct VertexLocation {
 	float4 location : SV_POSITION;
 };
@@ -24,3 +27,5 @@ struct VertexAllWorld {
 	float2 tex_coord : TEXCOORD1;
 	float4 world_location : POSITION;
 };
+
+#endif // VERTEX_TYPES

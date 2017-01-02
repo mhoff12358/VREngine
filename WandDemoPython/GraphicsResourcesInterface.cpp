@@ -16,6 +16,7 @@ void GraphicsResourcesInterface() {
 	class_<ResourcePool, boost::noncopyable>("ResourcePool", no_init);
 	class_<EntityHandler, boost::noncopyable>("EntityHandler", no_init)
 		.def("MutableCamera", &EntityHandler::MutableCamera, return_value_policy<reference_existing_object>())
+		.def("MutableLightSystem", &EntityHandler::MutableLightSystem, return_value_policy<reference_existing_object>())
 		.def("AddModelMutation", &EntityHandlerAddModelMutation);
 	class_<boost::reference_wrapper<ID3D11Device>>("ID3D11Device", no_init);
 

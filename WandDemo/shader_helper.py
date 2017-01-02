@@ -4,7 +4,7 @@ class ShaderHelper(object):
     force_pixel_shader_to_normals = False
 
     @classmethod
-    def Default(cls, vertex_type_name = "all", include_world_coords = True, pixel_shader_name = "ps_blue.cso"):
+    def Default(cls, vertex_type_name = "all", include_world_coords = True, pixel_shader_name = "ps_blue", lighting = False):
         if vertex_type_name == "all":
             vertex_type = sc.VertexType.all
         elif vertex_type_name == "texture":
@@ -14,7 +14,11 @@ class ShaderHelper(object):
         elif vertex_type_name == "location":
             vertex_type = sc.VertexType.location
         vertex_shader_name = "vs_{}_apply_mvp{}.cso".format(vertex_type_name, "_world" if include_world_coords else "")
+        if lighting:
+            pixel_shader_name += "_lit"
         return sc.ShaderDetails(
             sc.VectorShaderIdentifier((
                 sc.ShaderIdentifier(vertex_shader_name, sc.ShaderStage.Vertex(), vertex_type),
-                sc.ShaderIdentifier("ps_normals.cso" if cls.force_pixel_shader_to_normals else pixel_shader_name, sc.ShaderStage.Pixel()))))
+                sc.ShaderIdentifier(
+                    "ps_normals.cso" if cls.force_pixel_shader_to_normals else pixel_shader_name + ".cso",
+                    sc.ShaderStage.Pixel()))))

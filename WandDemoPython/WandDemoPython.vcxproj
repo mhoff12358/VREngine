@@ -149,6 +149,7 @@
     <ClCompile Include="GraphicsResourcesInterface.cpp" />
     <ClCompile Include="HeadsetInterface.cpp" />
     <ClCompile Include="IOInterfaceInterface.cpp" />
+    <ClCompile Include="LightInterface.cpp" />
     <ClCompile Include="ModelCreationInterface.cpp" />
     <ClCompile Include="PoseInterface.cpp" />
     <ClCompile Include="PyActor.cpp" />
@@ -167,6 +168,7 @@
     <ClInclude Include="GraphicsResourcesInterface.h" />
     <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="IOInterfaceInterface.h" />
+    <ClInclude Include="LightInterface.h" />
     <ClInclude Include="ModelCreationInterface.h" />
     <ClInclude Include="PoseInterface.h" />
     <ClInclude Include="PyActor.h" />
