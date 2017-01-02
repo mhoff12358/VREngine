@@ -241,7 +241,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	a.InsertCommand(b, game_scene::Command(game_scene::Target(game_scene::ActorId::AllActors), nullptr));
 
 	bool hmd_active = false;
-	bool hmd_desired = true;
+	bool hmd_desired = false;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
