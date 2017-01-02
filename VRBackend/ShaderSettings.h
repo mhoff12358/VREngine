@@ -17,5 +17,5 @@ public:
 	ConstantBuffer* constant_buffer;
 
 private:
-	static const int buffer_register = 2;
+	static const int buffer_register = 4;
 };

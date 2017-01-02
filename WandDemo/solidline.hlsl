@@ -29,7 +29,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer line_details : register(b2)
+cbuffer line_details : register(b4)
 {
 	float4 color;
 	float width;

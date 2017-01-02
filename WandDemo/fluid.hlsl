@@ -22,7 +22,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer solid_color : register(b2)
+cbuffer solid_color : register(b4)
 {
 	float4 color;
 	float fluid_level;

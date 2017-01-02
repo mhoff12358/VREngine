@@ -72,11 +72,11 @@ class Wheel(sc.DelegatingActor):
                                 sc.ArrayInt3((0, 1, 2)),
                                 sc.ArrayFloat3((1, 1, 1)),
                                 sc.ArrayBool2((False, True))),
-                            sc.VertexType.normal,
+                            sc.VertexType.all,
                             False)))
                     .SetShaders(sc.ShaderDetails(
                         sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_location_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
+                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
                             sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.color),)))
                     .SetComponent("Wheel"),
@@ -88,11 +88,11 @@ class Wheel(sc.DelegatingActor):
                                 sc.ArrayInt3((0, 1, 2)),
                                 sc.ArrayFloat3((1, 1, 1)),
                                 sc.ArrayBool2((False, True))),
-                            sc.VertexType.normal,
+                            sc.VertexType.all,
                             False)))
                     .SetShaders(sc.ShaderDetails(
                         sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_location_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.location),
+                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
                             sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.color),)))
                     .SetComponent("Crank"),

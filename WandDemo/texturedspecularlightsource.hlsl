@@ -25,7 +25,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer light_details : register(b2)
+cbuffer light_details : register(b4)
 {
 	float3 light_location;
 	float ambient_light;

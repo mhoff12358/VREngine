@@ -18,7 +18,6 @@ class Cannon(sc.DelegatingActor):
         self.yaw = 0
         self.cover_position = sc.Pose(sc.Location(-0.62794, 0.78524, 0))
         self.cover_end_position = sc.Pose(sc.Location(-0.51281, 1.4757, 0))
-        self.rotation_start = sc.Location(0, -0.4, 0)
         self.firing_pose = sc.Pose(sc.Location(0, 2, 0))
         self.cover_drag = None # type: path_draggable_object.PathDraggableObject
         self.draggable_cover = None # type: draggable_graphics.DraggableGraphics
@@ -177,11 +176,11 @@ class Cannon(sc.DelegatingActor):
                                     sc.ArrayInt3((0, 1, 2)),
                                     sc.ArrayFloat3((1, 1, 1)),
                                     sc.ArrayBool2((False, True))),
-                                sc.VertexType.texture,
+                                sc.VertexType.all,
                                 False)))
                         .SetShaders(sc.ShaderDetails(
                             sc.VectorShaderIdentifier((
-                                sc.ShaderIdentifier("vs_texture_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.texture),
+                                sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
                                 sc.ShaderIdentifier("ps_textured.cso", sc.ShaderStage.Pixel())))))
                         .SetShaderSettingsValue(sc.ShaderSettingsValue(tuple()))
                         .SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("cannon2.png", sc.ShaderStages.All(), 0, 0),)))
@@ -198,7 +197,7 @@ class Cannon(sc.DelegatingActor):
                                 False)))
                         .SetShaders(sc.ShaderDetails(
                             sc.VectorShaderIdentifier((
-                                sc.ShaderIdentifier("vs_texture_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.texture),
+                                sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
                                 sc.ShaderIdentifier("ps_textured.cso", sc.ShaderStage.Pixel())))))
                         .SetShaderSettingsValue(sc.ShaderSettingsValue(tuple()))
                         .SetTextures(sc.VectorIndividualTextureDetails((sc.IndividualTextureDetails("cannon2.png", sc.ShaderStages.All(), 0, 0),)))

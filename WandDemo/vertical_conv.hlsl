@@ -14,7 +14,7 @@ sampler skin_sampler : register(s0);
 
 static int kernel_size = 51;
 
-cbuffer kernel : register(b2)
+cbuffer kernel : register(b4)
 {
 	float4 height;
 	float kernel[51];

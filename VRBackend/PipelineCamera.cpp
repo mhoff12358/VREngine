@@ -55,6 +55,7 @@ void PipelineCamera::BuildMatrices() {
 	orientation_projection_matrix_ = orientation_matrix_ * projection_matrix_;
 	view_matrix_ = location_matrix_ * orientation_matrix_;
 	view_inverse_matrix_ = orientation_inverse_matrix_ * location_inverse_matrix_;
+	view_inverse_trans_matrix_ = orientation_inverse_matrix_ * location_inverse_matrix_;
 	view_projection_matrix_ = view_matrix_ * projection_matrix_;
 }
 

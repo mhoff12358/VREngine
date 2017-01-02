@@ -14,7 +14,7 @@ sampler source : register(s0);
 
 static int kernel_size = 51;
 
-cbuffer kernel : register(b2)
+cbuffer kernel : register(b4)
 {
 	float4 width;
 	float kernel[51];

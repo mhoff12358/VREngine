@@ -21,7 +21,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer sprite_details : register(b2)
+cbuffer sprite_details : register(b4)
 {
 	float2 size;
 };

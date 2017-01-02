@@ -1,4 +1,4 @@
-cbuffer solid_color : register(b2)
+cbuffer solid_color : register(b4)
 {
 	float4 color;
 };

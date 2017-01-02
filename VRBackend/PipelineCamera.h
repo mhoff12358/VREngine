@@ -37,6 +37,7 @@ private:
 	DirectX::XMMATRIX view_matrix_;
 	DirectX::XMMATRIX view_inverse_matrix_;
 	DirectX::XMMATRIX view_projection_matrix_;
+	DirectX::XMMATRIX view_inverse_trans_matrix_;
 	DirectX::XMMATRIX orientation_projection_matrix_;
 
 	bool dirty_ = false;

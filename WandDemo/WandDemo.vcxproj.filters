@@ -277,6 +277,12 @@
     <FxCompile Include="set_color.hlsl">
       <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="vs_all_apply_mvp.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_normals.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -498,6 +504,9 @@
     </None>
     <None Include="nixie.py">
       <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="lighting_buffers.hlsli">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
   </ItemGroup>
 </Project>

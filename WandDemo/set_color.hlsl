@@ -9,7 +9,7 @@ struct POut
 	float4 t1 : SV_Target0;
 };
 
-cbuffer color_input : register(b2)
+cbuffer color_input : register(b4)
 {
 	float4 color;
 };

@@ -25,7 +25,7 @@ cbuffer personal_matrices : register(b1)
 	matrix <float, 4, 4> model_inv_trans;
 };
 
-cbuffer terrain_details : register(b2)
+cbuffer terrain_details : register(b4)
 {
 	float terrain_plane_scale;
 	float3 terrain_height_scale;
