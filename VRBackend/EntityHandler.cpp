@@ -3,6 +3,7 @@
 
 #include "RenderGroup.h"
 #include "ModelMutation.h"
+#include "ResourcePool.h"
 
 EntityHandler::EntityHandler()
 {
@@ -25,6 +26,17 @@ void EntityHandler::SetEntitySets(map<string, int>& entity_group_associations) {
 void EntityHandler::SetCameras(const map<PipelineCameraIdent, unsigned int>& camera_map) {
 	camera_map_ = camera_map;
 	current_edit_group[0].cameras.resize(camera_map_.size());
+}
+
+void EntityHandler::SetLighting(ID3D11Device* device_interface, const map<LightingSystemIdent, unsigned int>& light_map) {
+	light_map_ = light_map;
+	auto& lights = current_edit_group[0].lights;
+	lights.resize(light_map_.size());
+	for (auto& light : lights) {
+		light_buffers_.emplace_back(ShaderStages::All(), light.GetConstantBufferSize());
+		light_buffers_.back().CreateBuffer(device_interface);
+		light.SetConstantBuffer(&light_buffers_.back());
+	}
 }
 
 unsigned int EntityHandler::GetNumEntitySets() {
@@ -106,7 +118,7 @@ Entity& EntityHandler::ReferenceEntity(EntityId entity_id) {
 }
 
 PipelineCamera& EntityHandler::MutableCamera(PipelineCameraIdent camera_name) {
-	return current_edit_group[0].cameras[camera_map_[camera_name]];
+	return current_edit_group[0].cameras[GetCameraIndex(camera_name)];
 }
 
 unsigned int EntityHandler::GetCameraIndex(PipelineCameraIdent camera_name) {
@@ -132,6 +144,29 @@ void EntityHandler::BuildCameras() {
 	for (auto& camera : current_edit_group[0].cameras) {
 		camera.BuildMatricesIfDirty();
 	}
+}
+
+LightSystem& EntityHandler::MutableLightSystem(LightingSystemIdent light_name) {
+	return current_edit_group[0].lights[GetLightSystemIndex(light_name)];
+}
+
+unsigned int EntityHandler::GetLightSystemIndex(LightingSystemIdent light_name) {
+	if (!light_map_.count(light_name)) {
+		std::cout << "Attempting to look up nonexistant light" << std::endl;
+		return 0;
+	}
+	return light_map_[light_name];
+}
+
+void EntityHandler::AddLightSystem(ID3D11Device* device_interface, LightingSystemIdent light_name, LightSystem light_system) {
+	if (light_map_.count(light_name)) {
+		std::cout << "Attempting to recreate an existing pipeline light" << std::endl;
+	}
+	auto& lights = current_edit_group[0].lights;
+	lights.emplace_back(std::move(light_system));
+	light_buffers_.emplace_back(ShaderStages::All(), lights.back().GetConstantBufferSize());
+	light_buffers_.back().CreateBuffer(device_interface);
+	lights.back().SetConstantBuffer(&light_buffers_.back());
 }
 
 ConstantBuffer* EntityHandler::GetEntityObjectSettings(unsigned int external_entity_id) {

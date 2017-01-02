@@ -1,5 +1,5 @@
 import scene_system as sc
-import draggable_object, draggable_graphics
+import draggable_object, draggable_graphics, shader_helper
 import math, functools, copy
 
 class Lighter(sc.DelegatingActor):
@@ -39,6 +39,7 @@ class Lighter(sc.DelegatingActor):
 
     def LoadGraphicsResources(self):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
+        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor.cso")
         self.scene.MakeCommandAfter(
             self.scene.BackOfNewCommands(),
             sc.Target(self.graphics_id),
@@ -55,10 +56,7 @@ class Lighter(sc.DelegatingActor):
                                 sc.ArrayBool2((False, True))),
                             sc.VertexType.all,
                             False)))
-                    .SetShaders(sc.ShaderDetails(
-                        sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
-                            sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
+                    .SetShaders(shader_details)
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.shaft_color),)))
                     .SetComponent("Whole"),
                     sc.EntitySpecification("Tip")
@@ -71,10 +69,7 @@ class Lighter(sc.DelegatingActor):
                                 sc.ArrayBool2((False, True))),
                             sc.VertexType.all,
                             False)))
-                    .SetShaders(sc.ShaderDetails(
-                        sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
-                            sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
+                    .SetShaders(shader_details)
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.tip_color),)))
                     .SetComponent("Whole"),
                     )),

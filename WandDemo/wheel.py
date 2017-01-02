@@ -1,5 +1,5 @@
 import scene_system as sc
-import draggable_graphics, path_draggable_object, path
+import draggable_graphics, path_draggable_object, path, shader_helper
 import copy, functools
 
 class Wheel(sc.DelegatingActor):
@@ -58,6 +58,7 @@ class Wheel(sc.DelegatingActor):
 
     def LoadGraphicsResources(self, latest_command):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
+        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor.cso")
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
             sc.Target(self.graphics_id),
@@ -74,10 +75,7 @@ class Wheel(sc.DelegatingActor):
                                 sc.ArrayBool2((False, True))),
                             sc.VertexType.all,
                             False)))
-                    .SetShaders(sc.ShaderDetails(
-                        sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
-                            sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
+                    .SetShaders(shader_details)
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.color),)))
                     .SetComponent("Wheel"),
                     sc.EntitySpecification("Crank")
@@ -90,10 +88,7 @@ class Wheel(sc.DelegatingActor):
                                 sc.ArrayBool2((False, True))),
                             sc.VertexType.all,
                             False)))
-                    .SetShaders(sc.ShaderDetails(
-                        sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
-                            sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
+                    .SetShaders(shader_details)
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.color),)))
                     .SetComponent("Crank"),
                     )),

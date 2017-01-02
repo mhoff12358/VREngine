@@ -63,7 +63,7 @@ void ConstantBuffer::Prepare(ID3D11Device* device, ID3D11DeviceContext* device_c
 }
 
 SizedConstantBuffer::SizedConstantBuffer(ShaderStages stages, unsigned int size) : ConstantBuffer(stages) {
-	buffer_data.resize(size);
+	buffer_data.resize((((size-1) / 16) + 1) * 16);
 }
 
 SizedConstantBuffer::~SizedConstantBuffer() {

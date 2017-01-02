@@ -17,3 +17,10 @@ struct VertexAll {
 	float3 normal : TEXCOORD0;
 	float2 tex_coord : TEXCOORD1;
 };
+
+struct VertexAllWorld {
+	float4 location : SV_POSITION;
+	float3 normal : TEXCOORD0;
+	float2 tex_coord : TEXCOORD1;
+	float4 world_location : POSITION;
+};

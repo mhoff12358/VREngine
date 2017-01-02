@@ -103,5 +103,5 @@ private:
 	Texture dummy_texture;
 	vector<Texture> textures;
 	map<string, unsigned int> texture_lookup;
-	map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;
+	//map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;
 };

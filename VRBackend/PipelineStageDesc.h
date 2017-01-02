@@ -5,6 +5,7 @@
 #include "PipelineStage.h"
 #include "Shaders.h"
 #include "PipelineCamera.h"
+#include "Lights.h"
 
 typedef string TextureIdent;
 
@@ -104,7 +105,8 @@ public:
 		DepthStencilDescription depth_desc,
 		vector<TextureIdent> input_textures_idents,
 		D3D11_BLEND_DESC blend_desc,
-		PipelineCameraIdent camera_ident);
+		PipelineCameraIdent camera_ident,
+		LightingSystemIdent light_ident);
 
 	virtual void ConstructStageInPlace(ID3D11Device* dev, ID3D11DeviceContext* dev_con, char* location) const override;
 	virtual void AllocateAdditionalResources(PipelineTexturePlanner& planner) override;
@@ -113,6 +115,8 @@ public:
 	// Configuration variables
 	PipelineCameraIdent camera_ident_;
 	unsigned int camera_index_;
+	LightingSystemIdent light_ident_;
+	unsigned int light_index_;
 };
 
 class TextureCopyDesc : public BasePipelineStageDesc {

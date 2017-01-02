@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 #include "PipelineCamera.h"
+#include "Lights.h"
 #include "ModelMutation.h"
 #include "Entity.h"
 
@@ -24,6 +25,7 @@ public:
 
 	vector<Entity> entities;
 	vector<PipelineCamera> cameras;
+	vector<LightSystem> lights;
 	vector<pair<string, ModelMutation>> model_mutations;
 	vector<pair<ID3D11Buffer*, ID3D11Buffer*>> buffer_copies_;
 };

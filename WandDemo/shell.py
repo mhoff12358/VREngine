@@ -1,5 +1,5 @@
 import scene_system as sc
-import draggable_graphics, draggable_object, path, drag_direction_graphics
+import draggable_graphics, draggable_object, path, drag_direction_graphics, shader_helper
 import math, functools, typing, copy
 
 class ShellAttributes(object):
@@ -111,6 +111,7 @@ class Shell(sc.DelegatingActor):
 
     def LoadGraphicsResources(self, latest_command):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
+        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor.cso")
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
             sc.Target(self.graphics_id),
@@ -127,10 +128,7 @@ class Shell(sc.DelegatingActor):
                                 sc.ArrayBool2((False, True))),
                             sc.VertexType.all,
                             False)))
-                    .SetShaders(sc.ShaderDetails(
-                        sc.VectorShaderIdentifier((
-                            sc.ShaderIdentifier("vs_all_apply_mvp.cso", sc.ShaderStage.Vertex(), sc.VertexType.all),
-                            sc.ShaderIdentifier("ps_solidcolor.cso", sc.ShaderStage.Pixel())))))
+                    .SetShaders(shader_details)
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.shell_attributes.color),)))
                     .SetComponent("Cylinder"),)),
                 sc.VectorComponentInfo((sc.ComponentInfo("", "Cylinder"),))))

@@ -16,6 +16,7 @@ RenderEntities::RenderEntities(ID3D11Device* dev, ID3D11DeviceContext* dev_con, 
 
 	entity_set_index_ = description.entity_handler_set_;
 	camera_index_ = description.camera_index_;
+	light_index_ = description.light_index_;
 
 	camera_transformation_buffer_.CreateBuffer(dev);
 }
@@ -34,6 +35,8 @@ void RenderEntities::Apply(ID3D11Device* dev, ID3D11DeviceContext* dev_con, Rend
 		camera.GetViewMatrix(), camera.GetViewInverseMatrix(), camera.GetViewProjectionMatrix(), camera.GetOrientationProjectionMatrix());
 	camera_transformation_buffer_.PushBuffer(dev_con);
 	camera_transformation_buffer_.Prepare(dev, dev_con, PER_FRAME_CONSTANT_BUFFER_REGISTER);
+
+	groups_to_draw[0].lights[light_index_].Prepare(dev, dev_con);
 
 	vector<Entity>& entities = groups_to_draw[entity_set_index_].entities;
 	for (Entity& entity : entities) {

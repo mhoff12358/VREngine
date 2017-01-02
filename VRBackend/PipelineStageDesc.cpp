@@ -82,9 +82,10 @@ RenderEntitiesDesc::RenderEntitiesDesc(
 	DepthStencilDescription depth_desc,
 	vector<TextureIdent> input_textures_idents,
 	D3D11_BLEND_DESC blend_desc,
-	PipelineCameraIdent camera_ident)
+	PipelineCameraIdent camera_ident,
+	LightingSystemIdent light_ident)
 	: BasePipelineStageDesc(name, type, output_textures_descs, depth_desc, input_textures_idents, blend_desc),
-	camera_ident_(camera_ident)
+	camera_ident_(camera_ident), light_ident_(light_ident)
 {
 
 }
@@ -95,6 +96,7 @@ void RenderEntitiesDesc::ConstructStageInPlace(ID3D11Device* dev, ID3D11DeviceCo
 
 void RenderEntitiesDesc::AllocateAdditionalResources(PipelineTexturePlanner& planner) {
 	camera_index_ = planner.RequestCameraIndex(camera_ident_);
+	light_index_ = planner.RequestLightingIndex(light_ident_);
 	entity_handler_set_ = planner.RequestEntityGroup(name_);
 }
 

@@ -17,6 +17,7 @@ public:
 private:
 	unsigned int camera_index_;
 	ConstantBufferTyped<ViewProjectionMatrixData> camera_transformation_buffer_;
+	unsigned int light_index_;
 	int entity_set_index_;
 
 	float x1;

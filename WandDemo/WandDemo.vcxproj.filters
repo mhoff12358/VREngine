@@ -283,6 +283,9 @@
     <FxCompile Include="ps_normals.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
+    <FxCompile Include="vs_all_apply_mvp_world.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -507,6 +510,9 @@
     </None>
     <None Include="lighting_buffers.hlsli">
       <Filter>Resource Files\Entity Shader Parts</Filter>
+    </None>
+    <None Include="shader_helper.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
     </None>
   </ItemGroup>
 </Project>

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 
 #include "PipelineCamera.h"
+#include "Lights.h"
 #include "PipelineStageDesc.h"
 #include "TextureUsage.h"
 
@@ -50,6 +51,7 @@ public:
 
 	int RequestEntityGroup(string stage_name);
 	unsigned int RequestCameraIndex(PipelineCameraIdent camera_ident);
+	unsigned int RequestLightingIndex(LightingSystemIdent light_ident);
 
 private:
 	int CountDependanciesOnTexture(
@@ -63,11 +65,13 @@ private:
 	int64_t ReserveDepthBufferTexture(const TextureSignature& signature_with_size, const TextureIdent& ident, int number_of_references);
 	
 	map<PipelineCameraIdent, unsigned int> camera_map_;
+	map<LightingSystemIdent, unsigned int> light_map_;
 
 	ID3D11Device* device_;
 	ID3D11DeviceContext* device_context_;
 
 	int number_of_cameras_;
+	int number_of_lights_;
 	int number_of_entity_groups_;
 };
 

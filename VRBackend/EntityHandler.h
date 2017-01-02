@@ -8,6 +8,7 @@
 #include "Entity.h"
 #include "ConstantBuffer.h"
 #include "PipelineCamera.h"
+#include "Lights.h"
 
 class ResourcePool;
 class PipelineCamera;
@@ -21,6 +22,7 @@ public:
 	void Initialize(ResourcePool* rp);
 	void SetEntitySets(map<string, int>& entity_group_associations);
 	void SetCameras(const map<PipelineCameraIdent, unsigned int>& camera_map);
+	void SetLighting(ID3D11Device* device_interface, const map<LightingSystemIdent, unsigned int>& light_map);
 
 	// Rendering accessors
 	RenderGroup* GetRenderGroupForDrawing();
@@ -60,6 +62,10 @@ public:
 	PipelineCamera& AddCamera(PipelineCameraIdent camera_name);
 	void BuildCameras();
 
+	LightSystem& MutableLightSystem(LightingSystemIdent light_name);
+	unsigned int GetLightSystemIndex(LightingSystemIdent light_name);
+	void AddLightSystem(ID3D11Device* device_interface, LightingSystemIdent light_name, LightSystem light_system);
+
 private:
 	ResourcePool* resource_pool;
 
@@ -69,6 +75,8 @@ private:
 	unsigned int num_entity_sets_;
 
 	map<PipelineCameraIdent, unsigned int> camera_map_;
+	map<LightingSystemIdent, unsigned int> light_map_;
+	std::list<SizedConstantBuffer> light_buffers_;
 
 	AsyncEntityBuffer entity_buffers;
 	RenderGroup* current_edit_group;

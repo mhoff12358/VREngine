@@ -49,6 +49,17 @@ unsigned int PipelineTexturePlanner::RequestCameraIndex(PipelineCameraIdent came
 	return new_camera_number;
 }
 
+unsigned int PipelineTexturePlanner::RequestLightingIndex(LightingSystemIdent light_ident) {
+	auto existing_light_number = light_map_.find(light_ident);
+	if (existing_light_number != light_map_.end()) {
+		return existing_light_number->second;
+	}
+	int new_light_number = number_of_lights_;
+	number_of_lights_++;
+	light_map_[light_ident] = new_light_number;
+	return new_light_number;
+}
+
 int PipelineTexturePlanner::CountDependanciesOnTexture(
 	const TextureIdent& texture_ident,
 	vector<unique_ptr<PipelineStageDesc>>::iterator first_stage,
@@ -168,6 +179,7 @@ void PipelineTexturePlanner::ParsePipelineStageDescs(const vector<TextureIdent>&
 
 	entity_handler_.SetEntitySets(entity_group_associations_);
 	entity_handler_.SetCameras(camera_map_);
+	entity_handler_.SetLighting(device_, light_map_);
 }
 
 int64_t PipelineTexturePlanner::LookupBlockGroupNumber(const TextureSignature& signature) {
