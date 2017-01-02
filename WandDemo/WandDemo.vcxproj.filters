@@ -111,6 +111,9 @@
     <ClInclude Include="NichijouGraph.h">
       <Filter>Nichijou Graph\Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Networking.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -154,6 +157,9 @@
     </ClCompile>
     <ClCompile Include="NichijouGraph.cpp">
       <Filter>Nichijou Graph\Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Networking.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -261,6 +267,15 @@
     </FxCompile>
     <FxCompile Include="ps_textured.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_texture_coords.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_nixie.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="set_color.hlsl">
+      <Filter>Resource Files\Processing Effect Shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
@@ -479,6 +494,9 @@
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
     <None Include="combinable.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="nixie.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
   </ItemGroup>

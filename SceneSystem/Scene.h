@@ -42,6 +42,7 @@ public:
 	ActorId AddActorGroup();
 	void AddActorToGroup(ActorId actor, ActorId group);
 	void RemoveActorFromGroup(ActorId actor, ActorId group);
+	void PrefaceCommand();
 
 	ActorId RegisterByName(string name, ActorId actor_or_group);
 	ActorId FindByName(string name);

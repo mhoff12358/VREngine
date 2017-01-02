@@ -1,5 +1,5 @@
 import scene_system as sc
-import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, mech_system, shell, wheel
+import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, mech_system, shell, wheel, nixie
 import collections
 import math
 
@@ -21,6 +21,9 @@ def first_load(resources):
     sc.ParseResources(resources)
 
     scene = resources["scene"]
+
+    nixie9 = nixie.Nixie(9, sc.Pose(sc.Location(0, 0, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/2)))
+    scene.AddActor(nixie9)
 
     mech = mech_system.MechSystem(
         cannon_details = (
@@ -51,7 +54,7 @@ def first_load(resources):
             "pose": sc.Pose(sc.Location(1, 1.25, 1), sc.Quaternion.RotationAboutLocation(sc.Location(1, 0, 0), 3.14/2), sc.Scale(0.35)),
             "crank_height": 0.5,
             })
-    scene.AddActor(mech)
+    #scene.AddActor(mech)
 
     import code
     a = globals()

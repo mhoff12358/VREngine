@@ -61,11 +61,15 @@ void Scene::OwnCommandArgsForFlushDuration(CommandArgs* args_to_own) {
 	command_flush_arg_storage_.emplace_back(args_to_own);
 }
 
+void Scene::PrefaceCommand() {
+	back_of_current_commands_ = FrontOfCommands();
+}
+
 void Scene::FlushCommandQueue() {
 	while (!commands_.IsEmpty()) {
 		Command active_command = commands_.PopActiveCommand();
 		for (const ActorId& actor_id : ExpandTarget(active_command.GetTarget())) {
-			back_of_current_commands_ = FrontOfCommands();
+			PrefaceCommand();
 			FindActor(actor_id)->HandleCommand(active_command.GetArgs());
 		}
 	}

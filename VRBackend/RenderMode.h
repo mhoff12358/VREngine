@@ -5,8 +5,8 @@
 
 class RenderMode {
 public:
-	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st, D3D11_VIEWPORT view);
-	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st);
+	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view = nullptr, ID3D11DepthStencilState* dep_sten_state = nullptr, ID3D11BlendState* bnd_st = nullptr, ID3D11RasterizerState* rasterizer_state = nullptr, D3D11_VIEWPORT view = { 0, 0, 0, 0, 0, 0 });
+	//void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st);
 	void SetViewport(D3D11_VIEWPORT view);
 	void SetViewport(array<int, 2> offset, array<int, 2> size, array<float, 2> depth_range);
 	void SetViewport(array<int, 2> size, array<float, 2> depth_range);
@@ -26,6 +26,8 @@ public:
 	void ClearDepth();
 
 private:
+	static ID3D11RasterizerState* GetDefaultRasterizerState(ID3D11Device* dev);
+
 	ID3D11Device* device;
 	ID3D11DeviceContext* device_context;
 
@@ -34,6 +36,7 @@ private:
 	ID3D11DepthStencilView* depth_stencil_view;
 	ID3D11DepthStencilState* depth_stencil_state;
 	ID3D11BlendState* blend_state;
+	ID3D11RasterizerState* rasterizer_state_;
 	int num_viewports = 1;
 	D3D11_VIEWPORT viewports[D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT];
 

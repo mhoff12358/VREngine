@@ -5,17 +5,17 @@ ID3D11RenderTargetView* RenderMode::clear_render_target_views[] = {
 	NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL
 };
 
-void RenderMode::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st) {
+void RenderMode::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st, ID3D11RasterizerState* rasterizer_state, D3D11_VIEWPORT view) {
 	device = dev;
 	device_context = dev_con;
 	depth_stencil_view = dep_sten_view;
 	depth_stencil_state = dep_sten_state;
 	blend_state = bnd_st;
+	if (rasterizer_state == nullptr) {
+		rasterizer_state = GetDefaultRasterizerState(dev);
+	}
+	rasterizer_state_ = rasterizer_state;
 	SetRenderTargetViews(rend_tar_views);
-}
-
-void RenderMode::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con, std::vector<ID3D11RenderTargetView*> rend_tar_views, ID3D11DepthStencilView* dep_sten_view, ID3D11DepthStencilState* dep_sten_state, ID3D11BlendState* bnd_st, D3D11_VIEWPORT view) {
-	Initialize(dev, dev_con, rend_tar_views, dep_sten_view, dep_sten_state, bnd_st);
 	SetViewport(view);
 }
 
@@ -73,6 +73,7 @@ void RenderMode::Prepare() {
 	device_context->OMSetRenderTargets(num_render_target_views, render_target_views, depth_stencil_view);
 	device_context->OMSetBlendState(blend_state, NULL, 0xFFFFFFFF);
 	device_context->RSSetViewports(1, viewports);
+	device_context->RSSetState(rasterizer_state_);
 }
 
 void RenderMode::UnPrepare() {
@@ -91,4 +92,15 @@ void RenderMode::Clear(D3DXCOLOR color) {
 
 void RenderMode::ClearDepth() {
 	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0, 1);
+}
+	
+ID3D11RasterizerState* RenderMode::GetDefaultRasterizerState(ID3D11Device* dev) {
+	D3D11_RASTERIZER_DESC raster_desc;
+	ZeroMemory(&raster_desc, sizeof(raster_desc));
+	raster_desc.DepthClipEnable = true;
+	raster_desc.FillMode = D3D11_FILL_SOLID;
+	raster_desc.CullMode = D3D11_CULL_BACK;
+	ID3D11RasterizerState* raster_state;
+	dev->CreateRasterizerState(&raster_desc, &raster_state);
+	return raster_state;
 }

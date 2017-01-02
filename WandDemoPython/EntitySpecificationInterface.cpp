@@ -32,6 +32,7 @@ void EntitySpecificationInterface() {
 	CreateVector<ShaderStage>("ShaderStage");
 
 	class_<ShaderStages>("ShaderStages", init<vector<ShaderStage>>())
+		.def(init<ShaderStage>())
 		.def("All", &ShaderStages::All)
 		.staticmethod("All");
 
