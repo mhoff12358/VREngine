@@ -6,4 +6,5 @@
 !*.ipp
 !*.hlsl
 !*.hlsli
+!WandDemo/*.obj
 x64
