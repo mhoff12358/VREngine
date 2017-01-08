@@ -5,16 +5,16 @@
 
 struct DirectionalLight {
 	float3 direction;
-	float3 color;
+	float4 color;
 };
 
 struct PointLight {
 	float3 location;
-	float3 color;
+	float4 color;
 };
 
 struct AmbientLight {
-	float3 color;
+	float4 color;
 };
 
 static const int num_point_lights = 8;
@@ -28,16 +28,19 @@ cbuffer lights : register(b2)
 };
 
 static const float specular_exponent = 4.0f;
+static const float specular_mix = 0.2f;
 
 float3 calculate_single_light(float3 normal, DirectionalLight light, float3 camera_vector) {
 	float diffuse = max(0, dot(normal, light.direction));
-	float3 halfway_vector = (light.direction + camera_vector) * 0.5;
-	float specular = max(0, pow(dot(normal, halfway_vector), specular_exponent));
-	return light.color * (diffuse + specular);
+	float3 halfway_vector = normalize(light.direction + camera_vector);
+	// There is no diffuse value iff the light is behind the object.
+	// Multiply the specular value by 0 if the diffuse value is 0 to prevent light bleeding around the object.
+	float specular = max(0, pow(dot(normal, halfway_vector), specular_exponent)) * ceil(diffuse);
+	return light.color.rgb * light.color.a * (specular * specular_mix + diffuse * (1 - specular_mix));
 }
 
 float3 calculate_lighting(float3 world_location, float3 normal) {
-	float3 lighting = ambient_light.color;
+	float3 lighting = ambient_light.color.rgb * ambient_light.color.a;
 
 	float3 camera_vector = normalize(get_camera_location() - world_location);
 	

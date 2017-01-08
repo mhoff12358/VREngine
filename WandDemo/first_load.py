@@ -1,5 +1,5 @@
 import scene_system as sc
-import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, mech_system, shell, wheel, nixie, shader_helper
+import player, mutable_graphical_object, draggable_object, path_draggable_object, path, draggable_graphics, mech_system, shell, wheel, nixie, shader_helper, lightbulb
 import collections
 import math
 
@@ -16,6 +16,9 @@ class DummyActor(sc.DelegatingActor):
         print("RECEIVED COMMAND OF TYPE TICK", command_args.duration)
 
 
+def pre_load():
+    return {"load_vr": True}
+
 def first_load(resources):
     print("STARTING FIRST LOAD")
     sc.ParseResources(resources)
@@ -24,6 +27,16 @@ def first_load(resources):
 
     #nixie9 = nixie.Nixie(9, sc.Pose(sc.Location(0, 0, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/2)))
     #scene.AddActor(nixie9)
+
+    graphics_resources = scene.AskQuery(
+        sc.Target(
+            scene.FindByName("GraphicsResources")),
+        sc.QueryArgs(
+            sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
+    graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
+
+    #light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
+    #scene.AddActor(light)
 
     mech = mech_system.MechSystem(
         cannon_details = (
@@ -61,7 +74,7 @@ def first_load(resources):
     a.update(locals())
     #code.interact(local = a)
 
-    p = player.Player()
+    p = player.Player(keyboard_and_mouse_controls = not resources["is_vr"])
     player_id = scene.AddActor(p)
     return player_id
 

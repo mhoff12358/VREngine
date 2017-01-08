@@ -170,6 +170,10 @@ vr::VRControllerState_t Headset::GetGameControllerState(vr::TrackedDeviceIndex_t
 	return logic_controller_states_[index];
 }
 
+void Headset::SetControllerHaptic(vr::TrackedDeviceIndex_t index, uint32_t strength) {
+	system_->TriggerHapticPulse(index, vr::k_EButton_SteamVR_Touchpad, strength);
+}
+
 DirectX::XMMATRIX Headset::ToDXMatrix(const vr::HmdMatrix34_t& matrix) {
 	float head_matrix_floats[4][4];
 	for (int i = 0; i < 3; i++) {

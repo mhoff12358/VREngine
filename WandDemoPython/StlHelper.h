@@ -4,10 +4,8 @@
 #include <type_traits>
 
 #include "PythonClassHelpers.h"
-
-struct general_ {};
-struct less_special_ : general_ {};
-struct special_ : less_special_ {};
+#include "TemplateJank.h"
+#include "HandleError.h"
 
 template <typename Collection, typename ValueType>
 auto ResizeIfPossibleImpl(Collection& c, ssize_t size, special_) -> decltype(c.reserve(size), void()) {
@@ -71,7 +69,7 @@ Collection* CreateFromList(object iterable) {
 			}
 		}
 		catch (error_already_set) {
-			PyErr_Print();
+			HandleError();
 		}
 	} else {
 		try {
@@ -83,7 +81,7 @@ Collection* CreateFromList(object iterable) {
 			}
 		}
 		catch (error_already_set) {
-			PyErr_Print();
+			HandleError();
 		}
 	}
 	return c.release();
@@ -101,7 +99,7 @@ Collection* CreateFromDict(dict mapping) {
 		}
 	}
 	catch (error_already_set) {
-		PyErr_Print();
+		HandleError();
 	}
 	return c.release();
 }
@@ -166,7 +164,7 @@ auto& CreateIteration(boost::python::class_<PyType> c) {
 template<typename T, size_t N>
 void CreateArray(string name) {
 	typedef array<T, N> PyType;
-	CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateIndexing<size_t, T, PyType>(CreateClass<PyType>("Array" + name + std::to_string(N)))));
+	CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateArrayIndexing<size_t, T, PyType>(CreateClass<PyType>("Array" + name + std::to_string(N)))));
 }
 
 template<typename T, size_t N>
@@ -180,7 +178,7 @@ void CreateArrays(string name) {
 template<typename T>
 void CreateVector(string name) {
 	typedef vector<T> PyType;
-	auto vec_class = CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateIndexing<size_t, T, PyType>(CreateClass<PyType>("Vector" + name))));
+	auto vec_class = CreateIteration<PyType>(CreateListToCollection<T, PyType>(CreateVectorIndexing<size_t, T, PyType>(CreateClass<PyType>("Vector" + name))));
 }
 
 template<typename Key, typename Value>

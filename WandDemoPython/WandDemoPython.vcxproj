@@ -147,6 +147,7 @@
     <ClCompile Include="GrabbableObjectHandlerInterface.cpp" />
     <ClCompile Include="GraphicsObjectInterface.cpp" />
     <ClCompile Include="GraphicsResourcesInterface.cpp" />
+    <ClCompile Include="HandleError.cpp" />
     <ClCompile Include="HeadsetInterface.cpp" />
     <ClCompile Include="IOInterfaceInterface.cpp" />
     <ClCompile Include="LightInterface.cpp" />
@@ -166,6 +167,7 @@
     <ClInclude Include="GrabbableObjectHandlerInterface.h" />
     <ClInclude Include="GraphicsObjectInterface.h" />
     <ClInclude Include="GraphicsResourcesInterface.h" />
+    <ClInclude Include="HandleError.h" />
     <ClInclude Include="HeadsetInterface.h" />
     <ClInclude Include="IOInterfaceInterface.h" />
     <ClInclude Include="LightInterface.h" />
@@ -178,6 +180,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlHelper.h" />
     <ClInclude Include="StlInterface.h" />
+    <ClInclude Include="TemplateJank.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="scene_system_internal.py">

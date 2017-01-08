@@ -48,6 +48,8 @@ public:
 	static DirectX::XMMATRIX ToDXMatrix(const vr::HmdMatrix34_t& matrix);
 	static DirectX::XMMATRIX ToDXMatrix(const vr::HmdMatrix44_t& matrix);
 
+	void SetControllerHaptic(vr::TrackedDeviceIndex_t index, uint32_t strength);
+
 	static constexpr array<vr::EVREye, 2> eyes_ =
 		{vr::EVREye::Eye_Left, vr::EVREye::Eye_Right};
 	static constexpr array<vr::ETrackedDeviceClass, 4> devices_ =

@@ -26,10 +26,10 @@ LightSystem::LightSystem() : dirty_(true) {
 }
 
 LightSystem::LightSystem(
-	AmbientLight ambient_light,
+	AmbientLight base_ambient_light,
 	array<PointLight, num_point_lights> point_lights,
 	array<DirectionalLight, num_directional_lights> directional_lights) :
-	ambient_light_(ambient_light),
+	base_ambient_light_(base_ambient_light),
 	point_lights_(std::move(point_lights)),
 	directional_lights_(std::move(directional_lights)),
 	dirty_(true)
@@ -46,7 +46,7 @@ void LightSystem::SetConstantBuffer(ConstantBuffer* constant_buffer) {
 }
 
 void LightSystem::WriteToBuffer(char* buffer) {
-	ambient_light_.WriteToBuffer(buffer);
+	total_ambient_light_.WriteToBuffer(buffer);
 	buffer += AmbientLight::cb_size;
 
 	for (const PointLight& point_light : point_lights_) {
@@ -66,9 +66,17 @@ void LightSystem::WriteToConstantBuffer(ConstantBuffer* constant_buffer) {
 
 void LightSystem::Push(ID3D11DeviceContext* device_context) {
 	if (dirty_) {
+		ComputeTotalAmbientLight();
 		WriteToConstantBuffer(constant_buffer_);
 		constant_buffer_->PushBuffer(device_context);
 		dirty_ = false;
+	}
+}
+
+void LightSystem::ComputeTotalAmbientLight() {
+	total_ambient_light_ = base_ambient_light_;
+	for (const PointLight& point_light : point_lights_) {
+		total_ambient_light_.color_ = point_light.color_.ScaleRGB(0.1f).ApplyOnto(total_ambient_light_.color_);
 	}
 }
 
@@ -78,12 +86,11 @@ void LightSystem::Prepare(ID3D11Device* device, ID3D11DeviceContext* device_cont
 
 void LightSystem::Update(const LightSystem& other) {
 	*this = other;
-	dirty_ = false;
 }
 
 AmbientLight& LightSystem::MutableAmbientLight() {
 	dirty_ = true;
-	return ambient_light_;
+	return base_ambient_light_;
 }
 
 array<PointLight, LightSystem::num_point_lights>& LightSystem::MutablePointLights() {
@@ -95,3 +102,32 @@ array<DirectionalLight, LightSystem::num_directional_lights>& LightSystem::Mutab
 	dirty_ = true;
 	return directional_lights_;
 }
+
+unsigned int LightSystem::ClaimPointLight() {
+	unsigned int i;
+	for (i = 0; i < num_point_lights; i++) {
+		if (!point_lights_claimed_[i]) {
+			break;
+		}
+	}
+	return i;
+}
+
+void LightSystem::ReleasePointLight(unsigned int light_number) {
+	point_lights_claimed_[light_number] = false;
+}
+
+unsigned int LightSystem::ClaimDirectionalLight() {
+	unsigned int i;
+	for (i = 0; i < num_directional_lights; i++) {
+		if (!directional_lights_claimed_[i]) {
+			break;
+		}
+	}
+	return i;
+}
+
+void LightSystem::ReleaseDirectionalLight(unsigned int light_number) {
+	directional_lights_claimed_[light_number] = false;
+}
+

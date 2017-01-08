@@ -15,6 +15,7 @@ REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_TRIGGER_STATE_CHANGE);
 REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_SLIDE);
 REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_DRAG);
 REGISTER_COMMAND(HeadsetInterfaceCommand, LISTEN_CONTROLLER_MOVEMENT);
+REGISTER_COMMAND(HeadsetInterfaceCommand, HAPTIC_PULSE);
 
 namespace actors {
 
@@ -55,6 +56,12 @@ void HeadsetInterface::HandleCommand(const CommandArgs& args) {
 		} else {
 			RegisterOrUnregisterActor(registration.register_not_unregister_, registration.actor_to_register_, registration.controller_number_, registration.listener_id_);
 		}
+	}
+	break;
+	case HeadsetInterfaceCommand::HAPTIC_PULSE:
+	{
+		const auto& pulse_info = dynamic_cast<const commands::HapticPulse&>(args);
+		HandleHapticPulse(pulse_info.controller_number_, pulse_info.strength_, pulse_info.duration_);
 	}
 	break;
 	case InputCommand::TICK:
@@ -163,6 +170,11 @@ ActorId HeadsetInterface::CreateControllerActor() {
 		game_scene::Target(new_controller),
 		make_unique<game_scene::commands::ComponentPlacement>("sphere", DirectX::XMMatrixScaling(controller_sphere_radius, controller_sphere_radius, controller_sphere_radius))));
 	return new_controller;
+}
+
+void HeadsetInterface::HandleHapticPulse(unsigned char hand_index, uint32_t strength, uint32_t duration) {
+	auto controller_index = headset_.GetDeviceIndex(vr::TrackedDeviceClass_Controller, hand_index);
+	headset_.SetControllerHaptic(controller_index, strength);
 }
 
 }  // actors

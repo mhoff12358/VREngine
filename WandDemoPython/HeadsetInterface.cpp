@@ -5,6 +5,7 @@
 #include "SceneSystem/HeadsetInterface.h"
 
 BOOST_PTR_MAGIC(game_scene::commands::HeadsetListenerRegistration)
+BOOST_PTR_MAGIC(game_scene::commands::HapticPulse)
 
 void HeadsetInterface(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 	enum_<game_scene::actors::HeadsetInterface::ListenerId>("HeadsetListenerId")
@@ -31,6 +32,14 @@ void HeadsetInterface(class_<game_scene::Scene, boost::noncopyable>& scene_regis
 	scene_registration.def(
 		"MakeCommandAfter",
 		&PyScene::MakeCommandAfter<game_scene::commands::HeadsetListenerRegistration>);
+
+	class_<game_scene::commands::HapticPulse, bases<game_scene::CommandArgs>,
+		std::auto_ptr<game_scene::commands::HapticPulse>,
+		boost::noncopyable>("HapticPulse", no_init)
+		.def(init<unsigned char, uint32_t, uint32_t>());
+	scene_registration.def(
+		"MakeCommandAfter",
+		&PyScene::MakeCommandAfter<game_scene::commands::HapticPulse>);
 
 	class_<game_scene::commands::ControllerInformation, bases<game_scene::CommandArgs>, boost::noncopyable>("ControllerInformation", no_init)
 		.def_readonly("number", &game_scene::commands::ControllerInformation::controller_number_)

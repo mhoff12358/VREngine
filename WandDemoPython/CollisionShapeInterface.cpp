@@ -4,6 +4,9 @@
 #include "StlHelper.h"
 #include "SceneSystem/CollisionShape.h"
 
+BOOST_PTR_MAGIC(CollisionShape);
+BOOST_PTR_MAGIC(ColoredCollisionShape);
+
 void CollisionShapeInterface() {
 	bool (CollisionShape::*a)(const CollisionShape&)const = &CollisionShape::Intersect;
 	bool (CollisionShape::*b)(const vector<CollisionShape>&)const = &CollisionShape::Intersect;

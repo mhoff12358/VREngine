@@ -39,7 +39,8 @@ public:
 
 private:
 	void HandleNewControllerState(unsigned char hand_index, vr::VRControllerState_t new_state);
-	void HeadsetInterface::RegisterOrUnregisterActor(bool register_not_unregister, ActorId actor, unsigned char controller_index, ListenerId listener_id);
+	void RegisterOrUnregisterActor(bool register_not_unregister, ActorId actor, unsigned char controller_index, ListenerId listener_id);
+	void HandleHapticPulse(unsigned char hand_index, uint32_t strength, uint32_t duration);
 
 	array<bool, 2> controller_connectedness_;
 	array<Pose, 2> controller_positions_;
@@ -59,6 +60,7 @@ public:
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_SLIDE);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_TOUCHPAD_DRAG);
 	DECLARE_COMMAND(HeadsetInterfaceCommand, LISTEN_CONTROLLER_MOVEMENT);
+	DECLARE_COMMAND(HeadsetInterfaceCommand, HAPTIC_PULSE);
 };
 
 namespace commands {
@@ -79,6 +81,21 @@ public:
 	ActorId actor_to_register_;
 	actors::HeadsetInterface::ListenerId listener_id_;
 	unsigned char controller_number_;
+};
+
+class HapticPulse : public CommandArgs {
+public:
+	HapticPulse(
+		unsigned char controller_number,
+		uint32_t strength,
+		uint32_t duration) :
+		CommandArgs(HeadsetInterfaceCommand::HAPTIC_PULSE),
+		controller_number_(controller_number),
+		strength_(strength),
+		duration_(duration) {}
+	unsigned char controller_number_;
+	uint32_t strength_;
+	uint32_t duration_;
 };
 
 class ControllerInformation : public CommandArgs {

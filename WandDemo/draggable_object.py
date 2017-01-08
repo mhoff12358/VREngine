@@ -11,7 +11,9 @@ class DraggableObject(sc.DelegatingActor):
         offset_pose: sc.Pose = sc.Pose(),
         draw_ball: bool = False,
         pose_updated_callback: typing.Callable[[sc.Pose, sc.Pose], None] = None,
-        pose_updated_callbacks: typing.Iterator[typing.Callable[[sc.Pose, sc.Pose], None]] = ()):
+        pose_updated_callbacks: typing.Iterator[typing.Callable[[sc.Pose, sc.Pose], None]] = (),
+        grab_callback: typing.Callable[[bool, int, sc.Pose], None] = None,
+        grab_callbacks: typing.Iterator[typing.Callable[[bool, int, sc.Pose], None]] = ()):
         super().__init__()
 
         self.current_pose = copy.copy(starting_pose)
@@ -23,6 +25,11 @@ class DraggableObject(sc.DelegatingActor):
         self.pose_updated_callbacks = list(pose_updated_callbacks)
         if pose_updated_callback is not None:
             self.pose_updated_callbacks.append(pose_updated_callback)
+
+        self.grab_callbacks = list(grab_callbacks)
+        if grab_callback is not None:
+            self.grab_callbacks.append(grab_callback)
+        self.grabbing_hand_index = None
 
         self.collision_sphere_id = draw_ball
 
@@ -134,6 +141,15 @@ class DraggableObject(sc.DelegatingActor):
         if self.controller_pose_delta is not None:
             self.SetNewPose(self.controller_pose_delta.ApplyAfter(args.position))
 
+    def GrabCallbacks(self, hand_index, hand_pose):
+        self.grabbing_hand_index = hand_index
+        for grab_callback in self.grab_callbacks:
+            grab_callback(True, hand_index, hand_pose)
+
+    def ReleaseCallbacks(self):
+        for grab_callback in self.grab_callbacks:
+            grab_callback(False, self.grabbing_hand_index, None)
+
     @delegater.RegisterCommand(sc.GrabbableObjectCommand.OBJECT_GRABBED)
     def HandleGrabbed(self, args):
         if args.held:
@@ -142,6 +158,7 @@ class DraggableObject(sc.DelegatingActor):
                 self.scene.BackOfNewCommands(),
 				self.grabbable_object_handler,
                 sc.EnDisableCollideableObject(self.id, False))
+            self.GrabCallbacks(args.number, args.position)
         else:
             if self.controller_pose_delta is not None:
                 self.controller_pose_delta = None
@@ -150,6 +167,7 @@ class DraggableObject(sc.DelegatingActor):
                     self.scene.BackOfNewCommands(),
                     self.grabbable_object_handler,
                     sc.EnDisableCollideableObject(self.id, True))
+                self.ReleaseCallbacks()
 
     def MoveToPose(self, new_pose):
         self.SetNewPose(new_pose)
@@ -164,7 +182,9 @@ class DraggableObject(sc.DelegatingActor):
             self.scene.BackOfNewCommands(),
 			self.grabbable_object_handler,
             sc.EnDisableCollideableObject(self.id, False))
-        self.controller_pose_delta = None
+        if self.controller_pose_delta is not None:
+            self.controller_pose_delta = None
+            self.ReleaseCallbacks()
 
     def EnableGrabbing(self):
         self.scene.MakeCommandAfter(

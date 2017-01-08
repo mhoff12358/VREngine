@@ -1,5 +1,5 @@
 import scene_system as sc
-import shell, cannon, wheel, lighter
+import shell, cannon, wheel, lighter, panels
 import math, functools
 
 class MechSystem(sc.DelegatingActor):
@@ -26,7 +26,7 @@ class MechSystem(sc.DelegatingActor):
         yaw_wheel_args = dict(yaw_wheel_args)
         yaw_wheel_args["spun_callbacks"] = [functools.partial(cannon.UpdateYaw) for cannon in self.cannons]
         self.yaw_wheel = wheel.Wheel(**yaw_wheel_args)
-        self.lighter = lighter.Lighter(sc.Pose(sc.Location(1, 1, -1)), reposed_callback = functools.partial(self.LighterReposed))
+        self.lighter = lighter.Lighter(sc.Pose(sc.Location(1, 1, -1)), reposed_callback = functools.partial(self.LighterReposed), light_system_name = "cockpit_lights")
 
     def ShellReposed(self, shell):
         shell_loading_collision = shell.GetLoadingCollision()
@@ -62,3 +62,4 @@ class MechSystem(sc.DelegatingActor):
         self.scene.AddActor(self.pitch_wheel)
         self.scene.AddActor(self.yaw_wheel)
         self.scene.AddActor(self.lighter)
+        self.panels = panels.PanelSet(self.scene)

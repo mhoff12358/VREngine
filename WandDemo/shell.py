@@ -111,7 +111,7 @@ class Shell(sc.DelegatingActor):
 
     def LoadGraphicsResources(self, latest_command):
         self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
-        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor")
+        shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
             sc.Target(self.graphics_id),

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "boost/python.hpp"
+#include "boost/python/suite/indexing/vector_indexing_suite.hpp"
 
 using boost::python::object;
 using boost::python::class_;
@@ -16,6 +17,8 @@ using boost::python::raw_function;
 using boost::python::make_function;
 using boost::python::error_already_set;
 using boost::python::extract;
+
+using boost::python::vector_indexing_suite;
 
 #include "BoostPointerMagic.h"
 

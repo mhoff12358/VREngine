@@ -9,5 +9,9 @@ public:
 	Color(array<float, 3> rgb);
 	Color();
 
+	Color ScaleRGB(float scale) const;
+	Color ScaleRGB() const ;
+	Color ApplyOnto(const Color& other) const;
+
 	array<float, 4> rgba_;
 };

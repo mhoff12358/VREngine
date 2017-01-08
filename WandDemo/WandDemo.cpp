@@ -58,6 +58,9 @@ const float mouse_phi_scale = 0.001f;
 
 mutex device_context_access;
 
+object main_namespace;
+object loaded_module;
+
 void GraphicsLoop() {
 	int frame_index = 0;
 
@@ -97,8 +100,6 @@ void UpdateLoop() {
 
 	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
 	array<float, 2> player_orientation_angles = { { 0, 0 } };
-
-	Py_Initialize();
 
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
@@ -149,17 +150,23 @@ void UpdateLoop() {
 	game_scene::ActorId added_actor;
 	//scene.PrefaceCommand();
 	try {
-		object main_namespace = import("__main__").attr("__dict__");
-		exec("import first_load", main_namespace);
-		object loaded_module = main_namespace["first_load"];
-
 		dict inputs;
 		inputs["scene"] = boost::ref(scene);
 		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
 		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
+		inputs["is_vr"] = graphics_objects.oculus->IsHeadsetInitialized();
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
-		PyErr_Print();
+		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
+		PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
+		try {
+			boost::python::handle<> h_tb(traceback_ptr);
+			object pdb(import("pdb"));
+			object pdb_fn = pdb.attr("post_mortem");
+			pdb_fn(h_tb);
+		} catch (error_already_set) {
+			PyErr_Print();
+		}
 	}
 
 	scene.FlushCommandQueue();
@@ -235,14 +242,33 @@ void UpdateLoop() {
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	bool hmd_desired = false;
 
-	game_scene::CommandQueue a;
-	game_scene::CommandQueueLocation b = a.GetNewFront();
-	a.InsertCommand(b, game_scene::Command(game_scene::Target(game_scene::ActorId::UnsetId), nullptr));
-	a.InsertCommand(b, game_scene::Command(game_scene::Target(game_scene::ActorId::AllActors), nullptr));
+	Py_Initialize();
+
+	try {
+		main_namespace = import("__main__").attr("__dict__");
+		exec("import first_load", main_namespace);
+		loaded_module = main_namespace["first_load"];
+
+		object result = loaded_module.attr("pre_load")();
+		if (result["load_vr"]) {
+			hmd_desired = true;
+		}
+	} catch (error_already_set) {
+		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
+		PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
+		try {
+			boost::python::handle<> h_tb(traceback_ptr);
+			object pdb(import("pdb"));
+			object pdb_fn = pdb.attr("post_mortem");
+			pdb_fn(h_tb);
+		} catch (error_already_set) {
+			PyErr_Print();
+		}
+	}
 
 	bool hmd_active = false;
-	bool hmd_desired = false;
 	bool hmd_found = vr::VR_IsHmdPresent();
 	vr::IVRSystem* headset_system = nullptr;
 	if (hmd_desired && hmd_found && vr::VR_IsRuntimeInstalled()) {
@@ -271,9 +297,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	TextureSignature back_buffer_signature(*graphics_objects.render_pipeline->GetStagingBufferDesc());
 	vector<unique_ptr<PipelineStageDesc>> pipeline_stages;
 	pipeline_stages.emplace_back(new ProcessingEffectDesc("clear_bloom", { std::make_tuple("bloom", back_buffer_signature) }, { }, BlendDesc::keep_new_alpha_blend_state_desc, graphics_objects.resource_pool->LoadPixelShader("set_color.hlsl"), graphics_objects.resource_pool->LoadVertexShader("set_color.hlsl", ProcessingEffect::squares_vertex_type), (char*)&clear_black, sizeof(clear_black)));
-	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name), LightingSystemIdent("outside_lights")));
+	pipeline_stages.emplace_back(new RenderEntitiesDesc("skybox", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription::Empty(), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent(single_camera_name), LightingSystemIdent("cockpit_lights")));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("basic", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("cockpit_lights"))));
-	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("terrain", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("outside_lights"))));
+	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("terrain", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::no_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("cockpit_lights"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::keep_new_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("cockpit_lights"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::keep_new_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("cockpit_lights"))));
 	pipeline_stages.emplace_back(new RepeatedStageDesc<RenderEntitiesDesc>(stage_repetition, RenderEntitiesDesc("bloom_alpha", PST_RENDER_ENTITIES, { std::make_tuple("objects", back_buffer_signature), std::make_tuple("bloom", back_buffer_signature) }, DepthStencilDescription("normal_depth", BlendDesc::keep_nearer_depth_test), {}, BlendDesc::keep_new_alpha_with_alpha_blend_state_desc, PipelineCameraIdent("player_head"), LightingSystemIdent("cockpit_lights"))));

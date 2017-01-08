@@ -289,6 +289,12 @@
     <FxCompile Include="ps_textured_lit.hlsl">
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </FxCompile>
+    <FxCompile Include="ps_solidcolor_lit.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
+    <FxCompile Include="ps_lit.hlsl">
+      <Filter>Resource Files\Entity Shader Parts</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <Object Include="glowy_console.obj">
@@ -515,6 +521,15 @@
       <Filter>Resource Files\Entity Shader Parts</Filter>
     </None>
     <None Include="shader_helper.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="lightbulb.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="light.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
+    <None Include="panels.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
   </ItemGroup>

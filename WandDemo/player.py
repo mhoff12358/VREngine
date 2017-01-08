@@ -21,8 +21,9 @@ class Player(sc.DelegatingActor):
         ord('E'): (1, 1),
     }
 
-    def __init__(self):
+    def __init__(self, keyboard_and_mouse_controls = True):
         super(sc.DelegatingActor, self).__init__()
+        self.keyboard_and_mouse_controls = keyboard_and_mouse_controls
         self.EmbedSelf(self)
         self.pitch = 0.0
         self.yaw = 0.0
@@ -34,22 +35,21 @@ class Player(sc.DelegatingActor):
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddToScene(self, args):
-        print("Player added to the scene")
         scene = self.GetScene()
 
         # Registers for IO
-        scene.MakeCommandAfter(
-            scene.FrontOfCommands(), sc.Target(
-                scene.FindByName("IOInterface")), sc.IOListenerRegistration(
-                True, self.id, sc.ListenerId.KEY_TOGGLE, sc.VectorUnsignedChar(
-                    (ord('W'), ord('A'), ord('S'), ord('D'), ord('Q'), ord('E'),
-                     ord('1'), ord('2'), ord('3'), ord('4'), ord('5'), ord('6'), ))))
-        scene.MakeCommandAfter(
-            scene.FrontOfCommands(),
-            sc.Target(scene.FindByName("IOInterface")),
-            sc.IOListenerRegistration(
-                True, self.id, sc.ListenerId.MOUSE_MOTION))
-        scene.AddActorToGroup(self.id, scene.FindByName("TickRegistry"))
+        if self.keyboard_and_mouse_controls:
+            scene.MakeCommandAfter(
+                scene.FrontOfCommands(), sc.Target(
+                    scene.FindByName("IOInterface")), sc.IOListenerRegistration(
+                    True, self.id, sc.ListenerId.KEY_TOGGLE, sc.VectorUnsignedChar(
+                        (ord('W'), ord('A'), ord('S'), ord('D'), ord('Q'), ord('E'),))))
+            scene.MakeCommandAfter(
+                scene.FrontOfCommands(),
+                sc.Target(scene.FindByName("IOInterface")),
+                sc.IOListenerRegistration(
+                    True, self.id, sc.ListenerId.MOUSE_MOTION))
+            scene.AddActorToGroup(self.id, scene.FindByName("TickRegistry"))
 
         # Gets the entity handler to access the camera
         graphics_resources = scene.AskQuery(
@@ -57,7 +57,6 @@ class Player(sc.DelegatingActor):
                 scene.FindByName("GraphicsResources")), sc.QueryArgs(
                 sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
         self.entity_handler = graphics_resources.GetEntityHandler()
-        self.entity_handler.MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(0.5, 0.5, 0.5)
 
     @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_MOUSE_MOTION)
     def HandleMouseMovement(self, args):
@@ -67,7 +66,6 @@ class Player(sc.DelegatingActor):
         self.pitch = self.pitch % (3.14 * 2)
         self.rotation = sc.Quaternion.RotationAboutAxis(
             sc.AxisID.y, self.yaw) * sc.Quaternion.RotationAboutAxis(sc.AxisID.x, self.pitch)
-        self.PushPose()
 
     @delegater.RegisterCommand(sc.IOInterfaceCommand.LISTEN_KEY_TOGGLE)
     def HandleKeyToggle(self, args):
@@ -90,6 +88,7 @@ class Player(sc.DelegatingActor):
         if self.motion_scale:
             self.location += self.motion.Rotate(
                 self.rotation) * self.motion_scale * self.move_speed * args.duration
+        self.PushPose()
 
     def PushPose(self):
         self.entity_handler.MutableCamera("player_head").SetPose(

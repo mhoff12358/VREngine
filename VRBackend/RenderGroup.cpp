@@ -23,7 +23,8 @@ void RenderGroup::Update(RenderGroup* other) {
 		lights[i].Update(other->lights[i]);
 	}
 	for (int i = lights.size(); i < other->lights.size(); i++) {
-		lights.push_back(other->lights[i]);
+		lights.emplace_back();
+		lights.back().Update(other->lights[i]);
 	}
 }
 

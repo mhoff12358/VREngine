@@ -37,7 +37,7 @@ public:
 
 	LightSystem();
 	LightSystem(
-		AmbientLight ambient_light,
+		AmbientLight base_ambient_light,
 		array<PointLight, num_point_lights> point_lights,
 		array<DirectionalLight, num_directional_lights> directional_lights);
 
@@ -52,12 +52,22 @@ public:
 	array<PointLight, num_point_lights>& MutablePointLights();
 	array<DirectionalLight, num_directional_lights>& MutableDirectionalLights();
 
+	unsigned int ClaimPointLight();
+	void ReleasePointLight(unsigned int light_number);
+	unsigned int ClaimDirectionalLight();
+	void ReleaseDirectionalLight(unsigned int light_number);
+
 	void Update(const LightSystem& other);
 
 private:
-	AmbientLight ambient_light_;
+	void ComputeTotalAmbientLight();
+
+	AmbientLight base_ambient_light_;
+	AmbientLight total_ambient_light_;
 	array<PointLight, num_point_lights> point_lights_;
+	array<bool, num_point_lights> point_lights_claimed_;
 	array<DirectionalLight, num_directional_lights> directional_lights_;
+	array<bool, num_directional_lights> directional_lights_claimed_;
 
 	ConstantBuffer* constant_buffer_ = nullptr;
 

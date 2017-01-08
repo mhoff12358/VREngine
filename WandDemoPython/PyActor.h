@@ -8,6 +8,7 @@
 #include "SceneSystem/Scene.h"
 
 #include "PyCommandAndQuery.h"
+#include "HandleError.h"
 
 struct PyActor : public game_scene::Actor, public boost::python::wrapper<game_scene::Actor> {
 public:
@@ -23,7 +24,7 @@ public:
 					HandleCommand(boost::ref(args));
 				}
 			} catch (error_already_set) {
-				PyErr_Print();
+				HandleError();
 			}
 		}
 		Actor::HandleCommand(args);
@@ -37,7 +38,7 @@ public:
 			try {
 				AddedToScene();
 			} catch (error_already_set) {
-				PyErr_Print();
+				HandleError();
 			}
 		}
 		Actor::AddedToScene();
@@ -58,7 +59,7 @@ public:
 				raw_result = this->get_override("AnswerQuery")(boost::ref(args));
 			}
 		} catch (error_already_set) {
-			PyErr_Print();
+			HandleError();
 		}
 		extract<std::auto_ptr<game_scene::QueryResult>> extract_attempt(raw_result);
 		if (extract_attempt.check()) {
