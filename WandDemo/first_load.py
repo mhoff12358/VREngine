@@ -17,7 +17,7 @@ class DummyActor(sc.DelegatingActor):
 
 
 def pre_load():
-    return {"load_vr": True}
+    return {"load_vr": False}
 
 def first_load(resources):
     print("STARTING FIRST LOAD")

@@ -7,4 +7,5 @@
 !*.hlsl
 !*.hlsli
 !WandDemo/*.obj
+!WandDemo/*.png
 x64
