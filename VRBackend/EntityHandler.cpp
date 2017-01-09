@@ -51,6 +51,10 @@ void EntityHandler::FinishUpdate() {
 	current_edit_group = entity_buffers.ProducerFinish();
 }
 
+void EntityHandler::CycleGraphics() {
+	entity_buffers.BlockUntilConsumerDone();
+}
+
 unsigned int EntityHandler::AddEntity(Entity new_entity, unsigned int entity_set_number) {
 	current_edit_group[entity_set_number].entities.push_back(new_entity);
 	entity_map.push_back(EntityId(entity_set_number, current_edit_group[entity_set_number].entities.size() - 1));

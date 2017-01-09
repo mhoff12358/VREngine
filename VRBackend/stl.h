@@ -35,5 +35,8 @@ using std::max;
 using std::set;
 
 #include "boost/optional.hpp"
+#include "boost/bimap.hpp"
+#include "boost/bimap/vector_of.hpp"
 
 using boost::optional;
+using boost::bimap;

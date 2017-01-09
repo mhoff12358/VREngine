@@ -25,8 +25,6 @@ def first_load(resources):
 
     scene = resources["scene"]
 
-    #nixie9 = nixie.Nixie(9, sc.Pose(sc.Location(0, 0, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/2)))
-    #scene.AddActor(nixie9)
 
     graphics_resources = scene.AskQuery(
         sc.Target(
@@ -35,8 +33,8 @@ def first_load(resources):
             sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
-    #light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
-    #scene.AddActor(light)
+    light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
+    scene.AddActor(light)
 
     mech = mech_system.MechSystem(
         cannon_details = (

@@ -6,7 +6,13 @@
 
 #include <fstream>
 
-ResourcePool::ResourcePool(EntityHandler& entity_handler) : entity_handler_(entity_handler)
+ResourcePool::ResourcePool(EntityHandler& entity_handler) :
+	entity_handler_(entity_handler),
+	model_lookup(model_lookup_raw_.left),
+	pixel_shader_lookup(pixel_shader_lookup_raw_.left),
+	vertex_shader_lookup(vertex_shader_lookup_raw_.left),
+	geometry_shader_lookup(geometry_shader_lookup_raw_.left),
+	texture_lookup(texture_lookup_raw_.left)
 {
 	lastest_model_number = 0;
 
@@ -40,7 +46,7 @@ void ResourcePool::Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con) {
 Model ResourcePool::LoadExistingModel(ModelIdentifier model_name) {
 	auto existing_model_gen = model_lookup.find(model_name.GetFileName());
 	if (existing_model_gen != model_lookup.end()) {
-		return models_[existing_model_gen->second].GetModel(model_name.GetSubPart());
+		return models_[existing_model_gen->second].generator_.GetModel(model_name.GetSubPart());
 	}
 
 	return Model();
@@ -49,7 +55,7 @@ Model ResourcePool::LoadExistingModel(ModelIdentifier model_name) {
 map<string, Model> ResourcePool::LoadExistingModelAsParts(const string& file_name) {
 	auto existing_model_gen = model_lookup.find(file_name);
 	if (existing_model_gen != model_lookup.end()) {
-		return models_[existing_model_gen->second].GetModels();
+		return models_[existing_model_gen->second].generator_.GetModels();
 	}
 
 	return map<string, Model>{};
@@ -64,10 +70,10 @@ Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoade
 	ModelGenerator generator = ObjLoader::CreateModelsFromFile(
 		device_interface, model_name.GetFileName(), model_output_format);
 
-	models_.push_back(generator);
+	models_.emplace_back(std::move(generator), true);
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
-	return generator.GetModel(model_name.GetSubPart());
+	return models_.back().generator_.GetModel(model_name.GetSubPart());
 }
 
 Model ResourcePool::LoadModelFromVertices(
@@ -85,10 +91,10 @@ Model ResourcePool::LoadModelFromVertices(
 	generator.SetParts(parts);
 	generator.Finalize(device_interface, entity_handler_, model_storage);
 
-	models_.push_back(generator);
+	models_.emplace_back(std::move(generator), false);
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 	
-	return generator.GetModel(model_name.GetSubPart());
+	return models_.back().generator_.GetModel(model_name.GetSubPart());
 }
 
 Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGenerator&& generator) {
@@ -97,10 +103,10 @@ Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGene
 		return model;
 	}
 
-	models_.emplace_back(std::move(generator));
+	models_.push_back(ModelValue(std::move(generator), false));
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
-	ModelGenerator& new_generator = models_.back();
+	ModelGenerator& new_generator = models_.back().generator_;
 
 	return new_generator.GetModel(model_name.GetSubPart());
 }
@@ -112,7 +118,7 @@ void ResourcePool::UpdateModel(const string& file_name, const ModelMutation& mut
 		return;
 	}
 
-	ModelGenerator& generator = models_[existing_model->second];
+	ModelGenerator& generator = models_[existing_model->second].generator_;
 	mutation.ApplyToData(generator.GetWritableBuffer(device_context));
 	generator.FinalizeWriteToBuffer(device_context);
 }
@@ -374,6 +380,40 @@ vector<float> ResourcePool::AccessDataFromResource(const ResourceIdent& resource
 	default:
 		return vector<float>();
 	}
+}
+
+void ResourcePool::ClearImpermanentModels() {
+	int kept_index = models_.size();
+	int remove_index = -1;
+
+	while (true) {
+		remove_index++;
+		while ((remove_index != kept_index) && models_[remove_index].permanent_) {
+			remove_index++;
+		}
+		kept_index--;
+		while ((remove_index != kept_index) && !models_[kept_index].permanent_) {
+			kept_index--;
+		}
+		
+		if (remove_index != kept_index) {
+			break;
+		}
+
+		SwapLookupValues(model_lookup_raw_, models_, kept_index, remove_index);
+	}
+
+	int num_permanents = 0;
+	while (num_permanents < models_.size() && models_[num_permanents].permanent_) {
+		num_permanents++;
+	}
+
+	for (int i = num_permanents + 1; i < models_.size(); i++) {
+		model_lookup_raw_.left.erase(model_lookup_raw_.right[i]);
+		models_[i].generator_.Release();
+	}
+	models_.resize(num_permanents);
+
 }
 
 void ResourcePool::PreloadResource(const ResourceIdent& resource_ident) {

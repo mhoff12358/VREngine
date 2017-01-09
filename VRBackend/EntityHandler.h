@@ -30,6 +30,9 @@ public:
 
 	// Update loop updaters
 	void FinishUpdate();
+	// Waits for the next render group for drawing to be loaded, which would be the
+	// update from the last call to FinishUpdate
+	void CycleGraphics();
 
 private:
 	unsigned int AddEntity(Entity new_entity, unsigned int entity_set_number);

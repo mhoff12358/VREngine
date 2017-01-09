@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include <condition_variable>
 
 class RenderGroup;
 
@@ -17,8 +18,14 @@ public:
 	RenderGroup* ProducerFinish();
 	RenderGroup* ConsumerFinish();
 
+	void BlockUntilConsumerDone();
+
 private:
 	mutex state_ownership_lock;
+
+	mutex consumer_wait_mutex;
+	std::condition_variable consumer_wait;
+	bool consumer_alerted = false;
 
 	// This is the number of render groups for each group, so there are 3*num_render_groups individual RenderGroup objects.
 	unsigned int num_render_groups;

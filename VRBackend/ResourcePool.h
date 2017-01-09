@@ -51,6 +51,7 @@ public:
 	~ResourcePool();
 
 	void Initialize(ID3D11Device* dev, ID3D11DeviceContext* dev_con);
+	void ClearImpermanentModels();
 
 	vector<char> ReadFileToBytes(const string& file_name);
 
@@ -92,16 +93,63 @@ public:
 private:
 	unsigned int lastest_model_number;
 
-	vector<ModelGenerator> models_;
-	map<string, unsigned int> model_lookup;
+	typedef bimap<boost::bimaps::set_of<string>, unsigned int> LookupType;
+
+	struct ModelValue {
+		ModelValue(ModelGenerator generator, bool permanent) : generator_(std::move(generator)), permanent_(permanent) {}
+		ModelGenerator generator_;
+		bool permanent_;
+	};
+
+	vector<ModelValue> models_;
+	LookupType model_lookup_raw_;
+	LookupType::left_map& model_lookup;
 	vector<PixelShader> pixel_shaders;
-	map<string, unsigned int> pixel_shader_lookup;
+	LookupType pixel_shader_lookup_raw_;
+	LookupType::left_map& pixel_shader_lookup;
 	vector<VertexShader> vertex_shaders;
-	map<string, unsigned int> vertex_shader_lookup;
+	LookupType vertex_shader_lookup_raw_;
+	LookupType::left_map& vertex_shader_lookup;
 	vector<GeometryShader> geometry_shaders;
-	map<string, unsigned int> geometry_shader_lookup;
+	LookupType geometry_shader_lookup_raw_;
+	LookupType::left_map& geometry_shader_lookup;
 	Texture dummy_texture;
 	vector<Texture> textures;
-	map<string, unsigned int> texture_lookup;
-	//map<string, unique_ptr<ConstantBuffer>> named_constant_buffers_;
+	LookupType texture_lookup_raw_;
+	LookupType::left_map& texture_lookup;
+
+	template <typename ValueType> 
+	void RemoveKeyFromLookup(string key, LookupType lookup, vector<ValueType>& values);
+
+	template <typename ValueType> 
+	void SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
 };
+
+template <typename ValueType>
+void ResourcePool::SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
+	std::swap(values[src], values[dest]);
+	string src_key = lookup.right.find(src)->second;
+	string dest_key = lookup.right.find(dest)->second;
+	lookup.left[src_key] = dest;
+	lookup.left[dest_key] = src;
+}
+
+template <typename ValueType> 
+void ResourcePool::RemoveKeyFromLookup(string key, LookupType lookup, vector<ValueType>& values) {
+	auto& lookup_left = lookup.left;
+	const auto& value_iter = lookup_left.find(key);
+	if (value_iter == lookup_left.end()) {
+		return;
+	}
+	unsigned int src_index = value_iter->second;
+
+	if (values.size() == 1) {
+		lookup_left.erase(value_iter);
+		values.resize(0);
+		return;
+	}
+
+	unsigned int dest_index = values.size() - 1;
+	SwapLookupValues(lookup, values, src_index, dest_index);
+	values.resize(dest_index);
+}

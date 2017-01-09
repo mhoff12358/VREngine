@@ -41,6 +41,7 @@ public:
 	void FinalizeWriteToBuffer(ID3D11DeviceContext* device_context, bool apply_changes = true);
 
 	unsigned int GetCurrentNumberOfVertices() const;
+	void Release();
 
 	map<string, ModelSlice> parts_;
 

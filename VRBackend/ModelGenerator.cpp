@@ -168,3 +168,12 @@ std::map<std::string, Model> ModelGenerator::GetModels() {
 unsigned int ModelGenerator::GetCurrentNumberOfVertices() const {
 	return number_of_vertices;
 }
+
+void ModelGenerator::Release() {
+	if (vertex_buffer) {
+		vertex_buffer->Release();
+	}
+	if (staging_buffer) {
+		staging_buffer->Release();
+	}
+}

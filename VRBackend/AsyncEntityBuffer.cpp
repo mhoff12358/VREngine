@@ -63,6 +63,17 @@ RenderGroup* AsyncEntityBuffer::ConsumerFinish() {
 	reader_on_new = true;
 	RenderGroup* returned_group = new_reading_group;
 
+	consumer_alerted = true;
+	consumer_wait.notify_all();
+
 	state_ownership_lock.unlock();
 	return returned_group;
+}
+
+void AsyncEntityBuffer::BlockUntilConsumerDone() {
+	std::unique_lock<std::mutex> lock(state_ownership_lock);
+	consumer_alerted = false;
+	while (!consumer_alerted) consumer_wait.wait(lock);
+
+	return;
 }

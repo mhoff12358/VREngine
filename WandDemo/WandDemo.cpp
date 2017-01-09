@@ -18,7 +18,7 @@ using std::unique_ptr;
 #include "VRBackend/EntityHandler.h"
 #include "VRBackend/Headset.h"
 #include "VRBackend/Lights.h"
-
+#include "VRBackend/PipelineCamera.h"
 #include "VRBackend/gaussian.h"
 #include "VRBackend/BlendDesc.h"
 #include "VRBackend/ProcessingEffect.h"
@@ -95,12 +95,7 @@ void GraphicsLoop() {
 	}
 }
 
-void UpdateLoop() {
-	int prev_time = timeGetTime();
-
-	// Stored in theta, phi format, theta kept in [0, 2*pi], phi kept in [-pi, pi]
-	array<float, 2> player_orientation_angles = { { 0, 0 } };
-
+void PreUpdateInitialize() {
 	RAWINPUTDEVICE Rid[1];
 	Rid[0].usUsagePage = HID_USAGE_PAGE_GENERIC;
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE;
@@ -116,6 +111,16 @@ void UpdateLoop() {
 	point_gen.Finalize(graphics_objects.view_state->device_interface, optional<EntityHandler&>{}, ModelStorageDescription::Immutable());
 	point_gen.parts_ = { { "Point", ModelSlice(point_gen.GetCurrentNumberOfVertices(), 0) } };
 	graphics_objects.resource_pool->PreloadResource(ResourceIdent(ResourceIdent::MODEL, ResourceIdentifier::GetConstantModelName("point"), point_gen));
+
+}
+
+enum class UpdateLoopResult {
+	FINISH,
+	RELOAD
+};
+
+UpdateLoopResult UpdateLoop() {
+	int prev_time = timeGetTime();
 
 	game_scene::Scene scene;
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
@@ -147,7 +152,6 @@ void UpdateLoop() {
 		)
 	);
 
-	game_scene::ActorId added_actor;
 	//scene.PrefaceCommand();
 	try {
 		dict inputs;
@@ -168,13 +172,11 @@ void UpdateLoop() {
 			PyErr_Print();
 		}
 	}
-
 	scene.FlushCommandQueue();
 
 	MSG msg;
 	vr::VREvent_t vr_msg;
-
-	bool body_found = false;
+	UpdateLoopResult response_code = UpdateLoopResult::FINISH;
 
 	while (TRUE)
 	{
@@ -183,6 +185,11 @@ void UpdateLoop() {
 			DispatchMessage(&msg);
 
 			if (msg.message == WM_QUIT) {
+				response_code = UpdateLoopResult::FINISH;
+				break;
+			}
+			else if ((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) {
+				response_code = UpdateLoopResult::RELOAD;
 				break;
 			}
 		}
@@ -229,16 +236,8 @@ void UpdateLoop() {
 		graphics_objects.entity_handler->FinishUpdate();
 	}
 
-	// clean up DirectX and COM
-	graphics_objects.view_state->Cleanup();
-	if (graphics_objects.input_handler->IsHeadsetActive()) {
-		graphics_objects.oculus->Cleanup();
-	}
+	return response_code;
 }
-
-#include "VRBackend/PipelineCamera.h"
-#include "VRBackend/PipelineStage.h"
-#include "VRBackend/RenderEntities.h"
 
 int _tmain(int argc, _TCHAR* argv[])
 {
@@ -347,7 +346,34 @@ int _tmain(int argc, _TCHAR* argv[])
 	graphics_objects.input_handler->SetPredictiveTiming(-5);
 
 	thread graphics_thread(GraphicsLoop);
-	UpdateLoop();
+
+	PreUpdateInitialize();
+	while (true) {
+		UpdateLoopResult update_result = UpdateLoop();
+		if (update_result == UpdateLoopResult::FINISH) {
+			break;
+		} else {
+			// Unload any unneeded resources.
+
+			// Push the updated state to the entity handler and wait for the new state
+			// to begin being rendered.
+			graphics_objects.entity_handler->FinishUpdate();
+			graphics_objects.entity_handler->CycleGraphics();
+
+			// Now that the references to the values are gone, recreate the 
+			graphics_objects.resource_pool->ClearImpermanentModels();
+
+			// Clear the python interpreter, reinitialize it, and then reload the first_load file.
+			// However there is no need to redo the preload function.
+			Py_Finalize();
+			Py_Initialize();
+			main_namespace = import("__main__").attr("__dict__");
+			exec("import first_load", main_namespace);
+			loaded_module = main_namespace["first_load"];
+
+			continue;
+		}
+	}
 
 	return 0;
 }
