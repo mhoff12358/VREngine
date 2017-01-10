@@ -74,6 +74,7 @@ void AsyncEntityBuffer::BlockUntilConsumerDone() {
 	std::unique_lock<std::mutex> lock(state_ownership_lock);
 	consumer_alerted = false;
 	while (!consumer_alerted) consumer_wait.wait(lock);
+	Sleep(5000);
 
 	return;
 }

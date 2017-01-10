@@ -149,7 +149,7 @@ ActorId Scene::AddActor(Actor& new_actor, CommandQueueLocation initialize_after,
 }
 
 tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, unique_ptr<CommandArgs> args) {
-	return AddActorReturnInitialize(new_actor, FrontOfCommands(), move(args));
+	return AddActorReturnInitialize(new_actor, BackOfNewCommands(), move(args));
 }
 
 tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {

@@ -12,20 +12,20 @@ ActorCreationBundle<game_scene::Actor> AddAndConstructActorDum(game_scene::Scene
 }
 
 game_scene::ActorId AddActor(game_scene::Scene& self, PyActor* new_actor) {
-	return self.AddActor(unique_ptr<game_scene::Actor>(new_actor));
+	return self.AddActor(*new_actor);
 }
 
 game_scene::ActorId AddActorAfter(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	return self.AddActor(unique_ptr<game_scene::Actor>(new_actor), initialize_after);
+	return self.AddActor(*new_actor, initialize_after);
 }
 
 boost::python::tuple AddActorReturnInitialize(game_scene::Scene& self, PyActor* new_actor) {
-	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(unique_ptr<game_scene::Actor>(new_actor));
+	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(*new_actor);
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
 
 boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(unique_ptr<game_scene::Actor>(new_actor), initialize_after);
+	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(*new_actor, initialize_after);
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
 

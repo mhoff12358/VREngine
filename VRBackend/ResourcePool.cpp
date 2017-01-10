@@ -7,12 +7,7 @@
 #include <fstream>
 
 ResourcePool::ResourcePool(EntityHandler& entity_handler) :
-	entity_handler_(entity_handler),
-	model_lookup(model_lookup_raw_.left),
-	pixel_shader_lookup(pixel_shader_lookup_raw_.left),
-	vertex_shader_lookup(vertex_shader_lookup_raw_.left),
-	geometry_shader_lookup(geometry_shader_lookup_raw_.left),
-	texture_lookup(texture_lookup_raw_.left)
+	entity_handler_(entity_handler)
 {
 	lastest_model_number = 0;
 
@@ -385,6 +380,10 @@ vector<float> ResourcePool::AccessDataFromResource(const ResourceIdent& resource
 void ResourcePool::ClearImpermanentModels() {
 	int kept_index = models_.size();
 	int remove_index = -1;
+	map<unsigned int, string> reverse_lookup;
+	for (const pair<string, unsigned int> kv : model_lookup) {
+		reverse_lookup[kv.second] = kv.first;
+	}
 
 	while (true) {
 		remove_index++;
@@ -400,7 +399,8 @@ void ResourcePool::ClearImpermanentModels() {
 			break;
 		}
 
-		SwapLookupValues(model_lookup_raw_, models_, kept_index, remove_index);
+		//swaps.push_back(std::make_pair(kept_index, remove_index));
+		SwapLookupValues(model_lookup, reverse_lookup, models_, kept_index, remove_index);
 	}
 
 	int num_permanents = 0;
@@ -409,7 +409,7 @@ void ResourcePool::ClearImpermanentModels() {
 	}
 
 	for (int i = num_permanents + 1; i < models_.size(); i++) {
-		model_lookup_raw_.left.erase(model_lookup_raw_.right[i]);
+		model_lookup.erase(reverse_lookup[i]);
 		models_[i].generator_.Release();
 	}
 	models_.resize(num_permanents);

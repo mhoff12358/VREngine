@@ -93,58 +93,78 @@ public:
 private:
 	unsigned int lastest_model_number;
 
-	typedef bimap<boost::bimaps::set_of<string>, unsigned int> LookupType;
+	typedef map<string, unsigned int> LookupType;
 
 	struct ModelValue {
+		ModelValue() : generator_(), permanent_(false) {}
 		ModelValue(ModelGenerator generator, bool permanent) : generator_(std::move(generator)), permanent_(permanent) {}
 		ModelGenerator generator_;
 		bool permanent_;
 	};
 
 	vector<ModelValue> models_;
-	LookupType model_lookup_raw_;
-	LookupType::left_map& model_lookup;
+	LookupType model_lookup;
 	vector<PixelShader> pixel_shaders;
-	LookupType pixel_shader_lookup_raw_;
-	LookupType::left_map& pixel_shader_lookup;
+	LookupType pixel_shader_lookup;
 	vector<VertexShader> vertex_shaders;
-	LookupType vertex_shader_lookup_raw_;
-	LookupType::left_map& vertex_shader_lookup;
+	LookupType vertex_shader_lookup;
 	vector<GeometryShader> geometry_shaders;
-	LookupType geometry_shader_lookup_raw_;
-	LookupType::left_map& geometry_shader_lookup;
+	LookupType geometry_shader_lookup;
 	Texture dummy_texture;
 	vector<Texture> textures;
-	LookupType texture_lookup_raw_;
-	LookupType::left_map& texture_lookup;
+	LookupType texture_lookup;
 
 	template <typename ValueType> 
 	void RemoveKeyFromLookup(string key, LookupType lookup, vector<ValueType>& values);
 
 	template <typename ValueType> 
 	void SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
+	template <typename ValueType> 
+	void SwapLookupValues(LookupType lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
 };
+
+template <typename ValueType>
+void ResourcePool::SwapLookupValues(LookupType lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
+	std::swap(values[src], values[dest]);
+	string src_key = reverse_lookup[src];
+	string dest_key = reverse_lookup[dest];
+	lookup[src_key] = dest;
+	lookup[dest_key] = src;
+	reverse_lookup[src] = dest_key;
+	reverse_lookup[dest] = src_key;
+}
 
 template <typename ValueType>
 void ResourcePool::SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
 	std::swap(values[src], values[dest]);
-	string src_key = lookup.right.find(src)->second;
-	string dest_key = lookup.right.find(dest)->second;
-	lookup.left[src_key] = dest;
-	lookup.left[dest_key] = src;
+	string src_key = "";
+	string dest_key = "";
+	bool src_done = false;
+	bool dest_found = false;
+	for (auto lookup_iter = lookup.begin(); !((lookup_iter == lookup.end()) || (src_found && dest_found)); ++lookup_iter) {
+		if (lookup_iter->second == src) {
+			src_key = lookup_iter->first;
+			src_found = true;
+		}
+		if (lookup_iter->second == dest) {
+			dest_key = lookup_iter->first;
+			dest_found = true;
+		}
+	}
+	lookup[src_key] = dest;
+	lookup[dest_key] = src;
 }
 
 template <typename ValueType> 
 void ResourcePool::RemoveKeyFromLookup(string key, LookupType lookup, vector<ValueType>& values) {
-	auto& lookup_left = lookup.left;
-	const auto& value_iter = lookup_left.find(key);
-	if (value_iter == lookup_left.end()) {
+	const auto& value_iter = lookup.find(key);
+	if (value_iter == lookup.end()) {
 		return;
 	}
 	unsigned int src_index = value_iter->second;
 
 	if (values.size() == 1) {
-		lookup_left.erase(value_iter);
+		lookup.erase(value_iter);
 		values.resize(0);
 		return;
 	}

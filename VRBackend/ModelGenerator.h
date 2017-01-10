@@ -28,6 +28,7 @@ public:
 	ModelGenerator(VertexType v_type, D3D_PRIMITIVE_TOPOLOGY p_type);
 	ModelGenerator(const ModelGenerator& other) = default;
 	ModelGenerator(ModelGenerator&& other);
+	ModelGenerator operator=(ModelGenerator&& other);
 
 	void AddVertex(Vertex new_vertex);
 	void AddVertexBatch(const Vertices& new_vertices);

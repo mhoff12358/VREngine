@@ -115,6 +115,7 @@ void PreUpdateInitialize() {
 }
 
 enum class UpdateLoopResult {
+	CONTINUE,
 	FINISH,
 	RELOAD
 };
@@ -176,9 +177,9 @@ UpdateLoopResult UpdateLoop() {
 
 	MSG msg;
 	vr::VREvent_t vr_msg;
-	UpdateLoopResult response_code = UpdateLoopResult::FINISH;
+	UpdateLoopResult response_code = UpdateLoopResult::CONTINUE;
 
-	while (TRUE)
+	while (true)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
 			TranslateMessage(&msg);
@@ -186,12 +187,12 @@ UpdateLoopResult UpdateLoop() {
 
 			if (msg.message == WM_QUIT) {
 				response_code = UpdateLoopResult::FINISH;
-				break;
-			}
-			else if ((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) {
+			} else if ((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) {
 				response_code = UpdateLoopResult::RELOAD;
-				break;
 			}
+		}
+		if (response_code != UpdateLoopResult::CONTINUE) {
+			break;
 		}
 
 		if (graphics_objects.oculus->IsHeadsetInitialized()) {
@@ -235,6 +236,12 @@ UpdateLoopResult UpdateLoop() {
 
 		graphics_objects.entity_handler->FinishUpdate();
 	}
+
+	// Push the updated state to the entity handler and wait for the new state
+	// to begin being rendered.
+	graphics_objects.entity_handler->FinishUpdate();
+	graphics_objects.entity_handler->CycleGraphics();
+
 
 	return response_code;
 }
@@ -353,13 +360,6 @@ int _tmain(int argc, _TCHAR* argv[])
 		if (update_result == UpdateLoopResult::FINISH) {
 			break;
 		} else {
-			// Unload any unneeded resources.
-
-			// Push the updated state to the entity handler and wait for the new state
-			// to begin being rendered.
-			graphics_objects.entity_handler->FinishUpdate();
-			graphics_objects.entity_handler->CycleGraphics();
-
 			// Now that the references to the values are gone, recreate the 
 			graphics_objects.resource_pool->ClearImpermanentModels();
 
