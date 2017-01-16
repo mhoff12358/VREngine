@@ -40,6 +40,8 @@ using std::unique_ptr;
 
 #include "boost/numeric/ublas/matrix.hpp"
 
+//#include "WandDemoPython/SceneSystemPython.h"
+
 #include "openvr.h"
 
 #ifndef HID_USAGE_PAGE_GENERIC
@@ -58,6 +60,7 @@ const float mouse_phi_scale = 0.001f;
 
 mutex device_context_access;
 
+PyThreadState* interpreter_thread_state = nullptr;
 object main_namespace;
 object loaded_module;
 
@@ -163,11 +166,12 @@ UpdateLoopResult UpdateLoop() {
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
 		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
-		PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
+		PyErr_Print();
 		try {
-			boost::python::handle<> h_tb(traceback_ptr);
-			object pdb(import("pdb"));
+			object sys(boost::python::import("sys"));
+			object pdb(boost::python::import("pdb"));
 			object pdb_fn = pdb.attr("post_mortem");
+			object h_tb = sys.attr("last_traceback");
 			pdb_fn(h_tb);
 		} catch (error_already_set) {
 			PyErr_Print();
@@ -239,6 +243,7 @@ UpdateLoopResult UpdateLoop() {
 
 	// Push the updated state to the entity handler and wait for the new state
 	// to begin being rendered.
+	graphics_objects.entity_handler->ClearAllEntities();
 	graphics_objects.entity_handler->FinishUpdate();
 	graphics_objects.entity_handler->CycleGraphics();
 
@@ -246,14 +251,40 @@ UpdateLoopResult UpdateLoop() {
 	return response_code;
 }
 
+
+void HandlePyError() {
+	PyErr_Print();
+	try {
+		object sys(boost::python::import("sys"));
+		object pdb(boost::python::import("pdb"));
+		object pdb_fn = pdb.attr("post_mortem");
+		object h_tb = sys.attr("last_traceback");
+		pdb_fn(h_tb);
+	} catch (error_already_set) {
+		PyErr_Print();
+	}
+}
+
+extern "C" PyObject* PyInit_scene_system_();
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	bool hmd_desired = false;
 
+	int append_result = PyImport_AppendInittab("scene_system_", PyInit_scene_system_);
 	Py_Initialize();
+	object starting_module_names;
+	object sys;
 
 	try {
+		interpreter_thread_state = Py_NewInterpreter();
+		PyThreadState_Swap(interpreter_thread_state);
 		main_namespace = import("__main__").attr("__dict__");
+		object mod = import("scene_system_");
+		dict name;
+		name["sys"] = import("sys");
+		starting_module_names = boost::python::eval("frozenset(sys.modules.keys())", main_namespace, name);
+		//starting_module_names = boost::python::tuple(sys.attr("modules").attr("keys")());
 		exec("import first_load", main_namespace);
 		loaded_module = main_namespace["first_load"];
 
@@ -262,16 +293,7 @@ int _tmain(int argc, _TCHAR* argv[])
 			hmd_desired = true;
 		}
 	} catch (error_already_set) {
-		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
-		PyErr_Fetch(&type_ptr, &value_ptr, &traceback_ptr);
-		try {
-			boost::python::handle<> h_tb(traceback_ptr);
-			object pdb(import("pdb"));
-			object pdb_fn = pdb.attr("post_mortem");
-			pdb_fn(h_tb);
-		} catch (error_already_set) {
-			PyErr_Print();
-		}
+		HandlePyError();
 	}
 
 	bool hmd_active = false;
@@ -365,10 +387,19 @@ int _tmain(int argc, _TCHAR* argv[])
 
 			// Clear the python interpreter, reinitialize it, and then reload the first_load file.
 			// However there is no need to redo the preload function.
-			Py_Finalize();
-			Py_Initialize();
-			main_namespace = import("__main__").attr("__dict__");
-			exec("import first_load", main_namespace);
+			try {
+				dict name;
+				name["sys"] = import("sys");
+				object current_module_names = boost::python::eval("frozenset(sys.modules.keys())", main_namespace, name);
+				object delta_module_names = current_module_names - starting_module_names;
+				std::cout << static_cast<std::string>(extract<std::string>(boost::python::str(delta_module_names))) << std::endl;
+				name["importlib"] = import("importlib");
+				name["types"] = import("types");
+				name["delta_module_names"] = delta_module_names;
+				boost::python::exec("for mod_name in delta_module_names:\n\tmod = sys.modules[mod_name]\n\tif mod and isinstance(mod, types.ModuleType):\n\t\timportlib.reload(mod)", main_namespace, name);
+			} catch (error_already_set) {
+				PyErr_Print();
+			}
 			loaded_module = main_namespace["first_load"];
 
 			continue;

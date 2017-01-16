@@ -50,3 +50,9 @@ void RenderGroup::Cleanup() {
 	model_mutations.clear();
 	buffer_copies_.clear();
 }
+
+void RenderGroup::ClearDrawingSettings() {
+	entities.clear();
+	model_mutations.clear();
+	buffer_copies_.clear();
+}

@@ -190,3 +190,9 @@ void EntityHandler::AddModelMutation(std::string model_resource_id, ModelMutatio
 void EntityHandler::AddBufferCopy(ID3D11Buffer* dest_buffer, ID3D11Buffer* src_buffer) {
 	current_edit_group[0].AddBufferCopy(dest_buffer, src_buffer);
 }
+	
+void EntityHandler::ClearAllEntities() {
+	for (int i = 0; i < num_entity_sets_; i++) {
+		current_edit_group[i].ClearDrawingSettings();
+	}
+}

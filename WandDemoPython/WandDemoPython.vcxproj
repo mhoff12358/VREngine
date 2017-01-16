@@ -177,6 +177,7 @@
     <ClInclude Include="PyCommandAndQuery.h" />
     <ClInclude Include="PyScene.h" />
     <ClInclude Include="PythonClassHelpers.h" />
+    <ClInclude Include="SceneSystemPython.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StlHelper.h" />
     <ClInclude Include="StlInterface.h" />

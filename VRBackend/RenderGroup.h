@@ -18,6 +18,7 @@ public:
 	void ApplyMutations(ID3D11Device* device, ID3D11DeviceContext* device_context, ResourcePool& resource_pool);
 	void Draw(ID3D11Device* device, ID3D11DeviceContext* device_context);
 	void Update(RenderGroup* other);
+	void ClearDrawingSettings();
 
 	void Cleanup();
 
