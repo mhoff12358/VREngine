@@ -66,6 +66,8 @@ public:
 		: file_name_(ResourceIdentifier::StripSubmodel(file_name)),
 		  sub_part_(ResourceIdentifier::GetSubmodel(file_name)) {}
 	ModelIdentifier(string file_name, string sub_part) : file_name_(move(file_name)), sub_part_(move(sub_part)) {}
+	ModelIdentifier(string file_name, string sub_part, bool permanent)
+		: file_name_(move(file_name)), sub_part_(move(sub_part)), permanent_(permanent) {}
 
 	const string& GetFileName() const {
 		return file_name_;
@@ -77,6 +79,10 @@ public:
 
 	string GetAsString() const {
 		return ResourceIdentifier::AddSubmodel(file_name_, sub_part_);
+	}
+
+	bool GetPermanent() const {
+		return permanent_;
 	}
 
 	bool operator==(const ModelIdentifier& other) const {
@@ -97,4 +103,5 @@ public:
 private:
 	string file_name_;
 	string sub_part_;
+	bool permanent_ = true;
 };

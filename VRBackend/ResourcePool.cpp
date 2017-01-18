@@ -65,7 +65,7 @@ Model ResourcePool::LoadModelFromFile(ModelIdentifier model_name, const ObjLoade
 	ModelGenerator generator = ObjLoader::CreateModelsFromFile(
 		device_interface, model_name.GetFileName(), model_output_format);
 
-	models_.emplace_back(std::move(generator), true);
+	models_.emplace_back(std::move(generator), model_name.GetPermanent());
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
 	return models_.back().generator_.GetModel(model_name.GetSubPart());
@@ -86,7 +86,7 @@ Model ResourcePool::LoadModelFromVertices(
 	generator.SetParts(parts);
 	generator.Finalize(device_interface, entity_handler_, model_storage);
 
-	models_.emplace_back(std::move(generator), false);
+	models_.emplace_back(std::move(generator), model_name.GetPermanent());
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 	
 	return models_.back().generator_.GetModel(model_name.GetSubPart());
@@ -98,7 +98,7 @@ Model ResourcePool::LoadModelFromGenerator(ModelIdentifier model_name, ModelGene
 		return model;
 	}
 
-	models_.push_back(ModelValue(std::move(generator), false));
+	models_.push_back(ModelValue(std::move(generator), model_name.GetPermanent()));
 	model_lookup[model_name.GetFileName()] = models_.size() - 1;
 
 	ModelGenerator& new_generator = models_.back().generator_;
@@ -390,12 +390,15 @@ void ResourcePool::ClearImpermanentModels() {
 		while ((remove_index != kept_index) && models_[remove_index].permanent_) {
 			remove_index++;
 		}
+		if (remove_index == kept_index) {
+			break;
+		}
 		kept_index--;
 		while ((remove_index != kept_index) && !models_[kept_index].permanent_) {
 			kept_index--;
 		}
 		
-		if (remove_index != kept_index) {
+		if (remove_index == kept_index) {
 			break;
 		}
 
@@ -408,7 +411,7 @@ void ResourcePool::ClearImpermanentModels() {
 		num_permanents++;
 	}
 
-	for (int i = num_permanents + 1; i < models_.size(); i++) {
+	for (int i = num_permanents; i < models_.size(); i++) {
 		model_lookup.erase(reverse_lookup[i]);
 		models_[i].generator_.Release();
 	}

@@ -118,13 +118,13 @@ private:
 	void RemoveKeyFromLookup(string key, LookupType lookup, vector<ValueType>& values);
 
 	template <typename ValueType> 
-	void SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
+	void SwapLookupValues(LookupType& lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
 	template <typename ValueType> 
-	void SwapLookupValues(LookupType lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
+	void SwapLookupValues(LookupType& lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest);
 };
 
 template <typename ValueType>
-void ResourcePool::SwapLookupValues(LookupType lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
+void ResourcePool::SwapLookupValues(LookupType& lookup, map<unsigned int, string>& reverse_lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
 	std::swap(values[src], values[dest]);
 	string src_key = reverse_lookup[src];
 	string dest_key = reverse_lookup[dest];
@@ -135,7 +135,7 @@ void ResourcePool::SwapLookupValues(LookupType lookup, map<unsigned int, string>
 }
 
 template <typename ValueType>
-void ResourcePool::SwapLookupValues(LookupType lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
+void ResourcePool::SwapLookupValues(LookupType& lookup, vector<ValueType>& values, unsigned int src, unsigned int dest) {
 	std::swap(values[src], values[dest]);
 	string src_key = "";
 	string dest_key = "";
