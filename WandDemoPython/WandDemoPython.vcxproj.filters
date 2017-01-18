@@ -157,5 +157,8 @@
     <Text Include="registration.py">
       <Filter>Python Files</Filter>
     </Text>
+    <Text Include="reload_import.py">
+      <Filter>Python Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

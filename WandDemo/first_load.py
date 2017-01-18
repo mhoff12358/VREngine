@@ -3,6 +3,7 @@ import player, mutable_graphical_object, draggable_object, path_draggable_object
 import collections
 import math
 
+print("IMPORTING FIRST LOAD")
 
 class DummyActor(sc.DelegatingActor):
     delegater = sc.Delegater(sc.DelegatingActor)
@@ -21,10 +22,9 @@ def pre_load():
 
 def first_load(resources):
     print("STARTING FIRST LOAD")
-    sc.ParseResources(resources)
+    #sc.ParseResources(resources)
 
     scene = resources["scene"]
-
 
     graphics_resources = scene.AskQuery(
         sc.Target(

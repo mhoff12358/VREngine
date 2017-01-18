@@ -19,13 +19,19 @@ public:
 	void AddRegistrationsFrom(RegistryMap& other);
 
 	IdType Register(string new_value) {
-		GetRegistries().push_back(new_value);
 		const auto& mapping = GetMapping();
 		IdType value = FNV(new_value.data());
-		if (mapping.count(value) != 0) {
-			std::cout << "Hash collision occured in registry" << std::endl;
+		const auto& existing_mapping_iter = mapping.find(value);
+		if (existing_mapping_iter != mapping.end()) {
+			string existing_key = existing_mapping_iter->second;
+			if (existing_key != new_value) {
+				std::cout << "Hash collision occured in registry" << std::endl;
+			}
+			return value;
+		} else {
+			GetRegistries().push_back(new_value);
+			GetMapping().insert(make_pair(value, new_value));
 		}
-		GetMapping().insert(make_pair(value, new_value));
 		return value;
 	}
 

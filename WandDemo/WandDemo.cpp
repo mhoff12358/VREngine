@@ -160,8 +160,6 @@ UpdateLoopResult UpdateLoop() {
 	try {
 		dict inputs;
 		inputs["scene"] = boost::ref(scene);
-		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
-		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		inputs["is_vr"] = graphics_objects.oculus->IsHeadsetInitialized();
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
@@ -273,18 +271,16 @@ int _tmain(int argc, _TCHAR* argv[])
 
 	int append_result = PyImport_AppendInittab("scene_system_", PyInit_scene_system_);
 	Py_Initialize();
-	object starting_module_names;
-	object sys;
 
 	try {
 		interpreter_thread_state = Py_NewInterpreter();
 		PyThreadState_Swap(interpreter_thread_state);
 		main_namespace = import("__main__").attr("__dict__");
-		object mod = import("scene_system_");
-		dict name;
-		name["sys"] = import("sys");
-		starting_module_names = boost::python::eval("frozenset(sys.modules.keys())", main_namespace, name);
-		//starting_module_names = boost::python::tuple(sys.attr("modules").attr("keys")());
+		exec("import scene_system", main_namespace);
+		exec("scene_system.ReloadImport.singleton_instance.Install()", main_namespace);
+		object scene_system_globals = main_namespace["scene_system"].attr("SceneSystemGlobals");
+		scene_system_globals.attr("command_registry") = boost::ref(game_scene::CommandRegistry::GetRegistry());
+		scene_system_globals.attr("query_registry") = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		exec("import first_load", main_namespace);
 		loaded_module = main_namespace["first_load"];
 
@@ -388,15 +384,9 @@ int _tmain(int argc, _TCHAR* argv[])
 			// Clear the python interpreter, reinitialize it, and then reload the first_load file.
 			// However there is no need to redo the preload function.
 			try {
-				dict name;
-				name["sys"] = import("sys");
-				object current_module_names = boost::python::eval("frozenset(sys.modules.keys())", main_namespace, name);
-				object delta_module_names = current_module_names - starting_module_names;
-				std::cout << static_cast<std::string>(extract<std::string>(boost::python::str(delta_module_names))) << std::endl;
-				name["importlib"] = import("importlib");
-				name["types"] = import("types");
-				name["delta_module_names"] = delta_module_names;
-				boost::python::exec("for mod_name in delta_module_names:\n\tmod = sys.modules[mod_name]\n\tif mod and isinstance(mod, types.ModuleType):\n\t\timportlib.reload(mod)", main_namespace, name);
+				object scene_system_mod = import("scene_system_");
+				exec("scene_system.ReloadImport.singleton_instance.Reload()", main_namespace);
+				exec("import first_load", main_namespace);
 			} catch (error_already_set) {
 				PyErr_Print();
 			}

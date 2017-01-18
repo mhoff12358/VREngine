@@ -2,6 +2,8 @@ import scene_system as sc
 import draggable_graphics, draggable_object, path, drag_direction_graphics, shader_helper
 import math, functools, typing, copy
 
+print("IMPORTING SHELL")
+
 class ShellAttributes(object):
     def __init__(self, power, color = (0.75, 0.75, 0.75), is_flare = False, spent = False):
         self.power = power
