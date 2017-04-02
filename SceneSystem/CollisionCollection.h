@@ -80,6 +80,10 @@ public:
 	void HandleEnDisableCollideableObject(const EnDisableCollideableObject& args);
 	void HandleRemoveCollideableObject(const RemoveCollideableObject& args);
 
+	string GetName() const {
+		return "CollisionCollectionImpl-" + ActorImpl::GetName();
+	}
+
 protected:
 	template <typename CollisionTest>
 	ActorId FindCollidingActor(const CollisionTest& test_shape, ActorId ignored_actor = ActorId::UnsetId);
@@ -132,6 +136,10 @@ public:
 	void HandleReposeCollideableObject(const ReposeCollideableObject& args);
 
 	void HandleInternalCollision(ActorId instigating_actor, const set<ActorId>& collided_actors);
+
+	string GetName() const {
+		return "CollisionCollectionCheckInternalCollisionsImpl-" + ActorImpl::GetName();
+	}
 };
 ADD_ACTOR_ADAPTER(CollisionCollectionCheckInternalCollisions);
 }

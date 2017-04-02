@@ -74,6 +74,10 @@ public:
 		self_ = self;
 	}
 
+	string GetName() const {
+		return "PyActor-" + game_scene::ActorImpl::GetName();
+	}
+
 	/*
 	game_scene::ActorId GetId() {
 		return id_;

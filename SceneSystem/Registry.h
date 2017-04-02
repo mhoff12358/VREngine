@@ -35,7 +35,7 @@ public:
 		return value;
 	}
 
-	IdType IdFromName(const string& name) {
+	IdType IdFromName(const string& name) const {
 		return FNV(name.data());
 	}
 
@@ -43,6 +43,17 @@ public:
 		map<IdType, string>& map = GetMapping();
 		const auto& iter = map.find(id);
 		if (iter == map.end()) {
+			return "";
+		}
+		return iter->second;
+	}
+	
+	string LookupNameConst(IdType id) const {
+		if (mapping_ == nullptr) {
+			return "";
+		}
+		const auto& iter = mapping_->find(id);
+		if (iter == mapping_->end()) {
 			return "";
 		}
 		return iter->second;

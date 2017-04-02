@@ -27,6 +27,10 @@ public:
 	void HandleCommand(const CommandArgs& args);
 	void AddedToScene();
 
+	string GetName() const {
+		return "HeadsetInterfaceImpl-" + ActorImpl::GetName();
+	}
+
 	ActorId CreateControllerActor();
 
 	enum class ListenerId : unsigned char {

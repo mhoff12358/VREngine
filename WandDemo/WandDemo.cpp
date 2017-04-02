@@ -126,7 +126,7 @@ enum class UpdateLoopResult {
 UpdateLoopResult UpdateLoop() {
 	int prev_time = timeGetTime();
 
-	game_scene::Scene scene;
+	game_scene::Scene scene(game_scene::CommandRegistry::GetRegistry(), game_scene::QueryRegistry::GetRegistry());
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
 	unique_ptr<game_scene::IActor> new_actor = 
@@ -162,6 +162,8 @@ UpdateLoopResult UpdateLoop() {
 		dict inputs;
 		inputs["scene"] = boost::ref(scene);
 		inputs["is_vr"] = graphics_objects.oculus->IsHeadsetInitialized();
+		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
+		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
 		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;

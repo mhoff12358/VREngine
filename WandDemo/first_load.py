@@ -22,7 +22,7 @@ def pre_load():
 
 def first_load(resources):
     print("STARTING FIRST LOAD")
-    #sc.ParseResources(resources)
+    sc.ParseResources(resources)
 
     scene = resources["scene"]
 

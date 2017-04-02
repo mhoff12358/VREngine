@@ -57,10 +57,16 @@ unique_ptr<QueryResult> ActorImpl::AskQuery(const Target& target, const QueryArg
 void ActorImpl::FailToHandleCommand(const CommandArgs& args) {
 	// The ADDED_TO_SCENE command is expected to be allowed to be unhandled.
 	if (args.Type() != CommandType::ADDED_TO_SCENE) {
+		const auto& a = GetScene().GetCommandRegistry();
 		std::cout <<
-			"ACTOR ID: " << GetId().id_ <<
-			" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
+			"ACTOR ID: " << GetId().id_ << " OF CLASS: " << GetNameVirt() <<
+			" HAS FAILED TO HANDLE COMMAND: " << std::hex << args.Type() << ", " <<
+			a.LookupNameConst(args.Type()) <<  std::endl;
 	}
+}
+
+string ActorImpl::GetName() const {
+	return "ActorImpl";
 }
 
 }  // game_scene

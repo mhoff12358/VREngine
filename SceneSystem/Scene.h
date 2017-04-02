@@ -14,7 +14,7 @@ class QueryArgs;
 class Scene
 {
 public:
-	Scene();
+	Scene(RegistryMap& command_registry, RegistryMap& query_registry);
 	~Scene();
 	Scene(const Scene&) = delete;
 
@@ -47,6 +47,9 @@ public:
 	ActorId RegisterByName(string name, ActorId actor_or_group);
 	ActorId FindByName(string name);
 
+	const RegistryMap& GetCommandRegistry() const;
+	const RegistryMap& GetQueryRegistry() const;
+
 private:
 	IActor* FindActor(const ActorId& actor_id);
 	vector<ActorId> ExpandTarget(const Target& target);
@@ -67,5 +70,8 @@ private:
 
 	int next_actor_id_;
 	ActorId NextActorId() { return ActorId(next_actor_id_++); }
+
+	RegistryMap& command_registry_;
+	RegistryMap& query_registry_;
 };
 }  // game_scene

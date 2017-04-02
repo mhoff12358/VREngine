@@ -38,6 +38,10 @@ public:
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 	void HandleCommand(const CommandArgs& args);
 
+	string GetName() const {
+		return "GraphicsResourcesImpl-" + ActorImpl::GetName();
+	}
+
 	void RequireResource(ResourceIdent resource_ident);
 	static GraphicsResources& GetGraphicsResources(Scene* scene);
 

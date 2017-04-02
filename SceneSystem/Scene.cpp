@@ -6,7 +6,10 @@
 
 namespace game_scene {
 
-Scene::Scene() : next_actor_id_(ActorId::FirstId) {
+Scene::Scene(RegistryMap& command_registry, RegistryMap& query_registry) :
+	next_actor_id_(ActorId::FirstId),
+	command_registry_(command_registry),
+	query_registry_(query_registry) {
 	actor_lookup_non_unique_[ActorId(5)] = nullptr;
 	back_of_current_commands_ = FrontOfCommands();
 }
@@ -27,6 +30,10 @@ void Scene::RegisterDependency(const Target& depender, const Target& dependent) 
 }
 
 CommandQueueLocation Scene::MakeCommandAfter(CommandQueueLocation location, Command command) {
+	if (command.GetArgs().Type() == 9067436475682223081) {
+		std::cout << "MAKING COMMAND WITH TYPE: " << std::hex << command.GetArgs().Type() << std::endl;
+	}
+	//std::cout << "MAKING COMMAND WITH TYPE: " << std::hex << command.GetArgs().Type() << std::endl;
 	CommandQueueLocation new_location = commands_.InsertCommand(location, move(command));
 	if (location == back_of_current_commands_) {
 		back_of_current_commands_ = new_location;
@@ -83,6 +90,14 @@ void Scene::ExecuteCommand(const Command& command) {
 		FindActor(actor_id)->HandleCommandVirt(command.GetArgs());
 	}
 	FlushCommandQueue();
+}
+
+const RegistryMap& Scene::GetCommandRegistry() const {
+	return command_registry_;
+}
+
+const RegistryMap& Scene::GetQueryRegistry() const {
+	return query_registry_;
 }
 
 IActor* Scene::FindActor(const ActorId& actor_id) {

@@ -113,6 +113,10 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
+	string GetName() const {
+		return "GraphicsObjectImpl-" + ActorImpl::GetName();
+	}
+
 protected:
 	// Creation methods.
 	void RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details);

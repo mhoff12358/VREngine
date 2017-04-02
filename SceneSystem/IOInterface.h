@@ -17,6 +17,10 @@ public:
 	void HandleCommand(const CommandArgs& args);
 	void AddedToScene();
 
+	string GetName() const {
+		return "IOInterfaceImpl-" + ActorImpl::GetName();
+	}
+
 	enum class ListenerId : unsigned char {
 		MOUSE_MOTION = 0,
 		KEY_PRESS,

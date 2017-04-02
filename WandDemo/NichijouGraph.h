@@ -47,6 +47,10 @@ public:
 	void HandleCommand(const CommandArgs& args);
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 
+	string GetName() const {
+		return "NichijouGraphImpl-" + ActorImpl::GetName();
+	}
+
 private:
 	void CreateGraphicsResources();
 	void MoveTimelinePosition(float timeline_delta);
@@ -73,6 +77,10 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
+	string GetName() const {
+		return "NichijouVertexImpl-" + ActorImpl::GetName();
+	}
+
 private:
 	void UpdateAllEdgeLocations();
 	void UpdateEdgeLocation(ActorId edge_actor);
@@ -93,6 +101,10 @@ public:
 		configuration_(configuration), edge_(edge), graph_(graph), model_name_(model_name) {}
 
 	void HandleCommand(const CommandArgs& args);
+
+	string GetName() const {
+		return "NichijoueEdgeImpl-" + ActorImpl::GetName();
+	}
 
 private:
 	object configuration_;

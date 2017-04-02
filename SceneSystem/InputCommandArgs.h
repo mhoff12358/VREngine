@@ -16,9 +16,7 @@ namespace commands {
 
 class TimeTick : public CommandArgs {
 public:
-	explicit TimeTick(const int duration)
-		: CommandArgs(InputCommand::TICK), duration_(duration) {
-	}
+	explicit TimeTick(const int duration);
 
 	// In milliseconds
 	const int duration_;
@@ -26,9 +24,7 @@ public:
 
 class InputUpdate : public CommandArgs {
 public:
-	explicit InputUpdate(const InputHandler* input)
-		: CommandArgs(InputCommand::INPUT_UPDATE), input_(*input) {
-	}
+	explicit InputUpdate(const InputHandler* input);
 	const InputHandler& input_;
 };
 

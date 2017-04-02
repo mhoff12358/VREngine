@@ -23,6 +23,7 @@ public:
 	virtual void AddedToSceneVirt() { throw std::logic_error("Not Implemented"); };
 	virtual void PrepareToDieVirt() { throw std::logic_error("Not Implemented"); };
 	virtual void DependencyDyingVirt(const ActorId& dying_id) { throw std::logic_error("Not Implemented"); };
+	virtual string GetNameVirt() const { throw std::logic_error("Not Implemented"); };
 
 	ActorId GetId();
 	void SetId(ActorId id);
@@ -45,6 +46,7 @@ public:
 	void AddedToSceneVirt() override;
 	void PrepareToDieVirt() override;
 	void DependencyDyingVirt(const ActorId& dying_id) override;
+	string GetNameVirt() const override;
 };
 
 #define ADD_ACTOR_ADAPTER(CLASS_NAME) typedef game_scene::ActorAdapter< CLASS_NAME ## Impl > CLASS_NAME
@@ -57,6 +59,7 @@ public:
 	void AddedToScene();
 	void PrepareToDie();
 	void DependencyDying(const ActorId& dying_id);
+	string GetName() const;
 
 protected:
 	void FailToHandleCommand(const CommandArgs& args);
@@ -87,6 +90,11 @@ void ActorAdapter<Impl>::PrepareToDieVirt() {
 template <typename Impl>
 void ActorAdapter<Impl>::DependencyDyingVirt(const ActorId& dying_id) {
 	Impl::DependencyDying(dying_id);
+}
+
+template <typename Impl>
+string ActorAdapter<Impl>::GetNameVirt() const {
+	return "ActorAdapter-" + Impl::GetName();
 }
 
 }  // game_scene

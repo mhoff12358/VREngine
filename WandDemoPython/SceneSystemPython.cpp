@@ -51,7 +51,7 @@ object a(boost::python::tuple args, boost::python::dict kwargs) {
 	return object();
 }
 
-void EmbedSelfHack(PyActor& actor, boost::python::object self) {
+void EmbedSelfHack(PyActor& actor, object self) {
 	actor.EmbedSelf(self);
 }
 
@@ -61,7 +61,6 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("AddedToScene", &game_scene::ActorImpl::AddedToSceneVirt, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
 		.def("EmbedSelf", &EmbedSelfHack)
-		//.def("EmbedSelf", &PyActor::EmbedSelf)
 		.def("GetScene", &game_scene::ActorImpl::GetScene, return_value_policy<reference_existing_object>())
 		.add_property("id", &game_scene::ActorImpl::GetId)
 		.def("SetScene", &game_scene::ActorImpl::SetScene);

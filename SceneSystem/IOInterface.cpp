@@ -7,6 +7,13 @@
 #include "VRBackend/InputHandler.h"
 
 namespace game_scene {
+
+REGISTER_COMMAND(IOInterfaceCommand, REGISTER_LISTENER);
+REGISTER_COMMAND(IOInterfaceCommand, LISTEN_MOUSE_MOTION);
+REGISTER_COMMAND(IOInterfaceCommand, LISTEN_KEY_PRESS);
+REGISTER_COMMAND(IOInterfaceCommand, LISTEN_KEY_RELEASE);
+REGISTER_COMMAND(IOInterfaceCommand, LISTEN_KEY_TOGGLE);
+
 namespace actors {
 
 void IOInterfaceImpl::AddedToScene() {

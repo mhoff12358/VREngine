@@ -64,6 +64,10 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
+	string GetName() const {
+		return "NewGraphicsObjectImpl-" + ActorImpl::GetName();
+	}
+
 private:
 	struct EntityRange {
 		EntityRange() : first_entity_(0), number_of_entities_(0) {}
