@@ -12,12 +12,12 @@ GrabbableObjectHandler::GrabbableObjectHandler() {
 void GrabbableObjectHandler::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
-		scene_->MakeCommandAfter(
-			scene_->FrontOfCommands(),
+		GetScene().MakeCommandAfter(
+			GetScene().FrontOfCommands(),
 			Command(
-				Target(scene_->FindByName("HeadsetInterface")),
+				Target(GetScene().FindByName("HeadsetInterface")),
 				make_unique<commands::HeadsetListenerRegistration>(
-					true, id_, actors::HeadsetInterface::ListenerId::TRIGGER_STATE_CHANGE)));
+					true, GetId(), actors::HeadsetInterface::ListenerId::TRIGGER_STATE_CHANGE)));
 		break;
 	case GrabbableObjectCommand::DROP_GRABBABLE_OBJECT:
 		HandleDropGrabbableObject(dynamic_cast<const DropGrabbableObject&>(args));
@@ -39,8 +39,8 @@ void GrabbableObjectHandler::HandleTriggerChange(const commands::TriggerStateCha
 			CollisionShape(args.controller_position_, 0));
 		if (collided_actor != ActorId::UnsetId) {
 			// Alert to the actor that it was grabbed.
-			scene_->MakeCommandAfter(
-				scene_->FrontOfCommands(),
+			GetScene().MakeCommandAfter(
+				GetScene().FrontOfCommands(),
 				Command(
 					Target(collided_actor),
 					make_unique<ObjectGrabbed>(true, args.controller_number_, args.controller_position_)));
@@ -66,8 +66,8 @@ void GrabbableObjectHandler::DropActor(ActorId actor_id) {
 
 void GrabbableObjectHandler::DropController(unsigned char controller_number) {
 	// Alert to the actor that it was released.
-	scene_->MakeCommandAfter(
-		scene_->FrontOfCommands(),
+	GetScene().MakeCommandAfter(
+		GetScene().FrontOfCommands(),
 		Command(
 			Target(grabbed_actor_[controller_number]),
 			make_unique<ObjectGrabbed>(false, controller_number)));
@@ -76,19 +76,19 @@ void GrabbableObjectHandler::DropController(unsigned char controller_number) {
 
 void GrabbableObjectHandler::SetGrabbedActor(unsigned char controller_number, ActorId grabbed_actor) {
 	grabbed_actor_[controller_number] = grabbed_actor;
-	scene_->MakeCommandAfter(
-		scene_->FrontOfCommands(),
+	GetScene().MakeCommandAfter(
+		GetScene().FrontOfCommands(),
 		Command(
-			Target(scene_->FindByName("HeadsetInterface")),
+			Target(GetScene().FindByName("HeadsetInterface")),
 			make_unique<commands::HeadsetListenerRegistration>(
 				true, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT, controller_number)));
 }
 
 void GrabbableObjectHandler::UnsetGrabbedActor(unsigned char controller_number) {
-	scene_->MakeCommandAfter(
-		scene_->FrontOfCommands(),
+	GetScene().MakeCommandAfter(
+		GetScene().FrontOfCommands(),
 		Command(
-			Target(scene_->FindByName("HeadsetInterface")),
+			Target(GetScene().FindByName("HeadsetInterface")),
 			make_unique<commands::HeadsetListenerRegistration>(
 				false, grabbed_actor_[controller_number], actors::HeadsetInterface::ListenerId::CONTROLLER_MOVEMENT, controller_number)));
 	grabbed_actor_[controller_number] = ActorId::UnsetId;

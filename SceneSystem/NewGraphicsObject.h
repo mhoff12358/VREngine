@@ -58,11 +58,11 @@ public:
 
 namespace actors {
 
-class NewGraphicsObject : public Actor {
+class NewGraphicsObjectImpl : public ActorImpl {
 public:
-	NewGraphicsObject() : Actor(), entities_(0, 0) {}
+	NewGraphicsObjectImpl() : entities_(0, 0) {}
 
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 
 private:
 	struct EntityRange {
@@ -104,6 +104,7 @@ private:
 	vector<Component> transforms_;
 	map<string, size_t> transform_lookup_;
 };
+ADD_ACTOR_ADAPTER(NewGraphicsObject);
 
 }  // actors
 }  // game_scene

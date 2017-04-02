@@ -48,11 +48,11 @@ unique_ptr<QueryResult> Scene::AskQuery(const Target& target, const QueryArgs& a
 		return make_unique<QueryResult>(QueryType::EMPTY);
 	}
 	if (actors_to_query.size() == 1) {
-		return FindActor(actors_to_query[0])->AnswerQuery(args);
+		return FindActor(actors_to_query[0])->AnswerQueryVirt(args);
 	}
 	unique_ptr<MultipleQueryResult> query_results = make_unique<MultipleQueryResult>();
 	for (const ActorId& query_id : ExpandTarget(target)) {
-		query_results->AddResult(query_id, move(FindActor(query_id)->AnswerQuery(args)));
+		query_results->AddResult(query_id, move(FindActor(query_id)->AnswerQueryVirt(args)));
 	}
 	return move(query_results);
 }
@@ -70,21 +70,22 @@ void Scene::FlushCommandQueue() {
 		Command active_command = commands_.PopActiveCommand();
 		for (const ActorId& actor_id : ExpandTarget(active_command.GetTarget())) {
 			PrefaceCommand();
-			FindActor(actor_id)->HandleCommand(active_command.GetArgs());
+			FindActor(actor_id)->HandleCommandVirt(active_command.GetArgs());
 		}
 	}
 	command_flush_arg_storage_.clear();
+	PrefaceCommand();
 }
 
 void Scene::ExecuteCommand(const Command& command) {
 	for (const ActorId& actor_id : ExpandTarget(command.GetTarget())) {
 		back_of_current_commands_ = FrontOfCommands();
-		FindActor(actor_id)->HandleCommand(command.GetArgs());
+		FindActor(actor_id)->HandleCommandVirt(command.GetArgs());
 	}
 	FlushCommandQueue();
 }
 
-Actor* Scene::FindActor(const ActorId& actor_id) {
+IActor* Scene::FindActor(const ActorId& actor_id) {
 	auto actor_iter = actor_lookup_.find(actor_id);
 	if (actor_iter == actor_lookup_.end()) {
 		return nullptr;
@@ -113,25 +114,25 @@ vector<ActorId> Scene::ExpandTarget(const Target& target) {
 	return actors_to_return;
 }
 
-ActorId Scene::AddActor(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(unique_ptr<IActor> new_actor, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(move(new_actor), move(args)));
 }
 
-ActorId Scene::AddActor(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(unique_ptr<IActor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(move(new_actor), initialize_after, move(args)));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<IActor> new_actor, unique_ptr<CommandArgs> args) {
 	return AddActorReturnInitialize(move(new_actor), BackOfNewCommands(), move(args));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<Actor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<IActor> new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	ActorId new_id = NextActorId();
 	new_actor->SetId(new_id);
 	new_actor->SetScene(this);
 	actor_lookup_.emplace(new_id, new_actor.get());
 	actor_lookup_unique_.emplace(new_id, move(new_actor));
-	actor_lookup_unique_[new_id]->AddedToScene();
+	actor_lookup_unique_[new_id]->AddedToSceneVirt();
 	if (args == nullptr) {
 		args = make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE);
 	}
@@ -140,25 +141,25 @@ tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(unique_ptr<
 }
 
 
-ActorId Scene::AddActor(Actor& new_actor, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(IActor& new_actor, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(new_actor, move(args)));
 }
 
-ActorId Scene::AddActor(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+ActorId Scene::AddActor(IActor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	return get<0>(AddActorReturnInitialize(new_actor, initialize_after, move(args)));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(IActor& new_actor, unique_ptr<CommandArgs> args) {
 	return AddActorReturnInitialize(new_actor, BackOfNewCommands(), move(args));
 }
 
-tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(Actor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
+tuple<ActorId, CommandQueueLocation> Scene::AddActorReturnInitialize(IActor& new_actor, CommandQueueLocation initialize_after, unique_ptr<CommandArgs> args) {
 	ActorId new_id = NextActorId();
 	new_actor.SetId(new_id);
 	new_actor.SetScene(this);
 	actor_lookup_.emplace(new_id, &new_actor);
 	actor_lookup_non_unique_.emplace(new_id, &new_actor);
-	new_actor.AddedToScene();
+	new_actor.AddedToSceneVirt();
 	if (args == nullptr) {
 		args = make_unique<CommandArgs>(CommandType::ADDED_TO_SCENE);
 	}

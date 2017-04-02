@@ -8,7 +8,7 @@
 namespace game_scene {
 namespace actors {
 
-void NewGraphicsObject::HandleCommand(const CommandArgs& args) {
+void NewGraphicsObjectImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 		break;
@@ -26,8 +26,8 @@ void NewGraphicsObject::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-void NewGraphicsObject::InitializeEntities(const commands::CreateNewGraphicsObject& args) {
-	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(scene_);
+void NewGraphicsObjectImpl::InitializeEntities(const commands::CreateNewGraphicsObject& args) {
+	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(&GetScene());
 	ResourcePool& resources = graphics_resources.resource_pool_;
 
 	// Build the component heirarchy, discarding the builder when unnecessary.
@@ -91,23 +91,23 @@ void NewGraphicsObject::InitializeEntities(const commands::CreateNewGraphicsObje
 	entities_ = EntityRange(entity_handler.AddEntities(entities, args.entity_group_name_), num_entities);
 }
 
-void NewGraphicsObject::PlaceComponent(const commands::PlaceNewComponent& args) {
+void NewGraphicsObjectImpl::PlaceComponent(const commands::PlaceNewComponent& args) {
 	Component* component = GetTransformByName(args.component_name_);
 	if (component) {
 		component->SetLocalTransformation(args.pose_.GetMatrix());
 	}
 }
 
-void NewGraphicsObject::SetShaderValues(const commands::SetEntityShaderValues& args) {
+void NewGraphicsObjectImpl::SetShaderValues(const commands::SetEntityShaderValues& args) {
 	EntityRange all_entities = GetEntitiesByName(args.entity_name_);
 	unsigned int shaded_entity = all_entities.GetMainEntity();
 
-	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(scene_);
+	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(&GetScene());
 	EntityHandler& entity_handler = graphics_resources.entity_handler_;
 	args.value_.SetIntoConstantBuffer(entity_handler.GetShaderSettings(shaded_entity));
 }
 
-Component* NewGraphicsObject::GetTransformByName(const string& transform_name) {
+Component* NewGraphicsObjectImpl::GetTransformByName(const string& transform_name) {
 	Component* component = nullptr;
 	auto transform_index = transform_lookup_.find(transform_name);
 	if (transform_index == transform_lookup_.end()) {
@@ -118,7 +118,7 @@ Component* NewGraphicsObject::GetTransformByName(const string& transform_name) {
 	return component;
 }
 
-NewGraphicsObject::EntityRange NewGraphicsObject::GetEntitiesByName(const string& entity_name) {
+NewGraphicsObjectImpl::EntityRange NewGraphicsObjectImpl::GetEntitiesByName(const string& entity_name) {
 	auto entity_range = entity_lookup_.find(entity_name);
 	if (entity_range == entity_lookup_.end()) {
 		std::cout << "FAILED TO FIND ENTITY BY NAME " << entity_name << std::endl;

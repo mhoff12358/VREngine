@@ -48,7 +48,7 @@ int ComponentHeirarchy::GetNumberOfComponents() const {
 	return 1 + number_of_subcomponents;
 }
 
-void GraphicsObject::HandleCommand(const CommandArgs& args) {
+void GraphicsObjectImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case GraphicsObjectCommand::CREATE_COMPONENTS:
 		RequestResourcesAndCreateComponents(
@@ -77,34 +77,34 @@ void GraphicsObject::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-void GraphicsObject::RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details) {
+void GraphicsObjectImpl::RequestResourcesAndCreateComponents(const GraphicsObjectDetails& details) {
 	// Create commands to load all the required resources.
-	CommandQueueLocation last_resource_load = scene_->FrontOfCommands();
+	CommandQueueLocation last_resource_load = GetScene().FrontOfCommands();
 	vector<ResourceIdent> required_resources;
 	details.heirarchy_.GetRequiredResources(&required_resources);
 	for (const ResourceIdent resource : required_resources) {
-		last_resource_load = scene_->MakeCommandAfter(
+		last_resource_load = GetScene().MakeCommandAfter(
 			last_resource_load,
 			Command(
-				Target(scene_->FindByName("GraphicsResources")),
+				Target(GetScene().FindByName("GraphicsResources")),
 				make_unique<WrappedCommandArgs<ResourceIdent>>(
 					GraphicsObjectCommand::REQUIRE_RESOURCE, resource)));
 	}
 	// Create a new commands for this actor doing the actual component creation
 	// which occurs after all the resources have been loaded.
-	scene_->MakeCommandAfter(
+	GetScene().MakeCommandAfter(
 		last_resource_load,
 		Command(
-			Target(id_),
+			Target(GetId()),
 			make_unique<WrappedCommandArgs<GraphicsObjectDetails>>(
 				GraphicsObjectCommand::CREATE_COMPONENTS_ASSUME_RESOURCES,
 				details)));
 }
 
-void GraphicsObject::CreateComponents(const GraphicsObjectDetails& details) {
+void GraphicsObjectImpl::CreateComponents(const GraphicsObjectDetails& details) {
 	components_.reserve(details.heirarchy_.GetNumberOfComponents());
 
-	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(scene_);
+	actors::GraphicsResources& graphics_resources = GraphicsResourcesImpl::GetGraphicsResources(&GetScene());
 
 	components_.emplace_back(
 		move(tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>(
@@ -114,7 +114,7 @@ void GraphicsObject::CreateComponents(const GraphicsObjectDetails& details) {
 	CreateIndividualComponent(graphics_resources, details.heirarchy_, 0);
 }
 
-void GraphicsObject::CreateSettingsEntity(
+void GraphicsObjectImpl::CreateSettingsEntity(
 	actors::GraphicsResources& graphics_resources,
 	const ComponentHeirarchy& heirarchy, unsigned int reserved_space) {
 	VertexShader vertex_shader;
@@ -171,7 +171,7 @@ void GraphicsObject::CreateSettingsEntity(
 	}
 }
 
-void GraphicsObject::CreateIndividualComponent(
+void GraphicsObjectImpl::CreateIndividualComponent(
 	actors::GraphicsResources& graphics_resources,
 	const ComponentHeirarchy& heirarchy, unsigned int reserved_space) {
 	if (!heirarchy.children_.empty()) {
@@ -206,7 +206,7 @@ void GraphicsObject::CreateIndividualComponent(
 }
 
 tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>&
-		GraphicsObject::LookupComponent(string component_name) {
+		GraphicsObjectImpl::LookupComponent(string component_name) {
 	auto component_iter = component_lookup_.find(component_name);
 	if (component_iter == component_lookup_.end()) {
 		std::cout << "Attempting to look up a nonexistent component" << std::endl;
@@ -214,18 +214,18 @@ tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>&
 	return components_[component_iter->second];
 }
 
-void GraphicsObject::PlaceComponent(const commands::ComponentPlacement& placement) {
+void GraphicsObjectImpl::PlaceComponent(const commands::ComponentPlacement& placement) {
 	get<0>(LookupComponent(placement.component_name_)).
 		SetLocalTransformation(placement.transformation_);
 }
 	
-void GraphicsObject::SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value) {
+void GraphicsObjectImpl::SetShaderSettingsValue(string component_name, const ShaderSettingsValue& value) {
 	value.SetIntoConstantBuffer(get<1>(LookupComponent(component_name)).get());
 }
 
-void GraphicsObject::SetComponentIsDrawn(const commands::ComponentDrawnState& component_drawn_state) {
+void GraphicsObjectImpl::SetComponentIsDrawn(const commands::ComponentDrawnState& component_drawn_state) {
 	const auto& component = LookupComponent(component_drawn_state.component_name_);
-	EntityHandler& entity_handler = GraphicsResources::GetGraphicsResources(scene_).entity_handler_;
+	EntityHandler& entity_handler = GraphicsResources::GetGraphicsResources(&GetScene()).entity_handler_;
 	for (unsigned int entity_offset = 0; entity_offset < get<0>(component).number_of_entities_; entity_offset++) {
 		if (component_drawn_state.is_drawn_) {
 			entity_handler.EnableEntity(get<0>(component).first_entity_ + entity_offset);

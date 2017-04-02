@@ -16,11 +16,11 @@ void InternalCollision::PassOn(Scene& scene, CommandQueueLocation location) {
 	}
 }
 
-CollisionCollection::CollisionCollection() {
+CollisionCollectionImpl::CollisionCollectionImpl() {
 
 }
 
-void CollisionCollection::HandleCommand(const CommandArgs& args) {
+void CollisionCollectionImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CollisionCollectionCommand::ADD_COLLIDEABLE_OBJECT:
 		HandleAddCollideableObject(dynamic_cast<const AddCollideableObject&>(args));
@@ -37,7 +37,7 @@ void CollisionCollection::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-void CollisionCollection::HandleAddCollideableObject(const AddCollideableObject& args) {
+void CollisionCollectionImpl::HandleAddCollideableObject(const AddCollideableObject& args) {
 	// If this actor already has a held location then remove it first.
 	if (collideable_actors_.find(args.grabbable_actor_) != collideable_actors_.end()) {
 		RemoveCollisionInformation(args.grabbable_actor_);
@@ -45,7 +45,7 @@ void CollisionCollection::HandleAddCollideableObject(const AddCollideableObject&
 	AddCollisionInformation(args.grabbable_actor_, args.grab_shapes_);
 }
 
-void CollisionCollection::HandleReposeCollideableObject(const ReposeCollideableObject& args) {
+void CollisionCollectionImpl::HandleReposeCollideableObject(const ReposeCollideableObject& args) {
 	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
 	if (args.shape_index_ == -1) {
 		for (CollisionShape& shape : collision_shapes) {
@@ -56,7 +56,7 @@ void CollisionCollection::HandleReposeCollideableObject(const ReposeCollideableO
 	}
 }
 
-void CollisionCollection::HandleEnDisableCollideableObject(const EnDisableCollideableObject& args) {
+void CollisionCollectionImpl::HandleEnDisableCollideableObject(const EnDisableCollideableObject& args) {
 	vector<CollisionShape>& collision_shapes = GetCollisionShapes(args.grabbable_actor_);
 	if (args.shape_index_ == -1) {
 		for (CollisionShape& shape : collision_shapes) {
@@ -67,16 +67,16 @@ void CollisionCollection::HandleEnDisableCollideableObject(const EnDisableCollid
 	}
 }
 
-void CollisionCollection::HandleRemoveCollideableObject(const RemoveCollideableObject& args) {
+void CollisionCollectionImpl::HandleRemoveCollideableObject(const RemoveCollideableObject& args) {
 	RemoveCollisionInformation(args.grabbable_actor_);
 }
 
-void CollisionCollection::AddCollisionInformation(ActorId actor_id, vector<CollisionShape> collision) {
+void CollisionCollectionImpl::AddCollisionInformation(ActorId actor_id, vector<CollisionShape> collision) {
 	actor_collisions_.emplace_back(make_pair(actor_id, std::move(collision)));
 	collideable_actors_.insert(actor_id);
 }
 
-void CollisionCollection::RemoveCollisionInformation(ActorId actor_id) {
+void CollisionCollectionImpl::RemoveCollisionInformation(ActorId actor_id) {
 	unsigned int remove_index = 0;
 	while (
 		(actor_id != actor_collisions_[remove_index].first) &&
@@ -94,7 +94,7 @@ void CollisionCollection::RemoveCollisionInformation(ActorId actor_id) {
 	collideable_actors_.erase(actor_id);
 }
 
-vector<CollisionShape>& CollisionCollection::GetCollisionShapes(ActorId actor_id) {
+vector<CollisionShape>& CollisionCollectionImpl::GetCollisionShapes(ActorId actor_id) {
 	size_t index = 0;
 	while (
 		(index != actor_collisions_.size()) &&
@@ -107,11 +107,7 @@ vector<CollisionShape>& CollisionCollection::GetCollisionShapes(ActorId actor_id
 	return actor_collisions_[index].second;
 }
 
-CollisionCollectionCheckInternalCollisions::CollisionCollectionCheckInternalCollisions() {
-
-}
-
-void CollisionCollectionCheckInternalCollisions::HandleCommand(const CommandArgs& args) {
+void CollisionCollectionCheckInternalCollisionsImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case CollisionCollectionCommand::ADD_COLLIDEABLE_OBJECT:
 		HandleAddCollideableObject(dynamic_cast<const AddCollideableObject&>(args));
@@ -120,27 +116,27 @@ void CollisionCollectionCheckInternalCollisions::HandleCommand(const CommandArgs
 		HandleReposeCollideableObject(dynamic_cast<const ReposeCollideableObject&>(args));
 		break;
 	default:
-		CollisionCollection::HandleCommand(args);
+		CollisionCollectionImpl::HandleCommand(args);
 	}
 }
 
-void CollisionCollectionCheckInternalCollisions::HandleAddCollideableObject(const AddCollideableObject& args) {
-	CollisionCollection::HandleAddCollideableObject(args);
+void CollisionCollectionCheckInternalCollisionsImpl::HandleAddCollideableObject(const AddCollideableObject& args) {
+	CollisionCollectionImpl::HandleAddCollideableObject(args);
 	set<ActorId> colliding_actors = FindCollidingActors(args.grab_shapes_, args.grabbable_actor_);
 	HandleInternalCollision(args.grabbable_actor_, colliding_actors);
 }
 
-void CollisionCollectionCheckInternalCollisions::HandleReposeCollideableObject(const ReposeCollideableObject& args) {
-	CollisionCollection::HandleReposeCollideableObject(args);
+void CollisionCollectionCheckInternalCollisionsImpl::HandleReposeCollideableObject(const ReposeCollideableObject& args) {
+	CollisionCollectionImpl::HandleReposeCollideableObject(args);
 	set<ActorId> colliding_actors = FindCollidingActors(GetCollisionShapes(args.grabbable_actor_), args.grabbable_actor_);
 	HandleInternalCollision(args.grabbable_actor_, colliding_actors);
 }
 
-void CollisionCollectionCheckInternalCollisions::HandleInternalCollision(ActorId instigating_actor, const set<ActorId>& collided_actors) {
+void CollisionCollectionCheckInternalCollisionsImpl::HandleInternalCollision(ActorId instigating_actor, const set<ActorId>& collided_actors) {
 	ActorId first_collided_actor = *collided_actors.cbegin();
 	set<ActorId> additional_collisions(collided_actors.cbegin()++, collided_actors.cend());
-	scene_->MakeCommandAfter(
-		scene_->BackOfNewCommands(),
+	GetScene().MakeCommandAfter(
+		GetScene().BackOfNewCommands(),
 		Command(
 			Target(first_collided_actor),
 			make_unique<InternalCollision>(instigating_actor, additional_collisions)));

@@ -10,7 +10,7 @@ REGISTER_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);
 
 namespace actors {
 
-void GraphicsResources::HandleCommand(const CommandArgs& args) {
+void GraphicsResourcesImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case GraphicsObjectCommand::REQUIRE_RESOURCE:
 		RequireResource(dynamic_cast<const WrappedCommandArgs<ResourceIdent>&>(args).data_);
@@ -21,20 +21,20 @@ void GraphicsResources::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-unique_ptr<QueryResult> GraphicsResources::AnswerQuery(const QueryArgs& args) {
+unique_ptr<QueryResult> GraphicsResourcesImpl::AnswerQuery(const QueryArgs& args) {
 	switch (args.Type()) {
 	case GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST:
-		return make_unique<QueryResultWrapped<actors::GraphicsResources&>>(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST, *this);
+		return make_unique<QueryResultWrapped<actors::GraphicsResources&>>(GraphicsResourceQuery::GRAPHICS_RESOURCE_REQUEST, dynamic_cast<actors::GraphicsResources&>(*this));
 	default:
 		return nullptr;
 	}
 }
 
-void GraphicsResources::RequireResource(ResourceIdent resource_ident) {
+void GraphicsResourcesImpl::RequireResource(ResourceIdent resource_ident) {
 	resource_pool_.PreloadResource(resource_ident);
 }
 
-GraphicsResources& GraphicsResources::GetGraphicsResources(Scene* scene) {
+GraphicsResources& GraphicsResourcesImpl::GetGraphicsResources(Scene* scene) {
 	Target graphics_resources_target = Target(scene->FindByName("GraphicsResources"));
 	unique_ptr<QueryResult> graphics_resources_result = scene->AskQuery(
 		graphics_resources_target,

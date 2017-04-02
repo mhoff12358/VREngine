@@ -10,7 +10,7 @@
 #include "PyCommandAndQuery.h"
 #include "HandleError.h"
 
-struct PyActor : public game_scene::Actor, public boost::python::wrapper<game_scene::Actor> {
+struct PyActorImpl : public game_scene::ActorImpl, public boost::python::wrapper<game_scene::ActorImpl> {
 public:
 	object self_;
 	// Wrap existing calls that work to be virtualizable through Python.
@@ -27,10 +27,10 @@ public:
 				HandleError();
 			}
 		}
-		Actor::HandleCommand(args);
+		game_scene::ActorImpl::HandleCommand(args);
 	}
 	void default_HandleCommand(const game_scene::CommandArgs& args) {
-		this->Actor::HandleCommand(args);
+		this->game_scene::ActorImpl::HandleCommand(args);
 	}
 
 	void AddedToScene() {
@@ -41,10 +41,10 @@ public:
 				HandleError();
 			}
 		}
-		Actor::AddedToScene();
+		game_scene::ActorImpl::AddedToScene();
 	}
 	void default_AddedToScene() {
-		this->Actor::AddedToScene();
+		this->game_scene::ActorImpl::AddedToScene();
 	}
 
 	// Creates a wrapper for the AnswerQuery call that passes around query results as auto_ptrs rather than unique_ptrs.
@@ -68,13 +68,15 @@ public:
 			return std::auto_ptr<game_scene::QueryResult>(make_unique<PyQueryResult>(raw_result).release());
 		}
 	}
-	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) override;
+	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args);
 
 	void EmbedSelf(object self) {
 		self_ = self;
 	}
 
+	/*
 	game_scene::ActorId GetId() {
 		return id_;
-	}
+	}*/
 };
+ADD_ACTOR_ADAPTER(PyActor);

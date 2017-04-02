@@ -10,12 +10,12 @@ class InputHandler;
 namespace game_scene {
 namespace actors {
 
-class IOInterface : public Actor {
+class IOInterfaceImpl : public ActorImpl {
 public:
-	IOInterface(InputHandler& input_handler);
+	IOInterfaceImpl(InputHandler& input_handler);
 
 	void HandleCommand(const CommandArgs& args);
-	void AddedToScene() override;
+	void AddedToScene();
 
 	enum class ListenerId : unsigned char {
 		MOUSE_MOTION = 0,
@@ -44,6 +44,7 @@ private:
 
 	InputHandler& input_handler_;
 };
+ADD_ACTOR_ADAPTER(IOInterface);
 
 }  // actors
 

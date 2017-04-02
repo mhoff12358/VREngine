@@ -36,35 +36,35 @@
 #include "CollisionShapeInterface.h"
 #include "LightInterface.h"
 
-BOOST_PTR_MAGIC_STRUCT(PyActor)
+BOOST_PTR_MAGIC(game_scene::ActorAdapter<PyActorImpl>)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
 BOOST_PTR_MAGIC_STRUCT(PyCommandArgs)
 BOOST_PTR_MAGIC_STRUCT(PyQueryArgs)
 BOOST_PTR_MAGIC_STRUCT(PyQueryResult)
-BOOST_PTR_MAGIC(game_scene::actors::GraphicsResources)
+BOOST_PTR_MAGIC(game_scene::ActorAdapter<game_scene::actors::GraphicsResourcesImpl>)
 BOOST_PTR_MAGIC(game_scene::commands::IOListenerRegistration)
 
-class Temp : public game_scene::QueryResult {
-public:
-	Temp(game_scene::IdType a) : game_scene::QueryResult(a) {}
-};
-
 object a(boost::python::tuple args, boost::python::dict kwargs) {
-	int b = boost::python::len(args);
+	auto b = boost::python::len(args);
 	return object();
+}
+
+void EmbedSelfHack(PyActor& actor, boost::python::object self) {
+	actor.EmbedSelf(self);
 }
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
-		.def("HandleCommand", &game_scene::Actor::HandleCommand, &PyActor::default_HandleCommand)
-		.def("AddedToScene", &game_scene::Actor::AddedToScene, &PyActor::default_AddedToScene)
+		.def("HandleCommand", &game_scene::ActorImpl::HandleCommandVirt, &PyActor::default_HandleCommand)
+		.def("AddedToScene", &game_scene::ActorImpl::AddedToSceneVirt, &PyActor::default_AddedToScene)
 		.def("AnswerQuery", &PyActor::PyAnswerQuery)
-		.def("EmbedSelf", &PyActor::EmbedSelf)
-		.def("GetScene", &game_scene::Actor::GetScene, return_value_policy<reference_existing_object>())
-		.add_property("id", &PyActor::GetId)
-		.def("SetScene", &game_scene::Actor::SetScene);
+		.def("EmbedSelf", &EmbedSelfHack)
+		//.def("EmbedSelf", &PyActor::EmbedSelf)
+		.def("GetScene", &game_scene::ActorImpl::GetScene, return_value_policy<reference_existing_object>())
+		.add_property("id", &game_scene::ActorImpl::GetId)
+		.def("SetScene", &game_scene::ActorImpl::SetScene);
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

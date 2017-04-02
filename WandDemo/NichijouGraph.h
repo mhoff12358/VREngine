@@ -42,10 +42,10 @@ public:
 
 namespace actors {
 
-class NichijouGraph : public Actor {
+class NichijouGraphImpl : public ActorImpl {
 public:
-	void HandleCommand(const CommandArgs& args) override;
-	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
+	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 
 private:
 	void CreateGraphicsResources();
@@ -65,12 +65,13 @@ private:
 	float timeline_position_ = 0.0f;
 	float timeline_max_position_ = 1.0f;
 };
+ADD_ACTOR_ADAPTER(NichijouGraph);
 
-class NichijouVertex : public Actor {
+class NichijouVertexImpl : public ActorImpl {
 public:
-	NichijouVertex(object configuration, object vertex, ActorId graph) : configuration_(configuration), vertex_(vertex), graph_(graph) {}
+	NichijouVertexImpl(object configuration, object vertex, ActorId graph) : configuration_(configuration), vertex_(vertex), graph_(graph) {}
 
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 
 private:
 	void UpdateAllEdgeLocations();
@@ -84,13 +85,14 @@ private:
 	Location location_;
 	bool visible_ = true;
 };
+ADD_ACTOR_ADAPTER(NichijouVertex);
 
-class NichijouEdge : public Actor {
+class NichijouEdgeImpl : public ActorImpl {
 public:
-	NichijouEdge(object configuration, object edge, ActorId graph, string model_name) :
+	NichijouEdgeImpl(object configuration, object edge, ActorId graph, string model_name) :
 		configuration_(configuration), edge_(edge), graph_(graph), model_name_(model_name) {}
 
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 
 private:
 	object configuration_;
@@ -104,6 +106,7 @@ private:
 	ActorId edge_graphics_;
 	bool visible_ = true;
 };
+ADD_ACTOR_ADAPTER(NichijouEdge);
 
 }  // actors
 }  // game_scene

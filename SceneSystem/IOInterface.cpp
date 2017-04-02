@@ -9,11 +9,11 @@
 namespace game_scene {
 namespace actors {
 
-void IOInterface::AddedToScene() {
-	mouse_motion_listener_group_ = scene_->AddActorGroup();
+void IOInterfaceImpl::AddedToScene() {
+	mouse_motion_listener_group_ = GetScene().AddActorGroup();
 }
 
-IOInterface::IOInterface(InputHandler& input_handler) : input_handler_(input_handler) {
+IOInterfaceImpl::IOInterfaceImpl(InputHandler& input_handler) : input_handler_(input_handler) {
 	// Set all the listener groups to the unset id.
 	mouse_motion_listener_group_ = ActorId::UnsetId;
 	for (ActorId& listener_group : key_press_listener_groups_) {
@@ -32,7 +32,7 @@ IOInterface::IOInterface(InputHandler& input_handler) : input_handler_(input_han
 	}
 }
 
-void IOInterface::HandleCommand(const CommandArgs& args) {
+void IOInterfaceImpl::HandleCommand(const CommandArgs& args) {
 	switch (args.Type()) {
 	case IOInterfaceCommand::REGISTER_LISTENER:
 	{
@@ -42,10 +42,10 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 		if (registration.listener_id_ == ListenerId::MOUSE_MOTION) {
 			listener_group_to_register = mouse_motion_listener_group_;
 			if (registration.register_not_unregister_) {
-				scene_->AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
+				GetScene().AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
 			}
 			else {
-				scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
+				GetScene().RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
 			}
 		} else {
 			// The registration is for a specific key's action.
@@ -57,15 +57,15 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 				ActorId& listener_group_ref = GetKeyActionListenerGroup(registration.listener_id_, key);
 				// If we are registering and the registration group doesn't exist then create it and watch the key.
 				if (registration.register_not_unregister_ && listener_group_ref == ActorId::UnsetId) {
-					listener_group_ref = scene_->AddActorGroup();
+					listener_group_ref = GetScene().AddActorGroup();
 					WatchKey(key);
 				}
 				listener_group_to_register = listener_group_ref;
 				if (registration.register_not_unregister_) {
-					scene_->AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
+					GetScene().AddActorToGroup(registration.actor_to_register_, listener_group_to_register);
 				}
 				else {
-					scene_->RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
+					GetScene().RemoveActorFromGroup(registration.actor_to_register_, listener_group_to_register);
 				}
 			}
 		}
@@ -75,7 +75,7 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 		// Updates the keyboard state since the last tick.
 		input_handler_.UpdateKeyboardState();
 		// Consumes any mouse motions since the last tick and passes them on to all listeners.
-		scene_->MakeCommandAfter(scene_->FrontOfCommands(),
+		GetScene().MakeCommandAfter(GetScene().FrontOfCommands(),
 			Command(
 				Target(mouse_motion_listener_group_),
 				make_unique<commands::MouseMotion>(input_handler_.ConsumeMouseMotion())));
@@ -85,18 +85,18 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 			bool pressed = input_handler_.GetKeyToggled(key);
 			bool released = input_handler_.GetKeyToggled(key, false);
 			if (pressed) {
-				scene_->MakeCommandAfter(scene_->FrontOfCommands(),
+				GetScene().MakeCommandAfter(GetScene().FrontOfCommands(),
 					Command(
 						Target(key_press_listener_groups_[key]),
 						make_unique<commands::KeyPress>(key)));
 			} else if (released) {
-				scene_->MakeCommandAfter(scene_->FrontOfCommands(),
+				GetScene().MakeCommandAfter(GetScene().FrontOfCommands(),
 					Command(
 						Target(key_release_listener_groups_[key]),
 						make_unique<commands::KeyRelease>(key)));
 			}
 			if (pressed || released) {
-				scene_->MakeCommandAfter(scene_->FrontOfCommands(),
+				GetScene().MakeCommandAfter(GetScene().FrontOfCommands(),
 					Command(
 						Target(key_toggle_listener_groups_[key]),
 						make_unique<commands::KeyToggle>(key, pressed)));
@@ -106,14 +106,14 @@ void IOInterface::HandleCommand(const CommandArgs& args) {
 	}
 }
 
-void IOInterface::WatchKey(unsigned char key_to_watch) {
+void IOInterfaceImpl::WatchKey(unsigned char key_to_watch) {
 	if (!is_key_watched_[key_to_watch]) {
 		is_key_watched_[key_to_watch] = true;
 		which_keys_to_watch_[num_keys_watched_++] = key_to_watch;
 	}
 }
 
-ActorId& IOInterface::GetKeyActionListenerGroup(ListenerId listener_type, unsigned char key) {
+ActorId& IOInterfaceImpl::GetKeyActionListenerGroup(ListenerId listener_type, unsigned char key) {
 	switch (listener_type) {
 	case ListenerId::KEY_PRESS:
 		return key_press_listener_groups_[key];

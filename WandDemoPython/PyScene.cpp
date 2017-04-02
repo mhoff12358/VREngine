@@ -4,12 +4,12 @@
 
 namespace PyScene {
 
-ActorCreationBundle<game_scene::Actor> AddAndConstructActorDum(game_scene::Scene& self) {
-	auto actor = make_unique<game_scene::Actor>();
+/*ActorCreationBundle<game_scene::IActor> AddAndConstructActorDum(game_scene::Scene& self) {
+	auto actor = make_unique<game_scene::IActor>();
 	auto* actor_pointer = actor.get();
 	auto result = self.AddActorReturnInitialize(std::move(actor));
-	return ActorCreationBundle<game_scene::Actor>(actor_pointer, get<0>(result), get<1>(result));
-}
+	return ActorCreationBundle<game_scene::IActor>(actor_pointer, get<0>(result), get<1>(result));
+}*/
 
 game_scene::ActorId AddActor(game_scene::Scene& self, PyActor* new_actor) {
 	return self.AddActor(*new_actor);

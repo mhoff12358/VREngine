@@ -6,56 +6,61 @@
 
 namespace game_scene {
 
-Actor::Actor() : id_(ActorId::UnsetId), scene_(nullptr)
-{
+IActor::IActor() : id_(ActorId::UnsetId), scene_(nullptr) {
+
 }
 
-Actor::~Actor() {
+IActor::~IActor() {
 }
 
-void Actor::HandleCommand(const CommandArgs& args) {
+ActorId IActor::GetId() {
+	return id_;
 }
 
-unique_ptr<QueryResult> Actor::AnswerQuery(const QueryArgs& args) {
-	return make_unique<QueryResult>(QueryType::EMPTY);
-}
-
-void Actor::AddedToScene() {
-}
-
-void Actor::PrepareToDie() {
-}
-
-void Actor::DependencyDying(const ActorId& dying_id) {
-}
-
-void Actor::RegisterDependency(const Target& target) {
-	scene_->RegisterDependency(Target(id_), target);
-}
-
-unique_ptr<QueryResult> Actor::AskQuery(const Target& target, const QueryArgs& args) {
-	return scene_->AskQuery(target, args);
-}
-
-void Actor::FailToHandleCommand(const CommandArgs& args) {
-	// The ADDED_TO_SCENE command is expected to be allowed to be unhandled.
-	if (args.Type() != CommandType::ADDED_TO_SCENE) {
-		std::cout <<
-			"ACTOR ID: " << id_.id_ <<
-			" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
-	}
-}
-
-void Actor::SetId(ActorId id) {
+void IActor::SetId(ActorId id) {
 	id_ = id;
 }
 
-void Actor::SetScene(Scene* scene) {
+void IActor::SetScene(Scene* scene) {
 	scene_ = scene;
 }
 
-Scene& Actor::GetScene() {
+Scene& IActor::GetScene() {
 	return *scene_;
+}
+
+void ActorImpl::HandleCommand(const CommandArgs& args) {
+	FailToHandleCommand(args);
+}
+
+unique_ptr<QueryResult> ActorImpl::AnswerQuery(const QueryArgs& args) {
+	return make_unique<QueryResult>(QueryType::EMPTY);
+}
+
+void ActorImpl::AddedToScene() {
+}
+
+void ActorImpl::PrepareToDie() {
+}
+
+void ActorImpl::DependencyDying(const ActorId& dying_id) {
+}
+
+void ActorImpl::RegisterDependency(const Target& target) {
+	GetScene().RegisterDependency(Target(GetId()), target);
+}
+
+unique_ptr<QueryResult> ActorImpl::AskQuery(const Target& target, const QueryArgs& args) {
+	return GetScene().AskQuery(target, args);
+}
+
+void ActorImpl::FailToHandleCommand(const CommandArgs& args) {
+	// The ADDED_TO_SCENE command is expected to be allowed to be unhandled.
+	if (args.Type() != CommandType::ADDED_TO_SCENE) {
+		std::cout <<
+			"ACTOR ID: " << GetId().id_ <<
+			" HAS FAILED TO HANDLE COMMAND: " << args.Type() << std::endl;
+	}
 }
 
 }  // game_scene

@@ -129,11 +129,12 @@ UpdateLoopResult UpdateLoop() {
 	game_scene::Scene scene;
 	game_scene::ActorId controls_registry = scene.RegisterByName("ControlsRegistry", scene.AddActorGroup());
 	game_scene::ActorId tick_registry = scene.RegisterByName("TickRegistry", scene.AddActorGroup());;
-	unique_ptr<game_scene::Actor> new_actor = 
-			make_unique<game_scene::actors::GraphicsResources>(
+	unique_ptr<game_scene::IActor> new_actor = 
+		make_unique<game_scene::actors::GraphicsResources>(
+			game_scene::actors::GraphicsResourcesImpl(
 				*graphics_objects.resource_pool,
 				*graphics_objects.entity_handler,
-				graphics_objects.view_state->device_interface);
+				graphics_objects.view_state->device_interface));
 	game_scene::ActorId graphics_resources = scene.RegisterByName(
 		"GraphicsResources",
 		scene.AddActor(move(new_actor)));
@@ -311,9 +312,9 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	auto bloom_horiz_kernel = FillHLSLKernel<51>(Generate1DGausianWithPeak<51>(1, 0, 12));
-	bloom_horiz_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[0];
+	bloom_horiz_kernel[0] = static_cast<float>(graphics_objects.render_pipeline->GetStageBufferSize()[0]);
 	auto bloom_vert_kernel = FillHLSLKernel<51>(Generate1DGausianWithPeak<51>(1, 0, 12));
-	bloom_vert_kernel[0] = graphics_objects.render_pipeline->GetStageBufferSize()[1];
+	bloom_vert_kernel[0] = static_cast<float>(graphics_objects.render_pipeline->GetStageBufferSize()[1]);
 
 	array<float, 4> clear_black = { 0, 0, 0, 0 };
 

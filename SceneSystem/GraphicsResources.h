@@ -25,16 +25,18 @@ enum class GraphicsResourceId {
 	DEVICE_INTERFACE,
 };
 
-class GraphicsResources : public Actor {
+class GraphicsResourcesImpl;
+typedef ActorAdapter<GraphicsResourcesImpl> GraphicsResources;
+class GraphicsResourcesImpl : public ActorImpl {
 public:
-	GraphicsResources(
+	GraphicsResourcesImpl(
 		ResourcePool& resource_pool, EntityHandler& entity_handler, ID3D11Device* device_interface)
 		: resource_pool_(resource_pool),
 		  entity_handler_(entity_handler),
 		  device_interface_(device_interface) {}
 
-	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) override;
-	void HandleCommand(const CommandArgs& args) override;
+	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
+	void HandleCommand(const CommandArgs& args);
 
 	void RequireResource(ResourceIdent resource_ident);
 	static GraphicsResources& GetGraphicsResources(Scene* scene);
@@ -48,6 +50,7 @@ public:
 	EntityHandler& entity_handler_;
 	ID3D11Device* device_interface_;
 };
+ADD_ACTOR_ADAPTER(GraphicsResources);
 
 }  // actors
 }  // game_scene

@@ -16,16 +16,16 @@ namespace HeadsetHelpers {
 bool IsTriggerPulled(const vr::VRControllerState_t& state);
 }  // HeadsetHelpers
 
-class HeadsetInterface : public Actor {
+class HeadsetInterfaceImpl : public ActorImpl {
 public:
-	HeadsetInterface(Headset& headset) :
+	HeadsetInterfaceImpl(Headset& headset) :
 		headset_(headset),
 		controller_connectedness_({false, false}),
 		controller_graphics_({ActorId::UnsetId, ActorId::UnsetId})
 	{}
 
 	void HandleCommand(const CommandArgs& args);
-	void AddedToScene() override;
+	void AddedToScene();
 
 	ActorId CreateControllerActor();
 
@@ -50,6 +50,7 @@ private:
 
 	Headset& headset_;
 };
+ADD_ACTOR_ADAPTER(HeadsetInterface);
 
 }  // actors
 

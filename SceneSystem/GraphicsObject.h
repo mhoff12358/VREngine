@@ -107,13 +107,11 @@ public:
 	ComponentHeirarchy heirarchy_;
 };
 
-class GraphicsObject : public Actor {
+class GraphicsObjectImpl : public ActorImpl {
 public:
-	GraphicsObject() {}
-	GraphicsObject(const GraphicsObject&) = delete;
-	GraphicsObject operator=(const GraphicsObject&) = delete;
+	GraphicsObjectImpl() {}
 
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 
 protected:
 	// Creation methods.
@@ -139,6 +137,7 @@ protected:
 	tuple<Component, unique_ptr<ConstantBuffer>, vector<unsigned int>>&
 		LookupComponent(string component_name);
 };
+ADD_ACTOR_ADAPTER(GraphicsObject);
 
 }  // actors
 }  // game_scene

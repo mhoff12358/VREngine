@@ -70,11 +70,11 @@ public:
 	set<ActorId> additional_collisions_;
 };
 
-class CollisionCollection : public Actor {
+class CollisionCollectionImpl : public ActorImpl {
 public:
-	CollisionCollection();
+	CollisionCollectionImpl();
 
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 	void HandleAddCollideableObject(const AddCollideableObject& args);
 	void HandleReposeCollideableObject(const ReposeCollideableObject& args);
 	void HandleEnDisableCollideableObject(const EnDisableCollideableObject& args);
@@ -94,6 +94,7 @@ private:
 	vector<pair<ActorId, vector<CollisionShape>>> actor_collisions_;
 	set<ActorId> collideable_actors_;
 };
+ADD_ACTOR_ADAPTER(CollisionCollection);
 
 template <typename CollisionTest>
 ActorId CollisionCollection::FindCollidingActor(const CollisionTest& test_shape, ActorId ignored_actor) {
@@ -124,14 +125,13 @@ set<ActorId> CollisionCollection::FindCollidingActors(const CollisionTest& test_
 	return collided_actors;
 }
 
-class CollisionCollectionCheckInternalCollisions : public CollisionCollection {
+class CollisionCollectionCheckInternalCollisionsImpl : public CollisionCollection {
 public:
-	CollisionCollectionCheckInternalCollisions();
-
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 	void HandleAddCollideableObject(const AddCollideableObject& args);
 	void HandleReposeCollideableObject(const ReposeCollideableObject& args);
 
 	void HandleInternalCollision(ActorId instigating_actor, const set<ActorId>& collided_actors);
 };
+ADD_ACTOR_ADAPTER(CollisionCollectionCheckInternalCollisions);
 }

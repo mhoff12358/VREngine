@@ -50,3 +50,9 @@ using std::get;
 #include "boost/optional.hpp"
 
 using boost::optional;
+
+class NotImplementedException : public std::logic_error
+{
+public:
+    virtual char const * what() const { return "Function not yet implemented."; }
+};

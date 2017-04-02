@@ -41,7 +41,7 @@ namespace actors {
 
 class Sprite : public GraphicsObject {
 public:
-	void HandleCommand(const CommandArgs& args) override;
+	void HandleCommand(const CommandArgs& args);
 
 	static void Init();
 

@@ -18,7 +18,7 @@ public:
 	game_scene::CommandQueueLocation initialized_at_;
 };
 
-ActorCreationBundle<game_scene::Actor> AddAndConstructActorDum(game_scene::Scene& self);
+//ActorCreationBundle<game_scene::Actor> AddAndConstructActorDum(game_scene::Scene& self);
 
 template <typename ActorSubclass>
 ActorCreationBundle<ActorSubclass> AddAndConstructActor(game_scene::Scene& self) {
