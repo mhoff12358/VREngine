@@ -5,6 +5,7 @@
 #include "EntitySpecification.h"
 #include "Actor.h"
 #include "Component.h"
+#include "GraphicsResources.h"
 
 namespace game_scene {
 
@@ -58,15 +59,13 @@ public:
 
 namespace actors {
 
-class NewGraphicsObjectImpl : public ActorImpl {
+class NewGraphicsObjectImpl {
 public:
 	NewGraphicsObjectImpl() : entities_(0, 0) {}
 
-	void HandleCommand(const CommandArgs& args);
-
-	string GetName() const {
-		return "NewGraphicsObjectImpl-" + ActorImpl::GetName();
-	}
+	void InitializeEntities(const commands::CreateNewGraphicsObject& args, actors::GraphicsResources& graphics_resources);
+	void PlaceComponent(const commands::PlaceNewComponent& args);
+	void SetShaderValues(const commands::SetEntityShaderValues& args, actors::GraphicsResources& graphics_resources);
 
 private:
 	struct EntityRange {
@@ -94,10 +93,6 @@ private:
 		}
 	};
 
-	void InitializeEntities(const commands::CreateNewGraphicsObject& args);
-	void PlaceComponent(const commands::PlaceNewComponent& args);
-	void SetShaderValues(const commands::SetEntityShaderValues& args);
-
 	Component* GetTransformByName(const string& transform_name);
 	EntityRange GetEntitiesByName(const string& entity_name);
 
@@ -108,7 +103,38 @@ private:
 	vector<Component> transforms_;
 	map<string, size_t> transform_lookup_;
 };
-ADD_ACTOR_ADAPTER(NewGraphicsObject);
+
+template<typename ActorBase>
+class NewGraphicsObjectTemp : public ActorBase {
+public:
+	void HandleCommand(const CommandArgs& args) {
+		switch (args.Type()) {
+		case CommandType::ADDED_TO_SCENE:
+			break;
+		case NewGraphicsObjectCommand::CREATE:
+			impl_.InitializeEntities(dynamic_cast<const commands::CreateNewGraphicsObject&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
+			return;
+		case NewGraphicsObjectCommand::PLACE_COMPONENT:
+			impl_.PlaceComponent(dynamic_cast<const commands::PlaceNewComponent&>(args));
+			return;
+		case NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES:
+			impl_.SetShaderValues(dynamic_cast<const commands::SetEntityShaderValues&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
+			return;
+		default:
+			break;
+		}
+		ActorBase::HandleCommand(args);
+	}
+
+	string GetName() const {
+		return "NewGraphicsObject-" + ActorBase::GetName();
+	}
+
+private:
+	NewGraphicsObjectImpl impl_;
+};
+
+typedef ActorAdapter<NewGraphicsObjectTemp<ActorImpl>> NewGraphicsObject;
 
 }  // actors
 }  // game_scene

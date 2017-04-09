@@ -99,6 +99,9 @@
     <ClInclude Include="CollisionCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="BulletDemo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ActorGroups.cpp">
@@ -180,6 +183,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CollisionCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="BulletDemo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

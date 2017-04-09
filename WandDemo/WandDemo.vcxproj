@@ -72,8 +72,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;C:\Program Files\Python35\include;$(SolutionDir);F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64;C:\Program Files\Python35\libs;F:\PR\Boost\lib\x64;$(SolutionDir)$(Platform)\$(Configuration)\;F:\PR\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>F:\PR\bullet3\src;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;C:\Program Files\Python35\include;$(SolutionDir);F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>F:\PR\bullet3\bin;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64;C:\Program Files\Python35\libs;F:\PR\Boost\lib\x64;$(SolutionDir)$(Platform)\$(Configuration)\;F:\PR\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>

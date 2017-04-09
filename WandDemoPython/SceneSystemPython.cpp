@@ -37,6 +37,7 @@
 #include "LightInterface.h"
 
 BOOST_PTR_MAGIC(game_scene::ActorAdapter<PyActorImpl>)
+BOOST_PTR_MAGIC(game_scene::ActorImpl)
 BOOST_PTR_MAGIC(game_scene::CommandArgs)
 BOOST_PTR_MAGIC(game_scene::QueryArgs)
 BOOST_PTR_MAGIC(game_scene::QueryResult)
@@ -57,13 +58,16 @@ void EmbedSelfHack(PyActor& actor, object self) {
 
 BOOST_PYTHON_MODULE(scene_system_) {
 	class_<PyActor, boost::noncopyable>("RawActor")
-		.def("HandleCommand", &game_scene::ActorImpl::HandleCommandVirt, &PyActor::default_HandleCommand)
-		.def("AddedToScene", &game_scene::ActorImpl::AddedToSceneVirt, &PyActor::default_AddedToScene)
-		.def("AnswerQuery", &PyActor::PyAnswerQuery)
+		.def("HandleCommand", &game_scene::ActorImpl::HandleCommandVirt)
+		.def("AddedToScene", &game_scene::ActorImpl::AddedToSceneVirt)
+		.def("AnswerQuery", &PyActorImpl::PyAnswerQuery)
 		.def("EmbedSelf", &EmbedSelfHack)
 		.def("GetScene", &game_scene::ActorImpl::GetScene, return_value_policy<reference_existing_object>())
 		.add_property("id", &game_scene::ActorImpl::GetId)
 		.def("SetScene", &game_scene::ActorImpl::SetScene);
+
+	//class_<PyActor, bases<PyActorImpl>, boost::noncopyable>("RawActor")
+	//	.def("EmbedSef", &EmbedSelfHack);
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

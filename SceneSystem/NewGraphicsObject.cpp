@@ -8,26 +8,7 @@
 namespace game_scene {
 namespace actors {
 
-void NewGraphicsObjectImpl::HandleCommand(const CommandArgs& args) {
-	switch (args.Type()) {
-	case CommandType::ADDED_TO_SCENE:
-		break;
-	case NewGraphicsObjectCommand::CREATE:
-		InitializeEntities(dynamic_cast<const commands::CreateNewGraphicsObject&>(args));
-		break;
-	case NewGraphicsObjectCommand::PLACE_COMPONENT:
-		PlaceComponent(dynamic_cast<const commands::PlaceNewComponent&>(args));
-		break;
-	case NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES:
-		SetShaderValues(dynamic_cast<const commands::SetEntityShaderValues&>(args));
-		break;
-	default:
-		FailToHandleCommand(args);
-	}
-}
-
-void NewGraphicsObjectImpl::InitializeEntities(const commands::CreateNewGraphicsObject& args) {
-	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(&GetScene());
+void NewGraphicsObjectImpl::InitializeEntities(const commands::CreateNewGraphicsObject& args, actors::GraphicsResources& graphics_resources) {
 	ResourcePool& resources = graphics_resources.resource_pool_;
 
 	// Build the component heirarchy, discarding the builder when unnecessary.
@@ -98,11 +79,10 @@ void NewGraphicsObjectImpl::PlaceComponent(const commands::PlaceNewComponent& ar
 	}
 }
 
-void NewGraphicsObjectImpl::SetShaderValues(const commands::SetEntityShaderValues& args) {
+void NewGraphicsObjectImpl::SetShaderValues(const commands::SetEntityShaderValues& args, actors::GraphicsResources& graphics_resources) {
 	EntityRange all_entities = GetEntitiesByName(args.entity_name_);
 	unsigned int shaded_entity = all_entities.GetMainEntity();
 
-	actors::GraphicsResources& graphics_resources = GraphicsResources::GetGraphicsResources(&GetScene());
 	EntityHandler& entity_handler = graphics_resources.entity_handler_;
 	args.value_.SetIntoConstantBuffer(entity_handler.GetShaderSettings(shaded_entity));
 }

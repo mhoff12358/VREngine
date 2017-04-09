@@ -30,7 +30,6 @@ Scene& IActor::GetScene() {
 }
 
 void ActorImpl::HandleCommand(const CommandArgs& args) {
-	FailToHandleCommand(args);
 }
 
 unique_ptr<QueryResult> ActorImpl::AnswerQuery(const QueryArgs& args) {
