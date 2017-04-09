@@ -47,13 +47,13 @@ void AddActorSubclassCreation(class_<game_scene::Scene, boost::noncopyable>& sce
 		.def(("AddAndConstruct" + subclass_name + "After").c_str(), &AddAndConstructActorAfter<ActorSubclass>);
 }
 
-game_scene::ActorId AddActor(game_scene::Scene& self, object new_actor);
+game_scene::ActorId AddActor(game_scene::Scene& self, game_scene::IActor* new_actor);
 
-game_scene::ActorId AddActorAfter(game_scene::Scene& self, object new_actor, game_scene::CommandQueueLocation initialize_after);
+game_scene::ActorId AddActorAfter(game_scene::Scene& self, game_scene::IActor* new_actor, game_scene::CommandQueueLocation initialize_after);
 
-boost::python::tuple AddActorReturnInitialize(game_scene::Scene& self, object new_actor);
+boost::python::tuple AddActorReturnInitialize(game_scene::Scene& self, game_scene::IActor* new_actor);
 
-boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, object new_actor, game_scene::CommandQueueLocation initialize_after);
+boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, game_scene::IActor* new_actor, game_scene::CommandQueueLocation initialize_after);
 
 
 template <typename T>

@@ -11,7 +11,7 @@
 #include "HandleError.h"
 
 template<typename ActorBase>
-struct PyActorImpl : public ActorBase, public boost::python::wrapper<ActorBase> {
+struct PyActorImpl : public ActorBase, public boost::python::wrapper<game_scene::IActor> {
 public:
 	object self_;
 	// Wrap existing calls that work to be virtualizable through Python.
@@ -69,7 +69,9 @@ public:
 			return std::auto_ptr<game_scene::QueryResult>(make_unique<PyQueryResult>(raw_result).release());
 		}
 	}
-	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args);
+	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) {
+		return unique_ptr<game_scene::QueryResult>(PyAnswerQuery(args).release());
+	}
 
 	void EmbedSelf(object self) {
 		self_ = self;
@@ -79,4 +81,4 @@ public:
 		return "PyActor-" + game_scene::ActorImpl::GetName();
 	}
 };
-typedef PyActorImpl<game_scene::ActorImpl> PyActor;
+typedef game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>> PyActor;
