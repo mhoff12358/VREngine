@@ -3,31 +3,24 @@
 #include "PyCommandAndQuery.h"
 
 namespace PyScene {
-
-/*ActorCreationBundle<game_scene::IActor> AddAndConstructActorDum(game_scene::Scene& self) {
-	auto actor = make_unique<game_scene::IActor>();
-	auto* actor_pointer = actor.get();
-	auto result = self.AddActorReturnInitialize(std::move(actor));
-	return ActorCreationBundle<game_scene::IActor>(actor_pointer, get<0>(result), get<1>(result));
-}*/
-
-game_scene::ActorId AddActor(game_scene::Scene& self, PyActor* new_actor) {
-	return self.AddActor(*new_actor);
+game_scene::ActorId AddActor(game_scene::Scene& self, object new_actor) {
+	return self.AddActor(extract<game_scene::ActorImpl&>(new_actor));
 }
 
-game_scene::ActorId AddActorAfter(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	return self.AddActor(*new_actor, initialize_after);
+game_scene::ActorId AddActorAfter(game_scene::Scene& self, object new_actor, game_scene::CommandQueueLocation initialize_after) {
+	return self.AddActor(extract<game_scene::ActorImpl&>(new_actor), initialize_after);
 }
 
-boost::python::tuple AddActorReturnInitialize(game_scene::Scene& self, PyActor* new_actor) {
-	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(*new_actor);
+boost::python::tuple AddActorReturnInitialize(game_scene::Scene& self, object new_actor) {
+	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(extract<game_scene::ActorImpl&>(new_actor));
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
 
-boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, PyActor* new_actor, game_scene::CommandQueueLocation initialize_after) {
-	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(*new_actor, initialize_after);
+boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, object new_actor, game_scene::CommandQueueLocation initialize_after) {
+	tuple<game_scene::ActorId, game_scene::CommandQueueLocation> result = self.AddActorReturnInitialize(extract<game_scene::ActorImpl&>(new_actor), initialize_after);
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
+
 
 object PythonObjectifyQueryResult(unique_ptr<game_scene::QueryResult> raw_result) {
 	PyQueryResult* cast_result = dynamic_cast<PyQueryResult*>(raw_result.get());
