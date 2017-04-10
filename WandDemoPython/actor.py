@@ -1,16 +1,23 @@
 from scene_system_ import *
 
-key = ""
-v = ""
-for key, v in globals().items():
-    if key.startswith("PyActor-"):
-        class Actor(v):
-            def __init__(self):
-                super().__init__()
-                self.EmbedSelf(self)
-        v = Actor
+pyactor_identifier = "PyActor_"
+key = None
+keys_to_mutate = []
+for key in globals():
+    if key.startswith(pyactor_identifier):
+        keys_to_mutate.append(key)
+
+for key in keys_to_mutate:
+    subclass = globals().pop(key)
+    key = key[len(pyactor_identifier):]
+    class Actor(subclass):
+        def __init__(self):
+            super().__init__()
+            self.EmbedSelf(self)
+    globals()[key] = Actor
 
 globals().pop("key")
-globals().pop("v")
+globals().pop("keys_to_mutate")
+globals().pop("pyactor_identifier")
 
-Actor = PyActor_ActorImpl
+Actor = ActorImpl

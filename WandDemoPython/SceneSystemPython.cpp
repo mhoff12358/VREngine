@@ -53,10 +53,6 @@ object a(boost::python::tuple args, boost::python::dict kwargs) {
 	return object();
 }
 
-void EmbedSelfHack(PyActor& actor, object self) {
-	actor.EmbedSelf(self);
-}
-
 template<typename c>
 class Fn {
 public:
@@ -91,7 +87,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	Fn4<Fn, JIFOE>();
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
-	CreatePyActor<game_scene::ActorImpl>::Create();
+	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObjectTemp>();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

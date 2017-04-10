@@ -79,42 +79,72 @@ public:
 	}
 
 	static string GetName() {
-		return "PyActor-" + game_scene::ActorImpl::GetName();
+		return "PyActor-" + ActorBase::GetName();
 	}
+
+	void HandleCommandVirt(const game_scene::CommandArgs& args) override {
+		HandleCommand(args);
+    }
+	unique_ptr<game_scene::QueryResult> AnswerQueryVirt(const game_scene::QueryArgs& args) override {
+		return AnswerQuery(args);
+    }
+	void AddedToSceneVirt() override {
+		AddedToScene();
+    }
+	void PrepareToDieVirt() override {
+		PrepareToDie();
+    }
+	void DependencyDyingVirt(const game_scene::ActorId& dying_id) override {
+		DependencyDying(dying_id);
+    }
+	string GetNameVirt() const override {
+		return GetName();
+    }
 };
 typedef game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>> PyActor;
 
 
+template<typename ActorBase>
+void EmbedSelfHack(ActorBase& actor, object self) {
+	actor.EmbedSelf(self);
+}
 
 template<typename ActorBase>
 struct CreatePyActor {
 	static void Create() {
-		typedef game_scene::ActorAdapter<PyActorImpl<ActorBase>> ActorSpecial;
+		typedef PyActorImpl<ActorBase> ActorSpecial;
 		string class_name = ActorSpecial::GetName();
 		for (int i = 0; i < class_name.length(); i++) {
 			if (class_name[i] == '-') {
 				class_name[i] = '_';
 			}
 		}
+		std::cout << "Creating: " << class_name << std::endl;
 		class_<ActorSpecial, bases<game_scene::ActorImpl>, boost::noncopyable>(class_name.c_str(), init<>())
-			.def("HandleCommand", &PyActor::HandleCommandVirt)
-			.def("AddedToScene", &PyActor::AddedToSceneVirt)
-			.def("AnswerQuery", &PyActor::PyAnswerQuery)
-			.def("EmbedSelf", &EmbedSelfHack)
-			.def("GetScene", &PyActor::GetScene, return_value_policy<reference_existing_object>())
-			.add_property("id", &PyActor::GetId)
-			.def("SetScene", &PyActor::SetScene);
+			.def("HandleCommand", &ActorBase::HandleCommand)
+			.def("AddedToScene", &ActorBase::AddedToScene)
+			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery)
+			.def("EmbedSelf", &EmbedSelfHack<ActorSpecial>)
+			.def("GetScene", &ActorBase::GetScene, return_value_policy<reference_existing_object>())
+			.add_property("id", &ActorBase::GetId)
+			.def("SetScene", &ActorBase::SetScene);
 	}
 };
 
 #define PYACT_FN_ARG template<typename> typename CreateFn, typename Preface
 template<PYACT_FN_ARG>
 void CreatePyActors() {
-	CreatePyActor<Preface>::Create();
+	CreateFn<Preface>::Create();
 }
 
-template<PYACT_FN_ARG, typename ActorBase, typename... FurtherBases>
+/*template<PYACT_FN_ARG, typename ActorBase>
 void CreatePyActors() {
-	CreatePyActors<CreateFn, Preface, FurtherBases>();
-	CreatePyActors<CreateFn, ActorBase<Preface>, FurtherBases>();
+	CreatePyActors<CreateFn, Preface>();
+	CreatePyActors<CreateFn, ActorBase<Preface>>();
+}*/
+
+template<PYACT_FN_ARG, template<typename> typename ActorBase, template<typename> typename... FurtherBases>
+void CreatePyActors() {
+	CreatePyActors<CreateFn, Preface, FurtherBases...>();
+	CreatePyActors<CreateFn, ActorBase<Preface>, FurtherBases...>();
 }

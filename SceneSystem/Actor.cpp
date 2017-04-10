@@ -7,7 +7,7 @@
 namespace game_scene {
 
 IActor::IActor() : id_(ActorId::UnsetId), scene_(nullptr) {
-
+	std::cout << "Creating IACTOR" << std::endl;
 }
 
 IActor::~IActor() {
