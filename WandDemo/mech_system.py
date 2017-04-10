@@ -2,8 +2,8 @@ import scene_system as sc
 import shell, cannon, wheel, lighter, panels
 import math, functools
 
-class MechSystem(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class MechSystem(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     default_cannon_details = {
         "starting_pose": sc.Pose(),

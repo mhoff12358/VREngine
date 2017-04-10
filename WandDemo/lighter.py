@@ -2,8 +2,8 @@ import scene_system as sc
 import draggable_object, draggable_graphics, shader_helper, light
 import math, functools, copy
 
-class Lighter(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class Lighter(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     shaft_color = (0.388, 0.149, 0)
     tip_color = sc.Color(1, 0.5, 0, 3)

@@ -137,12 +137,6 @@ void CreatePyActors() {
 	CreateFn<Preface>::Create();
 }
 
-/*template<PYACT_FN_ARG, typename ActorBase>
-void CreatePyActors() {
-	CreatePyActors<CreateFn, Preface>();
-	CreatePyActors<CreateFn, ActorBase<Preface>>();
-}*/
-
 template<PYACT_FN_ARG, template<typename> typename ActorBase, template<typename> typename... FurtherBases>
 void CreatePyActors() {
 	CreatePyActors<CreateFn, Preface, FurtherBases...>();

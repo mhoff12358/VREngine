@@ -1,8 +1,8 @@
 import scene_system as sc
 import shader_helper, light
 
-class LightBulb(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class LightBulb(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     num_motion_modifiers = {
         ord('1'): (2, -1),
@@ -14,7 +14,7 @@ class LightBulb(sc.DelegatingActor):
     }
 
     def __init__(self, light_system_name = "", light_number = 0, color = sc.Color(1, 1, 1, 1)):
-        super(sc.DelegatingActor, self).__init__()
+        super().__init__()
         self.EmbedSelf(self)
         self.location = sc.Location(1, 0, 1)
         self.motion = sc.Location(0, 0, 0)

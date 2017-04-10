@@ -2,8 +2,8 @@ import scene_system as sc
 import draggable_graphics, path_draggable_object, path, shader_helper
 import copy, functools
 
-class Wheel(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class Wheel(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     def __init__(self, pose: sc.Pose, spun_callback = None, spun_callbacks = (), crank_height = 1, color = (0.5, 0, 0)):
         super().__init__()

@@ -1,8 +1,8 @@
 import scene_system as sc
 import collections, copy, typing
 
-class DraggableObject(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class DraggableObject(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     def __init__(
         self,

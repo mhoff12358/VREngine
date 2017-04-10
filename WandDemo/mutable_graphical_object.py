@@ -1,11 +1,11 @@
 import scene_system as sc
 
 
-class MutableGraphicalObject(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class MutableGraphicalObject(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     def __init__(self):
-        super(sc.DelegatingActor, self).__init__()
+        super().__init__()
         self.EmbedSelf(self)
 
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)

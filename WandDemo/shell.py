@@ -39,8 +39,8 @@ class FireShell(sc.CommandArgs):
     def __init__(self):
         super().__init__(ShellCommands.FIRE)
 
-class Shell(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class Shell(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     spent_color = (0.1, 0.1, 0.1)
 

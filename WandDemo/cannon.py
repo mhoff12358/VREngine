@@ -7,8 +7,8 @@ class CoverStatus(enum.Enum):
     MIXED = 1
     CLOSED = 2
 
-class Cannon(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class Cannon(sc.DelegatingActor[sc.NewGraphicsObject_ActorImpl]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_ActorImpl])
 
     def __init__(self, starting_pose: sc.Pose, size: float):
         super().__init__()
@@ -22,7 +22,6 @@ class Cannon(sc.DelegatingActor):
         self.cover_drag = None # type: path_draggable_object.PathDraggableObject
         self.draggable_cover = None # type: draggable_graphics.DraggableGraphics
         self.cannon_rotate = None # type: draggable_object.DraggableObject
-        self.cannon_id = None # type: sc.ActorId
         self.cover_status = CoverStatus.CLOSED
         self.loading_collision_center = sc.Pose(sc.Location(-0.187, 0.71171, 0))
         self.loading_collision = sc.CollisionShape(self.loading_collision_center, 0)
@@ -117,7 +116,7 @@ class Cannon(sc.DelegatingActor):
         latest_command = self.scene.FrontOfCommands()
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
-            sc.Target(self.cannon_id),
+            sc.Target(self.id),
             sc.PlaceComponent("Whole", self.cannon_pose))
         self.cover_drag.SetOffsetPose(self.cannon_pose)
         self.loading_collision.SetPose(self.GetLoadingPose())
@@ -154,18 +153,17 @@ class Cannon(sc.DelegatingActor):
         self.draggable_cover = draggable_graphics.DraggableGraphics(
             scene = self.scene,
             draggable_actor = self.cover_drag,
-            graphics_id = self.cannon_id,
+            graphics_id = self.id,
             graphics_component = "Cover",
             graphics_pose = sc.Pose(),
             delta_pose = self.cover_position)
 
 
     def LoadGraphicsObjects(self, latest_command):
-        self.cannon_id = self.scene.AddAndConstructGraphicsObject().id
         shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_textured", lighting = True)
         latest_command = self.scene.MakeCommandAfter(
             latest_command,
-            sc.Target(self.cannon_id),
+            sc.Target(self.id),
             sc.CreateGraphicsObject(
                 "basic",
                     sc.VectorEntitySpecification((

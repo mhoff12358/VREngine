@@ -5,8 +5,8 @@ import math
 
 print("IMPORTING FIRST LOAD")
 
-class DummyActor(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class DummyActor(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     def __init__(self):
         super(DummyActor, self).__init__()
@@ -33,11 +33,8 @@ def first_load(resources):
             sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
-    print("PRELIGHTBULB")
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
-    print("POSTLIGHTBULB")
     scene.AddActor(light)
-    print("POSTLBADD")
 
     mech = mech_system.MechSystem(
         cannon_details = (

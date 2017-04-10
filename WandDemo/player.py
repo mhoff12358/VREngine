@@ -1,8 +1,8 @@
 import scene_system as sc
 
 
-class Player(sc.DelegatingActor):
-    delegater = sc.Delegater(sc.DelegatingActor)
+class Player(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
 
     num_motion_modifiers = {
         ord('1'): (2, -1),
@@ -22,7 +22,7 @@ class Player(sc.DelegatingActor):
     }
 
     def __init__(self, keyboard_and_mouse_controls = True):
-        super(sc.DelegatingActor, self).__init__()
+        super().__init__()
         self.keyboard_and_mouse_controls = keyboard_and_mouse_controls
         self.EmbedSelf(self)
         self.pitch = 0.0
