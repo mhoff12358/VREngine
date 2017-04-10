@@ -1,8 +1,16 @@
 #include "stdafx.h"
-#include "BulletDemo.h"
-#include "InputCommandArgs.h"
+#include "BulletInternals.h"
 
 namespace bullet {
+CollisionInfo collision_info::Make(
+	bullet::CollisionComponent cc_a, const btCollisionObjectWrapper* wrapper_a,
+	bullet::CollisionComponent cc_b, const btCollisionObjectWrapper* wrapper_b) {
+	if (cc_b < cc_a) {
+		return make_pair(cc_a, make_tuple(cc_b, wrapper_a, wrapper_b));
+	}
+	return make_pair(cc_b, make_tuple(cc_a, wrapper_b, wrapper_a));
+}
+
 
 Config::Config() :
 	broadphase_(new btDbvtBroadphase()),
@@ -113,8 +121,8 @@ void RigidBody::MakeCollideable(bool collideable) const {
 }
 
 bool RigidBody::IsCollideable() const {
-	return body_->getCollisionFlags() &
-		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK;
+	return static_cast<bool>(body_->getCollisionFlags() &
+		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 
 namespace shapes {
@@ -159,78 +167,3 @@ namespace poses {
 extern ContactProcessedCallback gContactProcessedCallback;
 extern ContactAddedCallback gContactAddedCallback;
 
-namespace game_scene {
-CollisionInfo collision_info::Make(
-	bullet::CollisionComponent cc_a, const btCollisionObjectWrapper* wrapper_a,
-	bullet::CollisionComponent cc_b, const btCollisionObjectWrapper* wrapper_b) {
-	if (cc_b < cc_a) {
-		return make_pair(cc_a, make_tuple(cc_b, wrapper_a, wrapper_b));
-	}
-	return make_pair(cc_b, make_tuple(cc_a, wrapper_b, wrapper_a));
-}
-
-PhysicsSimulationImpl::PhysicsSimulationImpl(bullet::World world) : world_(std::move(world)) {}
-
-void PhysicsSimulationImpl::HandleTimeTick(const commands::TimeTick& args) {
-	world_.Step(args.duration_ / 1000.0f);
-}
-
-void PhysicsSimulationImpl::PreTimeTick() {
-	current_collisions_.clear();
-	MakeCallbackOwner();
-}
-
-void PhysicsSimulationImpl::PostTimeTick() {
-	for (const CollisionInfo& collision_info : current_collisions_) {
-		if (collision_info.first.actor_ != ActorId::UnsetId) {
-		}
-	}
-}
-
-PhysicsSimulationImpl* PhysicsSimulationImpl::callback_owner = nullptr;
-
-void PhysicsSimulationImpl::MakeCallbackOwner() {
-	callback_owner = this;
-
-	gContactProcessedCallback = ContactProcessedCallbackDelegater;
-	gContactAddedCallback = ContactAddedCallbackDelegater;
-}
-
-bool PhysicsSimulationImpl::ContactProcessedCallback(
-	btManifoldPoint& cp,
-	void* body0, void* body1) {
-	std::cout << "PROCESSED" << std::endl;
-	btCollisionObjectWrapper* colObj0Wrap = static_cast<btCollisionObjectWrapper*>(body0);
-	btCollisionObjectWrapper* colObj1Wrap = static_cast<btCollisionObjectWrapper*>(body1);
-	return true;
-}
-
-bool PhysicsSimulationImpl::ContactAddedCallback(
-	btManifoldPoint& cp,
-	const btCollisionObjectWrapper* colObj0Wrap,
-	int partId0, int index0,
-	const btCollisionObjectWrapper* colObj1Wrap,
-	int partId1, int index1) {
-	std::cout << "ADDED" << std::endl;
-	return true;
-}
-
-bool PhysicsSimulationImpl::ContactProcessedCallbackDelegater(
-	btManifoldPoint& cp,
-	void* body0, void* body1) {
-	return callback_owner->ContactProcessedCallback(cp, body0, body1);
-}
-
-bool PhysicsSimulationImpl::ContactAddedCallbackDelegater(
-	btManifoldPoint& cp,
-	const btCollisionObjectWrapper* colObj0Wrap,
-	int partId0, int index0,
-	const btCollisionObjectWrapper* colObj1Wrap,
-	int partId1, int index1) {
-	return callback_owner->ContactAddedCallback(
-		cp,
-		colObj0Wrap, partId0, index0,
-		colObj1Wrap, partId1, index1);
-}
-
-}  // game_scene

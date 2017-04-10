@@ -84,7 +84,7 @@ void Scene::FlushCommandQueue() {
 	PrefaceCommand();
 }
 
-void Scene::ExecuteCommand(const Command& command) {
+void Scene::ExecuteCommand(Command& command) {
 	for (const ActorId& actor_id : ExpandTarget(command.GetTarget())) {
 		back_of_current_commands_ = FrontOfCommands();
 		FindActor(actor_id)->HandleCommandVirt(command.GetArgs());

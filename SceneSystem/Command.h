@@ -23,7 +23,7 @@ public:
 	Command& operator=(Command&& other);
 
 	const Target& GetTarget() const;
-	const CommandArgs& GetArgs() const;
+	CommandArgs& GetArgs();
 
 private:
 	Command(

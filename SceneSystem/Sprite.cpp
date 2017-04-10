@@ -11,7 +11,7 @@ namespace actors {
 
 const GraphicsObjectDetails Sprite::generic_details_;
 
-void Sprite::HandleCommand(const CommandArgs& args) {
+void Sprite::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case SpriteCommand::CREATE_SPRITE:
 	{

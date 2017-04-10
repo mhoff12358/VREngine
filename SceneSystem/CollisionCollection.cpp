@@ -20,7 +20,7 @@ CollisionCollectionImpl::CollisionCollectionImpl() {
 
 }
 
-void CollisionCollectionImpl::HandleCommand(const CommandArgs& args) {
+void CollisionCollectionImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CollisionCollectionCommand::ADD_COLLIDEABLE_OBJECT:
 		HandleAddCollideableObject(dynamic_cast<const AddCollideableObject&>(args));
@@ -107,7 +107,7 @@ vector<CollisionShape>& CollisionCollectionImpl::GetCollisionShapes(ActorId acto
 	return actor_collisions_[index].second;
 }
 
-void CollisionCollectionCheckInternalCollisionsImpl::HandleCommand(const CommandArgs& args) {
+void CollisionCollectionCheckInternalCollisionsImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CollisionCollectionCommand::ADD_COLLIDEABLE_OBJECT:
 		HandleAddCollideableObject(dynamic_cast<const AddCollideableObject&>(args));

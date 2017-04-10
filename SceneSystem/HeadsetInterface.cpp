@@ -44,7 +44,7 @@ void HeadsetInterfaceImpl::RegisterOrUnregisterActor(bool register_not_unregiste
 	} 
 }
 
-void HeadsetInterfaceImpl::HandleCommand(const CommandArgs& args) {
+void HeadsetInterfaceImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case HeadsetInterfaceCommand::REGISTER_LISTENER:
 	{

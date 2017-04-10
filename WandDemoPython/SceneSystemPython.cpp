@@ -13,6 +13,7 @@
 #include "SceneSystem/GraphicsResources.h"
 #include "SceneSystem/EntitySpecification.h"
 #include "SceneSystem/NewGraphicsObject.h"
+#include "SceneSystem/PhysicsSimulation.h"
 #include "VRBackend/PipelineCamera.h"
 #include "VRBackend/Pose.h"
 #include "VRBackend/EntityHandler.h"
@@ -88,6 +89,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
 	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObjectTemp>();
+	CreatePyActor<game_scene::actors::PhysicsSimulation<game_scene::ActorImpl>>();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

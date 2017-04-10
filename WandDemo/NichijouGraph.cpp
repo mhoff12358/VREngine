@@ -25,7 +25,7 @@ REGISTER_QUERY(NichijouQuery, GET_VERTEX);
 
 namespace actors {
 
-void NichijouGraphImpl::HandleCommand(const CommandArgs& args) {
+void NichijouGraphImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
@@ -249,7 +249,7 @@ void NichijouGraphImpl::MoveTimelinePosition(float delta) {
 				{timeline_position_ / timeline_max_position_}}))))));
 }
 
-void NichijouVertexImpl::HandleCommand(const CommandArgs& args) {
+void NichijouVertexImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{
@@ -333,7 +333,7 @@ void NichijouVertexImpl::UpdateAllEdgeLocations() {
 	}
 }
 
-void NichijouEdgeImpl::HandleCommand(const CommandArgs& args) {
+void NichijouEdgeImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 	{

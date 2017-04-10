@@ -24,7 +24,7 @@ public:
 		controller_graphics_({ActorId::UnsetId, ActorId::UnsetId})
 	{}
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	void AddedToScene();
 
 	static string GetName() {

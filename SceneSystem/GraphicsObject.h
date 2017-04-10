@@ -111,7 +111,7 @@ class GraphicsObjectImpl : public ActorImpl {
 public:
 	GraphicsObjectImpl() {}
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 
 	static string GetName() {
 		return "GraphicsObjectImpl-" + ActorImpl::GetName();

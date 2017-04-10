@@ -14,7 +14,7 @@ class IOInterfaceImpl : public ActorImpl {
 public:
 	IOInterfaceImpl(InputHandler& input_handler);
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	void AddedToScene();
 
 	static string GetName() {

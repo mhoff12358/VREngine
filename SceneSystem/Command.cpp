@@ -12,7 +12,7 @@ const Target& Command::GetTarget() const {
 	return target_;
 }
 
-const CommandArgs& Command::GetArgs() const {
+CommandArgs& Command::GetArgs() {
 	if (unowned_args_) {
 		return *unowned_args_;
 	}

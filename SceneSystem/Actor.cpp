@@ -29,7 +29,7 @@ Scene& IActor::GetScene() {
 	return *scene_;
 }
 
-void ActorImpl::HandleCommand(const CommandArgs& args) {
+void ActorImpl::HandleCommand(CommandArgs& args) {
 }
 
 unique_ptr<QueryResult> ActorImpl::AnswerQuery(const QueryArgs& args) {
@@ -53,7 +53,7 @@ unique_ptr<QueryResult> ActorImpl::AskQuery(const Target& target, const QueryArg
 	return GetScene().AskQuery(target, args);
 }
 
-void ActorImpl::FailToHandleCommand(const CommandArgs& args) {
+void ActorImpl::FailToHandleCommand(CommandArgs& args) {
 	// The ADDED_TO_SCENE command is expected to be allowed to be unhandled.
 	if (args.Type() != CommandType::ADDED_TO_SCENE) {
 		const auto& a = GetScene().GetCommandRegistry();

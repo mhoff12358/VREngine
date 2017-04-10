@@ -10,7 +10,7 @@ REGISTER_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);
 
 namespace actors {
 
-void GraphicsResourcesImpl::HandleCommand(const CommandArgs& args) {
+void GraphicsResourcesImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case GraphicsObjectCommand::REQUIRE_RESOURCE:
 		RequireResource(dynamic_cast<const WrappedCommandArgs<ResourceIdent>&>(args).data_);

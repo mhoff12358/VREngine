@@ -107,7 +107,7 @@ private:
 template<typename ActorBase>
 class NewGraphicsObjectTemp : public ActorBase {
 public:
-	void HandleCommand(const CommandArgs& args) {
+	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
 		case CommandType::ADDED_TO_SCENE:
 			break;

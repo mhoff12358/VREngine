@@ -18,7 +18,7 @@ public:
 	virtual ~IActor();
 
 	// Overridable behaviors
-	virtual void HandleCommandVirt(const CommandArgs& args) { throw std::logic_error("Not Implemented"); };
+	virtual void HandleCommandVirt(CommandArgs& args) { throw std::logic_error("Not Implemented"); };
 	virtual unique_ptr<QueryResult> AnswerQueryVirt(const QueryArgs& args) { throw std::logic_error("Not Implemented"); };
 	virtual void AddedToSceneVirt() { throw std::logic_error("Not Implemented"); };
 	virtual void PrepareToDieVirt() { throw std::logic_error("Not Implemented"); };
@@ -41,7 +41,7 @@ public:
 	ActorAdapter() {}
 	ActorAdapter(Impl impl) : Impl(impl) {}
 
-	void HandleCommandVirt(const CommandArgs& args) override;
+	void HandleCommandVirt(CommandArgs& args) override;
 	unique_ptr<QueryResult> AnswerQueryVirt(const QueryArgs& args) override;
 	void AddedToSceneVirt() override;
 	void PrepareToDieVirt() override;
@@ -54,7 +54,7 @@ public:
 class ActorImpl : public IActor
 {
 public:
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 	void AddedToScene();
 	void PrepareToDie();
@@ -62,13 +62,13 @@ public:
 	static string GetName();
 
 protected:
-	void FailToHandleCommand(const CommandArgs& args);
+	void FailToHandleCommand(CommandArgs& args);
 	void RegisterDependency(const Target& target);
 	unique_ptr<QueryResult> AskQuery(const Target& target, const QueryArgs& args);
 };
 
 template <typename Impl>
-void ActorAdapter<Impl>::HandleCommandVirt(const CommandArgs& args) {
+void ActorAdapter<Impl>::HandleCommandVirt(CommandArgs& args) {
 	Impl::HandleCommand(args);
 }
 

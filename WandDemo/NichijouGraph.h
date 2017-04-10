@@ -44,7 +44,7 @@ namespace actors {
 
 class NichijouGraphImpl : public ActorImpl {
 public:
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 
 	static string GetName() {
@@ -75,7 +75,7 @@ class NichijouVertexImpl : public ActorImpl {
 public:
 	NichijouVertexImpl(object configuration, object vertex, ActorId graph) : configuration_(configuration), vertex_(vertex), graph_(graph) {}
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 
 	static string GetName() {
 		return "NichijouVertexImpl-" + ActorImpl::GetName();
@@ -100,7 +100,7 @@ public:
 	NichijouEdgeImpl(object configuration, object edge, ActorId graph, string model_name) :
 		configuration_(configuration), edge_(edge), graph_(graph), model_name_(model_name) {}
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 
 	static string GetName() {
 		return "NichijoueEdgeImpl-" + ActorImpl::GetName();

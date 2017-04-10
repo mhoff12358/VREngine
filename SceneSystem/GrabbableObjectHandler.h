@@ -42,7 +42,7 @@ class GrabbableObjectHandler : public CollisionCollection {
 public:
 	GrabbableObjectHandler();
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	void HandleDropGrabbableObject(const DropGrabbableObject& args);
 	void HandleTriggerChange(const commands::TriggerStateChange& args);
 

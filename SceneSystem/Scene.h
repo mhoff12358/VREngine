@@ -28,7 +28,7 @@ public:
 
 	// Interface for main loop
 	void FlushCommandQueue();
-	void ExecuteCommand(const Command& command);
+	void ExecuteCommand(Command& command);
 
 	// Universal interface
 	ActorId AddActor(unique_ptr<IActor> new_actor, unique_ptr<CommandArgs> args = nullptr);

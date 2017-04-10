@@ -74,7 +74,7 @@ class CollisionCollectionImpl : public ActorImpl {
 public:
 	CollisionCollectionImpl();
 
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	void HandleAddCollideableObject(const AddCollideableObject& args);
 	void HandleReposeCollideableObject(const ReposeCollideableObject& args);
 	void HandleEnDisableCollideableObject(const EnDisableCollideableObject& args);
@@ -131,7 +131,7 @@ set<ActorId> CollisionCollection::FindCollidingActors(const CollisionTest& test_
 
 class CollisionCollectionCheckInternalCollisionsImpl : public CollisionCollection {
 public:
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 	void HandleAddCollideableObject(const AddCollideableObject& args);
 	void HandleReposeCollideableObject(const ReposeCollideableObject& args);
 

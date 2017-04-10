@@ -39,7 +39,7 @@ IOInterfaceImpl::IOInterfaceImpl(InputHandler& input_handler) : input_handler_(i
 	}
 }
 
-void IOInterfaceImpl::HandleCommand(const CommandArgs& args) {
+void IOInterfaceImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case IOInterfaceCommand::REGISTER_LISTENER:
 	{

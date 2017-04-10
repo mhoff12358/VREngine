@@ -16,10 +16,10 @@ public:
 	object self_;
 
 	// Wrap existing calls that work to be virtualizable through Python.
-	void HandleCommand(const game_scene::CommandArgs& args) {
+	void HandleCommand(game_scene::CommandArgs& args) {
 		if (boost::python::override fn_override = this->get_override("HandleCommand")) {
 			try {
-				const PyCommandArgs* downcast_args = dynamic_cast<const PyCommandArgs*>(&args);
+				PyCommandArgs* downcast_args = dynamic_cast<PyCommandArgs*>(&args);
 				if (downcast_args) {
 					fn_override(downcast_args->self_);
 				} else {
@@ -31,7 +31,7 @@ public:
 		}
 		ActorBase::HandleCommand(args);
 	}
-	void default_HandleCommand(const game_scene::CommandArgs& args) {
+	void default_HandleCommand(game_scene::CommandArgs& args) {
 		this->ActorBase::HandleCommand(args);
 	}
 
@@ -82,7 +82,7 @@ public:
 		return "PyActor-" + ActorBase::GetName();
 	}
 
-	void HandleCommandVirt(const game_scene::CommandArgs& args) override {
+	void HandleCommandVirt(game_scene::CommandArgs& args) override {
 		HandleCommand(args);
     }
 	unique_ptr<game_scene::QueryResult> AnswerQueryVirt(const game_scene::QueryArgs& args) override {

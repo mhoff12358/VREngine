@@ -123,7 +123,7 @@
     <ClInclude Include="ActorGroups.h" />
     <ClInclude Include="ActorId.h" />
     <ClInclude Include="BezierCurve.h" />
-    <ClInclude Include="BulletDemo.h" />
+    <ClInclude Include="BulletInternals.h" />
     <ClInclude Include="CollisionCollection.h" />
     <ClInclude Include="CollisionShape.h" />
     <ClInclude Include="Command.h" />
@@ -139,6 +139,7 @@
     <ClInclude Include="InputCommandArgs.h" />
     <ClInclude Include="IOInterface.h" />
     <ClInclude Include="NewGraphicsObject.h" />
+    <ClInclude Include="PhysicsSimulation.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
     <ClInclude Include="Registry.h" />
@@ -154,7 +155,7 @@
     <ClCompile Include="ActorGroups.cpp" />
     <ClCompile Include="ActorId.cpp" />
     <ClCompile Include="BezierCurve.cpp" />
-    <ClCompile Include="BulletDemo.cpp" />
+    <ClCompile Include="BulletInternals.cpp" />
     <ClCompile Include="CollisionCollection.cpp" />
     <ClCompile Include="CollisionShape.cpp" />
     <ClCompile Include="Command.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="InputCommandArgs.cpp" />
     <ClCompile Include="IOInterface.cpp" />
     <ClCompile Include="NewGraphicsObject.cpp" />
+    <ClCompile Include="PhysicsSimulation.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
     <ClCompile Include="Registry.cpp" />

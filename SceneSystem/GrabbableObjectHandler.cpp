@@ -9,7 +9,7 @@ GrabbableObjectHandler::GrabbableObjectHandler() {
 
 }
 
-void GrabbableObjectHandler::HandleCommand(const CommandArgs& args) {
+void GrabbableObjectHandler::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case CommandType::ADDED_TO_SCENE:
 		GetScene().MakeCommandAfter(

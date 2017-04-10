@@ -69,7 +69,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir);C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files\Python35\include;$(IncludePath)</IncludePath>
+    <IncludePath>F:\PR\bullet3\src;$(SolutionDir);C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;C:\Program Files\Python35\include;$(IncludePath)</IncludePath>
     <LibraryPath>F:\PR\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(SolutionDir)$(Platform)\$(Configuration);C:\Program Files\Python35\libs;F:\PR\Boost\lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
     <TargetExt>.pyd</TargetExt>

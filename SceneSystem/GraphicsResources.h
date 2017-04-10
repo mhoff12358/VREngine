@@ -36,7 +36,7 @@ public:
 		  device_interface_(device_interface) {}
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
-	void HandleCommand(const CommandArgs& args);
+	void HandleCommand(CommandArgs& args);
 
 	static string GetName() {
 		return "GraphicsResourcesImpl-" + ActorImpl::GetName();

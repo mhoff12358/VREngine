@@ -48,7 +48,7 @@ int ComponentHeirarchy::GetNumberOfComponents() const {
 	return 1 + number_of_subcomponents;
 }
 
-void GraphicsObjectImpl::HandleCommand(const CommandArgs& args) {
+void GraphicsObjectImpl::HandleCommand(CommandArgs& args) {
 	switch (args.Type()) {
 	case GraphicsObjectCommand::CREATE_COMPONENTS:
 		RequestResourcesAndCreateComponents(

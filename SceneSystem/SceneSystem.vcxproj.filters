@@ -99,7 +99,10 @@
     <ClInclude Include="CollisionCollection.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="BulletDemo.h">
+    <ClInclude Include="BulletInternals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PhysicsSimulation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -185,7 +188,10 @@
     <ClCompile Include="CollisionCollection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="BulletDemo.cpp">
+    <ClCompile Include="BulletInternals.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PhysicsSimulation.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
