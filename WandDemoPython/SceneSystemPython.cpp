@@ -57,17 +57,41 @@ void EmbedSelfHack(PyActor& actor, object self) {
 	actor.EmbedSelf(self);
 }
 
+template<typename c>
+class Fn {
+public:
+	static void Fna() {
+		std::cout << c::thing() << std::endl;
+	}
+};
+
+void Fn3() {
+
+}
+
+template <void(*a)()>
+void Fn2() {
+	a();
+}
+
+template <template<typename> typename a, typename b>
+void Fn4() {
+	a<b>::Fna();
+}
+
+class JIFOE {
+public:
+	static const char* thing() {
+		return "FJEIOFJOIE";
+	}
+};
+
 BOOST_PYTHON_MODULE(scene_system_) {
+	Fn2<Fn3>();
+	Fn4<Fn, JIFOE>();
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
-	class_<PyActor, bases<game_scene::ActorImpl>, boost::noncopyable>("RawActor", init<>())
-		.def("HandleCommand", &PyActor::HandleCommandVirt)
-		.def("AddedToScene", &PyActor::AddedToSceneVirt)
-		.def("AnswerQuery", &PyActor::PyAnswerQuery)
-		.def("EmbedSelf", &EmbedSelfHack)
-		.def("GetScene", &PyActor::GetScene, return_value_policy<reference_existing_object>())
-		.add_property("id", &PyActor::GetId)
-		.def("SetScene", &PyActor::SetScene);
+	CreatePyActor<game_scene::ActorImpl>::Create();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);

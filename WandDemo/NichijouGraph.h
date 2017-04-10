@@ -47,7 +47,7 @@ public:
 	void HandleCommand(const CommandArgs& args);
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "NichijouGraphImpl-" + ActorImpl::GetName();
 	}
 
@@ -77,7 +77,7 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "NichijouVertexImpl-" + ActorImpl::GetName();
 	}
 
@@ -102,7 +102,7 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "NichijoueEdgeImpl-" + ActorImpl::GetName();
 	}
 

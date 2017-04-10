@@ -14,6 +14,7 @@ template<typename ActorBase>
 struct PyActorImpl : public ActorBase, public boost::python::wrapper<game_scene::IActor> {
 public:
 	object self_;
+
 	// Wrap existing calls that work to be virtualizable through Python.
 	void HandleCommand(const game_scene::CommandArgs& args) {
 		if (boost::python::override fn_override = this->get_override("HandleCommand")) {
@@ -77,8 +78,43 @@ public:
 		self_ = self;
 	}
 
-	string GetName() const {
+	static string GetName() {
 		return "PyActor-" + game_scene::ActorImpl::GetName();
 	}
 };
 typedef game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>> PyActor;
+
+
+
+template<typename ActorBase>
+struct CreatePyActor {
+	static void Create() {
+		typedef game_scene::ActorAdapter<PyActorImpl<ActorBase>> ActorSpecial;
+		string class_name = ActorSpecial::GetName();
+		for (int i = 0; i < class_name.length(); i++) {
+			if (class_name[i] == '-') {
+				class_name[i] = '_';
+			}
+		}
+		class_<ActorSpecial, bases<game_scene::ActorImpl>, boost::noncopyable>(class_name.c_str(), init<>())
+			.def("HandleCommand", &PyActor::HandleCommandVirt)
+			.def("AddedToScene", &PyActor::AddedToSceneVirt)
+			.def("AnswerQuery", &PyActor::PyAnswerQuery)
+			.def("EmbedSelf", &EmbedSelfHack)
+			.def("GetScene", &PyActor::GetScene, return_value_policy<reference_existing_object>())
+			.add_property("id", &PyActor::GetId)
+			.def("SetScene", &PyActor::SetScene);
+	}
+};
+
+#define PYACT_FN_ARG template<typename> typename CreateFn, typename Preface
+template<PYACT_FN_ARG>
+void CreatePyActors() {
+	CreatePyActor<Preface>::Create();
+}
+
+template<PYACT_FN_ARG, typename ActorBase, typename... FurtherBases>
+void CreatePyActors() {
+	CreatePyActors<CreateFn, Preface, FurtherBases>();
+	CreatePyActors<CreateFn, ActorBase<Preface>, FurtherBases>();
+}

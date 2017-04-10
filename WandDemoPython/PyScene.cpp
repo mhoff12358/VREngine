@@ -21,7 +21,6 @@ boost::python::tuple AddActorAfterReturnInitialize(game_scene::Scene& self, game
 	return boost::python::make_tuple(std::get<0>(result), std::get<1>(result));
 }
 
-
 object PythonObjectifyQueryResult(unique_ptr<game_scene::QueryResult> raw_result) {
 	PyQueryResult* cast_result = dynamic_cast<PyQueryResult*>(raw_result.get());
 	if (cast_result) {

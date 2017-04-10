@@ -126,7 +126,7 @@ public:
 		ActorBase::HandleCommand(args);
 	}
 
-	string GetName() const {
+	static string GetName() {
 		return "NewGraphicsObject-" + ActorBase::GetName();
 	}
 

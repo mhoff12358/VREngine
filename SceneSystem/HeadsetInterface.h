@@ -27,7 +27,7 @@ public:
 	void HandleCommand(const CommandArgs& args);
 	void AddedToScene();
 
-	string GetName() const {
+	static string GetName() {
 		return "HeadsetInterfaceImpl-" + ActorImpl::GetName();
 	}
 

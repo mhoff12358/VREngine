@@ -80,7 +80,7 @@ public:
 	void HandleEnDisableCollideableObject(const EnDisableCollideableObject& args);
 	void HandleRemoveCollideableObject(const RemoveCollideableObject& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "CollisionCollectionImpl-" + ActorImpl::GetName();
 	}
 
@@ -137,7 +137,7 @@ public:
 
 	void HandleInternalCollision(ActorId instigating_actor, const set<ActorId>& collided_actors);
 
-	string GetName() const {
+	static string GetName() {
 		return "CollisionCollectionCheckInternalCollisionsImpl-" + ActorImpl::GetName();
 	}
 };

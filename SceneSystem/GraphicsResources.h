@@ -38,7 +38,7 @@ public:
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args);
 	void HandleCommand(const CommandArgs& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "GraphicsResourcesImpl-" + ActorImpl::GetName();
 	}
 

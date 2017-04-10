@@ -113,7 +113,7 @@ public:
 
 	void HandleCommand(const CommandArgs& args);
 
-	string GetName() const {
+	static string GetName() {
 		return "GraphicsObjectImpl-" + ActorImpl::GetName();
 	}
 

@@ -59,7 +59,7 @@ public:
 	void AddedToScene();
 	void PrepareToDie();
 	void DependencyDying(const ActorId& dying_id);
-	string GetName() const;
+	static string GetName();
 
 protected:
 	void FailToHandleCommand(const CommandArgs& args);

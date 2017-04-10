@@ -64,7 +64,7 @@ void ActorImpl::FailToHandleCommand(const CommandArgs& args) {
 	}
 }
 
-string ActorImpl::GetName() const {
+string ActorImpl::GetName() {
 	return "ActorImpl";
 }
 
