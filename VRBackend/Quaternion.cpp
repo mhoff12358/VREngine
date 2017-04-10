@@ -45,6 +45,13 @@ Quaternion::Quaternion(std::array<float, 4> val) {
 	w = val[3];
 }
 
+Quaternion::Quaternion(float* val) {
+	x = val[0];
+	y = val[1];
+	z = val[2];
+	w = val[3];
+}
+
 Quaternion::Quaternion(float xval, float yval, float zval, float wval) :
 	x(xval), y(yval), z(zval), w(wval) {
 
