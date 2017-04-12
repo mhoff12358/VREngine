@@ -7,22 +7,29 @@
 #include "Actor.h"
 #include "InputCommandArgs.h"
 
+#include "PhysicsObject.h"
+
 namespace game_scene {
 namespace commands {
 
-class PhysicsSimulationCommand : public CommandType {
+class PhysicsSimulationCommand {
 public:
-	DECLARE_COMMAND(PhysicsSimulationCommand, ADD_RIGID_BODY);
-	DECLARE_COMMAND(PhysicsSimulationCommand, REMOVE_RIGID_BODY);
+	DECLARE_COMMAND(PhysicsSimulationCommand, UPDATE_PHYSICS_OBJECT);
 };
 
-class AddRemoveRigidBody : public CommandArgs {
+class UpdatePhysicsObject : public CommandArgs {
 public:
-	AddRemoveRigidBody(bullet::RigidBody& rigid_body, bool add_not_remove = true) :
-		CommandArgs(add_not_remove ? PhysicsSimulationCommand::ADD_RIGID_BODY : PhysicsSimulationCommand::REMOVE_RIGID_BODY),
-		rigid_body_(rigid_body) {}
+	enum UpdateType {
+		ADD,
+		REMOVE,
+	};
+	UpdatePhysicsObject(UpdateType update_type, ActorId object_id) :
+		CommandArgs(PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT),
+		update_type_(update_type),
+		object_id_(object_id) {}
 
-	bullet::RigidBody& rigid_body_;
+	UpdateType update_type_;
+	ActorId object_id_;
 };
 
 }  // commands
@@ -40,9 +47,9 @@ public:
 	void PreTimeTick();
 	void PostTimeTick();
 
-private:
 	bullet::World world_;
 
+private:
 	map<bullet::CollisionInfo::first_type, bullet::CollisionInfo::second_type> current_collisions_;
 
 	static PhysicsSimulationImpl* callback_owner;
@@ -76,6 +83,18 @@ public:
 
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
+		case commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT:
+		{
+			auto args = dynamic_cast<commands::UpdatePhysicsObject&>(args);
+			switch (args.update_type_) {
+			case commands::UpdatePhysicsObject::ADD:
+				AddObject(args.object_);
+				break;
+			case commands::UpdatePhysicsObject::REMOVE:
+				RemoveObject(args.object_);
+				break;
+			}
+		}	break;
 		case InputCommand::TICK:
 			physics_simulation_impl_.HandleTimeTick(dynamic_cast<const commands::TimeTick&>(args));
 			break;
@@ -85,8 +104,52 @@ public:
 		ActorBase::HandleCommand(args);
 	}
 
-public:
+	static string GetName() {
+		return "PhysicsSimulation-" + ActorBase::GetName();
+	}
+
+private:
+	void PhysicsObjectIsUpdated(ActorId actor_id) {
+		auto result = dynamic_cast<queries::GetRigidBodiesResult>(
+			GetScene().AskQuery(Target(actor_id), queries::GetRigidBodies));
+		auto existing_body = rigid_body_sources_.find(actor_id);
+		if (result) {
+			const bullet::RigidBody& new_rigid_body = result.rigid_body_;
+			if (existing_body != rigid_body_sources_.end()) {
+				physics_simulation_impl_.world_.RemoveRigidBody(*existing_body);
+				*existing_body = new_rigid_body;
+				if (new_rigid_body.GetFilled()) {
+					physics_simulation_impl_.world_.AddRigidBody(*existing_body);
+				}
+			} else {
+				rigid_body_sources_.insert(make_pair(actor_id, result.rigid_body_));
+			}
+		}
+		else {
+			std::cout << "Failed to get a response" << std::endl;
+		}
+	}
+
+	void AddObject(ActorId actor_id) {
+		GetScene().MakeCommandAfter(
+			GetScene().BackOfNewCommands(),
+			Command(
+				Target(actor_id),
+				make_unique<commands::AddUpdatedCallback>(
+					std::bind(&PhysicsObjectIsUpdated, this))));
+		PhysicsObjectIsUpdated(actor_id);
+	}
+
+	void RemoveObject(ActorId actor_id) {
+		auto existing_body = rigid_body_sources_.find(actor_id);
+		if (existing_body != rigid_body_sources_.end()) {
+			physics_simulation_impl_.world_.RemoveRigidBody(*existing_body);
+			rigid_body_sources_.erase(existing_body);
+		}
+	}
+
 	PhysicsSimulationImpl physics_simulation_impl_;
+	map<ActorId, const bullet::RigidBody&> rigid_body_sources_;
 };
 }  // actors
 }  // game_scene

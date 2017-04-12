@@ -34,6 +34,9 @@ bool CollisionComponent::operator==(const CollisionComponent other) const {
 	return (actor_ == other.actor_) && (rigid_body_ident_ == other.rigid_body_ident_);
 }
 
+RigidBody::RigidBody() :
+	body_(nullptr), shape_(nullptr), motion_state_(nullptr) {}
+
 RigidBody::RigidBody(
 	Shape shape,
 	btTransform transform,
@@ -52,6 +55,10 @@ RigidBody::RigidBody(
 	shape_->calculateLocalInertia(mass, inertia);
     btRigidBody::btRigidBodyConstructionInfo construction_info(mass, motion_state_.get(), shape_.get(), inertia);
 	body_ = make_unique<btRigidBody>(construction_info);
+}
+
+bool RigidBody::GetFilled() const {
+	return shape_.get() != nullptr;
 }
 
 btRigidBody* RigidBody::GetBody() const {

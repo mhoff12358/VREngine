@@ -28,4 +28,6 @@ public:
 	int id_;
 };
 
+typedef std::function<void(ActorId)> ActorCallback;
+
 }  // game_scene

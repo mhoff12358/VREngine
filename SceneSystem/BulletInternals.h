@@ -55,6 +55,7 @@ namespace collision_info {
 
 class RigidBody {
 public:
+	RigidBody();
 	RigidBody(
 		Shape shape,
 		unique_ptr<btDefaultMotionState> starting_motion_state,
@@ -65,6 +66,8 @@ public:
 		btTransform transform,
 		btScalar mass = 1,
 		btVector3 inertia = btVector3(0, 0, 0));
+
+	bool GetFilled() const;
 
 	btRigidBody* GetBody() const;
 

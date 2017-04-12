@@ -36,6 +36,7 @@
 #include "GrabbableObjectHandlerInterface.h"
 #include "CollisionShapeInterface.h"
 #include "LightInterface.h"
+#include "Physics.h"
 
 BOOST_PTR_MAGIC(game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>>)
 BOOST_PTR_MAGIC(game_scene::ActorImpl)
@@ -90,6 +91,8 @@ BOOST_PYTHON_MODULE(scene_system_) {
 
 	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObjectTemp>();
 	CreatePyActor<game_scene::actors::PhysicsSimulation<game_scene::ActorImpl>>();
+	CreatePyActor<game_scene::actors::PhysicsObject<game_scene::ActorImpl>>();
+	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::ActorImpl>>();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);
@@ -163,4 +166,5 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	GrabbableObjectHandlerInterface(scene_registration);
 	CollisionShapeInterface();
 	LightInterface();
+	Physics(scene_registration);
 }

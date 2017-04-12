@@ -152,6 +152,7 @@
     <ClCompile Include="IOInterfaceInterface.cpp" />
     <ClCompile Include="LightInterface.cpp" />
     <ClCompile Include="ModelCreationInterface.cpp" />
+    <ClCompile Include="Physics.cpp" />
     <ClCompile Include="PoseInterface.cpp" />
     <ClCompile Include="PyActor.cpp" />
     <ClCompile Include="PyCommandAndQuery.cpp" />
@@ -172,6 +173,7 @@
     <ClInclude Include="IOInterfaceInterface.h" />
     <ClInclude Include="LightInterface.h" />
     <ClInclude Include="ModelCreationInterface.h" />
+    <ClInclude Include="Physics.h" />
     <ClInclude Include="PoseInterface.h" />
     <ClInclude Include="PyActor.h" />
     <ClInclude Include="PyCommandAndQuery.h" />

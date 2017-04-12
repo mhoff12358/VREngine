@@ -3,6 +3,10 @@
 #include "PhysicsSimulation.h"
 
 namespace game_scene {
+namespace commands {
+REGISTER_COMMAND(PhysicsSimulationCommand, UPDATE_PHYSICS_OBJECT);
+}  // commands
+
 namespace actors {
 
 PhysicsSimulationImpl::PhysicsSimulationImpl(bullet::World world) : world_(std::move(world)) {}
