@@ -7,7 +7,7 @@
 
 BOOST_PTR_MAGIC_STRUCT(game_scene::commands::AddRigidBody)
 BOOST_PTR_MAGIC_STRUCT(game_scene::commands::RemoveRigidBody)
-BOOST_PTR_MAGIC_STRUCT(game_scene::commands::UpdatePhysicsObject)
+BOOST_PTR_MAGIC(game_scene::commands::UpdatePhysicsObject)
 
 std::auto_ptr<game_scene::commands::AddRigidBody> MakeAddRigidBody(
 	string name, std::auto_ptr<bullet::RigidBody> rigid_body_ptr) {
@@ -43,6 +43,9 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 	class_<game_scene::commands::PhysicsSimulationCommand>("PhysicsSimulationCommand")
 		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT);
 
+	enum_<game_scene::commands::UpdatePhysicsObject::UpdateType>("UpdateType")
+		.value("ADD", game_scene::commands::UpdatePhysicsObject::UpdateType::ADD)
+		.value("REMOVE", game_scene::commands::UpdatePhysicsObject::UpdateType::REMOVE);
 	class_<game_scene::commands::UpdatePhysicsObject, bases<game_scene::CommandArgs>,
 		std::auto_ptr<game_scene::commands::UpdatePhysicsObject>,
 		boost::noncopyable>(

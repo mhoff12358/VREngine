@@ -6,6 +6,7 @@
 #include "Actor.h"
 #include "Component.h"
 #include "GraphicsResources.h"
+#include "Poseable.h"
 
 namespace game_scene {
 
@@ -135,6 +136,9 @@ private:
 };
 
 typedef ActorAdapter<NewGraphicsObjectTemp<ActorImpl>> NewGraphicsObject;
+
+template class NewGraphicsObjectTemp<Poseable<ActorImpl>>;
+template class NewGraphicsObjectTemp<ActorImpl>;
 
 }  // actors
 }  // game_scene

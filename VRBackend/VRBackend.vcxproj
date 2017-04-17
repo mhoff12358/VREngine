@@ -22,7 +22,7 @@
     <ProjectGuid>{D66EB24C-6C27-403A-9F31-0108DFC5C52D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>VRBackend</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

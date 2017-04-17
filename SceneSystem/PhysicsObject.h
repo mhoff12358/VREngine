@@ -7,6 +7,8 @@
 #include "CommandArgs.h"
 #include "QueryArgs.h"
 #include "QueryResult.h"
+#include "PhysicsInteractions.h"
+#include "Poseable.h"
 
 namespace game_scene {
 namespace commands {
@@ -37,9 +39,9 @@ struct RemoveRigidBody : public CommandArgs {
 	string name_;
 };
 
-struct AddUpdatedCallback : public CommandType {
+struct AddUpdatedCallback : public CommandArgs {
 	AddUpdatedCallback(game_scene::ActorCallback callback)
-		: CommandType(PhysicsObjectCommand::ADD_UPDATED_CALLBACK), callback_(callback) {}
+		: CommandArgs(PhysicsObjectCommand::ADD_UPDATED_CALLBACK), callback_(callback) {}
 
 	game_scene::ActorCallback callback_;
 };
@@ -59,9 +61,14 @@ struct GetRigidBodies : QueryArgs {
 
 struct GetRigidBodiesResult : QueryResult {
 	GetRigidBodiesResult(const bullet::RigidBody& rigid_body) :
-		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_body_(rigid_body) {}
+		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_bodies_() {
+		rigid_bodies_.push_back(&rigid_body);
+	}
+	GetRigidBodiesResult(vector<const bullet::RigidBody*> rigid_bodies) :
+		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_bodies_(std::move(rigid_bodies)) {
+	}
 
-	const bullet::RigidBody& rigid_body_;
+	vector<const bullet::RigidBody*> rigid_bodies_;
 };
 
 }  // queries
@@ -71,15 +78,18 @@ namespace actors {
 template <typename ActorBase>
 class PhysicsObject : public ActorBase {
 public:
-	PhysicsObject() : ActorBase(), rigid_body_(nullptr), world_() {}
+	PhysicsObject() : ActorBase(), rigid_body_(), updated_callback_() {}
 
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
-		case ADD_RIGID_BODY:
-			SetRigidBody(std::move(dynamic_cast<AddRigidBody&>(args).rigid_body_));
+		case commands::PhysicsObjectCommand::ADD_RIGID_BODY:
+			SetRigidBody(std::move(dynamic_cast<commands::AddRigidBody&>(args)));
 			break;
-		case REMOVE_RIGID_BODY:
+		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
 			ClearRigidBody();
+			break;
+		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
+			RigidBodyPoseUpdated();
 			break;
 		default:
 			break;
@@ -89,10 +99,10 @@ public:
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) const {
 		switch (args.Type()) {
-		case PhysicsObjectQuery::GET_RIGID_BODIES:
-			return make_unique<GetRigidBodiesResult>(rigid_body_);
+		case queries::PhysicsObjectQuery::GET_RIGID_BODIES:
+			return make_unique<queries::GetRigidBodiesResult>(rigid_body_);
 		default:
-			return make_unqiue<QueryResult>(QueryType::EMPTY);
+			return make_unique<QueryResult>(QueryType::EMPTY);
 		}
 	}
 
@@ -101,20 +111,28 @@ public:
 	}
 
 private:
-	void SetRigidBody(bullet::RigidBody rigid_body) {
-		rigid_body_ = std::move(rigid_body);
+	void SetRigidBody(commands::AddRigidBody& args) {
+		rigid_body_name_ = args.name_;
+		rigid_body_ = std::move(args.rigid_body_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
 	void ClearRigidBody() {
-		rigid_body_ = RigidBody();
+		rigid_body_ = bullet::RigidBody();
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
+	void RigidBodyPoseUpdated() {
+		poseable::PushNewPose(*this, std::make_pair(
+			rigid_body_name_,
+			bullet::poses::GetPose(rigid_body_.GetTransform())));
+	}
+
+	string rigid_body_name_;
 	bullet::RigidBody rigid_body_;
 	game_scene::ActorCallback updated_callback_;
 };
@@ -122,15 +140,18 @@ private:
 template <typename ActorBase>
 class PhysicsObjectCollection : public ActorBase {
 public:
-	PhysicsObjectCollection() : ActorBase(), rigid_body_(nullptr), world_() {}
+	PhysicsObjectCollection() : ActorBase(), rigid_bodies_() {}
 
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
-		case ADD_RIGID_BODY:
+		case commands::PhysicsObjectCommand::ADD_RIGID_BODY:
 			AddNewRigidBody(dynamic_cast<commands::AddRigidBody&>(args));
 			break;
-		case REMOVE_RIGID_BODY:
+		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
 			RemoveExistingRigidBody(dynamic_cast<commands::RemoveRigidBody&>(args));
+			break;
+		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
+			RigidBodyPoseUpdated();
 			break;
 		default:
 			break;
@@ -140,10 +161,17 @@ public:
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) const {
 		switch (args.Type()) {
-		case PhysicsObjectQuery::GET_RIGID_BODIES:
-			return make_unique<queries::GetRigidBodiesResult>(rigid_body_);
+		case queries::PhysicsObjectQuery::GET_RIGID_BODIES:
+		{
+			vector<const bullet::RigidBody*> bodies;
+			bodies.reserve(rigid_bodies_.size());
+			for (const auto& rigid_body : rigid_bodies_) {
+				bodies.push_back(&rigid_body.second);
+			}
+			return make_unique<queries::GetRigidBodiesResult>(bodies);
+		}
 		default:
-			return make_unqiue<QueryResult>(QueryType::EMPTY);
+			return make_unique<QueryResult>(QueryType::EMPTY);
 		}
 	}
 
@@ -152,17 +180,25 @@ public:
 	}
 
 private:
-	void AddNewRigidBody(commands::AddRigidBody args) {
+	void AddNewRigidBody(commands::AddRigidBody& args) {
 		rigid_bodies_[args.name_] = std::move(args.rigid_body_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
-	void RemoveExistingRigidBody(commands::RemoveRigidBody args) {
+	void RemoveExistingRigidBody(commands::RemoveRigidBody& args) {
 		rigid_bodies_.erase(args.name_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
+		}
+	}
+
+	void RigidBodyPoseUpdated() {
+		for (const auto& named_rigid_body : rigid_bodies_) {
+			poseable::PushNewPose(*this, std::make_pair(
+				named_rigid_body.first,
+				bullet::poses::GetPose(named_rigid_body.second.GetTransform())));
 		}
 	}
 
@@ -170,5 +206,11 @@ private:
 	game_scene::ActorCallback updated_callback_;
 };
 
+template class PhysicsObject<Poseable<ActorImpl>>;
+template class PhysicsObject<ActorImpl>;
+template class PhysicsObjectCollection<Poseable<ActorImpl>>;
+template class PhysicsObjectCollection<ActorImpl>;
+
 }
 }
+

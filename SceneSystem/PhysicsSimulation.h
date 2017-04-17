@@ -8,6 +8,7 @@
 #include "InputCommandArgs.h"
 
 #include "PhysicsObject.h"
+#include "PhysicsInteractions.h"
 
 namespace game_scene {
 namespace commands {
@@ -85,18 +86,19 @@ public:
 		switch (args.Type()) {
 		case commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT:
 		{
-			auto args = dynamic_cast<commands::UpdatePhysicsObject&>(args);
-			switch (args.update_type_) {
-			case commands::UpdatePhysicsObject::ADD:
-				AddObject(args.object_);
-				break;
-			case commands::UpdatePhysicsObject::REMOVE:
-				RemoveObject(args.object_);
-				break;
-			}
+			UpdateObject(dynamic_cast<commands::UpdatePhysicsObject&>(args));
 		}	break;
 		case InputCommand::TICK:
 			physics_simulation_impl_.HandleTimeTick(dynamic_cast<const commands::TimeTick&>(args));
+			for (auto rigid_body_source : rigid_body_sources_) {
+				ActorId actor_to_alert;
+				std::tie(actor_to_alert, std::ignore) = rigid_body_source;
+				GetScene().MakeCommandAfter(
+					GetScene().BackOfNewCommands(),
+					Command(
+						game_scene::Target(actor_to_alert),
+						make_unique<commands::RigidBodyUpdated>()));
+			}
 			break;
 		default:
 			break;
@@ -110,19 +112,25 @@ public:
 
 private:
 	void PhysicsObjectIsUpdated(ActorId actor_id) {
-		auto result = dynamic_cast<queries::GetRigidBodiesResult>(
-			GetScene().AskQuery(Target(actor_id), queries::GetRigidBodies));
-		auto existing_body = rigid_body_sources_.find(actor_id);
-		if (result) {
-			const bullet::RigidBody& new_rigid_body = result.rigid_body_;
-			if (existing_body != rigid_body_sources_.end()) {
-				physics_simulation_impl_.world_.RemoveRigidBody(*existing_body);
-				*existing_body = new_rigid_body;
-				if (new_rigid_body.GetFilled()) {
-					physics_simulation_impl_.world_.AddRigidBody(*existing_body);
+		auto raw_result = GetScene().AskQuery(Target(actor_id), queries::GetRigidBodies());
+		if (raw_result) {
+			queries::GetRigidBodiesResult& result = dynamic_cast<queries::GetRigidBodiesResult&>(*raw_result);
+			set<const bullet::RigidBody*> new_bodies(result.rigid_bodies_.begin(), result.rigid_bodies_.end());
+			auto existing_bodies = rigid_body_sources_.find(actor_id);
+			if (existing_bodies != rigid_body_sources_.end()) {
+				for (const bullet::RigidBody* body : existing_bodies->second) {
+					if (new_bodies.count(body) == 0) {
+						physics_simulation_impl_.world_.RemoveRigidBody(*body);
+					}
 				}
+				for (const bullet::RigidBody* body : new_bodies) {
+					if (body->GetFilled() && (existing_bodies->second.count(body) == 0)) {
+						physics_simulation_impl_.world_.AddRigidBody(*body);
+					}
+				}
+				existing_bodies->second = std::move(new_bodies);
 			} else {
-				rigid_body_sources_.insert(make_pair(actor_id, result.rigid_body_));
+				rigid_body_sources_.insert(make_pair(actor_id, std::move(new_bodies)));
 			}
 		}
 		else {
@@ -130,26 +138,40 @@ private:
 		}
 	}
 
+	void UpdateObject(commands::UpdatePhysicsObject& args) {
+		switch (args.update_type_) {
+		case commands::UpdatePhysicsObject::ADD:
+			AddObject(args.object_id_);
+			break;
+		case commands::UpdatePhysicsObject::REMOVE:
+			RemoveObject(args.object_id_);
+			break;
+		}
+	}
+
 	void AddObject(ActorId actor_id) {
+		game_scene::ActorCallback callback([this](ActorId actor_id) {PhysicsSimulation::PhysicsObjectIsUpdated(actor_id);});
 		GetScene().MakeCommandAfter(
 			GetScene().BackOfNewCommands(),
 			Command(
 				Target(actor_id),
 				make_unique<commands::AddUpdatedCallback>(
-					std::bind(&PhysicsObjectIsUpdated, this))));
+					callback)));
 		PhysicsObjectIsUpdated(actor_id);
 	}
 
 	void RemoveObject(ActorId actor_id) {
-		auto existing_body = rigid_body_sources_.find(actor_id);
-		if (existing_body != rigid_body_sources_.end()) {
-			physics_simulation_impl_.world_.RemoveRigidBody(*existing_body);
-			rigid_body_sources_.erase(existing_body);
+		auto existing_bodies = rigid_body_sources_.find(actor_id);
+		if (existing_bodies != rigid_body_sources_.end()) {
+			for (const bullet::RigidBody* body : existing_bodies->second) {
+				physics_simulation_impl_.world_.RemoveRigidBody(*body);
+			}
+			rigid_body_sources_.erase(existing_bodies);
 		}
 	}
 
 	PhysicsSimulationImpl physics_simulation_impl_;
-	map<ActorId, const bullet::RigidBody&> rigid_body_sources_;
+	map<ActorId, set<const bullet::RigidBody*>> rigid_body_sources_;
 };
 }  // actors
 }  // game_scene

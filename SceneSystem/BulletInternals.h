@@ -21,12 +21,19 @@ public:
 	unique_ptr<btSequentialImpulseConstraintSolver> solver_;
 };
 
-using Shape = unique_ptr<btCollisionShape>;
-namespace shapes {
-	Shape MakeSphere(btScalar radius);
-	Shape MakePlane(btVector3 normal, btScalar plane_constant = 0);
-	Shape MakePlane(btVector3 normal, btVector3 point_in_plane);
-}  // shapes
+class Shape {
+public:
+    Shape();
+	Shape(Shape&& shape);
+	Shape& operator=(Shape&&) = default;
+    Shape(unique_ptr<btCollisionShape> shape);
+
+    unique_ptr<btCollisionShape> shape_;
+
+	static Shape MakeSphere(btScalar radius);
+	static Shape MakePlaneWithConstant(btVector3 normal, btScalar plane_constant = 0);
+	static Shape MakePlane(btVector3 normal, btVector3 point_in_plane);
+};
 
 struct CollisionComponent {
 	game_scene::ActorId actor_ = game_scene::ActorId::UnsetId;
@@ -66,6 +73,8 @@ public:
 		btTransform transform,
 		btScalar mass = 1,
 		btVector3 inertia = btVector3(0, 0, 0));
+	RigidBody(RigidBody&&) = default;
+	RigidBody& operator=(RigidBody&& other) = default;
 
 	bool GetFilled() const;
 

@@ -34,8 +34,26 @@ bool CollisionComponent::operator==(const CollisionComponent other) const {
 	return (actor_ == other.actor_) && (rigid_body_ident_ == other.rigid_body_ident_);
 }
 
+Shape::Shape() : shape_(nullptr) {}
+
+Shape::Shape(Shape&& shape) : shape_(std::move(shape.shape_)) {}
+
+Shape::Shape(unique_ptr<btCollisionShape> shape) : shape_(std::move(shape)) {}
+
+Shape Shape::MakeSphere(btScalar radius) {
+	return Shape(make_unique<btSphereShape>(radius));
+}
+
+Shape Shape::MakePlaneWithConstant(btVector3 normal, btScalar plane_constant) {
+	return Shape(make_unique<btStaticPlaneShape>(normal, plane_constant));
+}
+
+Shape Shape::MakePlane(btVector3 normal, btVector3 point_in_plane) {
+	return MakePlaneWithConstant(normal, normal.dot(point_in_plane));
+}
+
 RigidBody::RigidBody() :
-	body_(nullptr), shape_(nullptr), motion_state_(nullptr) {}
+	body_(nullptr), shape_(), motion_state_(nullptr) {}
 
 RigidBody::RigidBody(
 	Shape shape,
@@ -52,13 +70,13 @@ RigidBody::RigidBody(
 	shape_(std::move(shape)),
 	motion_state_(std::move(starting_motion_state))
 {
-	shape_->calculateLocalInertia(mass, inertia);
-    btRigidBody::btRigidBodyConstructionInfo construction_info(mass, motion_state_.get(), shape_.get(), inertia);
+	shape_.shape_->calculateLocalInertia(mass, inertia);
+    btRigidBody::btRigidBodyConstructionInfo construction_info(mass, motion_state_.get(), shape_.shape_.get(), inertia);
 	body_ = make_unique<btRigidBody>(construction_info);
 }
 
 bool RigidBody::GetFilled() const {
-	return shape_.get() != nullptr;
+	return shape_.shape_.get() != nullptr;
 }
 
 btRigidBody* RigidBody::GetBody() const {
@@ -66,11 +84,11 @@ btRigidBody* RigidBody::GetBody() const {
 }
 
 const RigidBodyPayload& RigidBody::GetPayload() const {
-	return *static_cast<RigidBodyPayload*>((shape_->getUserPointer()));
+	return *static_cast<RigidBodyPayload*>((shape_.shape_->getUserPointer()));
 }
 
 void RigidBody::SetPayload(RigidBodyPayload* payload) {
-	shape_->setUserPointer(static_cast<void*>(payload));
+	shape_.shape_->setUserPointer(static_cast<void*>(payload));
 }
 
 World::World(Config config) :
@@ -131,20 +149,6 @@ bool RigidBody::IsCollideable() const {
 	return static_cast<bool>(body_->getCollisionFlags() &
 		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
-
-namespace shapes {
-	Shape MakeSphere(btScalar radius) {
-		return make_unique<btSphereShape>(radius);
-	}
-
-	Shape MakePlane(btVector3 normal, btScalar plane_constant) {
-		return make_unique<btStaticPlaneShape>(normal, plane_constant);
-	}
-
-	Shape MakePlane(btVector3 normal, btVector3 point_in_plane) {
-		return MakePlane(normal, normal.dot(point_in_plane));
-	}
-}  // shapes
 
 namespace poses {
 	btQuaternion GetQuaternion(const Quaternion& quat) {

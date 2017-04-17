@@ -17,7 +17,6 @@ auto ResizeIfPossibleImpl(Collection& c, ssize_t size, less_special_) -> decltyp
 	assert((c.size() == 0) || (c.size() == size));
 }
 
-
 template <typename Collection, typename ValueType>
 auto ResizeIfPossibleImpl(Collection& c, ssize_t size, general_) -> void {
 }

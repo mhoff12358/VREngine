@@ -26,12 +26,33 @@ def first_load(resources):
 
     scene = resources["scene"]
 
+    import code
+    a = globals()
+    a.update(locals())
+    #code.interact(local = a)
+
     graphics_resources = scene.AskQuery(
         sc.Target(
             scene.FindByName("GraphicsResources")),
         sc.QueryArgs(
             sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
+
+    physics_object = sc.PhysicsObject_Poseable_ActorImpl()
+    scene.AddActor(physics_object)
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(physics_object.id),
+        sc.AddRigidBody(
+            "", sc.RigidBody(sc.Shape.MakeSphere(2.0), sc.Pose(sc.Location(1, 2, 3)))))
+
+    physics_simulation = sc.PhysicsSimulation_ActorImpl()
+    scene.AddActor(physics_simulation)
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(physics_simulation.id),
+        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_simulation.id))
+    scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)
@@ -66,11 +87,6 @@ def first_load(resources):
             "crank_height": 0.5,
             })
     scene.AddActor(mech)
-
-    import code
-    a = globals()
-    a.update(locals())
-    #code.interact(local = a)
 
     p = player.Player(keyboard_and_mouse_controls = not resources["is_vr"])
     player_id = scene.AddActor(p)
