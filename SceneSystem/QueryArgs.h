@@ -13,8 +13,9 @@ public:
 	DECLARE_QUERY(QueryType, EMPTY);
 	DECLARE_QUERY(QueryType, MULTIPLE);
 
-	IdType Type() {return id_;}
+	IdType Type() const {return id_;}
 	IdType id_;
+	string Name() const { return QueryRegistry::GetRegistry().LookupNameConst(id_); }
 };
 
 class QueryArgs
@@ -27,9 +28,8 @@ public:
 	QueryArgs(const QueryArgs&) = delete;
 	QueryArgs operator=(const QueryArgs&) = delete;
 
-	IdType Type() const {return type_.id_;}
+	IdType Type() const {return type_.Type();}
 
-private:
 	QueryType type_;
 };
 

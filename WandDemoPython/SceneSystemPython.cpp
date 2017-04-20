@@ -98,6 +98,8 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	CreatePyActor<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>::Create();
 	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::actors::Poseable<game_scene::ActorImpl>>>::Create();
 
+	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
+
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type);
 
@@ -135,7 +137,9 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("MakeCommandAfter", &PyScene::MakeCommandAfter<game_scene::CommandArgs>)
 		.def("MakeCommandAfter", &PyScene::MakeCommandAfterWithPythonArgs);
 
-	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", init<>())
+	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", no_init)
+		.def("GetCommandRegistry", &game_scene::CommandRegistry::GetRegistry, return_value_policy<reference_existing_object>())
+		.def("GetQueryRegistry", &game_scene::QueryRegistry::GetRegistry, return_value_policy<reference_existing_object>())
 		.def("Register", &game_scene::RegistryMap::Register)
 		.def("IdFromName", &game_scene::RegistryMap::IdFromName)
 		.def("LookupName", &game_scene::RegistryMap::LookupName)

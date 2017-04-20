@@ -56,7 +56,7 @@ public:
 };
 
 struct GetRigidBodies : QueryArgs {
-	GetRigidBodies() : QueryArgs(PhysicsObjectQuery::GET_RIGID_BODIES) {}
+	GetRigidBodies();
 };
 
 struct GetRigidBodiesResult : QueryResult {

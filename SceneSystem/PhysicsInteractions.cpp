@@ -9,5 +9,7 @@ namespace commands {
 
 REGISTER_COMMAND(PhysicsInteractionCommand, RIGID_BODY_MOVED);
 
+RigidBodyUpdated::RigidBodyUpdated() : CommandArgs(PhysicsInteractionCommand::RIGID_BODY_MOVED) {}
+
 }  // commands
 }  // game_scene

@@ -52,23 +52,35 @@ public:
 	// Creates a wrapper for the AnswerQuery call that passes around query results as auto_ptrs rather than unique_ptrs.
 	//object PyAnswerQuery(const game_scene::QueryArgs& args) {
 	std::auto_ptr<game_scene::QueryResult> PyAnswerQuery(const game_scene::QueryArgs& args) {
-		object raw_result;
-		try {
-			const PyQueryArgs* downcast_args = dynamic_cast<const PyQueryArgs*>(&args);
-			if (downcast_args) {
-				raw_result = this->get_override("AnswerQuery")(downcast_args->self_);
-			} else {
-				raw_result = this->get_override("AnswerQuery")(boost::ref(args));
+		if (boost::python::override fn_override = this->get_override("AnswerQuery")) {
+			object raw_result;
+			try {
+				const PyQueryArgs* downcast_args = dynamic_cast<const PyQueryArgs*>(&args);
+				if (downcast_args) {
+					raw_result = fn_override(downcast_args->self_);
+				}
+				else {
+					raw_result = fn_override(boost::ref(args));
+				}
 			}
-		} catch (error_already_set) {
-			HandleError();
+			catch (error_already_set) {
+				HandleError();
+			}
+			extract<std::auto_ptr<game_scene::QueryResult>> extract_attempt(raw_result);
+			if (extract_attempt.check()) {
+				return static_cast<std::auto_ptr<game_scene::QueryResult>>(extract_attempt);
+			}
+			else {
+				return std::auto_ptr<game_scene::QueryResult>(make_unique<PyQueryResult>(raw_result).release());
+			}
 		}
-		extract<std::auto_ptr<game_scene::QueryResult>> extract_attempt(raw_result);
-		if (extract_attempt.check()) {
-			return static_cast<std::auto_ptr<game_scene::QueryResult>>(extract_attempt);
-		} else {
-			return std::auto_ptr<game_scene::QueryResult>(make_unique<PyQueryResult>(raw_result).release());
+		else {
+			return std::auto_ptr<game_scene::QueryResult>(ActorBase::AnswerQuery(args).release());
 		}
+	}
+
+	std::auto_ptr<game_scene::QueryResult> default_PyAnswerQuery(const game_scene::QueryArgs& args) {
+		return std::auto_ptr<game_scene::QueryResult>(ActorBase::AnswerQuery(args).release());
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) {
 		return unique_ptr<game_scene::QueryResult>(PyAnswerQuery(args).release());
@@ -121,9 +133,9 @@ struct CreatePyActor {
 		}
 		std::cout << "Creating: " << class_name << std::endl;
 		class_<ActorSpecial, bases<game_scene::ActorImpl>, boost::noncopyable>(class_name.c_str(), init<>())
-			.def("HandleCommand", &ActorBase::HandleCommand)
+			.def("HandleCommand", &ActorSpecial::HandleCommand, &ActorSpecial::default_HandleCommand)
 			.def("AddedToScene", &ActorBase::AddedToScene)
-			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery)
+			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery, &ActorSpecial::default_PyAnswerQuery)
 			.def("EmbedSelf", &EmbedSelfHack<ActorSpecial>)
 			.def("GetScene", &ActorBase::GetScene, return_value_policy<reference_existing_object>())
 			.add_property("id", &ActorBase::GetId)

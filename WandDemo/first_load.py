@@ -38,20 +38,20 @@ def first_load(resources):
             sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
-    physics_object = sc.PhysicsObject_Poseable_ActorImpl()
+    physics_object = sc.PrintNewPoses_PhysicsObject_Poseable_ActorImpl()
     scene.AddActor(physics_object)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "", sc.RigidBody(sc.Shape.MakeSphere(2.0), sc.Pose(sc.Location(1, 2, 3)))))
+            "", sc.RigidBody(sc.Shape.MakeSphere(2.0), sc.Pose(sc.Location(1, 2, 3)), 10.0)))
 
     physics_simulation = sc.PhysicsSimulation_ActorImpl()
     scene.AddActor(physics_simulation)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_simulation.id),
-        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_simulation.id))
+        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_object.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))

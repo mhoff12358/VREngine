@@ -16,9 +16,8 @@ public:
 	QueryResult(const QueryResult&) = delete;
 	QueryResult operator=(const QueryResult&) = delete;
 
-	int64_t Type() const {return type_.id_;}
+	int64_t Type() const {return type_.Type();}
 
-private:
 	QueryType type_;
 };
 

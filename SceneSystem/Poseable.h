@@ -13,11 +13,13 @@ public:
 
 class AcceptNewPose : public CommandArgs {
 public:
-	AcceptNewPose(Pose new_pose, Pose old_pose) :
+	AcceptNewPose(string name, Pose new_pose, Pose old_pose) :
 		CommandArgs(PoseableCommand::ACCEPT_NEW_POSE),
+		name_(name),
 		new_pose_(new_pose),
 		old_pose_(old_pose) {}
 
+	string name_;
 	Pose new_pose_;
 	Pose old_pose_;
 };
@@ -60,6 +62,28 @@ public:
 private:
 	map<string, Pose> stored_poses_;
 
+};
+
+template<typename ActorBase>
+class PrintNewPoses : public ActorBase {
+public:
+	void HandleCommand(CommandArgs& args) {
+		switch (args.Type()) {
+		case commands::PoseableCommand::ACCEPT_NEW_POSE:
+		{
+			auto& poses = dynamic_cast<commands::AcceptNewPose&>(args);
+			std::cout << "UPDATING POSE: " << poses.name_ << ": OLD POSE: " << std::to_string(poses.old_pose_) << ": NEW POSE: " << std::to_string(poses.new_pose_) << std::endl;
+		}
+			break;
+		default:
+			break;
+		}
+		ActorBase::HandleCommand(args);
+	}
+
+	static string GetName() {
+		return "PrintNewPoses-" + ActorBase::GetName();
+	}
 };
 
 }  // actors

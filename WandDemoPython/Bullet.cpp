@@ -53,6 +53,18 @@ std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shap
 	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
 }
 
+std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, btTransform transform, btScalar mass) {
+	bullet::Shape shape(std::move(*shape_ptr));
+	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), transform, mass);
+	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
+}
+
+std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, btTransform transform, btScalar mass, btVector3 inertia) {
+	bullet::Shape shape(std::move(*shape_ptr));
+	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), transform, mass, inertia);
+	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
+}
+
 std::auto_ptr<bullet::Shape> MakeAutoSphere(btScalar radius) {
 	auto shape = std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakeSphere(radius))));
 	//*shape = std::move(bullet::Shape::MakeSphere);
@@ -73,5 +85,10 @@ void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 		.staticmethod("MakePlaneWithConstant");
 
 	class_<bullet::RigidBody, std::auto_ptr<bullet::RigidBody>, boost::noncopyable>("RigidBody", no_init)
-		.def("__init__", boost::python::make_constructor(MakeRigidBody));
+		.def("__init__", boost::python::make_constructor(
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform)>(MakeRigidBody)))
+		.def("__init__", boost::python::make_constructor(
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform, btScalar)>(MakeRigidBody)))
+		.def("__init__", boost::python::make_constructor(
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform, btScalar, btVector3)>(MakeRigidBody)));
 }

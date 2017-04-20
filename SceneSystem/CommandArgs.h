@@ -17,6 +17,7 @@ public:
 
 	IdType Type() {return id_;}
 	IdType id_;
+	string Name() const { return CommandRegistry::GetRegistry().LookupNameConst(id_); }
 };
 
 class CommandArgs {

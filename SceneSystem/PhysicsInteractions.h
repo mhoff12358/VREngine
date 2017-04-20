@@ -13,7 +13,7 @@ public:
 };
 
 struct RigidBodyUpdated : public CommandArgs {
-	RigidBodyUpdated() : CommandArgs(PhysicsInteractionCommand::RIGID_BODY_MOVED) {}
+	RigidBodyUpdated();
 };
 
 }  // commands

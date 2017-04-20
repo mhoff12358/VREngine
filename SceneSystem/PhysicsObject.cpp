@@ -10,5 +10,7 @@ REGISTER_COMMAND(PhysicsObjectCommand, ADD_UPDATED_CALLBACK);
 }  // commands
 namespace queries {
 REGISTER_QUERY(PhysicsObjectQuery, GET_RIGID_BODIES);
+
+GetRigidBodies::GetRigidBodies() : QueryArgs(PhysicsObjectQuery::GET_RIGID_BODIES) {}
 }  // queries
 }  // game_scene

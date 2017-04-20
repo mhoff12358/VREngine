@@ -2,13 +2,15 @@ from scene_system_ import *
 import enum
 
 class SceneSystemGlobals(object):
-    query_registry = RegistryMap()
-    command_registry = RegistryMap()
+    query_registry = RegistryMap.GetQueryRegistry()
+    command_registry = RegistryMap.GetCommandRegistry()
 
 def ParseResources(resources):
     resources["query_registry"].AddRegistrationsFrom(SceneSystemGlobals.query_registry)
+    SceneSystemGlobals.query_registry.AddRegistrationsFrom(resources["query_registry"])
     SceneSystemGlobals.query_registry = resources["query_registry"]
     resources["command_registry"].AddRegistrationsFrom(SceneSystemGlobals.command_registry)
+    SceneSystemGlobals.command_registry.AddRegistrationsFrom(resources["command_registry"])
     SceneSystemGlobals.command_registry = resources["command_registry"]
 
 def AddCommandType(new_command_name: str):

@@ -114,26 +114,30 @@ private:
 	void PhysicsObjectIsUpdated(ActorId actor_id) {
 		auto raw_result = GetScene().AskQuery(Target(actor_id), queries::GetRigidBodies());
 		if (raw_result) {
-			queries::GetRigidBodiesResult& result = dynamic_cast<queries::GetRigidBodiesResult&>(*raw_result);
-			set<const bullet::RigidBody*> new_bodies(result.rigid_bodies_.begin(), result.rigid_bodies_.end());
-			auto existing_bodies = rigid_body_sources_.find(actor_id);
-			if (existing_bodies != rigid_body_sources_.end()) {
-				for (const bullet::RigidBody* body : existing_bodies->second) {
-					if (new_bodies.count(body) == 0) {
-						physics_simulation_impl_.world_.RemoveRigidBody(*body);
+			if (raw_result->Type() == queries::PhysicsObjectQuery::GET_RIGID_BODIES) {
+				queries::GetRigidBodiesResult& result = dynamic_cast<queries::GetRigidBodiesResult&>(*raw_result);
+				set<const bullet::RigidBody*> new_bodies(result.rigid_bodies_.begin(), result.rigid_bodies_.end());
+				auto existing_bodies = rigid_body_sources_.find(actor_id);
+				if (existing_bodies != rigid_body_sources_.end()) {
+					for (const bullet::RigidBody* body : existing_bodies->second) {
+						if (new_bodies.count(body) == 0) {
+							physics_simulation_impl_.world_.RemoveRigidBody(*body);
+						}
 					}
-				}
-				for (const bullet::RigidBody* body : new_bodies) {
-					if (body->GetFilled() && (existing_bodies->second.count(body) == 0)) {
-						physics_simulation_impl_.world_.AddRigidBody(*body);
+					for (const bullet::RigidBody* body : new_bodies) {
+						if (body->GetFilled() && (existing_bodies->second.count(body) == 0)) {
+							physics_simulation_impl_.world_.AddRigidBody(*body);
+						}
 					}
+					existing_bodies->second = std::move(new_bodies);
 				}
-				existing_bodies->second = std::move(new_bodies);
+				else {
+					rigid_body_sources_.insert(make_pair(actor_id, std::move(new_bodies)));
+				}
 			} else {
-				rigid_body_sources_.insert(make_pair(actor_id, std::move(new_bodies)));
+				std::cout << "Bad response type for physics object update: " << raw_result->type_.Name() << std::endl;
 			}
-		}
-		else {
+		} else {
 			std::cout << "Failed to get a response" << std::endl;
 		}
 	}
