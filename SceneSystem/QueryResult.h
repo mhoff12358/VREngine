@@ -17,6 +17,7 @@ public:
 	QueryResult operator=(const QueryResult&) = delete;
 
 	int64_t Type() const {return type_.Type();}
+	string Name() const { return type_.Name(); }
 
 	QueryType type_;
 };

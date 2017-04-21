@@ -2,6 +2,8 @@
 
 #include "PhysicsObject.h"
 
+FORCE_LINK_THIS(PhysicsObject)
+
 namespace game_scene {
 namespace commands {
 REGISTER_COMMAND(PhysicsObjectCommand, ADD_RIGID_BODY);

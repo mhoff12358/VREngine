@@ -2,6 +2,8 @@
 #include "QueryArgs.h"
 #include "Registry.h"
 
+FORCE_LINK_THIS(QueryArgs)
+
 namespace game_scene {
 
 REGISTER_QUERY(QueryType, EMPTY);

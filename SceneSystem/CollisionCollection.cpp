@@ -3,7 +3,16 @@
 
 #include "Scene.h"
 
+FORCE_LINK_THIS(CollisionCollection)
+
 namespace game_scene {
+
+REGISTER_COMMAND(CollisionCollectionCommand, ADD_COLLIDEABLE_OBJECT);
+REGISTER_COMMAND(CollisionCollectionCommand, REPOSE_COLLIDEABLE_OBJECT);
+REGISTER_COMMAND(CollisionCollectionCommand, ENDISABLE_COLLIDEABLE_OBJECT);
+REGISTER_COMMAND(CollisionCollectionCommand, REMOVE_COLLIDEABLE_OBJECT);
+REGISTER_COMMAND(CollisionCollectionCommand, INTERNAL_COLLISION);
+
 void InternalCollision::PassOn(Scene& scene, CommandQueueLocation location) {
 	if (!additional_collisions_.empty()) {
 		ActorId new_collided_actor = *additional_collisions_.cbegin();

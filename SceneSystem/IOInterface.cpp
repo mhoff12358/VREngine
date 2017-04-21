@@ -6,6 +6,8 @@
 
 #include "VRBackend/InputHandler.h"
 
+FORCE_LINK_THIS(IOInterface)
+
 namespace game_scene {
 
 REGISTER_COMMAND(IOInterfaceCommand, REGISTER_LISTENER);

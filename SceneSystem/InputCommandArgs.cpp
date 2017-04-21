@@ -2,6 +2,8 @@
 
 #include "InputCommandArgs.h"
 
+FORCE_LINK_THIS(InputCommandArgs)
+
 namespace game_scene {
 
 REGISTER_COMMAND(InputCommand, TICK);

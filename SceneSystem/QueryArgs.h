@@ -29,6 +29,7 @@ public:
 	QueryArgs operator=(const QueryArgs&) = delete;
 
 	IdType Type() const {return type_.Type();}
+	string Name() const { return type_.Name(); }
 
 	QueryType type_;
 };

@@ -8,6 +8,8 @@
 
 constexpr float controller_sphere_radius = 0.025f;
 
+FORCE_LINK_THIS(HeadsetInterface)
+
 namespace game_scene {
 
 REGISTER_COMMAND(HeadsetInterfaceCommand, REGISTER_LISTENER);

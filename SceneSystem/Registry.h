@@ -59,6 +59,10 @@ public:
 		return iter->second;
 	}
 
+	size_t size() {
+		return mapping_->size();
+	}
+
 private:
 	vector<string>& GetRegistries() {
 		if (registries_ == nullptr) {
@@ -84,6 +88,8 @@ public:
 
 	IdType value_;
 	static RegistryMap& GetRegistry();
+	static void SetRegistry(RegistryMap& registry);
+	static RegistryMap* override_registry_;
 };
 
 class CommandRegistry {
@@ -92,6 +98,8 @@ public:
 
 	IdType value_;
 	static RegistryMap& GetRegistry();
+	static void SetRegistry(RegistryMap& registry);
+	static RegistryMap* override_registry_;
 };
 
 }  // game_scene

@@ -12,14 +12,14 @@ class Delegater(object):
             self.query_delegation = copy.copy(parent_cls.delegater.query_delegation)
 
     def DefaultHandleCommand(self, command_args):
-        print("Failed to provide a handler for command args of type", command_args.Type())
+        print("Failed to provide a handler for command args of type", command_args.Type(), command_args.Name())
 
     @classmethod
     def GetDefaultHandleCommand(cls):
         return cls.DefaultHandleCommand
 
     def DefaultAnswerQuery(self, query_args):
-        print("Failed to provide a handler for query args of type", query_args.Type())
+        print("Failed to provide a handler for query args of type", query_args.Type(), query_args.Name())
         return None
 
     @classmethod

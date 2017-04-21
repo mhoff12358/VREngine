@@ -30,10 +30,6 @@ void Scene::RegisterDependency(const Target& depender, const Target& dependent) 
 }
 
 CommandQueueLocation Scene::MakeCommandAfter(CommandQueueLocation location, Command command) {
-	if (command.GetArgs().Type() == 9067436475682223081) {
-		std::cout << "MAKING COMMAND WITH TYPE: " << std::hex << command.GetArgs().Type() << std::endl;
-	}
-	//std::cout << "MAKING COMMAND WITH TYPE: " << std::hex << command.GetArgs().Type() << std::endl;
 	CommandQueueLocation new_location = commands_.InsertCommand(location, move(command));
 	if (location == back_of_current_commands_) {
 		back_of_current_commands_ = new_location;

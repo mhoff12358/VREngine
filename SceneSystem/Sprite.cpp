@@ -2,6 +2,8 @@
 
 #include "Sprite.h"
 
+FORCE_LINK_THIS(Sprite)
+
 namespace game_scene {
 
 REGISTER_COMMAND(SpriteCommand, CREATE_SPRITE);

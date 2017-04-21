@@ -101,13 +101,16 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
-		.def("Type", &game_scene::CommandArgs::Type);
+		.def("Type", &game_scene::CommandArgs::Type)
+		.def("Name", &game_scene::CommandArgs::Name);
 
 	class_<game_scene::QueryArgs, std::auto_ptr<game_scene::QueryArgs>, boost::noncopyable>("RawQueryArgs", init<game_scene::IdType>())
-		.def("Type", &game_scene::QueryArgs::Type);
+		.def("Type", &game_scene::QueryArgs::Type)
+		.def("Name", &game_scene::QueryArgs::Name);
 
 	class_<game_scene::QueryResult, std::auto_ptr<game_scene::QueryResult>, boost::noncopyable>("RawQueryResult", init<game_scene::IdType>())
-		.def("Type", &game_scene::QueryResult::Type);
+		.def("Type", &game_scene::QueryResult::Type)
+		.def("Name", &game_scene::QueryResult::Name);
 
 	class_<game_scene::CommandQueueLocation>("CommandQueueLocation", no_init);
 
@@ -140,10 +143,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	class_<game_scene::RegistryMap, boost::noncopyable>("RegistryMap", no_init)
 		.def("GetCommandRegistry", &game_scene::CommandRegistry::GetRegistry, return_value_policy<reference_existing_object>())
 		.def("GetQueryRegistry", &game_scene::QueryRegistry::GetRegistry, return_value_policy<reference_existing_object>())
+		.def("SetCommandRegistry", &game_scene::CommandRegistry::SetRegistry)
+		.def("SetQueryRegistry", &game_scene::QueryRegistry::SetRegistry)
 		.def("Register", &game_scene::RegistryMap::Register)
 		.def("IdFromName", &game_scene::RegistryMap::IdFromName)
 		.def("LookupName", &game_scene::RegistryMap::LookupName)
-		.def("AddRegistrationsFrom", &game_scene::RegistryMap::AddRegistrationsFrom);
+		.def("AddRegistrationsFrom", &game_scene::RegistryMap::AddRegistrationsFrom)
+		.def("Size", &game_scene::RegistryMap::size);
 
 	class_<game_scene::CommandType, boost::noncopyable>("CommandType", no_init)
 		.def_readonly("ADDED_TO_SCENE", &game_scene::CommandType::ADDED_TO_SCENE);

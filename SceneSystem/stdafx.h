@@ -51,6 +51,8 @@ using std::get;
 
 using boost::optional;
 
+#define FORCE_LINK_THIS(x) int force_link_##x = 0;
+
 class NotImplementedException : public std::logic_error
 {
 public:

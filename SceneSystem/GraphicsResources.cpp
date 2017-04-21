@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "GraphicsObject.h"
 
+FORCE_LINK_THIS(GraphicsResources)
+
 namespace game_scene {
 	
 REGISTER_QUERY(GraphicsResourceQuery, GRAPHICS_RESOURCE_REQUEST);

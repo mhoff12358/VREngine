@@ -9,6 +9,8 @@
 #include "VRBackend/Shaders.h"
 #include "VRBackend/ShaderSettings.h"
 
+FORCE_LINK_THIS(GraphicsObject)
+
 namespace game_scene {
 
 REGISTER_COMMAND(GraphicsObjectCommand, REQUIRE_RESOURCE);

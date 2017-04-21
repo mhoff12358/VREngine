@@ -28,6 +28,7 @@ public:
 	CommandArgs operator=(const CommandArgs&) = delete;
 
 	IdType Type() const {return type_.id_;}
+	string Name() const { return type_.Name(); }
 
 private:
 	CommandType type_;

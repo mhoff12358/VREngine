@@ -164,6 +164,7 @@ UpdateLoopResult UpdateLoop() {
 		inputs["is_vr"] = graphics_objects.oculus->IsHeadsetInitialized();
 		inputs["query_registry"] = boost::ref(game_scene::QueryRegistry::GetRegistry());
 		inputs["command_registry"] = boost::ref(game_scene::CommandRegistry::GetRegistry());
+		auto& a = game_scene::CommandRegistry::GetRegistry();
 		object result = loaded_module.attr("first_load")(inputs);
 	} catch (error_already_set) {
 		PyObject *type_ptr = NULL, *value_ptr = NULL, *traceback_ptr = NULL;
@@ -267,9 +268,24 @@ void HandlePyError() {
 }
 
 extern "C" PyObject* PyInit_scene_system_();
+#define FORCE_LINK_THAT(x) { extern int force_link_##x; force_link_##x = 1; }
 
 int _tmain(int argc, _TCHAR* argv[])
 {
+	FORCE_LINK_THAT(QueryArgs)
+	FORCE_LINK_THAT(Sprite)
+	FORCE_LINK_THAT(PhysicsSimulation)
+	FORCE_LINK_THAT(PhysicsObject)
+	FORCE_LINK_THAT(PhysicsInteractions)
+	FORCE_LINK_THAT(IOInterface)
+	FORCE_LINK_THAT(InputCommandArgs)
+	FORCE_LINK_THAT(HeadsetInterface)
+	FORCE_LINK_THAT(GraphicsResources)
+	FORCE_LINK_THAT(GraphicsObject)
+	FORCE_LINK_THAT(CommandArgs)
+	FORCE_LINK_THAT(CollisionCollection)
+	FORCE_LINK_THAT(NewGraphicsObject)
+
 	bool hmd_desired = false;
 
 	int append_result = PyImport_AppendInittab("scene_system_", PyInit_scene_system_);

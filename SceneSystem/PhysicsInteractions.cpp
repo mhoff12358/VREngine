@@ -4,6 +4,8 @@
 
 #include "PhysicsInteractions.h"
 
+FORCE_LINK_THIS(PhysicsInteractions)
+
 namespace game_scene {
 namespace commands {
 

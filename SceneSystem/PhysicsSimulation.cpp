@@ -2,6 +2,8 @@
 
 #include "PhysicsSimulation.h"
 
+FORCE_LINK_THIS(PhysicsSimulation)
+
 namespace game_scene {
 namespace commands {
 REGISTER_COMMAND(PhysicsSimulationCommand, UPDATE_PHYSICS_OBJECT);

@@ -1,6 +1,8 @@
 #include "stdafx.h"
 #include "CommandArgs.h"
 
+FORCE_LINK_THIS(CommandArgs)
+
 namespace game_scene {
 
 REGISTER_COMMAND(CommandType, ADDED_TO_SCENE);

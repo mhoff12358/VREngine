@@ -5,7 +5,14 @@
 #include "VRBackend/Entity.h"
 #include "VRBackend/EntityHandler.h"
 
+FORCE_LINK_THIS(NewGraphicsObject)
+
 namespace game_scene {
+
+REGISTER_COMMAND(NewGraphicsObjectCommand, CREATE);
+REGISTER_COMMAND(NewGraphicsObjectCommand, PLACE_COMPONENT);
+REGISTER_COMMAND(NewGraphicsObjectCommand, SET_ENTITY_SHADER_VALUES);
+
 namespace actors {
 
 void NewGraphicsObjectImpl::InitializeEntities(const commands::CreateNewGraphicsObject& args, actors::GraphicsResources& graphics_resources) {
