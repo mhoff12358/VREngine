@@ -6,7 +6,6 @@ class SceneSystemGlobals(object):
     command_registry = RegistryMap.GetCommandRegistry()
 
 def ParseResources(resources):
-    import pdb; pdb.set_trace()
     resources["query_registry"].AddRegistrationsFrom(SceneSystemGlobals.query_registry)
     SceneSystemGlobals.query_registry.AddRegistrationsFrom(resources["query_registry"])
     SceneSystemGlobals.query_registry = resources["query_registry"]
@@ -16,7 +15,6 @@ def ParseResources(resources):
     RegistryMap.SetCommandRegistry(resources["command_registry"])
 
 def AddCommandType(new_command_name: str):
-    import pdb; pdb.set_trace()
     new_val = SceneSystemGlobals.command_registry.Register(new_command_name)
     print("Registering new command:", new_command_name, new_val)
     return new_val
@@ -32,7 +30,6 @@ class CommandRegistration(enum.IntEnum):
         return obj
 
     def __init__(self, *args):
-        import pdb; pdb.set_trace()
         self._value_ = AddCommandType(str(self.__class__) + self.name)
 
     def __eq__(self, other):

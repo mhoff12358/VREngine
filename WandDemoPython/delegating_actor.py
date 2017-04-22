@@ -12,14 +12,13 @@ class Delegater(object):
             self.query_delegation = copy.copy(parent_cls.delegater.query_delegation)
 
     def DefaultHandleCommand(self, command_args):
-        print("Failed to provide a handler for command args of type", command_args.Type(), command_args.Name())
+        return True
 
     @classmethod
     def GetDefaultHandleCommand(cls):
         return cls.DefaultHandleCommand
 
     def DefaultAnswerQuery(self, query_args):
-        print("Failed to provide a handler for query args of type", query_args.Type(), query_args.Name())
         return None
 
     @classmethod
@@ -50,7 +49,8 @@ def create_delegating_actor_class(actor_class):
         def HandleCommand(self, command_args):
             if command_args.Type() == CommandType.ADDED_TO_SCENE:
                 self.scene = self.GetScene()
-            self.delegater.command_delegation[command_args.Type()](self, command_args)
+            if self.delegater.command_delegation[command_args.Type()](self, command_args):
+                super().HandleCommand(command_args)
 
         def AnswerQuery(self, query_args):
             return self.delegater.query_delegation[query_args.Type()](self, query_args)

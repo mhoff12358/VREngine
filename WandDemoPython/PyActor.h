@@ -29,7 +29,6 @@ public:
 				HandleError();
 			}
 		}
-		ActorBase::HandleCommand(args);
 	}
 	void default_HandleCommand(game_scene::CommandArgs& args) {
 		this->ActorBase::HandleCommand(args);
@@ -66,6 +65,9 @@ public:
 			catch (error_already_set) {
 				HandleError();
 			}
+			if (raw_result == object()) {
+				return std::auto_ptr<game_scene::QueryResult>(nullptr);
+			}
 			extract<std::auto_ptr<game_scene::QueryResult>> extract_attempt(raw_result);
 			if (extract_attempt.check()) {
 				return static_cast<std::auto_ptr<game_scene::QueryResult>>(extract_attempt);
@@ -75,7 +77,7 @@ public:
 			}
 		}
 		else {
-			return std::auto_ptr<game_scene::QueryResult>(ActorBase::AnswerQuery(args).release());
+			return std::auto_ptr<game_scene::QueryResult>(nullptr);
 		}
 	}
 
@@ -83,7 +85,12 @@ public:
 		return std::auto_ptr<game_scene::QueryResult>(ActorBase::AnswerQuery(args).release());
 	}
 	unique_ptr<game_scene::QueryResult> AnswerQuery(const game_scene::QueryArgs& args) {
-		return unique_ptr<game_scene::QueryResult>(PyAnswerQuery(args).release());
+		std::auto_ptr<game_scene::QueryResult> result(PyAnswerQuery(args));
+		if (result.get() != nullptr) {
+			return unique_ptr<game_scene::QueryResult>(PyAnswerQuery(args).release());
+		} else {
+			return ActorBase::AnswerQuery(args);
+		}
 	}
 
 	void EmbedSelf(object self) {
@@ -134,8 +141,10 @@ struct CreatePyActor {
 		std::cout << "Creating: " << class_name << std::endl;
 		class_<ActorSpecial, bases<game_scene::ActorImpl>, boost::noncopyable>(class_name.c_str(), init<>())
 			.def("HandleCommand", &ActorSpecial::HandleCommand, &ActorSpecial::default_HandleCommand)
+			.def("BaseHandleCommand", &ActorBase::HandleCommand)
 			.def("AddedToScene", &ActorBase::AddedToScene)
 			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery, &ActorSpecial::default_PyAnswerQuery)
+			.def("BaseAnswerQuery", &ActorBase::AnswerQuery)
 			.def("EmbedSelf", &EmbedSelfHack<ActorSpecial>)
 			.def("GetScene", &ActorBase::GetScene, return_value_policy<reference_existing_object>())
 			.add_property("id", &ActorBase::GetId)
