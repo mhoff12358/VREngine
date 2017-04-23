@@ -270,21 +270,26 @@ void HandlePyError() {
 extern "C" PyObject* PyInit_scene_system_();
 #define FORCE_LINK_THAT(x) { extern int force_link_##x; force_link_##x = 1; }
 
+#include "SceneSystem/Poseable.h"
+
 int _tmain(int argc, _TCHAR* argv[])
 {
-	FORCE_LINK_THAT(QueryArgs)
-	FORCE_LINK_THAT(Sprite)
-	FORCE_LINK_THAT(PhysicsSimulation)
-	FORCE_LINK_THAT(PhysicsObject)
-	FORCE_LINK_THAT(PhysicsInteractions)
-	FORCE_LINK_THAT(IOInterface)
-	FORCE_LINK_THAT(InputCommandArgs)
-	FORCE_LINK_THAT(HeadsetInterface)
-	FORCE_LINK_THAT(GraphicsResources)
-	FORCE_LINK_THAT(GraphicsObject)
-	FORCE_LINK_THAT(CommandArgs)
-	FORCE_LINK_THAT(CollisionCollection)
-	FORCE_LINK_THAT(NewGraphicsObject)
+	FORCE_LINK_THAT(QueryArgs);
+	FORCE_LINK_THAT(Sprite);
+	FORCE_LINK_THAT(PhysicsSimulation);
+	FORCE_LINK_THAT(PhysicsObject);
+	FORCE_LINK_THAT(PhysicsInteractions);
+	FORCE_LINK_THAT(IOInterface);
+	FORCE_LINK_THAT(InputCommandArgs);
+	FORCE_LINK_THAT(HeadsetInterface);
+	FORCE_LINK_THAT(GraphicsResources);
+	FORCE_LINK_THAT(GraphicsObject);
+	FORCE_LINK_THAT(CommandArgs);
+	FORCE_LINK_THAT(CollisionCollection);
+	FORCE_LINK_THAT(NewGraphicsObject);
+	FORCE_LINK_THAT(Poseable);
+
+	std::true_type a = game_scene::poseable::IsPoseable<game_scene::actors::Poseable<game_scene::ActorImpl>>::type();
 
 	bool hmd_desired = false;
 

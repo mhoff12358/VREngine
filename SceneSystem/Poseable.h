@@ -34,12 +34,12 @@ public:
 	void PushNewPoseImpl(pair<string, Pose> pose) {
 		auto existing_pose = stored_poses_.find(std::get<0>(pose));
 		if (existing_pose != stored_poses_.end()) {
-			if (existing_pose->second != std::get<1>(pose)) {
-				CommandNewPose(pose, existing_pose->second);
+			if (!(existing_pose->second == std::get<1>(pose))) {
+				CommandNewPose(pose.first, pose.second, existing_pose->second);
 			}
 		}
 		else {
-			CommandNewPose(pose, Pose());
+			CommandNewPose(pose.first, pose.second, Pose());
 		}
 	}
 
@@ -51,8 +51,8 @@ public:
 		stored_poses_.erase(pose_name);
 	}
 
-	void CommandNewPose(Pose new_pose, Pose old_pose) {
-		HandleCommandVirt(AcceptNewPose(new_pose, old_pose));
+	void CommandNewPose(string name, Pose new_pose, Pose old_pose) {
+		HandleCommandVirt(commands::AcceptNewPose(name, new_pose, old_pose));
 	}
 
 	static string GetName() {
@@ -98,13 +98,16 @@ struct IsPoseable {
 	typename typedef std::integral_constant<bool, sizeof(Test<ActorType>(0)) == sizeof(char)> type;
 };
 
+struct general_ {};
+struct special_ : public general_ {};
+
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, std::true_type) -> void {
+auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, special_) -> decltype(actor.PushNewPoseImpl(pose), void()) {
 	actor.PushNewPoseImpl(pose);
 }
 
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, std::false_type) -> void {
+auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, general_) -> void {
 
 }
 
@@ -130,7 +133,7 @@ auto ClearNamedPoseSpecial(ActorType& actor, string pose_name, std::false_type) 
 
 template<typename ActorType>
 void PushNewPose(ActorType& actor, pair<string, Pose> pose) {
-	PushNewPoseSpecial(actor, pose, IsPoseable<ActorType>::type());
+	PushNewPoseSpecial(actor, pose, special_());
 }
 
 template<typename ActorType>

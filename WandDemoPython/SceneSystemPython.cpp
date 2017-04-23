@@ -100,6 +100,13 @@ BOOST_PYTHON_MODULE(scene_system_) {
 
 	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
 
+//	std::true_type a = game_scene::poseable::IsPoseable<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::type();
+//	game_scene::poseable::IsPoseable<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::SFINAE<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>, game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>::PushNewPoseImpl>
+//	std::true_type b = game_scene::poseable::IsPoseable<game_scene::actors::Poseable<game_scene::ActorImpl>>::type();
+	auto c = &game_scene::actors::Poseable<game_scene::ActorImpl >::PushNewPoseImpl;
+	auto d = &game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl >>::PushNewPoseImpl;
+	void(game_scene::actors::Poseable<game_scene::ActorImpl>::*e)(pair<string, Pose>) = &game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>::PushNewPoseImpl;
+
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type)
 		.def("Name", &game_scene::CommandArgs::Name);

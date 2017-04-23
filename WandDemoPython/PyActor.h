@@ -18,16 +18,22 @@ public:
 	// Wrap existing calls that work to be virtualizable through Python.
 	void HandleCommand(game_scene::CommandArgs& args) {
 		if (boost::python::override fn_override = this->get_override("HandleCommand")) {
+			object result;
 			try {
 				PyCommandArgs* downcast_args = dynamic_cast<PyCommandArgs*>(&args);
 				if (downcast_args) {
-					fn_override(downcast_args->self_);
+					result = fn_override(downcast_args->self_);
 				} else {
-					fn_override(boost::ref(args));
+					result = fn_override(boost::ref(args));
 				}
 			} catch (error_already_set) {
 				HandleError();
 			}
+			if (!result) {
+				ActorBase::HandleCommand(args);
+			}
+		} else {
+			ActorBase::HandleCommand(args);
 		}
 	}
 	void default_HandleCommand(game_scene::CommandArgs& args) {
@@ -144,7 +150,6 @@ struct CreatePyActor {
 			.def("BaseHandleCommand", &ActorBase::HandleCommand)
 			.def("AddedToScene", &ActorBase::AddedToScene)
 			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery, &ActorSpecial::default_PyAnswerQuery)
-			.def("BaseAnswerQuery", &ActorBase::AnswerQuery)
 			.def("EmbedSelf", &EmbedSelfHack<ActorSpecial>)
 			.def("GetScene", &ActorBase::GetScene, return_value_policy<reference_existing_object>())
 			.add_property("id", &ActorBase::GetId)

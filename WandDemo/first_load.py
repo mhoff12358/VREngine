@@ -40,6 +40,7 @@ def first_load(resources):
 
     physics_object = sc.PrintNewPoses_PhysicsObject_Poseable_ActorImpl()
     scene.AddActor(physics_object)
+    print("ID: ", physics_object.id.id)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),

@@ -16,7 +16,6 @@ def ParseResources(resources):
 
 def AddCommandType(new_command_name: str):
     new_val = SceneSystemGlobals.command_registry.Register(new_command_name)
-    print("Registering new command:", new_command_name, new_val)
     return new_val
 
 def AddQueryType(new_query_name: str):

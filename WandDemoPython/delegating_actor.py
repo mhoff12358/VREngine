@@ -12,7 +12,7 @@ class Delegater(object):
             self.query_delegation = copy.copy(parent_cls.delegater.query_delegation)
 
     def DefaultHandleCommand(self, command_args):
-        return True
+        pass
 
     @classmethod
     def GetDefaultHandleCommand(cls):
