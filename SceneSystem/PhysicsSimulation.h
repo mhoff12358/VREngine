@@ -116,7 +116,10 @@ private:
 		if (raw_result) {
 			if (raw_result->Type() == queries::PhysicsObjectQuery::GET_RIGID_BODIES) {
 				queries::GetRigidBodiesResult& result = dynamic_cast<queries::GetRigidBodiesResult&>(*raw_result);
-				set<const bullet::RigidBody*> new_bodies(result.rigid_bodies_.begin(), result.rigid_bodies_.end());
+				set<const bullet::RigidBody*> new_bodies;
+				for (const bullet::RigidBody* new_body : result.rigid_bodies_) {
+					new_bodies.insert(new_body);
+				}
 				auto existing_bodies = rigid_body_sources_.find(actor_id);
 				if (existing_bodies != rigid_body_sources_.end()) {
 					for (const bullet::RigidBody* body : existing_bodies->second) {
@@ -130,8 +133,12 @@ private:
 						}
 					}
 					existing_bodies->second = std::move(new_bodies);
-				}
-				else {
+				} else {
+					for (const bullet::RigidBody* body : new_bodies) {
+						if (body->GetFilled()) {
+							physics_simulation_impl_.world_.AddRigidBody(*body);
+						}
+					}
 					rigid_body_sources_.insert(make_pair(actor_id, std::move(new_bodies)));
 				}
 			} else {

@@ -31,7 +31,7 @@ public:
     unique_ptr<btCollisionShape> shape_;
 
 	static Shape MakeSphere(btScalar radius);
-	static Shape MakePlaneWithConstant(btVector3 normal, btScalar plane_constant = 0);
+	static Shape MakePlane(btVector3 normal, btScalar plane_constant = 0);
 	static Shape MakePlane(btVector3 normal, btVector3 point_in_plane);
 };
 
@@ -66,12 +66,12 @@ public:
 	RigidBody(
 		Shape shape,
 		unique_ptr<btDefaultMotionState> starting_motion_state,
-		btScalar mass = 1,
+		btScalar mass = 0,
 		btVector3 inertia = btVector3(0, 0, 0));
 	RigidBody(
 		Shape shape,
 		btTransform transform,
-		btScalar mass = 1,
+		btScalar mass = 0,
 		btVector3 inertia = btVector3(0, 0, 0));
 	RigidBody(RigidBody&&) = default;
 	RigidBody& operator=(RigidBody&& other) = default;

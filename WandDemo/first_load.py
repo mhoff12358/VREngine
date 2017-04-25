@@ -40,12 +40,19 @@ def first_load(resources):
 
     physics_object = sc.PrintNewPoses_PhysicsObject_Poseable_ActorImpl()
     scene.AddActor(physics_object)
-    print("ID: ", physics_object.id.id)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "", sc.RigidBody(sc.Shape.MakeSphere(2.0), sc.Pose(sc.Location(1, 2, 3)), 10.0)))
+            "", sc.RigidBody(sc.Shape.MakeSphere(1.0), sc.Pose(sc.Location(1, 10, 3)), 10.0)))
+
+    physics_collection = sc.PhysicsObjectCollection_ActorImpl()
+    scene.AddActor(physics_collection)
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(physics_collection.id),
+        sc.AddRigidBody(
+            "Floor", sc.RigidBody(sc.Shape.MakePlane(sc.Location(0, 1, 0)), sc.Pose(sc.Location(0, 0, 0)))))
 
     physics_simulation = sc.PhysicsSimulation_ActorImpl()
     scene.AddActor(physics_simulation)
@@ -53,6 +60,10 @@ def first_load(resources):
         scene.BackOfNewCommands(),
         sc.Target(physics_simulation.id),
         sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_object.id))
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(physics_simulation.id),
+        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))

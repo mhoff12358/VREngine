@@ -44,12 +44,12 @@ Shape Shape::MakeSphere(btScalar radius) {
 	return Shape(make_unique<btSphereShape>(radius));
 }
 
-Shape Shape::MakePlaneWithConstant(btVector3 normal, btScalar plane_constant) {
+Shape Shape::MakePlane(btVector3 normal, btScalar plane_constant) {
 	return Shape(make_unique<btStaticPlaneShape>(normal, plane_constant));
 }
 
 Shape Shape::MakePlane(btVector3 normal, btVector3 point_in_plane) {
-	return MakePlaneWithConstant(normal, normal.dot(point_in_plane));
+	return MakePlane(normal, normal.dot(point_in_plane));
 }
 
 RigidBody::RigidBody() :
@@ -70,7 +70,9 @@ RigidBody::RigidBody(
 	shape_(std::move(shape)),
 	motion_state_(std::move(starting_motion_state))
 {
-	shape_.shape_->calculateLocalInertia(mass, inertia);
+	if (mass) {
+		shape_.shape_->calculateLocalInertia(mass, inertia);
+	}
     btRigidBody::btRigidBodyConstructionInfo construction_info(mass, motion_state_.get(), shape_.shape_.get(), inertia);
 	body_ = make_unique<btRigidBody>(construction_info);
 }

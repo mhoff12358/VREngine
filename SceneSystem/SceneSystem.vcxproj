@@ -177,6 +177,7 @@
     <ClCompile Include="PhysicsInteractions.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="PhysicsSimulation.cpp" />
+    <ClCompile Include="Poseable.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />
     <ClCompile Include="Registry.cpp" />

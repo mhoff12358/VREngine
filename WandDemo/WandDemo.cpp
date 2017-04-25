@@ -289,8 +289,6 @@ int _tmain(int argc, _TCHAR* argv[])
 	FORCE_LINK_THAT(NewGraphicsObject);
 	FORCE_LINK_THAT(Poseable);
 
-	std::true_type a = game_scene::poseable::IsPoseable<game_scene::actors::Poseable<game_scene::ActorImpl>>::type();
-
 	bool hmd_desired = false;
 
 	int append_result = PyImport_AppendInittab("scene_system_", PyInit_scene_system_);

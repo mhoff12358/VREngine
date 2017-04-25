@@ -29,9 +29,6 @@ public:
 			} catch (error_already_set) {
 				HandleError();
 			}
-			if (!result) {
-				ActorBase::HandleCommand(args);
-			}
 		} else {
 			ActorBase::HandleCommand(args);
 		}
@@ -147,6 +144,7 @@ struct CreatePyActor {
 		std::cout << "Creating: " << class_name << std::endl;
 		class_<ActorSpecial, bases<game_scene::ActorImpl>, boost::noncopyable>(class_name.c_str(), init<>())
 			.def("HandleCommand", &ActorSpecial::HandleCommand, &ActorSpecial::default_HandleCommand)
+			.def("ParentHandleCommand", &ActorSpecial::default_HandleCommand)
 			.def("BaseHandleCommand", &ActorBase::HandleCommand)
 			.def("AddedToScene", &ActorBase::AddedToScene)
 			.def("AnswerQuery", &ActorSpecial::PyAnswerQuery, &ActorSpecial::default_PyAnswerQuery)

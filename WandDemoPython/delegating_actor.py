@@ -12,7 +12,7 @@ class Delegater(object):
             self.query_delegation = copy.copy(parent_cls.delegater.query_delegation)
 
     def DefaultHandleCommand(self, command_args):
-        pass
+        return None
 
     @classmethod
     def GetDefaultHandleCommand(cls):
@@ -50,7 +50,7 @@ def create_delegating_actor_class(actor_class):
             if command_args.Type() == CommandType.ADDED_TO_SCENE:
                 self.scene = self.GetScene()
             if self.delegater.command_delegation[command_args.Type()](self, command_args):
-                super().HandleCommand(command_args)
+                ParentHandleCommand(command_args)
 
         def AnswerQuery(self, query_args):
             return self.delegater.query_delegation[query_args.Type()](self, query_args)

@@ -209,5 +209,8 @@
     <ClCompile Include="PhysicsInteractions.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Poseable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -36,7 +36,10 @@ struct MakeFromConverter {
 			((boost::python::converter::rvalue_from_python_storage<OutType>*)
 				data)->storage.bytes;
 
-		OutType* out_ptr = new (storage) OutType(raw_construct(*in));
+		//OutType* out_ptr = new (storage) OutType(raw_construct(*in));
+		//OutType temp = raw_construct(*in);
+		//*reinterpret_cast<OutType*>(storage) = raw_construct(*in);
+		new (storage) OutType(raw_construct(*in));
 		data->convertible = storage;
 	}
 };
@@ -47,48 +50,58 @@ string DumpTypeString(boost::python::object obj) {
 	return string(type->tp_name);
 }
 
-std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, btTransform transform) {
+std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, Pose transform) {
 	bullet::Shape shape(std::move(*shape_ptr));
-	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), transform);
+	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), bullet::poses::GetTransform(transform));
 	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
 }
 
-std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, btTransform transform, btScalar mass) {
+std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, Pose transform, btScalar mass) {
 	bullet::Shape shape(std::move(*shape_ptr));
-	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), transform, mass);
+	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), bullet::poses::GetTransform(transform), mass);
 	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
 }
 
-std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, btTransform transform, btScalar mass, btVector3 inertia) {
+std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shape_ptr, Pose transform, btScalar mass, Location inertia) {
 	bullet::Shape shape(std::move(*shape_ptr));
-	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), transform, mass, inertia);
+	auto rigid_body = std::make_unique<bullet::RigidBody>(std::move(shape), bullet::poses::GetTransform(transform), mass, bullet::poses::GetVector3(inertia));
 	return std::auto_ptr<bullet::RigidBody>(rigid_body.release());
 }
 
 std::auto_ptr<bullet::Shape> MakeAutoSphere(btScalar radius) {
-	auto shape = std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakeSphere(radius))));
-	//*shape = std::move(bullet::Shape::MakeSphere);
-	return shape;
+	return std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakeSphere(radius))));
+}
+
+std::auto_ptr<bullet::Shape> MakeAutoPlane(Location normal) {
+	return std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakePlane(bullet::poses::GetVector3(normal)))));
+}
+
+std::auto_ptr<bullet::Shape> MakeAutoPlaneConstant(Location normal, btScalar plane_constant) {
+	return std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakePlane(bullet::poses::GetVector3(normal), plane_constant))));
+}
+
+std::auto_ptr<bullet::Shape> MakeAutoPlanePoint(Location normal, Location point_in_plane) {
+	return std::auto_ptr<bullet::Shape>(new bullet::Shape(std::move(bullet::Shape::MakePlane(bullet::poses::GetVector3(normal), bullet::poses::GetVector3(point_in_plane)))));
 }
 
 void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
-	MakeFromConverter < Pose, btTransform, bullet::poses::GetTransform > ();
-	MakeFromConverter < Location, btVector3, bullet::poses::GetVector3 > ();
-	MakeFromConverter < Quaternion, btQuaternion, bullet::poses::GetQuaternion > ();
+	//MakeFromConverter < Pose, btTransform, bullet::poses::GetTransform > ();
+	//MakeFromConverter < Location, btVector3, bullet::poses::GetVector3 > ();
+	//MakeFromConverter < Quaternion, btQuaternion, bullet::poses::GetQuaternion > ();
 
 	class_<bullet::Shape, std::auto_ptr<bullet::Shape>, boost::noncopyable>("Shape", no_init)
 		.def("MakeSphere", MakeAutoSphere)
 		.staticmethod("MakeSphere")
-		.def("MakePlane", bullet::Shape::MakePlane)
-		.staticmethod("MakePlane")
-		.def("MakePlaneWithConstant", bullet::Shape::MakePlaneWithConstant)
-		.staticmethod("MakePlaneWithConstant");
+		.def("MakePlane", MakeAutoPlane)
+		.def("MakePlane", MakeAutoPlaneConstant)
+		.def("MakePlane", MakeAutoPlanePoint)
+		.staticmethod("MakePlane");
 
 	class_<bullet::RigidBody, std::auto_ptr<bullet::RigidBody>, boost::noncopyable>("RigidBody", no_init)
 		.def("__init__", boost::python::make_constructor(
-			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform)>(MakeRigidBody)))
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose)>(MakeRigidBody)))
 		.def("__init__", boost::python::make_constructor(
-			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform, btScalar)>(MakeRigidBody)))
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose, btScalar)>(MakeRigidBody)))
 		.def("__init__", boost::python::make_constructor(
-			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, btTransform, btScalar, btVector3)>(MakeRigidBody)));
+			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose, btScalar, Location)>(MakeRigidBody)));
 }

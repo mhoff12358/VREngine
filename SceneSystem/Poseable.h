@@ -35,16 +35,19 @@ public:
 		auto existing_pose = stored_poses_.find(std::get<0>(pose));
 		if (existing_pose != stored_poses_.end()) {
 			if (!(existing_pose->second == std::get<1>(pose))) {
-				CommandNewPose(pose.first, pose.second, existing_pose->second);
+				Pose original_pose = existing_pose->second;
+				RegisterNamedPoseImpl(pose);
+				CommandNewPose(pose.first, pose.second, original_pose);
 			}
 		}
 		else {
+			RegisterNamedPoseImpl(pose);
 			CommandNewPose(pose.first, pose.second, Pose());
 		}
 	}
 
 	void RegisterNamedPoseImpl(pair<string, Pose> pose) {
-		stored_poses_.insert(pose);
+		stored_poses_[std::get<0>(pose)] = std::get<1>(pose);
 	}
 
 	void ClearNamedPoseImpl(string pose_name) {
