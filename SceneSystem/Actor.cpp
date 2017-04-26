@@ -29,6 +29,7 @@ Scene& IActor::GetScene() {
 }
 
 void ActorImpl::HandleCommand(CommandArgs& args) {
+	//std::cout << "Failed to handle command: " << args.Type() << ", " << args.Name() << " inside: " << GetNameVirt() << std::endl;
 }
 
 unique_ptr<QueryResult> ActorImpl::AnswerQuery(const QueryArgs& args) {
