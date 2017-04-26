@@ -4,13 +4,14 @@
 #include "StlHelper.h"
 #include "PyScene.h"
 #include "SceneSystem/NewGraphicsObject.h"
+#include "SceneSystem/Actor.h"
 
 BOOST_PTR_MAGIC(game_scene::commands::CreateNewGraphicsObject)
 BOOST_PTR_MAGIC(game_scene::commands::PlaceNewComponent)
 BOOST_PTR_MAGIC(game_scene::commands::SetEntityShaderValues)
 
 void GraphicsObjectInterface(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
-	PyScene::AddActorSubclassCreation<game_scene::actors::NewGraphicsObject>(scene_registration, "GraphicsObject");
+	PyScene::AddActorSubclassCreation<game_scene::ActorAdapter<game_scene::actors::NewGraphicsObject<game_scene::ActorImpl>>>(scene_registration, "GraphicsObject");
 
 	class_<
 		game_scene::commands::CreateNewGraphicsObject,

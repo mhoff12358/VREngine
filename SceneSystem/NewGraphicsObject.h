@@ -67,6 +67,7 @@ public:
 	void InitializeEntities(const commands::CreateNewGraphicsObject& args, actors::GraphicsResources& graphics_resources);
 	void PlaceComponent(const commands::PlaceNewComponent& args);
 	void SetShaderValues(const commands::SetEntityShaderValues& args, actors::GraphicsResources& graphics_resources);
+	void HandleAcceptNewPose(const commands::AcceptNewPose& args);
 
 private:
 	struct EntityRange {
@@ -106,20 +107,23 @@ private:
 };
 
 template<typename ActorBase>
-class NewGraphicsObjectTemp : public ActorBase {
+class NewGraphicsObject : public ActorBase {
 public:
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
 		case CommandType::ADDED_TO_SCENE:
 			break;
 		case NewGraphicsObjectCommand::CREATE:
-			impl_.InitializeEntities(dynamic_cast<const commands::CreateNewGraphicsObject&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
+			impl_.InitializeEntities(dynamic_cast<commands::CreateNewGraphicsObject&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
 			return;
 		case NewGraphicsObjectCommand::PLACE_COMPONENT:
-			impl_.PlaceComponent(dynamic_cast<const commands::PlaceNewComponent&>(args));
+			impl_.PlaceComponent(dynamic_cast<commands::PlaceNewComponent&>(args));
 			return;
 		case NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES:
-			impl_.SetShaderValues(dynamic_cast<const commands::SetEntityShaderValues&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
+			impl_.SetShaderValues(dynamic_cast<commands::SetEntityShaderValues&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
+			return;
+		case commands::PoseableCommand::ACCEPT_NEW_POSE:
+			impl_.HandleAcceptNewPose(dynamic_cast<commands::AcceptNewPose&>(args));
 			return;
 		default:
 			break;
@@ -135,10 +139,8 @@ private:
 	NewGraphicsObjectImpl impl_;
 };
 
-typedef ActorAdapter<NewGraphicsObjectTemp<ActorImpl>> NewGraphicsObject;
-
-template class NewGraphicsObjectTemp<Poseable<ActorImpl>>;
-template class NewGraphicsObjectTemp<ActorImpl>;
+template class NewGraphicsObject<Poseable<ActorImpl>>;
+template class NewGraphicsObject<ActorImpl>;
 
 }  // actors
 }  // game_scene

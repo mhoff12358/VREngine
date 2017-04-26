@@ -91,7 +91,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	Fn4<Fn, JIFOE>();
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
-	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObjectTemp>();
+	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObject>();
 	CreatePyActor<game_scene::actors::PhysicsSimulation<game_scene::ActorImpl>>::Create();
 	CreatePyActor<game_scene::actors::PhysicsObject<game_scene::ActorImpl>>::Create();
 	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::ActorImpl>>::Create();
@@ -99,6 +99,7 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::actors::Poseable<game_scene::ActorImpl>>>::Create();
 
 	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
+	CreatePyActor<game_scene::actors::NewGraphicsObject<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
 	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObjectCollection<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())

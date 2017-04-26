@@ -94,6 +94,10 @@ void NewGraphicsObjectImpl::SetShaderValues(const commands::SetEntityShaderValue
 	args.value_.SetIntoConstantBuffer(entity_handler.GetShaderSettings(shaded_entity));
 }
 
+void NewGraphicsObjectImpl::HandleAcceptNewPose(const commands::AcceptNewPose& args) {
+	PlaceComponent(commands::PlaceNewComponent(args.name_, args.new_pose_));
+}
+
 Component* NewGraphicsObjectImpl::GetTransformByName(const string& transform_name) {
 	Component* component = nullptr;
 	auto transform_index = transform_lookup_.find(transform_name);

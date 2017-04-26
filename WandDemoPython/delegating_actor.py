@@ -49,8 +49,8 @@ def create_delegating_actor_class(actor_class):
         def HandleCommand(self, command_args):
             if command_args.Type() == CommandType.ADDED_TO_SCENE:
                 self.scene = self.GetScene()
-            if self.delegater.command_delegation[command_args.Type()](self, command_args):
-                ParentHandleCommand(command_args)
+            if self.delegater.command_delegation[command_args.Type()](self, command_args) is None:
+                self.ParentHandleCommand(command_args)
 
         def AnswerQuery(self, query_args):
             return self.delegater.query_delegation[query_args.Type()](self, query_args)
