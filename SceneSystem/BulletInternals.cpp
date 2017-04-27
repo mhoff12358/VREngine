@@ -93,6 +93,51 @@ void RigidBody::SetPayload(RigidBodyPayload* payload) {
 	shape_.shape_->setUserPointer(static_cast<void*>(payload));
 }
 
+const btDefaultMotionState& RigidBody::GetMotionState() const {
+	return *motion_state_.get();
+}
+btDefaultMotionState* RigidBody::GetMutableMotionState() {
+	return motion_state_.get();
+}
+
+btTransform RigidBody::GetTransform() const {
+	btTransform transform;
+	motion_state_->getWorldTransform(transform);
+	return transform;
+}
+void RigidBody::SetTransform(btTransform new_transform) {
+	motion_state_->setWorldTransform(new_transform);
+}
+
+void RigidBody::MakeStatic() {
+	btScalar inv_mass = body_->getInvMass();
+	if (inv_mass) {
+		body_->setMassProps(0.0f, body_->getLocalInertia());
+		stored_mass_ = 1.0f / inv_mass;
+	}
+}
+
+void RigidBody::MakeDynamic() {
+	if (stored_mass_) {
+		body_->setMassProps(stored_mass_, body_->getLocalInertia());
+	}
+}
+
+void RigidBody::MakeCollideable(bool collideable) const {
+	if (collideable) {
+		body_->setCollisionFlags(body_->getCollisionFlags() |
+			btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+	} else {
+		body_->setCollisionFlags(body_->getCollisionFlags() &
+			~btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+	}
+}
+
+bool RigidBody::IsCollideable() const {
+	return static_cast<bool>(body_->getCollisionFlags() &
+		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+}
+
 World::World(Config config) :
 	config_(std::move(config)),
 	world_(new btDiscreteDynamicsWorld(
@@ -119,37 +164,6 @@ void World::RemoveRigidBody(const RigidBody& body) {
 }
 void World::RemoveRigidBody(btRigidBody* body) {
 	world_->removeRigidBody(body);
-}
-
-const btDefaultMotionState& RigidBody::GetMotionState() const {
-	return *motion_state_.get();
-}
-btDefaultMotionState* RigidBody::GetMutableMotionState() {
-	return motion_state_.get();
-}
-
-btTransform RigidBody::GetTransform() const {
-	btTransform transform;
-	motion_state_->getWorldTransform(transform);
-	return transform;
-}
-void RigidBody::SetTransform(btTransform new_transform) {
-	motion_state_->setWorldTransform(new_transform);
-}
-
-void RigidBody::MakeCollideable(bool collideable) const {
-	if (collideable) {
-		body_->setCollisionFlags(body_->getCollisionFlags() |
-			btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-	} else {
-		body_->setCollisionFlags(body_->getCollisionFlags() &
-			~btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
-	}
-}
-
-bool RigidBody::IsCollideable() const {
-	return static_cast<bool>(body_->getCollisionFlags() &
-		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 }
 
 namespace poses {

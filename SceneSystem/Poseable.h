@@ -13,13 +13,15 @@ public:
 
 class AcceptNewPose : public CommandArgs {
 public:
-	AcceptNewPose(string name, Pose new_pose, Pose old_pose) :
+	AcceptNewPose(string name, string pose_source, Pose new_pose, Pose old_pose) :
 		CommandArgs(PoseableCommand::ACCEPT_NEW_POSE),
 		name_(name),
+		pose_source_(pose_source),
 		new_pose_(new_pose),
 		old_pose_(old_pose) {}
 
 	string name_;
+	string pose_source_;
 	Pose new_pose_;
 	Pose old_pose_;
 };
@@ -55,7 +57,7 @@ public:
 	}
 
 	void CommandNewPose(string name, Pose new_pose, Pose old_pose) {
-		HandleCommandVirt(commands::AcceptNewPose(name, new_pose, old_pose));
+		HandleCommandVirt(commands::AcceptNewPose(name, GetNameVirt(), new_pose, old_pose));
 	}
 
 	static string GetName() {

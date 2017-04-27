@@ -11,13 +11,25 @@
 #include "Poseable.h"
 
 namespace game_scene {
+
+namespace {
+struct PhysicsObjectComponent {
+	PhysicsObjectComponent() : body_(), enabled_(false) {}
+	PhysicsObjectComponent(bullet::RigidBody body, bool enabled) :
+		body_(std::move(body)), enabled_(enabled) {}
+
+	bullet::RigidBody body_;
+	bool enabled_;
+};
+}
+
 namespace commands {
 
 class PhysicsObjectCommand {
 public:
 	DECLARE_COMMAND(PhysicsObjectCommand, ADD_RIGID_BODY);
 	DECLARE_COMMAND(PhysicsObjectCommand, REMOVE_RIGID_BODY);
-	DECLARE_COMMAND(PhysicsObjectCommand, TOGGLE_RIGID_BODY);
+	DECLARE_COMMAND(PhysicsObjectCommand, MODIFY_RIGID_BODY);
 	DECLARE_COMMAND(PhysicsObjectCommand, ADD_UPDATED_CALLBACK);
 };
 
@@ -46,17 +58,38 @@ struct RemoveRigidBody : public CommandArgs {
 	string name_;
 };
 
-struct ToggleRigidBody : public CommandArgs {
-	ToggleRigidBody(bool enable) :
-		CommandArgs(PhysicsObjectCommand::TOGGLE_RIGID_BODY), toggle_all_(true), names_to_toggle_() {}
-	ToggleRigidBody(bool enable, string name) :
-		CommandArgs(PhysicsObjectCommand::TOGGLE_RIGID_BODY), toggle_all_(false), names_to_toggle_({ name }) {}
-	ToggleRigidBody(bool enable, vector<string> names) :
-		CommandArgs(PhysicsObjectCommand::TOGGLE_RIGID_BODY), toggle_all_(false), names_to_toggle_(std::move(names)) {}
+struct ModifyRigidBody : public CommandArgs {
+	enum Modifier {
+		ENABLE,
+		DISABLE,
+		STATIC,
+		DYNAMIC
+	};
 
-	bool enable_;
-	bool toggle_all_;
-	vector<string> names_to_toggle_;
+	ModifyRigidBody(Modifier modifier) :
+		CommandArgs(PhysicsObjectCommand::MODIFY_RIGID_BODY), modifier_(modifier) {}
+
+	bool ApplyModifier(PhysicsObjectComponent& comp) {
+		if ((modifier_ == ENABLE) || (modifier_ == DISABLE)) {
+			bool enabled = (modifier_ == ENABLE);
+			if (comp.enabled_ == enabled) {
+				return false;
+			}
+			comp.enabled_ = enabled;
+			return true;
+		} else if ((modifier_ == STATIC) || (modifier_ == DYNAMIC)) {
+			if (modifier_ == STATIC) {
+				comp.body_.MakeStatic();
+			} else {
+				comp.body_.MakeDynamic();
+			}
+			return true;
+		}
+	}
+
+	Modifier modifier_;
+	bool modify_all_;
+	vector<string> names_to_modify_;
 };
 
 struct AddUpdatedCallback : public CommandArgs {
@@ -108,11 +141,13 @@ public:
 		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
 			ClearRigidBody();
 			break;
-		case commands::PhysicsObjectCommand::TOGGLE_RIGID_BODY:
-			ToggleRigidBody(dynamic_cast<commands::AddRigidBody&>(args));
+		case commands::PhysicsObjectCommand::MODIFY_RIGID_BODY:
+			ModifyRigidBody(dynamic_cast<commands::ModifyRigidBody&>(args));
 		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
 			RigidBodyPoseUpdated();
 			break;
+		case commands::PoseableCommand::ACCEPT_NEW_POSE:
+			HandleNewPose(dynamic_cast<commands::AcceptNewPose&>(args));
 		default:
 			break;
 		}
@@ -122,8 +157,8 @@ public:
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) const {
 		switch (args.Type()) {
 		case queries::PhysicsObjectQuery::GET_RIGID_BODIES:
-			if (enabled_) {
-				return make_unique<queries::GetRigidBodiesResult>(rigid_body_);
+			if (rigid_body_.enabled_) {
+				return make_unique<queries::GetRigidBodiesResult>(rigid_body_.body_);
 			} else {
 				return make_unique<queries::GetRigidBodiesResult>(vector<const bullet::RigidBody*>());
 			}
@@ -139,38 +174,40 @@ public:
 private:
 	void SetRigidBody(commands::AddRigidBody& args) {
 		rigid_body_name_ = args.name_;
-		rigid_body_ = std::move(args.rigid_body_);
-		enabled_ = args.enabled_;
+		rigid_body_ = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
 	void ClearRigidBody() {
-		rigid_body_ = bullet::RigidBody();
+		rigid_body_ = PhysicsObjectComponent();
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
-	void ToggleRigidBody(commands::ToggleRigidBody& args) {
-		if (args.enable_ != enabled_) {
-			enabled_ = args.enable_;
-			if (updated_callback_) {
-				updated_callback_(GetId());
-			}
+	void ModifyRigidBody(commands::ModifyRigidBody& args) {
+		bool changed = args.ApplyModifier(rigid_body_);
+		if (changed && updated_callback_) {
+			updated_callback_(GetId());
 		}
 	}
 
 	void RigidBodyPoseUpdated() {
 		poseable::PushNewPose(*this, std::make_pair(
 			rigid_body_name_,
-			bullet::poses::GetPose(rigid_body_.GetTransform())));
+			bullet::poses::GetPose(rigid_body_.body_.GetTransform())));
 	}
 
-	bool enabled_ = true;
+	void HandleNewPose(commands::AcceptNewPose& args) {
+		if (args.pose_source_ != GetNameVirt()) {
+			rigid_body_.body_.SetTransform(poses::GetTransform(args.new_pose_));
+		}
+	}
+
 	string rigid_body_name_;
-	bullet::RigidBody rigid_body_;
+	PhysicsObjectComponent rigid_body_;
 	game_scene::ActorCallback updated_callback_;
 };
 
@@ -187,8 +224,8 @@ public:
 		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
 			RemoveExistingRigidBody(dynamic_cast<commands::RemoveRigidBody&>(args));
 			break;
-		case commands::PhysicsObjectCommand::TOGGLE_RIGID_BODY:
-			ToggleRigidBody(dynamic_cast<commands::AddRigidBody&>(args));
+		case commands::PhysicsObjectCommand::MODIFY_RIGID_BODY:
+			ModifyRigidBody(dynamic_cast<commands::ModifyRigidBody&>(args));
 		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
 			RigidBodyPoseUpdated();
 			break;
@@ -204,8 +241,8 @@ public:
 		{
 			vector<const bullet::RigidBody*> bodies;
 			for (const auto& rigid_body : rigid_bodies_) {
-				if (rigid_body.second.second) {
-					bodies.push_back(&rigid_body.second.first);
+				if (rigid_body.second.enabled_) {
+					bodies.push_back(&rigid_body.second.body_);
 				}
 			}
 			return make_unique<queries::GetRigidBodiesResult>(bodies);
@@ -221,7 +258,7 @@ public:
 
 private:
 	void AddNewRigidBody(commands::AddRigidBody& args) {
-		rigid_bodies_[args.name_] = std::make_pair(std::move(args.rigid_body_), args.enabled_);
+		rigid_bodies_[args.name_] = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
@@ -234,23 +271,20 @@ private:
 		}
 	}
 
-	void ToggleRigidBody(commands::ToggleRigidBody& args) {
+	void ModifyRigidBody(commands::ModifyRigidBody& args) {
 		bool changed = false;
-		if (args.toggle_all_) {
+		if (args.modify_all_) {
 			for (auto& rigid_body : rigid_bodies_) {
-				changed |= (rigid_body.second.second != args.enable_);
-				rigid_body.second.second = args.enable_;
+				changed |= args.ApplyModifier(rigid_body.second);
 			}
 		} else {
-			for (const string& name : args.names_to_toggle_) {
+			for (const string& name : args.names_to_modify_) {
 				auto rigid_body_iter = rigid_bodies_.find(name);
 				if (rigid_body_iter == rigid_bodies_.end()) {
 					std::cout << "Tried to toggle a non-existant rigid body" << std::endl;
 					continue;
 				}
-				auto& rigid_body = *rigid_body_iter;
-				changed |= (rigid_body.second.second != args.enable_);
-				rigid_body.second.second = args.enable_;
+				changed |= args.ApplyModifier(rigid_body_iter->second);
 			}
 		}
 		if (changed && updated_callback_) {
@@ -262,11 +296,22 @@ private:
 		for (const auto& named_rigid_body : rigid_bodies_) {
 			poseable::PushNewPose(*this, std::make_pair(
 				named_rigid_body.first,
-				bullet::poses::GetPose(named_rigid_body.second.GetTransform())));
+				bullet::poses::GetPose(named_rigid_body.second.body_.GetTransform())));
 		}
 	}
 
-	map<string, pair<bullet::RigidBody, bool>> rigid_bodies_;
+	void HandleNewPose(commands::AcceptNewPose& args) {
+		if (args.pose_source_ != GetNameVirt()) {
+			auto rigid_body_iter = rigid_bodies_.find(args.name_);
+			if (rigid_body_iter == rigid_bodies_.end()) {
+				std::cout << "Attempting to set a new pose of a rigid body that doesn't exist." << std::endl;
+				return;
+			}
+			rigid_body_iter->second.body_.SetTransform(poses::GetTransform(args.new_pose_));
+		}
+	}
+
+	map<string, PhysicsObjectComponent> rigid_bodies_;
 	game_scene::ActorCallback updated_callback_;
 };
 

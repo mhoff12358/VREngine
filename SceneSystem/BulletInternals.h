@@ -87,6 +87,9 @@ public:
 	btDefaultMotionState* GetMutableMotionState();
 	btTransform GetTransform() const;
 	void SetTransform(btTransform new_transform);
+
+	void MakeStatic();
+	void MakeDynamic();
  
 	void MakeCollideable(bool collideable = true) const;
 	bool IsCollideable() const;
@@ -95,6 +98,7 @@ private:
 	unique_ptr<btRigidBody> body_;
 	Shape shape_;
 	unique_ptr<btDefaultMotionState> motion_state_;
+	btScalar stored_mass_ = 0.0f;
 };
 
 class World {
