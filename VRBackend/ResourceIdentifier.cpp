@@ -16,9 +16,9 @@ ShaderIdentifier ShaderIdentifier::GetUnsetShader(ShaderStage stage) {
 	if (stage.IsGeometryStage()) {
 		return ShaderIdentifier(ResourceIdentifier::GetConstantModelName("unset_geometry_shader"), stage);
 	}
-	if (stage.IsPixelStage()) {
+	//if (stage.IsPixelStage()) {
 		return ShaderIdentifier(ResourceIdentifier::GetConstantModelName("unset_pixel_shader"), stage);
-	}
+	//}
 }
 
 ShaderIdentifier::ShaderIdentifier() {

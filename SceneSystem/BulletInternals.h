@@ -4,6 +4,8 @@
 
 #include "VRBackend/Pose.h"
 #include <btBulletDynamicsCommon.h>
+#include <btBulletCollisionCommon.h>
+#include <BulletCollision/CollisionDispatch/btGhostObject.h>
 
 #include "ActorId.h"
 
@@ -62,10 +64,37 @@ namespace collision_info {
 
 class RigidBody {
 public:
+	typedef std::function<void(const Pose&, const Pose&)> NewPoseCallback;
+	class MotionState : public btMotionState {
+	public:
+		MotionState(btTransform initial_transform);
+
+		// These functions are meant to be called by bullet. getWorldTransform is supposed to
+		// tell bullet what the current transform is. setWorldTransform is called whenever bullet
+		// updates the position of the object.
+		void getWorldTransform(btTransform& worldTrans) const override;
+        void setWorldTransform(const btTransform& worldTrans) override;
+
+		// This function is meant to be called by the scene to set a kinematic object's position.
+		void PushNewTransform(const btTransform& new_transform);
+
+		void SetCallback();
+		void SetCallback(NewPoseCallback callback);
+
+		void SetKinematic(bool kinematic);
+
+	private:
+		void SetTransformAndCallback(const btTransform& new_transform);
+
+		bool kinematic_;
+		btTransform current_transform_;
+		NewPoseCallback callback_;
+	};
+
 	RigidBody();
 	RigidBody(
 		Shape shape,
-		unique_ptr<btDefaultMotionState> starting_motion_state,
+		unique_ptr<btMotionState> starting_motion_state,
 		btScalar mass = 0,
 		btVector3 inertia = btVector3(0, 0, 0));
 	RigidBody(
@@ -83,13 +112,17 @@ public:
 	const RigidBodyPayload& GetPayload() const;
 	void SetPayload(RigidBodyPayload* payload);
 
-	const btDefaultMotionState& GetMotionState() const;
-	btDefaultMotionState* GetMutableMotionState();
+	const btMotionState& GetMotionState() const;
+	btMotionState* GetMutableMotionState();
 	btTransform GetTransform() const;
 	void SetTransform(btTransform new_transform);
 
 	void MakeStatic();
 	void MakeDynamic();
+	void RemoveKinematic();
+	void MakeKinematic();
+
+	void SetPoseUpdatedCallback(NewPoseCallback callback);
  
 	void MakeCollideable(bool collideable = true) const;
 	bool IsCollideable() const;
@@ -97,8 +130,31 @@ public:
 private:
 	unique_ptr<btRigidBody> body_;
 	Shape shape_;
-	unique_ptr<btDefaultMotionState> motion_state_;
+	unique_ptr<btMotionState> motion_state_;
 	btScalar stored_mass_ = 0.0f;
+};
+
+class CollisionObject {
+public:
+	enum CollisionObjectType {
+		NORMAL,
+		GHOST,
+		PAIR_CACHING_GHOST,
+	};
+
+	CollisionObject();
+	CollisionObject(CollisionObjectType type, Shape shape, btTransform transform = btTransform());
+
+	bool GetFilled() const;
+
+	btCollisionObject* GetCollisionObject() const;
+
+	void SetTransform(btTransform new_transform);
+	btTransform GetTransform() const;
+
+private:
+	unique_ptr<btCollisionObject> object_;
+	Shape shape_;
 };
 
 class World {
@@ -111,6 +167,13 @@ public:
 	void AddRigidBody(btRigidBody* body);
 	void RemoveRigidBody(const RigidBody& body);
 	void RemoveRigidBody(btRigidBody* body);
+
+	void AddCollisionObject(const CollisionObject& object);
+	void AddCollisionObject(btCollisionObject* object);
+	void RemoveCollisionObject(const CollisionObject& object);
+	void RemoveCollisionObject(btCollisionObject* object);
+
+	btDiscreteDynamicsWorld* Get();
 
 private:
 	Config config_;

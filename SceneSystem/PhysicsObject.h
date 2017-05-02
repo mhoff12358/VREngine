@@ -85,6 +85,7 @@ struct ModifyRigidBody : public CommandArgs {
 			}
 			return true;
 		}
+		return true;
 	}
 
 	Modifier modifier_;
@@ -172,9 +173,14 @@ public:
 	}
 
 private:
+	bullet::RigidBody::NewPoseCallback MakeRigidBodyCallback() {
+		return [](const Pose&, const Pose&) { };
+	}
+
 	void SetRigidBody(commands::AddRigidBody& args) {
 		rigid_body_name_ = args.name_;
 		rigid_body_ = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
+		rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback());
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
@@ -202,7 +208,7 @@ private:
 
 	void HandleNewPose(commands::AcceptNewPose& args) {
 		if (args.pose_source_ != GetNameVirt()) {
-			rigid_body_.body_.SetTransform(poses::GetTransform(args.new_pose_));
+			rigid_body_.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
 
@@ -307,7 +313,7 @@ private:
 				std::cout << "Attempting to set a new pose of a rigid body that doesn't exist." << std::endl;
 				return;
 			}
-			rigid_body_iter->second.body_.SetTransform(poses::GetTransform(args.new_pose_));
+			rigid_body_iter->second.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
 

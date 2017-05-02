@@ -57,38 +57,7 @@ object a(boost::python::tuple args, boost::python::dict kwargs) {
 	return object();
 }
 
-template<typename c>
-class Fn {
-public:
-	static void Fna() {
-		std::cout << c::thing() << std::endl;
-	}
-};
-
-void Fn3() {
-
-}
-
-template <void(*a)()>
-void Fn2() {
-	a();
-}
-
-template <template<typename> typename a, typename b>
-void Fn4() {
-	a<b>::Fna();
-}
-
-class JIFOE {
-public:
-	static const char* thing() {
-		return "FJEIOFJOIE";
-	}
-};
-
 BOOST_PYTHON_MODULE(scene_system_) {
-	Fn2<Fn3>();
-	Fn4<Fn, JIFOE>();
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
 	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObject>();

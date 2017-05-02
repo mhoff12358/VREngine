@@ -123,6 +123,8 @@ enum class UpdateLoopResult {
 	RELOAD
 };
 
+#include "SceneSystem/BulletInternals.h"
+
 UpdateLoopResult UpdateLoop() {
 	int prev_time = timeGetTime();
 
@@ -272,6 +274,15 @@ extern "C" PyObject* PyInit_scene_system_();
 
 #include "SceneSystem/Poseable.h"
 
+struct CollisionCallback : btCollisionWorld::ContactResultCallback {
+	virtual btScalar addSingleResult(btManifoldPoint& cp,
+        const btCollisionObjectWrapper* colObj0,int partId0,int index0,
+        const btCollisionObjectWrapper* colObj1,int partId1,int index1)
+    {
+        return 0; // There was a planned purpose for the return value of addSingleResult, but it is not used so you can ignore it.
+    }
+};
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	FORCE_LINK_THAT(QueryArgs);
@@ -288,6 +299,50 @@ int _tmain(int argc, _TCHAR* argv[])
 	FORCE_LINK_THAT(CollisionCollection);
 	FORCE_LINK_THAT(NewGraphicsObject);
 	FORCE_LINK_THAT(Poseable);
+	
+	bullet::CollisionObject test_obj(bullet::CollisionObject::CollisionObjectType::PAIR_CACHING_GHOST, bullet::Shape::MakeSphere(1.0f), btTransform());
+	bullet::CollisionObject test_obj_2(bullet::CollisionObject::CollisionObjectType::NORMAL, bullet::Shape::MakeSphere(1.0f), btTransform());
+	bullet::RigidBody rig_bod(bullet::Shape::MakeSphere(1.0f), btTransform());
+	bullet::Config config;
+	bullet::World phys_world(std::move(config));
+
+	bullet::Shape shape = bullet::Shape::MakeSphere(1.0f);
+
+	btCollisionObject* test_obj_a = new btCollisionObject;
+	test_obj_a->setCollisionShape(shape.shape_.get());
+	test_obj_a->setWorldTransform(btTransform());
+
+	btCollisionObject* test_obj_b = new btCollisionObject;
+	test_obj_b->setCollisionShape(shape.shape_.get());
+	test_obj_b->setWorldTransform(btTransform());
+
+	phys_world.AddCollisionObject(test_obj);
+	phys_world.AddCollisionObject(test_obj_2);
+	//phys_world.AddRigidBody(rig_bod);
+	phys_world.AddCollisionObject(test_obj_a);
+	phys_world.AddCollisionObject(test_obj_b);
+
+	//phys_world.Get()->contactTest(test_obj_a, CollisionCallback());
+
+	phys_world.Step(0.1f);
+	phys_world.Get()->computeOverlappingPairs();
+	phys_world.Get()->performDiscreteCollisionDetection();
+
+	phys_world.Get()->getDispatcher()->dispatchAllCollisionPairs(
+		dynamic_cast<btPairCachingGhostObject*>(test_obj.GetCollisionObject())->getOverlappingPairCache(),
+		phys_world.Get()->getDispatchInfo(),
+		phys_world.Get()->getDispatcher());
+	
+
+	btBroadphasePairArray& pair_array = dynamic_cast<btPairCachingGhostObject*>(test_obj.GetCollisionObject())->getOverlappingPairCache()->getOverlappingPairArray();
+
+	int numManifolds = phys_world.Get()->getDispatcher()->getNumManifolds();
+
+	auto b = phys_world.Get()->getNumCollisionObjects();
+	size_t num_pairs = pair_array.size();
+	for (size_t i = 0; i < num_pairs; i++) {
+		btBroadphasePair& pair = pair_array[i];
+	}
 
 	bool hmd_desired = false;
 
