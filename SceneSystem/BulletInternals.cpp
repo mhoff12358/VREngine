@@ -52,29 +52,69 @@ Shape Shape::MakePlane(btVector3 normal, btVector3 point_in_plane) {
 	return MakePlane(normal, normal.dot(point_in_plane));
 }
 
+RigidBody::MotionState::MotionState(btTransform initial_transform)
+	: kinematic_(false), current_transform_(initial_transform), callback_() {
+
+}
+
+void RigidBody::MotionState::getWorldTransform(btTransform& worldTrans) const {
+	worldTrans = current_transform_;
+}
+void RigidBody::MotionState::setWorldTransform(const btTransform& worldTrans) {
+	if (kinematic_) {
+		std::cout << "Bullet is trying to set the world transformation on a kinematic object" << std::endl;
+		return;
+	}
+	SetTransformAndCallback(worldTrans);
+}
+
+void RigidBody::MotionState::PushNewTransform(const btTransform& new_transform) {
+	SetTransformAndCallback(new_transform);
+}
+
+void RigidBody::MotionState::SetCallback() {
+	callback_ = NewPoseCallback();
+}
+void RigidBody::MotionState::SetCallback(NewPoseCallback callback) {
+	callback_ = callback;
+}
+
+void RigidBody::MotionState::SetKinematic(bool kinematic) {
+	kinematic_ = kinematic;
+}
+
+void RigidBody::MotionState::SetTransformAndCallback(const btTransform& new_transform) {
+	Pose old_pose = poses::GetPose(current_transform_);
+	current_transform_ = new_transform;
+	if (callback_) {
+		callback_(old_pose, poses::GetPose(current_transform_));
+	}
+}
+
 RigidBody::RigidBody() :
 	body_(nullptr), shape_(), motion_state_(nullptr) {}
 
 RigidBody::RigidBody(
 	Shape shape,
 	btTransform transform,
-	btScalar mass,
-	btVector3 inertia) :
-	RigidBody(std::move(shape), make_unique<btDefaultMotionState>(transform), mass, inertia) {}
+	InteractionType interaction_type) :
+	RigidBody(std::move(shape), make_unique<MotionState>(transform), interaction_type) {}
 
 RigidBody::RigidBody(
 	Shape shape,
-	unique_ptr<btDefaultMotionState> starting_motion_state,
-	btScalar mass,
-	btVector3 inertia) :
+	unique_ptr<btMotionState> starting_motion_state,
+	InteractionType interaction_type) :
 	shape_(std::move(shape)),
 	motion_state_(std::move(starting_motion_state))
 {
-	if (mass) {
-		shape_.shape_->calculateLocalInertia(mass, inertia);
+	if (interaction_type.IsDynamic()) {
+		shape_.shape_->calculateLocalInertia(interaction_type.mass_, interaction_type.inertia_);
 	}
-    btRigidBody::btRigidBodyConstructionInfo construction_info(mass, motion_state_.get(), shape_.shape_.get(), inertia);
+  btRigidBody::btRigidBodyConstructionInfo construction_info(interaction_type.mass_, motion_state_.get(), shape_.shape_.get(), interaction_type.inertia_);
 	body_ = make_unique<btRigidBody>(construction_info);
+  if (interaction_type.IsKinematic()) {
+    MakeKinematic();
+  }
 }
 
 bool RigidBody::GetFilled() const {
@@ -93,10 +133,10 @@ void RigidBody::SetPayload(RigidBodyPayload* payload) {
 	shape_.shape_->setUserPointer(static_cast<void*>(payload));
 }
 
-const btDefaultMotionState& RigidBody::GetMotionState() const {
+const btMotionState& RigidBody::GetMotionState() const {
 	return *motion_state_.get();
 }
-btDefaultMotionState* RigidBody::GetMutableMotionState() {
+btMotionState* RigidBody::GetMutableMotionState() {
 	return motion_state_.get();
 }
 
@@ -106,10 +146,15 @@ btTransform RigidBody::GetTransform() const {
 	return transform;
 }
 void RigidBody::SetTransform(btTransform new_transform) {
-	motion_state_->setWorldTransform(new_transform);
+	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
+		downcast_motion_state->PushNewTransform(new_transform);
+	} else {
+		motion_state_->setWorldTransform(new_transform);
+	}
 }
 
 void RigidBody::MakeStatic() {
+	RemoveKinematic();
 	btScalar inv_mass = body_->getInvMass();
 	if (inv_mass) {
 		body_->setMassProps(0.0f, body_->getLocalInertia());
@@ -118,8 +163,29 @@ void RigidBody::MakeStatic() {
 }
 
 void RigidBody::MakeDynamic() {
+	RemoveKinematic();
 	if (stored_mass_) {
 		body_->setMassProps(stored_mass_, body_->getLocalInertia());
+	}
+}
+
+void RigidBody::RemoveKinematic() {
+	body_->setCollisionFlags(body_->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
+		downcast_motion_state->SetKinematic(false);
+	}
+}
+
+void RigidBody::MakeKinematic() {
+	body_->setCollisionFlags(body_->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
+		downcast_motion_state->SetKinematic(true);
+	}
+}
+
+void RigidBody::SetPoseUpdatedCallback(NewPoseCallback callback) {
+	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
+		downcast_motion_state->SetCallback(callback);
 	}
 }
 
@@ -134,9 +200,43 @@ void RigidBody::MakeCollideable(bool collideable) const {
 }
 
 bool RigidBody::IsCollideable() const {
-	return static_cast<bool>(body_->getCollisionFlags() &
-		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
+	return (body_->getCollisionFlags() &
+		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK) != 0;
 }
+
+CollisionObject::CollisionObject() :
+	object_(nullptr), shape_(nullptr) {}
+
+CollisionObject::CollisionObject(CollisionObjectType type, Shape shape, btTransform transform) :
+	object_(nullptr), shape_(std::move(shape)) {
+	switch (type) {
+	case NORMAL:
+		object_ = make_unique<btCollisionObject>();
+	case GHOST:
+		object_ = make_unique<btGhostObject>();
+	case PAIR_CACHING_GHOST:
+		object_ = make_unique<btPairCachingGhostObject>();
+	}
+	object_->setCollisionShape(shape_.shape_.get());
+	object_->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);
+	object_->setWorldTransform(transform);
+}
+
+bool CollisionObject::GetFilled() const {
+	return object_.get() != nullptr;
+}
+
+btCollisionObject* CollisionObject::GetCollisionObject() const {
+	return object_.get();
+}
+
+void CollisionObject::SetTransform(btTransform new_transform) {
+	object_->setWorldTransform(new_transform);
+}
+btTransform CollisionObject::GetTransform() const {
+	return object_->getWorldTransform();
+}
+
 
 World::World(Config config) :
 	config_(std::move(config)),
@@ -146,6 +246,7 @@ World::World(Config config) :
 		config_.solver_.get(),
 		config_.collision_config_.get())) {
 	world_->setGravity(btVector3(0, -10, 0));
+	world_->getBroadphase()->getOverlappingPairCache()->setInternalGhostPairCallback(new btGhostPairCallback());
 }
 
 void World::Step(btScalar time_step) {
@@ -164,6 +265,24 @@ void World::RemoveRigidBody(const RigidBody& body) {
 }
 void World::RemoveRigidBody(btRigidBody* body) {
 	world_->removeRigidBody(body);
+}
+
+void World::AddCollisionObject(const CollisionObject& object) {
+	AddCollisionObject(object.GetCollisionObject());
+}
+void World::AddCollisionObject(btCollisionObject* object) {
+	
+	world_->addCollisionObject(object,0x1,0x1);
+}
+void World::RemoveCollisionObject(const CollisionObject& object) {
+	RemoveCollisionObject(object.GetCollisionObject());
+}
+void World::RemoveCollisionObject(btCollisionObject* object) {
+	world_->removeCollisionObject(object);
+}
+
+btDiscreteDynamicsWorld* World::Get() {
+	return world_.get();
 }
 
 namespace poses {

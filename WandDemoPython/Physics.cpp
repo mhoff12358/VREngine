@@ -16,10 +16,17 @@ std::auto_ptr<game_scene::commands::AddRigidBody> MakeAddRigidBody(
 	return std::auto_ptr<game_scene::commands::AddRigidBody>(add_rigid_body.release());
 }
 
+game_scene::commands::ModifyRigidBody::ModifyFunction MakeModifierFunction(object callback) {
+  return [callback](bullet::RigidBody& body) {
+    return static_cast<bool>(boost::python::extract<bool>(callback(body)));
+  };
+}
+
 void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 	class_<game_scene::commands::PhysicsObjectCommand>("PhysicsObjectCommand")
 		.def_readonly("ADD_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::ADD_RIGID_BODY)
 		.def_readonly("REMOVE_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::REMOVE_RIGID_BODY)
+		.def_readonly("MODIFY_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::MODIFY_RIGID_BODY)
 		.def_readonly("ADD_UPDATED_CALLBACK", &game_scene::commands::PhysicsObjectCommand::ADD_UPDATED_CALLBACK);
 
 	class_<game_scene::queries::PhysicsObjectQuery>("PhysicsObjectQuery")
@@ -39,6 +46,15 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 	scene_registration.def(
 		"MakeCommandAfter",
 		&PyScene::MakeCommandAfter<game_scene::commands::RemoveRigidBody>);
+
+	/*class_<game_scene::commands::ModifyRigidBody, bases<game_scene::CommandArgs>,
+		std::auto_ptr<game_scene::commands::ModifyRigidBody>,
+		boost::noncopyable>("ModifyRigidBody", init<string>())
+    .def("MakeCallback", &MakeModifierFunction)
+    .staticmethod("MakeCallback");
+	scene_registration.def(
+		"MakeCommandAfter",
+		&PyScene::MakeCommandAfter<game_scene::commands::ModifyRigidBody>);*/
 
 	class_<game_scene::commands::PhysicsSimulationCommand>("PhysicsSimulationCommand")
 		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT);

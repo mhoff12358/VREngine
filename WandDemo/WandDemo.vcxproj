@@ -562,6 +562,7 @@
     <None Include="sun.lua" />
     <None Include="target.lua" />
     <None Include="terrain.lua" />
+    <None Include="KeyMoveable.py" />
     <None Include="texture0.hlsli" />
     <None Include="tower_scene.lua" />
     <None Include="vertex_types.hlsli" />

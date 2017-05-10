@@ -59,35 +59,15 @@ struct RemoveRigidBody : public CommandArgs {
 };
 
 struct ModifyRigidBody : public CommandArgs {
-	enum Modifier {
-		ENABLE,
-		DISABLE,
-		STATIC,
-		DYNAMIC
-	};
-
-	ModifyRigidBody(Modifier modifier) :
+  typedef std::function<bool(bullet::RigidBody& body)> ModifyFunction;
+	ModifyRigidBody(ModifyFunction modifier) :
 		CommandArgs(PhysicsObjectCommand::MODIFY_RIGID_BODY), modifier_(modifier) {}
 
 	bool ApplyModifier(PhysicsObjectComponent& comp) {
-		if ((modifier_ == ENABLE) || (modifier_ == DISABLE)) {
-			bool enabled = (modifier_ == ENABLE);
-			if (comp.enabled_ == enabled) {
-				return false;
-			}
-			comp.enabled_ = enabled;
-			return true;
-		} else if ((modifier_ == STATIC) || (modifier_ == DYNAMIC)) {
-			if (modifier_ == STATIC) {
-				comp.body_.MakeStatic();
-			} else {
-				comp.body_.MakeDynamic();
-			}
-			return true;
-		}
+    return modifier_(comp.body_);
 	}
 
-	Modifier modifier_;
+	ModifyFunction modifier_;
 	bool modify_all_;
 	vector<string> names_to_modify_;
 };
@@ -171,10 +151,19 @@ public:
 		return "PhysicsObject-" + ActorBase::GetName();
 	}
 
+  bullet::RigidBody& GetRigidBody(string name) {
+    return rigid_body_.body_;
+  }
+
 private:
+	bullet::RigidBody::NewPoseCallback MakeRigidBodyCallback() {
+		return [](const Pose&, const Pose&) { };
+	}
+
 	void SetRigidBody(commands::AddRigidBody& args) {
 		rigid_body_name_ = args.name_;
 		rigid_body_ = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
+		rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback());
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
@@ -202,7 +191,7 @@ private:
 
 	void HandleNewPose(commands::AcceptNewPose& args) {
 		if (args.pose_source_ != GetNameVirt()) {
-			rigid_body_.body_.SetTransform(poses::GetTransform(args.new_pose_));
+			rigid_body_.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
 
@@ -307,7 +296,7 @@ private:
 				std::cout << "Attempting to set a new pose of a rigid body that doesn't exist." << std::endl;
 				return;
 			}
-			rigid_body_iter->second.body_.SetTransform(poses::GetTransform(args.new_pose_));
+			rigid_body_iter->second.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
 

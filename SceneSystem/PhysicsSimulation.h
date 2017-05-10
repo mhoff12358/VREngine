@@ -90,7 +90,7 @@ public:
 		}	break;
 		case InputCommand::TICK:
 			physics_simulation_impl_.HandleTimeTick(dynamic_cast<const commands::TimeTick&>(args));
-			for (auto rigid_body_source : rigid_body_sources_) {
+			/*for (auto rigid_body_source : rigid_body_sources_) {
 				ActorId actor_to_alert;
 				std::tie(actor_to_alert, std::ignore) = rigid_body_source;
 				GetScene().MakeCommandAfter(
@@ -98,7 +98,7 @@ public:
 					Command(
 						game_scene::Target(actor_to_alert),
 						make_unique<commands::RigidBodyUpdated>()));
-			}
+			}*/
 			break;
 		default:
 			break;

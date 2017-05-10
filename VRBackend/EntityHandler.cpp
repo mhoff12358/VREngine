@@ -192,7 +192,7 @@ void EntityHandler::AddBufferCopy(ID3D11Buffer* dest_buffer, ID3D11Buffer* src_b
 }
 	
 void EntityHandler::ClearAllEntities() {
-	for (int i = 0; i < num_entity_sets_; i++) {
+	for (unsigned int i = 0; i < num_entity_sets_; i++) {
 		current_edit_group[i].ClearDrawingSettings();
 	}
 }

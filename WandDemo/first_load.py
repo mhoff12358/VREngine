@@ -44,7 +44,7 @@ def first_load(resources):
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "Cylinder", sc.RigidBody(sc.Shape.MakeSphere(0.25), sc.Pose(sc.Location(1, 100, 3)), 10.0)))
+            "Cylinder", sc.RigidBody(sc.Shape.MakeSphere(0.25), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
     shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
@@ -92,6 +92,8 @@ def first_load(resources):
         sc.Target(physics_simulation.id),
         sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
+
+    import pdb; pdb.set_trace()
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)

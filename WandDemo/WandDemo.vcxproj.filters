@@ -532,5 +532,8 @@
     <None Include="panels.py">
       <Filter>Nichijou Graph\Python Files</Filter>
     </None>
+    <None Include="KeyMoveable.py">
+      <Filter>Nichijou Graph\Python Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -131,6 +131,23 @@ void EmbedSelfHack(ActorBase& actor, object self) {
 	actor.EmbedSelf(self);
 }
 
+template<template<typename> typename ActorMixin>
+struct WrapActorMixin {
+  template<typename ActorImplChain>
+  struct Level2 {
+    typedef ActorImplChain SubChain;
+
+    typedef ActorMixin<ActorImplChain> WholeChain;
+
+    typedef PyActorImpl<ActorMixin<ActorImplChain>> WithPyActor;
+
+    static void CreateChain(string name) {
+      std::cout << "CREATING BASE CLASS: " << name << std::endl;
+      class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>());
+    }
+  };
+};
+
 template<typename ActorBase>
 struct CreatePyActor {
 	static void Create() {
@@ -155,6 +172,31 @@ struct CreatePyActor {
 	}
 };
 
+template<typename ActorBaseSource>
+struct CreatePyActor2 {
+  static void Create() {
+    string class_name = ActorBaseSource::WithPyActor::GetName();
+		for (int i = 0; i < class_name.length(); i++) {
+			if (class_name[i] == '-') {
+				class_name[i] = '_';
+			}
+		}
+		std::cout << "Creating: " << class_name << std::endl;
+    string unwrapped_class_name = "unwrapped_" + class_name;
+    ActorBaseSource::CreateChain(unwrapped_class_name);
+    class_<ActorBaseSource::WithPyActor, bases<ActorBaseSource::WholeChain>, boost::noncopyable>(class_name.c_str(), init<>())
+			.def("HandleCommand", &ActorBaseSource::WithPyActor::HandleCommand, &ActorBaseSource::WithPyActor::default_HandleCommand)
+			.def("ParentHandleCommand", &ActorBaseSource::WithPyActor::default_HandleCommand)
+			.def("BaseHandleCommand", &ActorBaseSource::WholeChain::HandleCommand)
+			.def("AddedToScene", &ActorBaseSource::WholeChain::AddedToScene)
+			.def("AnswerQuery", &ActorBaseSource::WithPyActor::PyAnswerQuery, &ActorBaseSource::WithPyActor::default_PyAnswerQuery)
+			.def("EmbedSelf", &EmbedSelfHack<ActorBaseSource::WithPyActor>)
+			.def("GetScene", &ActorBaseSource::WholeChain::GetScene, return_value_policy<reference_existing_object>())
+			.add_property("id", &ActorBaseSource::WholeChain::GetId)
+			.def("SetScene", &ActorBaseSource::WholeChain::SetScene);
+  }
+};
+
 #define PYACT_FN_ARG template<typename> typename CreateFn, typename Preface
 template<PYACT_FN_ARG>
 void CreatePyActors() {
@@ -165,4 +207,31 @@ template<PYACT_FN_ARG, template<typename> typename ActorBase, template<typename>
 void CreatePyActors() {
 	CreatePyActors<CreateFn, Preface, FurtherBases...>();
 	CreatePyActors<CreateFn, ActorBase<Preface>, FurtherBases...>();
+}
+
+template<typename Preface>
+void CreatePyActorsImpl() {
+}
+
+template<typename Preface, typename PartialActorBaseSource, typename... FurtherBaseSources>
+void CreatePyActorsImpl() {
+  typedef PartialActorBaseSource::Level2<Preface> ActorBaseSource;
+  CreatePyActor2<ActorBaseSource>::Create();
+  CreatePyActorsImpl<Preface, FurtherBaseSources...>();
+  CreatePyActorsImpl<ActorBaseSource::WholeChain, FurtherBaseSources...>();
+}
+
+template<typename... MixinSources>
+void CreatePyActors2() {
+  /*class_<PyActorImpl<game_scene::ActorImpl>, bases<ActorBaseSource::WholeChain>, boost::noncopyable>(class_name.c_str(), init<>())
+    .def("HandleCommand", &ActorBaseSource::WithPyActor::HandleCommand, &ActorBaseSource::WithPyActor::default_HandleCommand)
+    .def("ParentHandleCommand", &ActorBaseSource::WithPyActor::default_HandleCommand)
+    .def("BaseHandleCommand", &ActorBaseSource::WholeChain::HandleCommand)
+    .def("AddedToScene", &ActorBaseSource::WholeChain::AddedToScene)
+    .def("AnswerQuery", &ActorBaseSource::WithPyActor::PyAnswerQuery, &ActorBaseSource::WithPyActor::default_PyAnswerQuery)
+    .def("EmbedSelf", &EmbedSelfHack<ActorBaseSource::WithPyActor>)
+    .def("GetScene", &ActorBaseSource::WholeChain::GetScene, return_value_policy<reference_existing_object>())
+    .add_property("id", &ActorBaseSource::WholeChain::GetId)
+    .def("SetScene", &ActorBaseSource::WholeChain::SetScene);*/
+  CreatePyActorsImpl<game_scene::ActorImpl, MixinSources...>();
 }

@@ -164,7 +164,7 @@ Quaternion Quaternion::RotationBetweenVectors(const std::array<float, 3>& start_
 			return Quaternion::Identity();
 		}
 		else {
-			return Quaternion::RotationAboutAxis(AID_X, 3.14159265359);
+			return Quaternion::RotationAboutAxis(AID_X, 3.14159265359f);
 		}
 	}
 	rotation_vector = vertex_normalize(rotation_vector);

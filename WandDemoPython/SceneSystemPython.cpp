@@ -57,50 +57,32 @@ object a(boost::python::tuple args, boost::python::dict kwargs) {
 	return object();
 }
 
-template<typename c>
-class Fn {
-public:
-	static void Fna() {
-		std::cout << c::thing() << std::endl;
-	}
-};
-
-void Fn3() {
-
-}
-
-template <void(*a)()>
-void Fn2() {
-	a();
-}
-
-template <template<typename> typename a, typename b>
-void Fn4() {
-	a<b>::Fna();
-}
-
-class JIFOE {
-public:
-	static const char* thing() {
-		return "FJEIOFJOIE";
-	}
+struct PhysicsObjectMixinHelper : public WrapActorMixin<game_scene::actors::PhysicsObject> {
+  template<typename ActorImplChain>
+  struct Level2 : public WrapActorMixin<game_scene::actors::PhysicsObject>::Level2<ActorImplChain> {
+    static void CreateChain(string name) {
+      std::cout << "CREATING BASE CLASS: " << name << std::endl;
+      class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
+        .def("GetRigidBody", &WholeChain::GetRigidBody, return_value_policy<reference_existing_object>());
+    }
+  };
 };
 
 BOOST_PYTHON_MODULE(scene_system_) {
-	Fn2<Fn3>();
-	Fn4<Fn, JIFOE>();
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
-	CreatePyActors<CreatePyActor, game_scene::ActorImpl, game_scene::actors::NewGraphicsObject>();
-	CreatePyActor<game_scene::actors::PhysicsSimulation<game_scene::ActorImpl>>::Create();
-	CreatePyActor<game_scene::actors::PhysicsObject<game_scene::ActorImpl>>::Create();
-	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::ActorImpl>>::Create();
-	CreatePyActor<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>::Create();
-	CreatePyActor<game_scene::actors::PhysicsObjectCollection<game_scene::actors::Poseable<game_scene::ActorImpl>>>::Create();
-
-	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
-	CreatePyActor<game_scene::actors::NewGraphicsObject<game_scene::actors::PhysicsObject<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
-	CreatePyActor<game_scene::actors::PrintNewPoses<game_scene::actors::PhysicsObjectCollection<game_scene::actors::Poseable<game_scene::ActorImpl>>>>::Create();
+  CreatePyActors<CreatePyActor, game_scene::ActorImpl>();
+  CreatePyActors2<WrapActorMixin<game_scene::actors::PhysicsSimulation>>();
+  CreatePyActors2<
+    WrapActorMixin<game_scene::actors::Poseable>,
+    WrapActorMixin<game_scene::actors::PhysicsObjectCollection>,
+    WrapActorMixin<game_scene::actors::PrintNewPoses>,
+    WrapActorMixin<game_scene::actors::NewGraphicsObject>>();
+  CreatePyActors2<
+    WrapActorMixin<game_scene::actors::Poseable>,
+    PhysicsObjectMixinHelper,
+    WrapActorMixin<game_scene::actors::PrintNewPoses>,
+    WrapActorMixin<game_scene::actors::NewGraphicsObject>>();
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
 		.def("Type", &game_scene::CommandArgs::Type)
