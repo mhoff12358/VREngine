@@ -70,12 +70,13 @@ struct PhysicsObjectMixinHelper : public WrapActorMixin<game_scene::actors::Phys
 
 struct PoseableMixinHelper : public WrapActorMixin<game_scene::actors::Poseable> {
   template<typename ActorImplChain>
-  struct Level2 : public WrapActorMixin<game_scene::actors::PhysicsObject>::Level2<ActorImplChain> {
+  struct Level2 : public WrapActorMixin<game_scene::actors::Poseable>::Level2<ActorImplChain> {
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
       class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
         .def("PushNewPose", &WholeChain::PushNewPoseImpl)
         .def("FreezePose", &WholeChain::FreezePoseImpl)
+        .def("ClearNamedPose", &WholeChain::ClearNamedPoseImpl)
         .def("RegisterNamedPose", &WholeChain::RegisterNamedPoseImpl);
     }
   };
@@ -94,12 +95,12 @@ BOOST_PYTHON_MODULE(scene_system_) {
   CreatePyActors<CreatePyActor, game_scene::ActorImpl>();
   CreatePyActors2<WrapActorMixin<game_scene::actors::PhysicsSimulation>>();
   CreatePyActors2<
-    WrapActorMixin<game_scene::actors::Poseable>,
+    PoseableMixinHelper,
     WrapActorMixin<game_scene::actors::PhysicsObjectCollection>,
     WrapActorMixin<game_scene::actors::PrintNewPoses>,
     WrapActorMixin<game_scene::actors::NewGraphicsObject>>();
   CreatePyActors2<
-    WrapActorMixin<game_scene::actors::Poseable>,
+    PoseableMixinHelper,
     PhysicsObjectMixinHelper,
     WrapActorMixin<game_scene::actors::PrintNewPoses>,
     WrapActorMixin<game_scene::actors::NewGraphicsObject>>();

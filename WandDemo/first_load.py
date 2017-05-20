@@ -39,6 +39,7 @@ def first_load(resources):
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
     physics_object = sc.NewGraphicsObject_PhysicsObject_Poseable_ActorImpl()
+    physics_object.RegisterNamedPose("Sphere", sc.PoseData(sc.Pose(), sc.Pose(sc.Scale(0.25)), sc.FreezeBits.SCALE))
     scene.AddActor(physics_object)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
@@ -92,8 +93,6 @@ def first_load(resources):
         sc.Target(physics_simulation.id),
         sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
-
-    import pdb; pdb.set_trace()
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)
