@@ -30,39 +30,40 @@ public:
 
 namespace actors {
 
+struct PoseData {
+  enum FreezeBits : unsigned char {
+    LOCATION = 0x1,
+    ORIENTATION = 0x2,
+    SCALE = 0x4,
+  };
+
+  PoseData(Pose pose) : PoseData(pose, Pose(), 0x0) {}
+  PoseData(Pose pose, Pose freeze_pose, unsigned char freeze_bits)
+    : freeze_pose_(freeze_pose_), freeze_bits_(0x0), pose_(ApplyFreezeToPose(pose)) {}
+
+  Pose ApplyFreezeToPose(Pose pose) {
+    if (freeze_bits_ & LOCATION) {
+      pose.location_ = freeze_pose_.location_;
+    }
+    if (freeze_bits_ & ORIENTATION) {
+      pose.orientation_ = freeze_pose_.orientation_;
+    };
+    if (freeze_bits_ & SCALE) {
+      pose.scale_ = freeze_pose_.scale_;
+    }
+    return pose;
+  }
+
+  Pose freeze_pose_;
+  unsigned char freeze_bits_;
+  Pose pose_;
+};
+
 template<typename ActorBase>
 class Poseable : public ActorBase {
 public:
-  struct PoseData {
-    enum FreezeBits : unsigned char {
-      LOCATION = 0x1,
-      ORIENTATION = 0x2,
-      SCALE = 0x4,
-    };
 
-    PoseData(Pose pose) : PoseData(pose, Pose(), 0x0) {}
-    PoseData(Pose pose, Pose freeze_pose, unsigned char freeze_bits)
-      : freeze_pose_(freeze_pose_), freeze_bits_(0x0), pose_(ApplyFreezeToPose(pose)) {}
-
-    Pose ApplyFreezeToPose(Pose pose) {
-      if (freeze_bits_ & LOCATION) {
-        pose.location_ = freeze_pose_.location;
-      }
-      if (freeze_bits_ & ORIENTATION) {
-        pose.orientation_ = freeze_pose_.orientation;
-      };
-      if (freeze_bits_ & SCALE) {
-        pose.scale_ = freeze_pose_.scale;
-      }
-      return pose;
-    }
-
-    Pose freeze_pose_;
-    unsigned char freeze_bits_;
-    Pose pose_;
-  };
-
-	void PushNewPoseImpl(pair<string, Pose> pose) {
+	void PushNewPoseImpl(string name, Pose pose) {
 		auto existing_pose = stored_poses_.find(std::get<0>(pose));
 		if (existing_pose != stored_poses_.end()) {
       PoseData& existing_pose_data = existing_pose->second;
@@ -70,12 +71,12 @@ public:
 			if (!(existing_pose_data.pose_ == frozen_input_pose)) {
 				Pose original_pose = existing_pose_data.pose_;
         existing_pose_data.pose_ = frozen_input_pose;
-				CommandNewPose(pose.first, existing_pose_data.pose_, original_pose);
+				CommandNewPose(name, existing_pose_data.pose_, original_pose);
 			}
 		}
 		else {
-			RegisterNamedPoseImpl(make_pair(pose.first, PoseData(pose, Pose(), 0x0)));
-			CommandNewPose(pose.first, pose.second, Pose());
+			RegisterNamedPoseImpl(name, PoseData(pose, Pose(), 0x0));
+			CommandNewPose(name, pose, Pose());
 		}
 	}
 
@@ -154,12 +155,12 @@ struct special_ : public general_ {};
 #define RETURN_IF_POSEABLE(type) decltype(actor.PushNewPoseImpl(Pose()), type())
 
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, special_) -> RETURN_IF_POSEABLE(void) {
+auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, special_) -> RETURN_IF_POSEABLE(void) {
 	actor.PushNewPoseImpl(pose);
 }
 
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, pair<string, Pose> pose, general_) -> void {
+auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, general_) -> void {
 
 }
 
@@ -174,12 +175,12 @@ auto FreezePoseSpecial(ActorType& actor, string name, Pose new_pose, unsigned ch
 }
 
 template<typename ActorType>
-auto RegisterNamedPoseSpecial(ActorType& actor, pair<string, PoseData> pose, special_) -> RETURN_IF_POSEABLE(void) {
-	actor.RegisterNamedPoseImpl(pose);
+auto RegisterNamedPoseSpecial(ActorType& actor, string name, actors::PoseData pose, special_) -> RETURN_IF_POSEABLE(void) {
+	actor.RegisterNamedPoseImpl(name, pose);
 }
 
 template<typename ActorType>
-auto RegisterNamedPoseSpecial(ActorType& actor, pair<string, PoseData> pose, general_) -> void {
+auto RegisterNamedPoseSpecial(ActorType& actor, string name, actors::PoseData pose, general_) -> void {
 
 }
 
@@ -194,8 +195,8 @@ auto ClearNamedPoseSpecial(ActorType& actor, string pose_name, general_) -> void
 }
 
 template<typename ActorType>
-void PushNewPose(ActorType& actor, pair<string, Pose> pose) {
-	PushNewPoseSpecial(actor, pose, special_());
+void PushNewPose(ActorType& actor, string name, Pose pose) {
+	PushNewPoseSpecial(actor, name, pose, special_());
 }
 
 template<typename ActorType>
@@ -209,7 +210,7 @@ void ClearNamedPose(ActorType& actor, string pose_name) {
 }
 
 template<typename ActorType>
-void RegisterNamedPose(ActorType& actor, pair<string, PoseData> pose) {
+void RegisterNamedPose(ActorType& actor, pair<string, actors::PoseData> pose) {
 	RegisterNamedPoseSpecial(actor, pose, special_());
 }
 }  // poseable

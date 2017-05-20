@@ -44,7 +44,7 @@ def first_load(resources):
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "Cylinder", sc.RigidBody(sc.Shape.MakeSphere(0.25), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
+            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.25), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
     shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
@@ -54,7 +54,7 @@ def first_load(resources):
             sc.VectorEntitySpecification((
                 sc.EntitySpecification("Shell")
                 .SetModel(sc.ModelDetails(
-                    sc.ModelIdentifier("cylinder.obj"),
+                    sc.ModelIdentifier("sphere.obj"),
                     sc.OutputFormat(
                         sc.ModelModifier(
                             sc.ArrayInt3((0, 1, 2)),
@@ -64,8 +64,8 @@ def first_load(resources):
                         False)))
                 .SetShaders(shader_details)
                 .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((1, 1, 1)),)))
-                .SetComponent("Cylinder"),)),
-            sc.VectorComponentInfo((sc.ComponentInfo("", "Cylinder"),))))
+                .SetComponent("Sphere"),)),
+            sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
 #    scene.MakeCommandAfter(
 #        scene.BackOfNewCommands(),
 #        sc.Target(physics_object.id),

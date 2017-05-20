@@ -184,9 +184,9 @@ private:
 	}
 
 	void RigidBodyPoseUpdated() {
-		poseable::PushNewPose(*this, std::make_pair(
+		poseable::PushNewPose(*this, 
 			rigid_body_name_,
-			bullet::poses::GetPose(rigid_body_.body_.GetTransform())));
+			bullet::poses::GetPose(rigid_body_.body_.GetTransform()));
 	}
 
 	void HandleNewPose(commands::AcceptNewPose& args) {
@@ -283,9 +283,9 @@ private:
 
 	void RigidBodyPoseUpdated() {
 		for (const auto& named_rigid_body : rigid_bodies_) {
-			poseable::PushNewPose(*this, std::make_pair(
+			poseable::PushNewPose(*this, 
 				named_rigid_body.first,
-				bullet::poses::GetPose(named_rigid_body.second.body_.GetTransform())));
+				bullet::poses::GetPose(named_rigid_body.second.body_.GetTransform()));
 		}
 	}
 
