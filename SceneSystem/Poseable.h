@@ -40,7 +40,8 @@ struct PoseData {
   PoseData() : PoseData(Pose()) {}
   PoseData(Pose pose) : PoseData(pose, Pose(), 0x0) {}
   PoseData(Pose pose, Pose freeze_pose, unsigned char freeze_bits)
-    : freeze_pose_(freeze_pose_), freeze_bits_(0x0), pose_(ApplyFreezeToPose(pose)) {}
+    : freeze_pose_(freeze_pose), freeze_bits_(freeze_bits), pose_(ApplyFreezeToPose(pose)) {
+  }
 
   Pose ApplyFreezeToPose(Pose pose) {
     if (freeze_bits_ & LOCATION) {
@@ -64,7 +65,7 @@ template<typename ActorBase>
 class Poseable : public ActorBase {
 public:
 
-	void PushNewPoseImpl(string name, Pose pose) {
+	Pose PushNewPoseImpl(string name, Pose pose) {
 		auto existing_pose = stored_poses_.find(name);
 		if (existing_pose != stored_poses_.end()) {
       PoseData& existing_pose_data = existing_pose->second;
@@ -79,6 +80,7 @@ public:
 			RegisterNamedPoseImpl(name, PoseData(pose, Pose(), 0x0));
 			CommandNewPose(name, pose, Pose());
 		}
+    return Pose();
 	}
 
   void FreezePoseImpl(string name, Pose new_pose, unsigned char freeze_bits) {
@@ -153,16 +155,16 @@ struct IsPoseable {
 struct general_ {};
 struct special_ : public general_ {};
 
-#define RETURN_IF_POSEABLE(type) decltype(actor.PushNewPoseImpl(Pose()), type())
+#define RETURN_IF_POSEABLE(type) decltype(actor.PushNewPoseImpl("", Pose()), type())
 
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, special_) -> RETURN_IF_POSEABLE(void) {
-	actor.PushNewPoseImpl(pose);
+auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, special_) -> RETURN_IF_POSEABLE(Pose) {
+	return actor.PushNewPoseImpl(name, pose);
 }
 
 template<typename ActorType>
-auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, general_) -> void {
-
+auto PushNewPoseSpecial(ActorType& actor, string name, Pose pose, general_) -> Pose {
+  return pose;
 }
 
 template<typename ActorType>
@@ -196,13 +198,13 @@ auto ClearNamedPoseSpecial(ActorType& actor, string pose_name, general_) -> void
 }
 
 template<typename ActorType>
-void PushNewPose(ActorType& actor, string name, Pose pose) {
-	PushNewPoseSpecial(actor, name, pose, special_());
+Pose PushNewPose(ActorType& actor, string name, Pose pose) {
+	return PushNewPoseSpecial(actor, name, pose, special_());
 }
 
 template<typename ActorType>
 void FreezePose(ActorType& actor, string name, Pose new_pose, unsigned char freeze_bits) {
-	PushNewPoseSpecial(actor, name, new_pose, freeze_bits, special_());
+	FreezePoseSpecial(actor, name, new_pose, freeze_bits, special_());
 }
 
 template<typename ActorType>

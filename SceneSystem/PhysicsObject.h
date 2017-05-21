@@ -156,14 +156,14 @@ public:
   }
 
 private:
-	bullet::RigidBody::NewPoseCallback MakeRigidBodyCallback() {
-		return [](const Pose&, const Pose&) { };
+	bullet::RigidBody::NewPoseCallback MakeRigidBodyCallback(string name) {
+    return [this, name](const Pose& old_pose, const Pose& new_pose) { poseable::PushNewPose(*this, name, new_pose); };
 	}
 
 	void SetRigidBody(commands::AddRigidBody& args) {
 		rigid_body_name_ = args.name_;
 		rigid_body_ = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
-		rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback());
+		rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback(rigid_body_name_));
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
