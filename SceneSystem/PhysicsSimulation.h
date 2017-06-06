@@ -110,6 +110,11 @@ public:
 		return "PhysicsSimulation-" + ActorBase::GetName();
 	}
 
+  void CheckCollision(const bullet::CollisionObject& collision_object) const {
+    auto collision_result = physics_simulation_impl_.world_.CheckCollision(collision_object);
+    return collision_result;
+  }
+
 private:
 	void PhysicsObjectIsUpdated(ActorId actor_id) {
 		auto raw_result = GetScene().AskQuery(Target(actor_id), queries::GetRigidBodies());

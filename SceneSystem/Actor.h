@@ -11,8 +11,7 @@ class Scene;
 class QueryArgs;
 class Target;
 
-class IActor
-{
+class IActor {
 public:
 	IActor();
 	virtual ~IActor();

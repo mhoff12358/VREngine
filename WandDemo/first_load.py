@@ -20,6 +20,13 @@ class DummyActor(sc.DelegatingActor[sc.Actor]):
 def pre_load():
     return {"load_vr": False}
 
+class HackActor(sc.DelegatingActor[sc.Actor]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
+
+    @delegater.RegisterCommand(sc.InputCommand.TICK)
+    def HandleTick(self, command_args):
+        pass
+
 def first_load(resources):
     print("STARTING FIRST LOAD")
     sc.ParseResources(resources)

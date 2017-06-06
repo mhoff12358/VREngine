@@ -82,6 +82,18 @@ struct PoseableMixinHelper : public WrapActorMixin<game_scene::actors::Poseable>
   };
 };
 
+struct PhysicsSimulationMixinHelper : public WrapActorMixin<game_scene::actors::PhysicsSimulation> {
+  template<typename ActorImplChain>
+  struct Level2 : public WrapActorMixin<game_scene::actors::PhysicsSimulation>::Level2<ActorImplChain> {
+    static void CreateChain(string name) {
+      std::cout << "CREATING BASE CLASS: " << name << std::endl;
+      class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
+        .def("RegisterNamedPose", &WholeChain::RegisterNamedPoseImpl);
+    }
+    }
+  };
+};
+
 BOOST_PYTHON_MODULE(scene_system_) {
   enum_<unsigned char>("FreezeBits")
     .value("LOCATION", game_scene::actors::PoseData::LOCATION)

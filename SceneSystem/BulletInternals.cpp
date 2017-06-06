@@ -281,6 +281,22 @@ void World::RemoveCollisionObject(btCollisionObject* object) {
 	world_->removeCollisionObject(object);
 }
 
+struct A : public btCollisionWorld::ContactResultCallback {
+  btScalar addSingleResult(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0, int index0,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1, int index1) override {
+    std::cout << "MHOFF!" << std::endl;
+    return 0.0f;
+  }
+};
+
+void World::CheckCollision(const CollisionObject& object) {
+  world_->contactTest(object.GetCollisionObject(), A());
+}
+
 btDiscreteDynamicsWorld* World::Get() {
 	return world_.get();
 }

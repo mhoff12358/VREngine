@@ -47,15 +47,6 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 		"MakeCommandAfter",
 		&PyScene::MakeCommandAfter<game_scene::commands::RemoveRigidBody>);
 
-	/*class_<game_scene::commands::ModifyRigidBody, bases<game_scene::CommandArgs>,
-		std::auto_ptr<game_scene::commands::ModifyRigidBody>,
-		boost::noncopyable>("ModifyRigidBody", init<string>())
-    .def("MakeCallback", &MakeModifierFunction)
-    .staticmethod("MakeCallback");
-	scene_registration.def(
-		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::ModifyRigidBody>);*/
-
 	class_<game_scene::commands::PhysicsSimulationCommand>("PhysicsSimulationCommand")
 		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT);
 

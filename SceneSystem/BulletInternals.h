@@ -61,7 +61,6 @@ namespace collision_info {
 		bullet::CollisionComponent cc_b, const btCollisionObjectWrapper* wrapper_b);
 }  // collision_info
 
-
 class RigidBody {
 public:
 	typedef std::function<void(const Pose&, const Pose&)> NewPoseCallback;
@@ -196,6 +195,8 @@ public:
 	void AddCollisionObject(btCollisionObject* object);
 	void RemoveCollisionObject(const CollisionObject& object);
 	void RemoveCollisionObject(btCollisionObject* object);
+
+  void CheckCollision(const CollisionObject& object);
 
 	btDiscreteDynamicsWorld* Get();
 
