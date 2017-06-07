@@ -61,7 +61,33 @@ namespace collision_info {
 		bullet::CollisionComponent cc_b, const btCollisionObjectWrapper* wrapper_b);
 }  // collision_info
 
-class RigidBody {
+class CollisionObject {
+public:
+	enum CollisionObjectType : unsigned char {
+		NORMAL = 1,
+		GHOST = 2,
+		PAIR_CACHING_GHOST = 3,
+	};
+
+	CollisionObject();
+	CollisionObject(CollisionObjectType type, Shape shape, btTransform transform = btTransform());
+
+	bool GetFilled() const;
+
+	btCollisionObject* GetCollisionObject() const;
+
+	void SetTransform(btTransform new_transform);
+	btTransform GetTransform() const;
+
+  void SetShape(Shape shape);
+  const Shape& GetShape() const;
+
+protected:
+	unique_ptr<btCollisionObject> object_;
+	Shape shape_;
+};
+
+class RigidBody : public CollisionObject {
 public:
 	typedef std::function<void(const Pose&, const Pose&)> NewPoseCallback;
 	class MotionState : public btMotionState {
@@ -137,8 +163,6 @@ public:
 
 	const btMotionState& GetMotionState() const;
 	btMotionState* GetMutableMotionState();
-	btTransform GetTransform() const;
-	void SetTransform(btTransform new_transform);
 
 	void MakeStatic();
 	void MakeDynamic();
@@ -151,33 +175,8 @@ public:
 	bool IsCollideable() const;
 
 private:
-	unique_ptr<btRigidBody> body_;
-	Shape shape_;
 	unique_ptr<btMotionState> motion_state_;
 	btScalar stored_mass_ = 0.0f;
-};
-
-class CollisionObject {
-public:
-	enum CollisionObjectType {
-		NORMAL,
-		GHOST,
-		PAIR_CACHING_GHOST,
-	};
-
-	CollisionObject();
-	CollisionObject(CollisionObjectType type, Shape shape, btTransform transform = btTransform());
-
-	bool GetFilled() const;
-
-	btCollisionObject* GetCollisionObject() const;
-
-	void SetTransform(btTransform new_transform);
-	btTransform GetTransform() const;
-
-private:
-	unique_ptr<btCollisionObject> object_;
-	Shape shape_;
 };
 
 class World {

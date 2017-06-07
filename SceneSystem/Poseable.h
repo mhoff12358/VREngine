@@ -9,6 +9,7 @@ namespace commands {
 class PoseableCommand {
 public:
 	DECLARE_COMMAND(PoseableCommand, ACCEPT_NEW_POSE);
+	DECLARE_COMMAND(PoseableCommand, PUSH_NEW_POSE);
 };
 
 class AcceptNewPose : public CommandArgs {
@@ -24,6 +25,19 @@ public:
 	string pose_source_;
 	Pose new_pose_;
 	Pose old_pose_;
+};
+
+class PushNewPose : public CommandArgs {
+public:
+  PushNewPose(string name, string pose_source, Pose new_pose) :
+    CommandArgs(PoseableCommand::PUSH_NEW_POSE),
+    name_(name),
+    pose_source_(pose_source),
+    new_pose_(new_pose) {}
+
+  string name_;
+  string pose_source_;
+  Pose new_pose_;
 };
 
 }  // commands
@@ -109,6 +123,17 @@ public:
 	void CommandNewPose(string name, Pose new_pose, Pose old_pose) {
 		HandleCommandVirt(commands::AcceptNewPose(name, GetNameVirt(), new_pose, old_pose));
 	}
+
+  void HandleCommand(CommandArgs& args) {
+    switch (args.Type()) {
+    case commands::PoseableCommand::PUSH_NEW_POSE:
+    {
+      commands::PushNewPose& new_pose = dynamic_cast<commands::PushNewPose&>(args);
+      PushNewPoseImpl(new_pose.name_, new_pose.new_pose_);
+    }
+    ActorBase::HandleCommand(args);
+    }
+  }
 
 	static string GetName() {
 		return "Poseable-" + ActorBase::GetName();

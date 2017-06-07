@@ -174,7 +174,7 @@ struct CreatePyActor {
 
 template<typename ActorBaseSource>
 struct CreatePyActor2 {
-  static void Create() {
+  static void Create(class_<game_scene::Scene, boost::noncopyable>& scene) {
     string class_name = ActorBaseSource::WithPyActor::GetName();
 		for (int i = 0; i < class_name.length(); i++) {
 			if (class_name[i] == '-') {
@@ -194,6 +194,7 @@ struct CreatePyActor2 {
 			.def("GetScene", &ActorBaseSource::WholeChain::GetScene, return_value_policy<reference_existing_object>())
 			.add_property("id", &ActorBaseSource::WholeChain::GetId)
 			.def("SetScene", &ActorBaseSource::WholeChain::SetScene);
+	  //PyScene::AddActorSubclassCreation<ActorBaseSource::WithPyActor>(scene, unwrapped_class_name);
   }
 };
 
@@ -210,19 +211,19 @@ void CreatePyActors() {
 }
 
 template<typename Preface>
-void CreatePyActorsImpl() {
+void CreatePyActorsImpl(class_<game_scene::Scene, boost::noncopyable>& scene) {
 }
 
 template<typename Preface, typename PartialActorBaseSource, typename... FurtherBaseSources>
-void CreatePyActorsImpl() {
+void CreatePyActorsImpl(class_<game_scene::Scene, boost::noncopyable>& scene) {
   typedef PartialActorBaseSource::Level2<Preface> ActorBaseSource;
-  CreatePyActor2<ActorBaseSource>::Create();
-  CreatePyActorsImpl<Preface, FurtherBaseSources...>();
-  CreatePyActorsImpl<ActorBaseSource::WholeChain, FurtherBaseSources...>();
+  CreatePyActor2<ActorBaseSource>::Create(scene);
+  CreatePyActorsImpl<Preface, FurtherBaseSources...>(scene);
+  CreatePyActorsImpl<ActorBaseSource::WholeChain, FurtherBaseSources...>(scene);
 }
 
 template<typename... MixinSources>
-void CreatePyActors2() {
+void CreatePyActors2(class_<game_scene::Scene, boost::noncopyable>& scene) {
   /*class_<PyActorImpl<game_scene::ActorImpl>, bases<ActorBaseSource::WholeChain>, boost::noncopyable>(class_name.c_str(), init<>())
     .def("HandleCommand", &ActorBaseSource::WithPyActor::HandleCommand, &ActorBaseSource::WithPyActor::default_HandleCommand)
     .def("ParentHandleCommand", &ActorBaseSource::WithPyActor::default_HandleCommand)
@@ -233,5 +234,5 @@ void CreatePyActors2() {
     .def("GetScene", &ActorBaseSource::WholeChain::GetScene, return_value_policy<reference_existing_object>())
     .add_property("id", &ActorBaseSource::WholeChain::GetId)
     .def("SetScene", &ActorBaseSource::WholeChain::SetScene);*/
-  CreatePyActorsImpl<game_scene::ActorImpl, MixinSources...>();
+  CreatePyActorsImpl<game_scene::ActorImpl, MixinSources...>(scene);
 }

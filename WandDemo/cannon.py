@@ -7,7 +7,7 @@ class CoverStatus(enum.Enum):
     MIXED = 1
     CLOSED = 2
 
-class Cannon(sc.DelegatingActor[sc.NewGraphicsObject_ActorImpl]):
+class Cannon(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
     delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_ActorImpl])
 
     def __init__(self, starting_pose: sc.Pose, size: float):

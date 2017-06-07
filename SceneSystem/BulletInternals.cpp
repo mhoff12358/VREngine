@@ -92,7 +92,7 @@ void RigidBody::MotionState::SetTransformAndCallback(const btTransform& new_tran
 }
 
 RigidBody::RigidBody() :
-	body_(nullptr), shape_(), motion_state_(nullptr) {}
+	CollisionObject(), motion_state_(nullptr) {}
 
 RigidBody::RigidBody(
 	Shape shape,
@@ -104,14 +104,14 @@ RigidBody::RigidBody(
 	Shape shape,
 	unique_ptr<btMotionState> starting_motion_state,
 	InteractionType interaction_type) :
-	shape_(std::move(shape)),
 	motion_state_(std::move(starting_motion_state))
 {
+  shape_ = std::move(shape);
 	if (interaction_type.IsDynamic()) {
 		shape_.shape_->calculateLocalInertia(interaction_type.mass_, interaction_type.inertia_);
 	}
   btRigidBody::btRigidBodyConstructionInfo construction_info(interaction_type.mass_, motion_state_.get(), shape_.shape_.get(), interaction_type.inertia_);
-	body_ = make_unique<btRigidBody>(construction_info);
+	object_ = make_unique<btRigidBody>(construction_info);
   if (interaction_type.IsKinematic()) {
     MakeKinematic();
   }
@@ -122,7 +122,7 @@ bool RigidBody::GetFilled() const {
 }
 
 btRigidBody* RigidBody::GetBody() const {
-	return body_.get();
+	return static_cast<btRigidBody*>(object_.get());
 }
 
 const RigidBodyPayload& RigidBody::GetPayload() const {
@@ -140,24 +140,11 @@ btMotionState* RigidBody::GetMutableMotionState() {
 	return motion_state_.get();
 }
 
-btTransform RigidBody::GetTransform() const {
-	btTransform transform;
-	motion_state_->getWorldTransform(transform);
-	return transform;
-}
-void RigidBody::SetTransform(btTransform new_transform) {
-	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
-		downcast_motion_state->PushNewTransform(new_transform);
-	} else {
-		motion_state_->setWorldTransform(new_transform);
-	}
-}
-
 void RigidBody::MakeStatic() {
 	RemoveKinematic();
-	btScalar inv_mass = body_->getInvMass();
+	btScalar inv_mass = GetBody()->getInvMass();
 	if (inv_mass) {
-		body_->setMassProps(0.0f, body_->getLocalInertia());
+		GetBody()->setMassProps(0.0f, GetBody()->getLocalInertia());
 		stored_mass_ = 1.0f / inv_mass;
 	}
 }
@@ -165,19 +152,19 @@ void RigidBody::MakeStatic() {
 void RigidBody::MakeDynamic() {
 	RemoveKinematic();
 	if (stored_mass_) {
-		body_->setMassProps(stored_mass_, body_->getLocalInertia());
+		GetBody()->setMassProps(stored_mass_, GetBody()->getLocalInertia());
 	}
 }
 
 void RigidBody::RemoveKinematic() {
-	body_->setCollisionFlags(body_->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
+	object_->setCollisionFlags(object_->getCollisionFlags() & ~btCollisionObject::CF_KINEMATIC_OBJECT);
 	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
 		downcast_motion_state->SetKinematic(false);
 	}
 }
 
 void RigidBody::MakeKinematic() {
-	body_->setCollisionFlags(body_->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
+	object_->setCollisionFlags(object_->getCollisionFlags() | btCollisionObject::CF_KINEMATIC_OBJECT);
 	if (MotionState* downcast_motion_state = dynamic_cast<MotionState*>(motion_state_.get())) {
 		downcast_motion_state->SetKinematic(true);
 	}
@@ -191,16 +178,16 @@ void RigidBody::SetPoseUpdatedCallback(NewPoseCallback callback) {
 
 void RigidBody::MakeCollideable(bool collideable) const {
 	if (collideable) {
-		body_->setCollisionFlags(body_->getCollisionFlags() |
+		object_->setCollisionFlags(object_->getCollisionFlags() |
 			btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	} else {
-		body_->setCollisionFlags(body_->getCollisionFlags() &
+		object_->setCollisionFlags(object_->getCollisionFlags() &
 			~btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK);
 	}
 }
 
 bool RigidBody::IsCollideable() const {
-	return (body_->getCollisionFlags() &
+	return (object_->getCollisionFlags() &
 		btCollisionObject::CF_CUSTOM_MATERIAL_CALLBACK) != 0;
 }
 
@@ -237,6 +224,14 @@ btTransform CollisionObject::GetTransform() const {
 	return object_->getWorldTransform();
 }
 
+void CollisionObject::SetShape(Shape shape) {
+  shape_ = std::move(shape);
+  object_->setCollisionShape(shape_.shape_.get());
+}
+
+const Shape& CollisionObject::GetShape() const {
+  return shape_;
+}
 
 World::World(Config config) :
 	config_(std::move(config)),
@@ -282,6 +277,10 @@ void World::RemoveCollisionObject(btCollisionObject* object) {
 }
 
 struct A : public btCollisionWorld::ContactResultCallback {
+  A(const CollisionObject& object) {
+
+  }
+
   btScalar addSingleResult(
     btManifoldPoint& cp,
     const btCollisionObjectWrapper* colObj0Wrap,
@@ -294,7 +293,7 @@ struct A : public btCollisionWorld::ContactResultCallback {
 };
 
 void World::CheckCollision(const CollisionObject& object) {
-  world_->contactTest(object.GetCollisionObject(), A());
+  world_->contactTest(object.GetCollisionObject(), A(object));
 }
 
 btDiscreteDynamicsWorld* World::Get() {

@@ -13,19 +13,29 @@ class DummyActor(sc.DelegatingActor[sc.Actor]):
         self.EmbedSelf(self)
 
     @delegater.RegisterCommand(sc.InputCommand.TICK)
-    def HandleTICK(self, command_args):
+    def HandleTick(self, command_args):
         print("RECEIVED COMMAND OF TYPE TICK", command_args.duration)
 
 
 def pre_load():
     return {"load_vr": False}
 
-class HackActor(sc.DelegatingActor[sc.Actor]):
-    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
+class HackActor(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl])
+
+    def __init__(self):
+        super().__init__()
+        self.collision = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeSphere(1), sc.Pose())
 
     @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTick(self, command_args):
         pass
+
+    @delegater.RegisterCommand(sc.PoseableCommand.ACCEPT_NEW_POSE)
+    def HandleAcceptNewPose(self, command_args):
+        print("Hello from in new pose acceptance land!")
+        self.collision.SetShape(sc.Shape.MakeSphere(command_args.new_pose.scale[0]))
+        self.collision.SetPose(command_args.new_pose)
 
 def first_load(resources):
     print("STARTING FIRST LOAD")
@@ -46,13 +56,13 @@ def first_load(resources):
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
     physics_object = sc.NewGraphicsObject_PhysicsObject_Poseable_ActorImpl()
-    physics_object.RegisterNamedPose("Sphere", sc.PoseData(sc.Pose(), sc.Pose(sc.Scale(0.25)), sc.FreezeBits.SCALE))
+    physics_object.RegisterNamedPose("Sphere", sc.PoseData(sc.Pose(), sc.Pose(sc.Scale(0.5)), sc.FreezeBits.SCALE))
     scene.AddActor(physics_object)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.25), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
+            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.5), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
     shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
@@ -74,12 +84,38 @@ def first_load(resources):
                 .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((1, 1, 1)),)))
                 .SetComponent("Sphere"),)),
             sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
-#    scene.MakeCommandAfter(
-#        scene.BackOfNewCommands(),
-#        sc.Target(physics_object.id),
-#        sc.PlaceComponent(
-#            "Cylinder",
-#            sc.Pose(sc.Location(1, 1, 3))))
+
+    collision_sphere = HackActor()
+    scene.AddActor(collision_sphere)
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(collision_sphere.id),
+        sc.CreateGraphicsObject(
+            "basic",
+            sc.VectorEntitySpecification((
+                sc.EntitySpecification("Shell")
+                .SetModel(sc.ModelDetails(
+                    sc.ModelIdentifier("sphere.obj"),
+                    sc.OutputFormat(
+                        sc.ModelModifier(
+                            sc.ArrayInt3((0, 1, 2)),
+                            sc.ArrayFloat3((1, 1, 1)),
+                            sc.ArrayBool2((False, True))),
+                        sc.VertexType.all,
+                        False)))
+                .SetShaders(shader_details)
+                .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((1, 0.25, 0.25)),)))
+                .SetComponent("Sphere"),)),
+            sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
+    scene.MakeCommandAfter(
+        scene.BackOfNewCommands(),
+        sc.Target(collision_sphere.id),
+        sc.PushNewPose(
+            "Sphere",
+            "",
+            sc.Pose(sc.Location(1, 0, 3), sc.Scale(0.05))
+        )
+    )
 
     physics_collection = sc.PhysicsObjectCollection_ActorImpl()
     scene.AddActor(physics_collection)

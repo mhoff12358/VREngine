@@ -14,6 +14,8 @@ void PoseInterface() {
 		.def("__repr__", (string(*)(const Scale&))&std::to_string)
 		.def("__eq__", &Scale::operator==)
 		.def("get", &Scale::operator[])
+		.def("__len__", +static_cast<size_t(*)(const Scale&)>([](const Scale&)->size_t {return 3; }))
+		.def("__getitem__", +static_cast<float(*)(Scale&, size_t)>([](Scale& self, size_t index)->float {return self[index]; }))
 		.def("__copy__", &CopyObject<Scale>);
 
 	auto location =class_<Location>("Location")

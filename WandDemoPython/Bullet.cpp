@@ -17,9 +17,9 @@ std::auto_ptr<bullet::RigidBody> MakeRigidBody(std::auto_ptr<bullet::Shape> shap
 }
 
 std::auto_ptr<bullet::CollisionObject> MakeCollisionObject(
-  bullet::CollisionObject::CollisionObjectType collision_object_type, std::auto_ptr<bullet::Shape> shape_ptr, Pose transform) {
+  uint8_t collision_object_type, std::auto_ptr<bullet::Shape> shape_ptr, Pose transform) {
   bullet::Shape shape(std::move(*shape_ptr));
-  auto collision_object = std::make_unique<bullet::CollisionObject>(collision_object_type, std::move(shape), bullet::poses::GetTransform(transform));
+  auto collision_object = std::make_unique<bullet::CollisionObject>(static_cast<bullet::CollisionObject::CollisionObjectType>(collision_object_type), std::move(shape), bullet::poses::GetTransform(transform));
   return std::auto_ptr<bullet::CollisionObject>(collision_object.release());
 }
 
@@ -56,20 +56,25 @@ void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
     .def("Static", &bullet::RigidBody::InteractionType::Static)
     .staticmethod("Static");
 
-	class_<bullet::RigidBody, std::auto_ptr<bullet::RigidBody>, boost::noncopyable>("RigidBody", no_init)
-		.def("__init__", boost::python::make_constructor(
-			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose)>(MakeRigidBody)))
-		.def("__init__", boost::python::make_constructor(
-			static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose, bullet::RigidBody::InteractionType)>(MakeRigidBody)))
-    .def("GetPose", (Pose(*)(bullet::RigidBody&))+[](bullet::RigidBody& rigid_body) {return bullet::poses::GetPose(rigid_body.GetTransform()); })
-    .def("SetPose", (Pose(*)(bullet::RigidBody&, Pose))+[](bullet::RigidBody& rigid_body, Pose pose) {return rigid_body.SetTransform(bullet::poses::GetTransform(pose)); });
+  enum_<bullet::CollisionObject::CollisionObjectType>("CollisionObjectType")
+    .value("NORMAL", bullet::CollisionObject::CollisionObjectType::NORMAL)
+    .value("GHOST", bullet::CollisionObject::CollisionObjectType::GHOST)
+    .value("PAIR_CACHING_GHOST", bullet::CollisionObject::CollisionObjectType::PAIR_CACHING_GHOST);
 
   class_<bullet::CollisionObject, std::auto_ptr<bullet::CollisionObject>, boost::noncopyable>("CollisionObject", no_init)
     .def("__init__", boost::python::make_constructor(
-      static_cast<std::auto_ptr<bullet::CollisionObject>(*)(bullet::CollisionObject::CollisionObjectType, std::auto_ptr<bullet::Shape>, Pose)>(MakeCollisionObject)))
-    .add_static_property("NORMAL", bullet::CollisionObject::CollisionObjectType::NORMAL)
-    .add_static_property("GHOST", bullet::CollisionObject::CollisionObjectType::GHOST)
-    .add_static_property("PAIR_CACHING_GHOST", bullet::CollisionObject::CollisionObjectType::PAIR_CACHING_GHOST)
-    .def("GetPose", (Pose(*)(bullet::CollisionObject&))+[](bullet::CollisionObject& collision_object) {return bullet::poses::GetPose(collision_object.GetTransform()); })
-    .def("SetPose", (Pose(*)(bullet::CollisionObject&, Pose))+[](bullet::CollisionObject& collision_object, Pose pose) {return collision_object.SetTransform(bullet::poses::GetTransform(pose)); });
+      static_cast<std::auto_ptr<bullet::CollisionObject>(*)(uint8_t, std::auto_ptr<bullet::Shape>, Pose)>(MakeCollisionObject)))
+    .def("GetPose", static_cast<Pose(*)(bullet::CollisionObject&)>([](bullet::CollisionObject& collision_object) -> Pose {return bullet::poses::GetPose(collision_object.GetTransform()); }))
+    .def("SetPose", static_cast<void(*)(bullet::CollisionObject&, Pose)>([](bullet::CollisionObject& collision_object, Pose pose) -> void {return collision_object.SetTransform(bullet::poses::GetTransform(pose)); }))
+    .def("SetShape", static_cast<void(*)(bullet::CollisionObject&, std::auto_ptr<bullet::Shape>)>(
+      [](bullet::CollisionObject& collision_object, std::auto_ptr<bullet::Shape> shape) -> void {
+        collision_object.SetShape(std::move(*shape));
+      }))
+    .def("GetShape", &bullet::CollisionObject::GetShape, return_value_policy<reference_existing_object>());
+
+  class_<bullet::RigidBody, bases<bullet::CollisionObject>, std::auto_ptr<bullet::RigidBody>, boost::noncopyable>("RigidBody", no_init)
+    .def("__init__", boost::python::make_constructor(
+      static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose)>(MakeRigidBody)))
+    .def("__init__", boost::python::make_constructor(
+      static_cast<std::auto_ptr<bullet::RigidBody>(*)(std::auto_ptr<bullet::Shape>, Pose, bullet::RigidBody::InteractionType)>(MakeRigidBody)));
 }
