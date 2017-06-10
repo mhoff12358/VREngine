@@ -233,6 +233,44 @@ const Shape& CollisionObject::GetShape() const {
   return shape_;
 }
 
+optional<CollisionObject&> CollisionObject::GetFromBullet(const btCollisionObject* bullet_object) {
+  void* result = bullet_object->getUserPointer();
+  if (result) {
+    return *static_cast<CollisionObject*>(result);
+  }
+  return optional<CollisionObject&>();
+}
+
+void CollisionResult::AddObject(const btCollisionObject* new_object) {
+  collisions_.push_back(new_object);
+}
+
+bool CollisionResult::CollisionFound() const {
+  return !collisions_.empty();
+}
+
+const vector<const btCollisionObject*>& CollisionResult::GetRawObjects() const {
+  return collisions_;
+}
+
+vector<CollisionObject&> CollisionResult::GetExistingWrappedObjects() const {
+  vector<CollisionObject&> result;
+  for (const btCollisionObject* raw_object : collisions_) {
+    if (optional<CollisionObject&> possible_wrap = CollisionObject::GetFromBullet(raw_object)) {
+      result.push_back(possible_wrap.get());
+    }
+  }
+  return result;
+}
+
+vector<optional<CollisionObject&>> CollisionResult::GetWrappedObjects() const {
+  vector<optional<CollisionObject&>> result;
+  for (const btCollisionObject* raw_object : collisions_) {
+    result.push_back(CollisionObject::GetFromBullet(raw_object));
+  }
+  return result;
+}
+
 World::World(Config config) :
 	config_(std::move(config)),
 	world_(new btDiscreteDynamicsWorld(
@@ -276,9 +314,9 @@ void World::RemoveCollisionObject(btCollisionObject* object) {
 	world_->removeCollisionObject(object);
 }
 
-struct A : public btCollisionWorld::ContactResultCallback {
-  A(const CollisionObject& object) {
-
+struct CreateCollisionResult : public btCollisionWorld::ContactResultCallback {
+  CreateCollisionResult(const CollisionObject& object) {
+    collision_object_ = object.GetCollisionObject();
   }
 
   btScalar addSingleResult(
@@ -287,13 +325,23 @@ struct A : public btCollisionWorld::ContactResultCallback {
     int partId0, int index0,
     const btCollisionObjectWrapper* colObj1Wrap,
     int partId1, int index1) override {
-    std::cout << "MHOFF!" << std::endl;
+    const btCollisionObject* other_object = colObj0Wrap->getCollisionObject();
+    if (other_object != collision_object_) {
+      result_.AddObject(other_object);
+    } else {
+      result_.AddObject(colObj1Wrap->getCollisionObject());
+    }
     return 0.0f;
   }
+
+  const btCollisionObject* collision_object_;
+  CollisionResult result_;
 };
 
-void World::CheckCollision(const CollisionObject& object) {
-  world_->contactTest(object.GetCollisionObject(), A(object));
+CollisionResult World::CheckCollision(const CollisionObject& object) {
+  CreateCollisionResult collision_result_generator(object);
+  world_->contactTest(object.GetCollisionObject(), collision_result_generator);
+  return collision_result_generator.result_;
 }
 
 btDiscreteDynamicsWorld* World::Get() {

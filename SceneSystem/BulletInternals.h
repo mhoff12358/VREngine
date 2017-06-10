@@ -82,6 +82,8 @@ public:
   void SetShape(Shape shape);
   const Shape& GetShape() const;
 
+  static optional<CollisionObject&> GetFromBullet(const btCollisionObject* bullet_object);
+
 protected:
 	unique_ptr<btCollisionObject> object_;
 	Shape shape_;
@@ -179,6 +181,21 @@ private:
 	btScalar stored_mass_ = 0.0f;
 };
 
+class CollisionResult {
+public:
+  CollisionResult() = default;
+
+  void AddObject(const btCollisionObject*);
+
+  bool CollisionFound() const;
+  const vector<const btCollisionObject*>& GetRawObjects() const;
+  vector<CollisionObject&> GetExistingWrappedObjects() const;
+  vector<optional<CollisionObject&>> GetWrappedObjects() const;
+
+private:
+  vector<const btCollisionObject*> collisions_;
+};
+
 class World {
 public:
 	World(Config config);
@@ -195,7 +212,7 @@ public:
 	void RemoveCollisionObject(const CollisionObject& object);
 	void RemoveCollisionObject(btCollisionObject* object);
 
-  void CheckCollision(const CollisionObject& object);
+  CollisionResult CheckCollision(const CollisionObject& object);
 
 	btDiscreteDynamicsWorld* Get();
 
