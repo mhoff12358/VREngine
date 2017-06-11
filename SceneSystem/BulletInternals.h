@@ -213,6 +213,7 @@ public:
 	void RemoveCollisionObject(btCollisionObject* object);
 
   CollisionResult CheckCollision(const CollisionObject& object);
+  bool CheckCollisionExistsPair(const CollisionObject& object_0, const CollisionObject& object_1) const;
 
 	btDiscreteDynamicsWorld* Get();
 

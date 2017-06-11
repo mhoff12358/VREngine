@@ -106,10 +106,12 @@ struct GetRigidBodiesResult : public QueryResult {
 };
 
 struct CheckCollisionQuery : public QueryArgs{
-  CheckCollisionQuery(const bullet::CollisionObject& collision_object) :
+  CheckCollisionQuery(const bullet::World& world, const bullet::CollisionObject& collision_object) :
     QueryArgs(PhysicsObjectQuery::CHECK_COLLISION),
+    world_(world),
     collision_object_(collision_object) {}
 
+  const bullet::World& world_;
   const bullet::CollisionObject& collision_object_;
 };
 
@@ -216,7 +218,7 @@ private:
 
   unique_ptr<queries::CheckCollisionResult> CheckCollision(const queries::CheckCollisionQuery& args) const {
     const bullet::CollisionObject& other_object = args.collision_object_;
-    return make_unique<queries::CheckCollisionResult>(rigid_body_.enabled_ && rigid_body_.body_.GetBody()->checkCollideWith(other_object.GetCollisionObject()));
+    return make_unique<queries::CheckCollisionResult>(rigid_body_.enabled_ && args.world_.CheckCollisionExistsPair(rigid_body_.body_, other_object));
   }
 
 	string rigid_body_name_;
@@ -328,7 +330,7 @@ private:
     const bullet::CollisionObject& other_object = args.collision_object_;
     for (const pair<const string, PhysicsObjectComponent>& sub_component : rigid_bodies_) {
       const PhysicsObjectComponent& rigid_body = sub_component.second;
-      if (rigid_body.enabled_ && rigid_body.body_.GetBody()->checkCollideWith(other_object.GetCollisionObject())) {
+      if (rigid_body.enabled_ && args.world_.CheckCollisionExistsPair(rigid_body.body_, other_object)) {
         return make_unique<queries::CheckCollisionResult>(true);
       }
     }

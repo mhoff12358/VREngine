@@ -340,9 +340,28 @@ struct CreateCollisionResult : public btCollisionWorld::ContactResultCallback {
   CollisionResult result_;
 };
 
+struct CreateCollisionOccurance : public btCollisionWorld::ContactResultCallback {
+  bool result_ = false;
+  btScalar addSingleResult(
+    btManifoldPoint& cp,
+    const btCollisionObjectWrapper* colObj0Wrap,
+    int partId0, int index0,
+    const btCollisionObjectWrapper* colObj1Wrap,
+    int partId1, int index1) override {
+    result_ = true;
+    return 0.0f;
+  }
+};
+
 CollisionResult World::CheckCollision(const CollisionObject& object) {
   CreateCollisionResult collision_result_generator(object);
   world_->contactTest(object.GetCollisionObject(), collision_result_generator);
+  return collision_result_generator.result_;
+}
+
+bool World::CheckCollisionExistsPair(const CollisionObject& object_0, const CollisionObject& object_1) const {
+  CreateCollisionOccurance collision_result_generator;
+  world_->contactPairTest(object_0.GetCollisionObject(), object_1.GetCollisionObject(), collision_result_generator);
   return collision_result_generator.result_;
 }
 

@@ -70,7 +70,8 @@ void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
       static_cast<CollisionResult*(*)(World&, const CollisionObject&)>([](World& world, const CollisionObject& check_object) -> CollisionResult* {
         return new CollisionResult(std::move(world.CheckCollision(check_object)));
       }),
-      return_value_policy<boost::python::manage_new_object>());
+      return_value_policy<boost::python::manage_new_object>())
+    .def("CheckCollisionExistsPair", &World::CheckCollisionExistsPair);
 
   class_<RigidBody::InteractionType>("InteractionType", init<>())
     .def(init<btScalar>())

@@ -38,10 +38,10 @@ class HackActor(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
 
     @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTick(self, command_args):
-        #if self.world is None:
-        #    self.world = self.scene.AskQuery(sc.Target(self.simulation_id), sc.RawQueryArgs(sc.PhysicsSimulationCommand.GET_WORLD)).GetData()
+        if self.world is None:
+            self.world = self.scene.AskQuery(sc.Target(self.simulation_id), sc.RawQueryArgs(sc.PhysicsSimulationCommand.GET_WORLD)).GetData()
         #b = self.world.CheckCollision(self.collision)
-        print("COLLISION FOUND:", self.scene.AskQuery(sc.Target(self.other_ball_id), sc.CheckCollisionQuery(self.collision)).collision)
+        print("COLLISION FOUND:", self.scene.AskQuery(sc.Target(self.other_ball_id), sc.CheckCollisionQuery(self.world, self.collision)).collision)
 
     @delegater.RegisterCommand(sc.PoseableCommand.ACCEPT_NEW_POSE)
     def HandleAcceptNewPose(self, command_args):
