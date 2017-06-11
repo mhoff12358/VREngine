@@ -31,7 +31,12 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 		.def_readonly("ADD_UPDATED_CALLBACK", &game_scene::commands::PhysicsObjectCommand::ADD_UPDATED_CALLBACK);
 
 	class_<game_scene::queries::PhysicsObjectQuery>("PhysicsObjectQuery")
-		.def_readonly("REGISTER_LISTENER", &game_scene::queries::PhysicsObjectQuery::GET_RIGID_BODIES);
+		.def_readonly("GET_RIGID_BODIES", &game_scene::queries::PhysicsObjectQuery::GET_RIGID_BODIES)
+		.def_readonly("CHECK_COLLISION", &game_scene::queries::PhysicsObjectQuery::CHECK_COLLISION);
+
+  class_<game_scene::queries::CheckCollisionQuery, bases<game_scene::QueryArgs>, boost::noncopyable>("CheckCollisionQuery", init<bullet::CollisionObject&>());
+  class_<game_scene::queries::CheckCollisionResult, bases<game_scene::QueryResult>, boost::noncopyable>("CheckCollisionResult", no_init)
+    .def_readonly("collision", &game_scene::queries::CheckCollisionResult::collision_);
 
 	class_<game_scene::commands::AddRigidBody, bases<game_scene::CommandArgs>,
 		std::auto_ptr<game_scene::commands::AddRigidBody>,

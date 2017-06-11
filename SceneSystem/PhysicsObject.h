@@ -86,13 +86,14 @@ namespace queries {
 class PhysicsObjectQuery {
 public:
 	DECLARE_QUERY(PhysicsObjectQuery, GET_RIGID_BODIES);
+  DECLARE_QUERY(PhysicsObjectQuery, CHECK_COLLISION);
 };
 
-struct GetRigidBodies : QueryArgs {
-	GetRigidBodies();
+struct GetRigidBodies : public QueryArgs {
+  GetRigidBodies() : QueryArgs(PhysicsObjectQuery::GET_RIGID_BODIES) {}
 };
 
-struct GetRigidBodiesResult : QueryResult {
+struct GetRigidBodiesResult : public QueryResult {
 	GetRigidBodiesResult(const bullet::RigidBody& rigid_body) :
 		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_bodies_() {
 		rigid_bodies_.push_back(&rigid_body);
@@ -102,6 +103,22 @@ struct GetRigidBodiesResult : QueryResult {
 	}
 
 	vector<const bullet::RigidBody*> rigid_bodies_;
+};
+
+struct CheckCollisionQuery : public QueryArgs{
+  CheckCollisionQuery(const bullet::CollisionObject& collision_object) :
+    QueryArgs(PhysicsObjectQuery::CHECK_COLLISION),
+    collision_object_(collision_object) {}
+
+  const bullet::CollisionObject& collision_object_;
+};
+
+struct CheckCollisionResult : public QueryResult {
+  CheckCollisionResult(bool collision) :
+    QueryResult(PhysicsObjectQuery::CHECK_COLLISION),
+    collision_(collision) {}
+
+  bool collision_;
 };
 
 }  // queries
@@ -142,6 +159,8 @@ public:
 			} else {
 				return make_unique<queries::GetRigidBodiesResult>(vector<const bullet::RigidBody*>());
 			}
+    case queries::PhysicsObjectQuery::CHECK_COLLISION:
+      return CheckCollision(dynamic_cast<const queries::CheckCollisionQuery&>(args));
 		default:
 			return make_unique<QueryResult>(QueryType::EMPTY);
 		}
@@ -194,6 +213,11 @@ private:
 			rigid_body_.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
+
+  unique_ptr<queries::CheckCollisionResult> CheckCollision(const queries::CheckCollisionQuery& args) const {
+    const bullet::CollisionObject& other_object = args.collision_object_;
+    return make_unique<queries::CheckCollisionResult>(rigid_body_.enabled_ && rigid_body_.body_.GetBody()->checkCollideWith(other_object.GetCollisionObject()));
+  }
 
 	string rigid_body_name_;
 	PhysicsObjectComponent rigid_body_;
@@ -299,6 +323,17 @@ private:
 			rigid_body_iter->second.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}
 	}
+
+  unique_ptr<queries::CheckCollisionResult> CheckCollision(const queries::CheckCollisionQuery& args) const {
+    const bullet::CollisionObject& other_object = args.collision_object_;
+    for (const pair<const string, PhysicsObjectComponent>& sub_component : rigid_bodies_) {
+      const PhysicsObjectComponent& rigid_body = sub_component.second;
+      if (rigid_body.enabled_ && rigid_body.body_.GetBody()->checkCollideWith(other_object.GetCollisionObject())) {
+        return make_unique<queries::CheckCollisionResult>(true);
+      }
+    }
+    return make_unique<queries::CheckCollisionResult>(false);
+  }
 
 	map<string, PhysicsObjectComponent> rigid_bodies_;
 	game_scene::ActorCallback updated_callback_;

@@ -28,16 +28,20 @@ class HackActor(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
         self.collision = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeSphere(1), sc.Pose())
         self.world = None
         self.simulation_id = None
+        self.other_ball_id = None
 
     def SetPhysicsSim(self, simulation_id):
         self.simulation_id = simulation_id
 
+    def SetOtherBall(self, other_ball_id):
+        self.other_ball_id = other_ball_id
+
     @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTick(self, command_args):
-        if self.world is None:
-            self.world = self.scene.AskQuery(sc.Target(self.simulation_id), sc.RawQueryArgs(sc.PhysicsSimulationCommand.GET_WORLD)).GetData()
-        a = self.world.CheckCollision(self.collision)
-        print("COLLISION FOUND:", a.CollisionFound())
+        #if self.world is None:
+        #    self.world = self.scene.AskQuery(sc.Target(self.simulation_id), sc.RawQueryArgs(sc.PhysicsSimulationCommand.GET_WORLD)).GetData()
+        #b = self.world.CheckCollision(self.collision)
+        print("COLLISION FOUND:", self.scene.AskQuery(sc.Target(self.other_ball_id), sc.CheckCollisionQuery(self.collision)).collision)
 
     @delegater.RegisterCommand(sc.PoseableCommand.ACCEPT_NEW_POSE)
     def HandleAcceptNewPose(self, command_args):
@@ -121,7 +125,7 @@ def first_load(resources):
         sc.PushNewPose(
             "Sphere",
             "",
-            sc.Pose(sc.Location(4, 0, 3), sc.Scale(0.05))))
+            sc.Pose(sc.Location(1, 0.75, 3), sc.Scale(0.05))))
     scene.AddActorToGroup(collision_sphere.id, scene.FindByName("TickRegistry"))
 
     physics_collection = sc.PhysicsObjectCollection_ActorImpl()
@@ -145,6 +149,7 @@ def first_load(resources):
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
 
     collision_sphere.SetPhysicsSim(physics_sim_id)
+    collision_sphere.SetOtherBall(physics_object.id)
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)

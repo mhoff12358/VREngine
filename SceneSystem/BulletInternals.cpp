@@ -325,11 +325,13 @@ struct CreateCollisionResult : public btCollisionWorld::ContactResultCallback {
     int partId0, int index0,
     const btCollisionObjectWrapper* colObj1Wrap,
     int partId1, int index1) override {
-    const btCollisionObject* other_object = colObj0Wrap->getCollisionObject();
-    if (other_object != collision_object_) {
-      result_.AddObject(other_object);
+    const btCollisionObject* other_object_0 = colObj0Wrap->getCollisionObject();
+    const btCollisionObject* other_object_1 = colObj1Wrap->getCollisionObject();
+    if (other_object_0 != collision_object_) {
+      result_.AddObject(other_object_0);
     } else {
-      result_.AddObject(colObj1Wrap->getCollisionObject());
+      assert(other_object_1 != collision_object_);
+      result_.AddObject(other_object_1);
     }
     return 0.0f;
   }
