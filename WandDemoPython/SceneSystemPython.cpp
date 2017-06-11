@@ -39,6 +39,7 @@
 #include "LightInterface.h"
 #include "Physics.h"
 #include "Bullet.h"
+#include "Poseable.h"
 
 BOOST_PTR_MAGIC(game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>>)
 BOOST_PTR_MAGIC(game_scene::ActorImpl)
@@ -88,22 +89,12 @@ struct PhysicsSimulationMixinHelper : public WrapActorMixin<game_scene::actors::
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
       class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
-        .def("GetWorld", &WholeChain::GetWorld);
+        .def("GetWorld", &WholeChain::GetWorld, return_value_policy<reference_existing_object>());
     }
   };
 };
 
-BOOST_PTR_MAGIC(game_scene::commands::AcceptNewPose)
-BOOST_PTR_MAGIC(game_scene::commands::PushNewPose)
-
 BOOST_PYTHON_MODULE(scene_system_) {
-  enum_<unsigned char>("FreezeBits")
-    .value("LOCATION", game_scene::actors::PoseData::LOCATION)
-    .value("ORIENTATION", game_scene::actors::PoseData::ORIENTATION)
-    .value("SCALE", game_scene::actors::PoseData::SCALE);
-  class_<game_scene::actors::PoseData>("PoseData", init<Pose>())
-    .def(init<Pose, Pose, unsigned char>());
-
 	class_<game_scene::ActorImpl, boost::noncopyable>("ActorImpl", init<>());
 
 	class_<game_scene::CommandArgs, std::auto_ptr<game_scene::CommandArgs>, boost::noncopyable>("RawCommandArgs", init<game_scene::IdType>())
@@ -175,42 +166,8 @@ BOOST_PYTHON_MODULE(scene_system_) {
 		.def("SetPose", &PipelineCamera::SetPose)
 		.def("BuildMatrices", &PipelineCamera::BuildMatrices);
 
-	class_<game_scene::commands::PoseableCommand, boost::noncopyable>("PoseableCommand", no_init)
-		.def_readonly("ACCEPT_NEW_POSE", &game_scene::commands::PoseableCommand::ACCEPT_NEW_POSE)
-		.def_readonly("PUSH_NEW_POSE", &game_scene::commands::PoseableCommand::PUSH_NEW_POSE);
-
-  class_<
-    game_scene::commands::AcceptNewPose,
-    bases<game_scene::CommandArgs>,
-    std::auto_ptr<game_scene::commands::AcceptNewPose>,
-    boost::noncopyable>(
-      "AcceptNewPose",
-      init<string, string, Pose, Pose>())
-    .add_property("name", &game_scene::commands::AcceptNewPose::name_)
-    .add_property("pose_source", &game_scene::commands::AcceptNewPose::pose_source_)
-    .add_property("new_pose", &game_scene::commands::AcceptNewPose::new_pose_)
-    .add_property("old_pose", &game_scene::commands::AcceptNewPose::old_pose_);
-	scene_registration.def(
-		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::AcceptNewPose>);
-
-  class_<
-    game_scene::commands::PushNewPose,
-    bases<game_scene::CommandArgs>,
-    std::auto_ptr<game_scene::commands::PushNewPose>,
-    boost::noncopyable>(
-      "PushNewPose",
-      init<string, string, Pose>())
-    .add_property("name", &game_scene::commands::PushNewPose::name_)
-    .add_property("pose_source", &game_scene::commands::PushNewPose::pose_source_)
-    .add_property("new_pose", &game_scene::commands::PushNewPose::new_pose_);
-	scene_registration.def(
-		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::PushNewPose>);
-
   CreatePyActors<CreatePyActor, game_scene::ActorImpl>();
-  CreatePyActors2<WrapActorMixin<game_scene::actors::PhysicsSimulation>>(scene_registration);
-  //CreatePyActors2<PhysicsSimulationMixinHelper>();
+  CreatePyActors2<PhysicsSimulationMixinHelper>(scene_registration);
   CreatePyActors2<
     PoseableMixinHelper,
     WrapActorMixin<game_scene::actors::PhysicsObjectCollection>,
@@ -235,4 +192,5 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	LightInterface();
 	Physics(scene_registration);
 	Bullet(scene_registration);
+  Poseable(scene_registration);
 }

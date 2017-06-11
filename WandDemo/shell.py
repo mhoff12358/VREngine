@@ -39,15 +39,14 @@ class FireShell(sc.CommandArgs):
     def __init__(self):
         super().__init__(ShellCommands.FIRE)
 
-class Shell(sc.DelegatingActor[sc.Actor]):
-    delegater = sc.Delegater(sc.DelegatingActor[sc.Actor])
+class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_PhysicsObject_Poseable])
 
     spent_color = (0.1, 0.1, 0.1)
 
     def __init__(self, shell_attributes: ShellAttributes, starting_pose: sc.Pose = sc.Pose(), size: float = 1, reposed_callback = None):
         super().__init__()
         self.shell_attributes = shell_attributes
-        self.graphics_id = None # type : sc.ActorId
         self.draggable_shell = None # type : draggable_object.DraggableObject
         self.shell_wrapper = None # type : draggable_graphics.DraggableGraphics
         self.shell_pose = sc.Pose()
@@ -83,7 +82,7 @@ class Shell(sc.DelegatingActor[sc.Actor]):
         self.shell_wrapper = draggable_graphics.DraggableGraphics(
             scene = self.scene,
             draggable_actor = self.draggable_shell,
-            graphics_id = self.graphics_id,
+            graphics_id = self.id,
             graphics_component = "Cylinder",
             graphics_pose = sc.Pose(self.scale))
 
@@ -100,9 +99,7 @@ class Shell(sc.DelegatingActor[sc.Actor]):
     def HandleFireShell(self, args):
         self.draggable_shell.EnableGrabbing()
         self.shell_attributes.spent = True
-        self.scene.MakeCommandAfter(
-            self.scene.FrontOfCommands(),
-            sc.Target(self.graphics_id),
+        self.HandleCommand(
             sc.SetEntityShaderValues(
                 "Shell",
                 sc.ShaderSettingsValue((sc.VectorFloat(self.spent_color),))))
@@ -112,11 +109,8 @@ class Shell(sc.DelegatingActor[sc.Actor]):
         return RespondShellAttributes(copy.copy(self.shell_attributes))
 
     def LoadGraphicsResources(self, latest_command):
-        self.graphics_id = self.scene.AddAndConstructGraphicsObject().id
         shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
-        latest_command = self.scene.MakeCommandAfter(
-            latest_command,
-            sc.Target(self.graphics_id),
+        self.HandleCommand(
             sc.CreateGraphicsObject(
                 "basic",
                 sc.VectorEntitySpecification((
