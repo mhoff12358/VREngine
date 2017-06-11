@@ -2,6 +2,7 @@
 #include "Poseable.h"
 
 #include "StlHelper.h"
+#include "PyCommandAndQuery.h"
 #include "PyScene.h"
 #include "SceneSystem/Poseable.h"
 #include "SceneSystem/Actor.h"
@@ -19,7 +20,8 @@ void Poseable(class_<game_scene::Scene, boost::noncopyable>& scene_registration)
 
 	class_<game_scene::commands::PoseableCommand, boost::noncopyable>("PoseableCommand", no_init)
 		.def_readonly("ACCEPT_NEW_POSE", &game_scene::commands::PoseableCommand::ACCEPT_NEW_POSE)
-		.def_readonly("PUSH_NEW_POSE", &game_scene::commands::PoseableCommand::PUSH_NEW_POSE);
+		.def_readonly("PUSH_NEW_POSE", &game_scene::commands::PoseableCommand::PUSH_NEW_POSE)
+		.def_readonly("GET_POSE", &game_scene::commands::PoseableCommand::GET_POSE);
 
   class_<
     game_scene::commands::AcceptNewPose,
@@ -49,4 +51,12 @@ void Poseable(class_<game_scene::Scene, boost::noncopyable>& scene_registration)
 	scene_registration.def(
 		"MakeCommandAfter",
 		&PyScene::MakeCommandAfter<game_scene::commands::PushNewPose>);
+
+  class_<
+    game_scene::commands::GetPoseQuery,
+    bases<game_scene::QueryArgs>,
+    boost::noncopyable>(
+      "GetPoseQuery",
+      init<string>());
+  RegisterQueryResultWrapped<Pose>("Pose");
 }

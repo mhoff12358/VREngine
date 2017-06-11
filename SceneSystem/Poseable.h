@@ -10,6 +10,7 @@ class PoseableCommand {
 public:
 	DECLARE_COMMAND(PoseableCommand, ACCEPT_NEW_POSE);
 	DECLARE_COMMAND(PoseableCommand, PUSH_NEW_POSE);
+  DECLARE_QUERY(PoseableCommand, GET_POSE);
 };
 
 class AcceptNewPose : public CommandArgs {
@@ -38,6 +39,13 @@ public:
   string name_;
   string pose_source_;
   Pose new_pose_;
+};
+
+class GetPoseQuery : public QueryArgs {
+public:
+  GetPoseQuery(string pose_name) : QueryArgs(PoseableCommand::GET_POSE), pose_name_(pose_name) {}
+
+  string pose_name_;
 };
 
 }  // commands
@@ -133,6 +141,16 @@ public:
     }
     ActorBase::HandleCommand(args);
     }
+  }
+
+  unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) {
+    switch (args.Type()) {
+    case commands::PoseableCommand::GET_POSE:
+      return make_unique<QueryResultWrapped<Pose>>(
+        commands::PoseableCommand::GET_POSE,
+        stored_poses_[dynamic_cast<const GetPoseQuery&>(args).pose_name_].pose_);
+    }
+    return make_unique<EmptyQueryResult>();
   }
 
 	static string GetName() {

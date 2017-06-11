@@ -9,6 +9,7 @@ namespace commands {
 
 REGISTER_COMMAND(PoseableCommand, ACCEPT_NEW_POSE);
 REGISTER_COMMAND(PoseableCommand, PUSH_NEW_POSE);
+REGISTER_QUERY(PoseableCommand, GET_POSE);
 
 
 }  // commands
