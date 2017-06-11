@@ -16,6 +16,7 @@ namespace commands {
 class PhysicsSimulationCommand {
 public:
 	DECLARE_COMMAND(PhysicsSimulationCommand, UPDATE_PHYSICS_OBJECT);
+  DECLARE_QUERY(PhysicsSimulationCommand, GET_WORLD);
 };
 
 class UpdatePhysicsObject : public CommandArgs {
@@ -90,15 +91,6 @@ public:
 		}	break;
 		case InputCommand::TICK:
 			physics_simulation_impl_.HandleTimeTick(dynamic_cast<const commands::TimeTick&>(args));
-			/*for (auto rigid_body_source : rigid_body_sources_) {
-				ActorId actor_to_alert;
-				std::tie(actor_to_alert, std::ignore) = rigid_body_source;
-				GetScene().MakeCommandAfter(
-					GetScene().BackOfNewCommands(),
-					Command(
-						game_scene::Target(actor_to_alert),
-						make_unique<commands::RigidBodyUpdated>()));
-			}*/
 			break;
 		default:
 			break;
@@ -106,13 +98,20 @@ public:
 		ActorBase::HandleCommand(args);
 	}
 
+  unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) {
+    switch (args.Type()) {
+    case commands::PhysicsSimulationCommand::GET_WORLD:
+      return make_unique<QueryResultWrapped<bullet::World&>>(commands::PhysicsSimulationCommand::GET_WORLD, GetWorld());
+    }
+	  return make_unique<QueryResult>(QueryType::EMPTY);
+  }
+
 	static string GetName() {
 		return "PhysicsSimulation-" + ActorBase::GetName();
 	}
 
-  void CheckCollision(const bullet::CollisionObject& collision_object) const {
-    auto collision_result = physics_simulation_impl_.world_.CheckCollision(collision_object);
-    return collision_result;
+  bullet::World& GetWorld() {
+    return physics_simulation_impl_.world_;
   }
 
 private:

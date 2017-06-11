@@ -2,6 +2,7 @@
 #include "Physics.h"
 
 #include "PyScene.h"
+#include "PyCommandAndQuery.h"
 #include "SceneSystem/PhysicsObject.h"
 #include "SceneSystem/PhysicsSimulation.h"
 
@@ -48,7 +49,9 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 		&PyScene::MakeCommandAfter<game_scene::commands::RemoveRigidBody>);
 
 	class_<game_scene::commands::PhysicsSimulationCommand>("PhysicsSimulationCommand")
-		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT);
+		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT)
+		.def_readonly("GET_WORLD", &game_scene::commands::PhysicsSimulationCommand::GET_WORLD);
+  RegisterQueryResultWrapped<bullet::World&>("World");
 
 	enum_<game_scene::commands::UpdatePhysicsObject::UpdateType>("UpdateType")
 		.value("ADD", game_scene::commands::UpdatePhysicsObject::UpdateType::ADD)

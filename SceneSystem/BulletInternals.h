@@ -189,7 +189,7 @@ public:
 
   bool CollisionFound() const;
   const vector<const btCollisionObject*>& GetRawObjects() const;
-  vector<CollisionObject&> GetExistingWrappedObjects() const;
+  vector<CollisionObject*> GetExistingWrappedObjects() const;
   vector<optional<CollisionObject&>> GetWrappedObjects() const;
 
 private:

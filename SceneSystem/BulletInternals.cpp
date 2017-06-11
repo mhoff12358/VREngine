@@ -253,11 +253,11 @@ const vector<const btCollisionObject*>& CollisionResult::GetRawObjects() const {
   return collisions_;
 }
 
-vector<CollisionObject&> CollisionResult::GetExistingWrappedObjects() const {
-  vector<CollisionObject&> result;
+vector<CollisionObject*> CollisionResult::GetExistingWrappedObjects() const {
+  vector<CollisionObject*> result;
   for (const btCollisionObject* raw_object : collisions_) {
     if (optional<CollisionObject&> possible_wrap = CollisionObject::GetFromBullet(raw_object)) {
-      result.push_back(possible_wrap.get());
+      result.push_back(&possible_wrap.get());
     }
   }
   return result;

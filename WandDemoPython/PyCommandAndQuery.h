@@ -8,6 +8,12 @@
 #include "SceneSystem/QueryArgs.h"
 #include "SceneSystem/CommandArgs.h"
 
+template <typename Wrapped>
+void RegisterQueryResultWrapped(string wrapped_name) {
+  wrapped_name = string("QueryResultWrapped_") + wrapped_name;
+  class_<game_scene::QueryResultWrapped<Wrapped>, bases<game_scene::QueryResult>, boost::noncopyable>(wrapped_name.c_str(), no_init)
+    .def("GetData", &game_scene::QueryResultWrapped<Wrapped>::GetData, return_value_policy<reference_existing_object>());
+}
 
 struct PyCommandArgs : public game_scene::CommandArgs {
 public:

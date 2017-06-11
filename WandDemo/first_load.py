@@ -26,10 +26,18 @@ class HackActor(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
     def __init__(self):
         super().__init__()
         self.collision = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeSphere(1), sc.Pose())
+        self.world = None
+        self.simulation_id = None
+
+    def SetPhysicsSim(self, simulation_id):
+        self.simulation_id = simulation_id
 
     @delegater.RegisterCommand(sc.InputCommand.TICK)
     def HandleTick(self, command_args):
-        pass
+        if self.world is None:
+            self.world = self.scene.AskQuery(sc.Target(self.simulation_id), sc.RawQueryArgs(sc.PhysicsSimulationCommand.GET_WORLD)).GetData()
+        a = self.world.CheckCollision(self.collision)
+        print("COLLISION FOUND:", a.CollisionFound())
 
     @delegater.RegisterCommand(sc.PoseableCommand.ACCEPT_NEW_POSE)
     def HandleAcceptNewPose(self, command_args):
@@ -113,9 +121,8 @@ def first_load(resources):
         sc.PushNewPose(
             "Sphere",
             "",
-            sc.Pose(sc.Location(1, 0, 3), sc.Scale(0.05))
-        )
-    )
+            sc.Pose(sc.Location(4, 0, 3), sc.Scale(0.05))))
+    scene.AddActorToGroup(collision_sphere.id, scene.FindByName("TickRegistry"))
 
     physics_collection = sc.PhysicsObjectCollection_ActorImpl()
     scene.AddActor(physics_collection)
@@ -126,7 +133,7 @@ def first_load(resources):
             "Floor", sc.RigidBody(sc.Shape.MakePlane(sc.Location(0, 1, 0)), sc.Pose(sc.Location(0, 0, 0)))))
 
     physics_simulation = sc.PhysicsSimulation_ActorImpl()
-    scene.AddActor(physics_simulation)
+    physics_sim_id = scene.AddActor(physics_simulation)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
         sc.Target(physics_simulation.id),
@@ -136,6 +143,8 @@ def first_load(resources):
         sc.Target(physics_simulation.id),
         sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
+
+    collision_sphere.SetPhysicsSim(physics_sim_id)
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)

@@ -7,6 +7,7 @@ FORCE_LINK_THIS(PhysicsSimulation)
 namespace game_scene {
 namespace commands {
 REGISTER_COMMAND(PhysicsSimulationCommand, UPDATE_PHYSICS_OBJECT);
+REGISTER_QUERY(PhysicsSimulationCommand, GET_WORLD);
 }  // commands
 
 namespace actors {
