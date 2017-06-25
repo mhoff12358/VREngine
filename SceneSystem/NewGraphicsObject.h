@@ -115,16 +115,16 @@ public:
 			break;
 		case NewGraphicsObjectCommand::CREATE:
 			impl_.InitializeEntities(dynamic_cast<commands::CreateNewGraphicsObject&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
-			return;
+			break;
 		case NewGraphicsObjectCommand::PLACE_COMPONENT:
 			impl_.PlaceComponent(dynamic_cast<commands::PlaceNewComponent&>(args));
-			return;
+			break;
 		case NewGraphicsObjectCommand::SET_ENTITY_SHADER_VALUES:
 			impl_.SetShaderValues(dynamic_cast<commands::SetEntityShaderValues&>(args), GraphicsResources::GetGraphicsResources(&GetScene()));
-			return;
+			break;
 		case commands::PoseableCommand::ACCEPT_NEW_POSE:
 			impl_.HandleAcceptNewPose(dynamic_cast<commands::AcceptNewPose&>(args));
-			return;
+			break;
 		default:
 			break;
 		}

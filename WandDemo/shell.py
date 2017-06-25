@@ -39,8 +39,8 @@ class FireShell(sc.CommandArgs):
     def __init__(self):
         super().__init__(ShellCommands.FIRE)
 
-class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
-    delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_PhysicsObject_Poseable])
+class Shell(sc.DelegatingActor[sc.NewGraphicsObject_PrintNewPoses_PhysicsObject_Poseable]):
+    delegater = sc.Delegater(sc.DelegatingActor[sc.NewGraphicsObject_PrintNewPoses_PhysicsObject_Poseable])
 
     spent_color = (0.1, 0.1, 0.1)
 
@@ -53,9 +53,8 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
         self.loading_collision = sc.CollisionShape(sc.Pose(), 0.1)
         self.reposed_callback = reposed_callback
 
-        starting_pose = copy.copy(starting_pose)
-        self.SetShellPose(starting_pose)
-        self.scale = sc.Scale(size)
+        self.starting_pose = copy.copy(starting_pose)
+        self.size = size
 
     def SetShellPose(self, shell_pose):
         self.shell_pose = shell_pose
@@ -69,31 +68,34 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
     def GetLoadingCollision(self):
         return self.loading_collision
 
+    def SetSize(self, size):
+        self.size = size
+        self.FreezePose("Cylinder", sc.Pose(sc.Scale(self.size)), sc.FreezeBits.SCALE)
+
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
-        latest_command = self.scene.FrontOfCommands()
-        latest_command = self.LoadGraphicsResources(latest_command)
-
-        self.draggable_shell = draggable_object.DraggableObject(
-            collision_shapes = ((sc.CollisionShape(sc.Pose(), 0.1), sc.Pose()),),
-            starting_pose = self.shell_pose,
-            pose_updated_callback = functools.partial(self.ShellDragged))
-        self.scene.AddActorAfter(self.draggable_shell, latest_command)
-        self.shell_wrapper = draggable_graphics.DraggableGraphics(
-            scene = self.scene,
-            draggable_actor = self.draggable_shell,
-            graphics_id = self.id,
-            graphics_component = "Cylinder",
-            graphics_pose = sc.Pose(self.scale))
+        self.LoadGraphicsResources()
+        self.HandleCommand(sc.AddRigidBody(
+            "Cylinder", sc.RigidBody(
+                sc.Shape.MakeBox(sc.Location(1.0, 1.0, 1.0)),
+                self.starting_pose,
+                1.0,
+                sc.InteractionType(10.0)
+        )))
+        self.RegisterNamedPose("Cylinder", sc.PoseData())
+        self.SetSize(self.size)
+        #self.PushNewPose("Cylinder", self.starting_pose)
 
     @delegater.RegisterCommand(ShellCommands.LOAD)
     def HandleLoadShell(self, args: LoadShell):
-        self.draggable_shell.MoveToPose(args.load_pose)
-        self.draggable_shell.DisableGrabbing()
+        pass
+        #self.draggable_shell.MoveToPose(args.load_pose)
+        #self.draggable_shell.DisableGrabbing()
 
     @delegater.RegisterCommand(ShellCommands.UPDATE_LOAD_POSE)
-    def HandleLoadShell(self, args: UpdateLoadPose):
-        self.draggable_shell.MoveToPose(args.load_pose)
+    def HandleUpdateLoadPose(self, args: UpdateLoadPose):
+        pass
+        #self.draggable_shell.MoveToPose(args.load_pose)
 
     @delegater.RegisterCommand(ShellCommands.FIRE)
     def HandleFireShell(self, args):
@@ -108,7 +110,7 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
     def HandleGetAttributes(self, args):
         return RespondShellAttributes(copy.copy(self.shell_attributes))
 
-    def LoadGraphicsResources(self, latest_command):
+    def LoadGraphicsResources(self):
         shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
         self.HandleCommand(
             sc.CreateGraphicsObject(
@@ -128,4 +130,3 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_Poseable]):
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.shell_attributes.color),)))
                     .SetComponent("Cylinder"),)),
                 sc.VectorComponentInfo((sc.ComponentInfo("", "Cylinder"),))))
-        return latest_command

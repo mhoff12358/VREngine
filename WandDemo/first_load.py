@@ -49,16 +49,15 @@ class HackActor(sc.DelegatingActor[sc.NewGraphicsObject_Poseable_ActorImpl]):
         self.collision.SetShape(sc.Shape.MakeSphere(command_args.new_pose.scale[0]))
         self.collision.SetPose(command_args.new_pose)
 
+
+
 def first_load(resources):
     print("STARTING FIRST LOAD")
     sc.ParseResources(resources)
 
     scene = resources["scene"]
 
-    import code
-    a = globals()
-    a.update(locals())
-    #code.interact(local = a)
+    point_obj = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeSphere(0.0001), sc.Pose())
 
     graphics_resources = scene.AskQuery(
         sc.Target(
@@ -74,7 +73,7 @@ def first_load(resources):
         scene.BackOfNewCommands(),
         sc.Target(physics_object.id),
         sc.AddRigidBody(
-            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.5), sc.Pose(sc.Location(1, 100, 3)), sc.InteractionType(10.0))))
+            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.5), sc.Pose(sc.Location(1, 100, 3)), 1.0, sc.InteractionType(10.0))))
     shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
     scene.MakeCommandAfter(
         scene.BackOfNewCommands(),
@@ -125,7 +124,7 @@ def first_load(resources):
         sc.PushNewPose(
             "Sphere",
             "",
-            sc.Pose(sc.Location(1, 0.75, 3), sc.Scale(0.05))))
+            sc.Pose(sc.Location(1, 0.1, 3), sc.Scale(0.05))))
     scene.AddActorToGroup(collision_sphere.id, scene.FindByName("TickRegistry"))
 
     physics_collection = sc.PhysicsObjectCollection_ActorImpl()
@@ -134,7 +133,7 @@ def first_load(resources):
         scene.BackOfNewCommands(),
         sc.Target(physics_collection.id),
         sc.AddRigidBody(
-            "Floor", sc.RigidBody(sc.Shape.MakePlane(sc.Location(0, 1, 0)), sc.Pose(sc.Location(0, 0, 0)))))
+            "Floor", sc.RigidBody(sc.Shape.MakePlane(sc.Location(0, 1, 0)), sc.Pose(sc.Location(0, 0, 0)), 1.0)))
 
     physics_simulation = sc.PhysicsSimulation_ActorImpl()
     physics_sim_id = scene.AddActor(physics_simulation)
@@ -147,6 +146,30 @@ def first_load(resources):
         sc.Target(physics_simulation.id),
         sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
     scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
+    scene.RegisterByName("MainPhysicsSimulation", physics_simulation.id)
+
+    world = physics_simulation.GetWorld()
+
+    cylinder = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeCylinder(sc.Location(1, 1, 1)), sc.Pose())
+
+    def PointCheck(obj, point):
+        point_obj.SetPose(point)
+        print(point, world.CheckCollisionExistsPair(obj, point_obj))
+
+    PointCheck(cylinder, sc.Pose(sc.Location(1, 0, 0)))
+    PointCheck(cylinder, sc.Pose(sc.Location(1.1, 0, 0)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0, 1, 0)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0, 1.1, 0)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0, 0, 1)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0, 0, 1.1)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0, 0.8, 0.8)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0.8, 0, 0.8)))
+    PointCheck(cylinder, sc.Pose(sc.Location(0.8, 0.8, 0)))
+
+    import code
+    a = globals()
+    a.update(locals())
+    #code.interact(local = a)
 
     collision_sphere.SetPhysicsSim(physics_sim_id)
     collision_sphere.SetOtherBall(physics_object.id)
@@ -162,18 +185,19 @@ def first_load(resources):
             },
         ),
         shell_details = (
-            {
-                "shell_attributes" : shell.ShellAttributes(power = 0.5, color = (1, 1, 0)),
-                "starting_pose" : sc.Pose(sc.Location(1, 1, -0.5)),
-             },
-            {
-                "shell_attributes" : shell.ShellAttributes(power = 1, color = (0, 1, 1), is_flare = True),
-                "starting_pose" : sc.Pose(sc.Location(1, 1, 0)),
-             },
+#            {
+#                "shell_attributes" : shell.ShellAttributes(power = 0.5, color = (1, 1, 0)),
+#                "starting_pose" : sc.Pose(sc.Location(1, 1, -0.5)),
+#             },
+#            {
+#                "shell_attributes" : shell.ShellAttributes(power = 1, color = (0, 1, 1), is_flare = True),
+#                "starting_pose" : sc.Pose(sc.Location(1, 1, 0)),
+#             },
             {
                 "shell_attributes" : shell.ShellAttributes(power = 1.5, color = (1, 0, 1)),
-                "starting_pose" : sc.Pose(sc.Location(1, 1, 0.5), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/4)),
-             }
+                "starting_pose" : sc.Pose(sc.Location(1, 1, 0.5), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/3.0)),
+                #"starting_pose" : sc.Pose(sc.Location(1, 1, 0.5)),
+             },
             ),
         pitch_wheel_args = {
             "pose": sc.Pose(sc.Location(0, 1.25, 1), sc.Quaternion.RotationAboutLocation(sc.Location(1, 0, 0), 3.14/2), sc.Scale(0.35)),
