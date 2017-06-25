@@ -85,7 +85,7 @@ namespace queries {
 
 class PhysicsObjectQuery {
 public:
-	DECLARE_QUERY(PhysicsObjectQuery, GET_RIGID_BODIES);
+  DECLARE_QUERY(PhysicsObjectQuery, GET_RIGID_BODIES);
   DECLARE_QUERY(PhysicsObjectQuery, CHECK_COLLISION);
 };
 
@@ -205,12 +205,14 @@ private:
 	}
 
 	void RigidBodyPoseUpdated() {
-		poseable::PushNewPose(*this, 
+		poseable::PushNewPose(
+			*this, 
 			rigid_body_name_,
 			bullet::poses::GetPose(rigid_body_.body_.GetTransform()));
 	}
 
 	void HandleNewPose(commands::AcceptNewPose& args) {
+		rigid_body_.body_.GetShape().shape_->setLocalScaling(bullet::poses::GetVector3(args.new_pose_.scale_));
 		if (args.pose_source_ != GetNameVirt()) {
 			rigid_body_.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
 		}

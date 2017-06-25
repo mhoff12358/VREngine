@@ -19,9 +19,15 @@ std::auto_ptr<RigidBody> MakeRigidBody(std::auto_ptr<Shape> shape_ptr, Pose tran
 	return std::auto_ptr<RigidBody>(rigid_body.release());
 }
 
-std::auto_ptr<RigidBody> MakeRigidBody(std::auto_ptr<Shape> shape_ptr, Pose transform, RigidBody::InteractionType interaction_type) {
+std::auto_ptr<RigidBody> MakeRigidBody(std::auto_ptr<Shape> shape_ptr, Pose transform, btScalar friction) {
 	Shape shape(std::move(*shape_ptr));
-	auto rigid_body = std::make_unique<RigidBody>(std::move(shape), GetTransform(transform), interaction_type);
+	auto rigid_body = std::make_unique<RigidBody>(std::move(shape), GetTransform(transform), friction);
+	return std::auto_ptr<RigidBody>(rigid_body.release());
+}
+
+std::auto_ptr<RigidBody> MakeRigidBody(std::auto_ptr<Shape> shape_ptr, Pose transform, btScalar friction, RigidBody::InteractionType interaction_type) {
+	Shape shape(std::move(*shape_ptr));
+	auto rigid_body = std::make_unique<RigidBody>(std::move(shape), GetTransform(transform), friction, interaction_type);
 	return std::auto_ptr<RigidBody>(rigid_body.release());
 }
 
@@ -48,6 +54,14 @@ std::auto_ptr<Shape> MakeAutoPlanePoint(Location normal, Location point_in_plane
 	return std::auto_ptr<Shape>(new Shape(std::move(Shape::MakePlane(GetVector3(normal), GetVector3(point_in_plane)))));
 }
 
+std::auto_ptr<Shape> MakeAutoCylinder(Location half_extents) {
+  return std::auto_ptr<Shape>(new Shape(std::move(Shape::MakeCylinder(GetVector3(half_extents)))));
+}
+
+std::auto_ptr<Shape> MakeAutoBox(Location half_extents) {
+  return std::auto_ptr<Shape>(new Shape(std::move(Shape::MakeBox(GetVector3(half_extents)))));
+}
+
 void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 	class_<Shape, std::auto_ptr<Shape>, boost::noncopyable>("Shape", no_init)
 		.def("MakeSphere", MakeAutoSphere)
@@ -55,7 +69,11 @@ void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 		.def("MakePlane", MakeAutoPlane)
 		.def("MakePlane", MakeAutoPlaneConstant)
 		.def("MakePlane", MakeAutoPlanePoint)
-		.staticmethod("MakePlane");
+		.staticmethod("MakePlane")
+		.def("MakeCylinder", MakeAutoCylinder)
+		.staticmethod("MakeCylinder")
+		.def("MakeBox", MakeAutoBox)
+		.staticmethod("MakeBox");
 
   class_<CollisionResult, std::auto_ptr<CollisionResult>, boost::noncopyable>("CollisionResult", no_init)
     .def("CollisionFound", &CollisionResult::CollisionFound)
@@ -101,7 +119,9 @@ void Bullet(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
     .def("__init__", boost::python::make_constructor(
       static_cast<std::auto_ptr<RigidBody>(*)(std::auto_ptr<Shape>, Pose)>(MakeRigidBody)))
     .def("__init__", boost::python::make_constructor(
-      static_cast<std::auto_ptr<RigidBody>(*)(std::auto_ptr<Shape>, Pose, RigidBody::InteractionType)>(MakeRigidBody)));
+      static_cast<std::auto_ptr<RigidBody>(*)(std::auto_ptr<Shape>, Pose, btScalar)>(MakeRigidBody)))
+    .def("__init__", boost::python::make_constructor(
+      static_cast<std::auto_ptr<RigidBody>(*)(std::auto_ptr<Shape>, Pose, btScalar, RigidBody::InteractionType)>(MakeRigidBody)));
 
   CreateVector<CollisionObject*>("CollisionObjectPtr");
 }

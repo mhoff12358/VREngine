@@ -35,6 +35,8 @@ public:
 	static Shape MakeSphere(btScalar radius);
 	static Shape MakePlane(btVector3 normal, btScalar plane_constant = 0);
 	static Shape MakePlane(btVector3 normal, btVector3 point_in_plane);
+  static Shape MakeCylinder(btVector3 half_extents);
+	static Shape MakeBox(btVector3 half_extents);
 };
 
 struct CollisionComponent {
@@ -148,10 +150,12 @@ public:
 	RigidBody(
 		Shape shape,
 		unique_ptr<btMotionState> starting_motion_state,
+		btScalar friction = 1.0f,
 		InteractionType interaction_type = InteractionType::Static());
 	RigidBody(
 		Shape shape,
 		btTransform transform,
+		btScalar friction = 1.0f,
 		InteractionType interaction_type = InteractionType::Static());
 	RigidBody(RigidBody&&) = default;
 	RigidBody& operator=(RigidBody&& other) = default;
@@ -226,6 +230,7 @@ private:
 namespace poses {
 	btQuaternion GetQuaternion(const Quaternion& quat);
 	btVector3 GetVector3(const Location& loc);
+	btVector3 GetVector3(const Scale& scale);
 	btTransform GetTransform(const Pose& pose);
 	Quaternion GetQuaternion(const btQuaternion& quat);
 	Location GetLocation(const btVector3& loc);

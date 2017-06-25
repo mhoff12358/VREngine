@@ -106,22 +106,22 @@ public:
 
 	void HandleCommandVirt(game_scene::CommandArgs& args) override {
 		HandleCommand(args);
-    }
+  }
 	unique_ptr<game_scene::QueryResult> AnswerQueryVirt(const game_scene::QueryArgs& args) override {
 		return AnswerQuery(args);
-    }
+  }
 	void AddedToSceneVirt() override {
 		AddedToScene();
-    }
+  }
 	void PrepareToDieVirt() override {
 		PrepareToDie();
-    }
+  }
 	void DependencyDyingVirt(const game_scene::ActorId& dying_id) override {
 		DependencyDying(dying_id);
-    }
+  }
 	string GetNameVirt() const override {
 		return GetName();
-    }
+  }
 };
 typedef game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>> PyActor;
 

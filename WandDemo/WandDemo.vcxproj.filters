@@ -333,6 +333,9 @@
     <Object Include="sphere.obj">
       <Filter>Resource Files\Models</Filter>
     </Object>
+    <Object Include="cylinder.obj">
+      <Filter>Resource Files\Models</Filter>
+    </Object>
   </ItemGroup>
   <ItemGroup>
     <Image Include="glowy_console.png">

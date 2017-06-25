@@ -15,7 +15,8 @@ void Poseable(class_<game_scene::Scene, boost::noncopyable>& scene_registration)
     .value("LOCATION", game_scene::actors::PoseData::LOCATION)
     .value("ORIENTATION", game_scene::actors::PoseData::ORIENTATION)
     .value("SCALE", game_scene::actors::PoseData::SCALE);
-  class_<game_scene::actors::PoseData>("PoseData", init<Pose>())
+  class_<game_scene::actors::PoseData>("PoseData", init<>())
+    .def(init<Pose>())
     .def(init<Pose, Pose, unsigned char>());
 
 	class_<game_scene::commands::PoseableCommand, boost::noncopyable>("PoseableCommand", no_init)

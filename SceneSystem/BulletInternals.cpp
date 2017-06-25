@@ -52,6 +52,14 @@ Shape Shape::MakePlane(btVector3 normal, btVector3 point_in_plane) {
 	return MakePlane(normal, normal.dot(point_in_plane));
 }
 
+Shape Shape::MakeCylinder(btVector3 half_extents) {
+  return Shape(make_unique<btCylinderShape>(half_extents));
+}
+
+Shape Shape::MakeBox(btVector3 half_extents) {
+  return Shape(make_unique<btBoxShape>(half_extents));
+}
+
 RigidBody::MotionState::MotionState(btTransform initial_transform)
 	: kinematic_(false), current_transform_(initial_transform), callback_() {
 
@@ -97,21 +105,28 @@ RigidBody::RigidBody() :
 RigidBody::RigidBody(
 	Shape shape,
 	btTransform transform,
+	btScalar friction,
 	InteractionType interaction_type) :
-	RigidBody(std::move(shape), make_unique<MotionState>(transform), interaction_type) {}
+	RigidBody(std::move(shape), make_unique<MotionState>(transform), friction, interaction_type) {}
 
 RigidBody::RigidBody(
 	Shape shape,
 	unique_ptr<btMotionState> starting_motion_state,
+	btScalar friction,
 	InteractionType interaction_type) :
 	motion_state_(std::move(starting_motion_state))
 {
+	interaction_type.inertia_ = btVector3(1.0, 1.0, 1.0);
   shape_ = std::move(shape);
-	if (interaction_type.IsDynamic()) {
+	//if (interaction_type.IsDynamic()) {
 		shape_.shape_->calculateLocalInertia(interaction_type.mass_, interaction_type.inertia_);
-	}
+	//}
   btRigidBody::btRigidBodyConstructionInfo construction_info(interaction_type.mass_, motion_state_.get(), shape_.shape_.get(), interaction_type.inertia_);
+	construction_info.m_friction = friction;
+	//construction_info.m_rollingFriction = 0.5;
+	//construction_info.m_spinningFriction = friction;
 	object_ = make_unique<btRigidBody>(construction_info);
+	//GetBody()->setFriction(friction);
   if (interaction_type.IsKinematic()) {
     MakeKinematic();
   }
@@ -375,6 +390,9 @@ namespace poses {
 	}
 	btVector3 GetVector3(const Location& loc) {
 		return btVector3(loc[0], loc[1], loc[2]);
+	}
+	btVector3 GetVector3(const Scale& scale) {
+		return btVector3(scale[0], scale[1], scale[2]);
 	}
 	btTransform GetTransform(const Pose& pose) {
 		return btTransform(GetQuaternion(pose.orientation_), GetVector3(pose.location_));
