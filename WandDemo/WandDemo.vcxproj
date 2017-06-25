@@ -73,8 +73,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>F:\PR\bullet3\src;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\Python35\include;$(SolutionDir);F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
-    <LibraryPath>F:\PR\bullet3\bin;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64;F:\PR\Python35\libs;F:\PR\Boost\lib\x64;$(SolutionDir)$(Platform)\$(Configuration)\;F:\PR\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
+    <IncludePath>F:\PR\PhysX-3.4-master\PxShared\include;F:\PR\PhysX-3.4-master\PhysX_3.4\Include;F:\PR\bullet3\src;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\Python35\include;$(SolutionDir);F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <LibraryPath>F:\PR\PhysX-3.4-master\PxShared\lib\vc14win64;F:\PR\PhysX-3.4-master\PhysX_3.4\Lib\vc14win64;F:\PR\bullet3\bin;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\Lib\x64;F:\PR\Python35\libs;F:\PR\Boost\lib\x64;$(SolutionDir)$(Platform)\$(Configuration)\;F:\PR\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -113,7 +113,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>scene_system_.lib;SceneSystem.lib;python35.lib;libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>scene_system_.lib;SceneSystem.lib;PhysX3DEBUG_x64.lib;PhysX3CommonDEBUG_x64.lib;PhysX3ExtensionsDEBUG.lib;PxFoundationDEBUG_x64.lib;PxTaskDEBUG_x64.lib;python35.lib;libboost_python3-vc140-mt-gd-1_61.lib;openvr_api.lib;VRBackend.lib;Ws2_32.lib;Bthprops.lib;hid.lib;Setupapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ForceSymbolReferences>
       </ForceSymbolReferences>
       <DelayLoadDLLs>
