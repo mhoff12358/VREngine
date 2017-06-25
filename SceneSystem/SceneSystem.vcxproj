@@ -69,7 +69,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>F:\PR\bullet3\src;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir);$(IncludePath)</IncludePath>
+    <IncludePath>F:\PR\PhysX-3.4-master\PxShared\include;F:\PR\PhysX-3.4-master\PhysX_3.4\Include;F:\PR\bullet3\src;C:\Program Files\Microsoft SDKs\Kinect\v2.0_1409\inc;F:\PR\boost_1_61_0;F:\PR\openvr-master\headers;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Include;$(SolutionDir);$(IncludePath)</IncludePath>
     <LibraryPath>$(SolutionDir)$(Platform)\$(Configuration);C:\openvr-master\lib\win64;C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)\Lib\x64;$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(NETFXKitsDir)Lib\um\x64</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -142,6 +142,7 @@
     <ClInclude Include="PhysicsInteractions.h" />
     <ClInclude Include="PhysicsObject.h" />
     <ClInclude Include="PhysicsSimulation.h" />
+    <ClInclude Include="PhysXInternal.h" />
     <ClInclude Include="Poseable.h" />
     <ClInclude Include="QueryArgs.h" />
     <ClInclude Include="QueryResult.h" />
@@ -177,6 +178,7 @@
     <ClCompile Include="PhysicsInteractions.cpp" />
     <ClCompile Include="PhysicsObject.cpp" />
     <ClCompile Include="PhysicsSimulation.cpp" />
+    <ClCompile Include="PhysXInternal.cpp" />
     <ClCompile Include="Poseable.cpp" />
     <ClCompile Include="QueryArgs.cpp" />
     <ClCompile Include="QueryResult.cpp" />

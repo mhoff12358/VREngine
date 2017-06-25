@@ -124,6 +124,7 @@ enum class UpdateLoopResult {
 };
 
 #include "SceneSystem/BulletInternals.h"
+#include "SceneSystem/PhysXInternal.h"
 
 UpdateLoopResult UpdateLoop() {
 	int prev_time = timeGetTime();
@@ -299,6 +300,10 @@ int _tmain(int argc, _TCHAR* argv[])
 	FORCE_LINK_THAT(CollisionCollection);
 	FORCE_LINK_THAT(NewGraphicsObject);
 	FORCE_LINK_THAT(Poseable);
+
+	PhysicsSystem system;
+	PhysicsScene scene(system);
+	scene.DummyPhysics();
 	
 	bullet::CollisionObject test_obj(bullet::CollisionObject::CollisionObjectType::PAIR_CACHING_GHOST, bullet::Shape::MakeSphere(1.0f), btTransform());
 	bullet::CollisionObject test_obj_2(bullet::CollisionObject::CollisionObjectType::NORMAL, bullet::Shape::MakeSphere(1.0f), btTransform());
