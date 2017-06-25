@@ -89,7 +89,7 @@ struct PhysicsSimulationMixinHelper : public WrapActorMixin<game_scene::actors::
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
       class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
-        .def("GetWorld", &WholeChain::GetWorld, return_value_policy<reference_existing_object>());
+        .def("GetPhysicsScene", &WholeChain::GetPhysicsScene, return_value_policy<reference_existing_object>());
     }
   };
 };

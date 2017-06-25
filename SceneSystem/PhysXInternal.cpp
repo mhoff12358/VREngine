@@ -19,9 +19,13 @@ PhysicsScene::PhysicsScene(const PhysicsSystem& system) : system_(system) {
 	scene_ = system_.physics_->createScene(desc);
 }
 
-void PhysicsScene::Step() {
-	scene_->simulate(1.0f / 60.0f);
-	scene_->fetchResults(true);
+void PhysicsScene::Step(PxReal duration) {
+	duration_leftover_ += duration;
+	while (duration_leftover_ >= 1.0f / 60.0f) {
+		scene_->simulate(1.0f / 60.0f);
+		scene_->fetchResults(true);
+		duration_leftover_ -= 1.0f / 60.0f;
+	}
 }
 
 void PhysicsScene::DummyPhysics() {
@@ -35,7 +39,7 @@ void PhysicsScene::DummyPhysics() {
 	scene_->addActor(*floor);
 
 	while (true) {
-		Step();
+		Step(1.0f / 60.0f);
 
 		PxU32 num_actors;
 		PxActor** active_actors = scene_->getActiveActors(num_actors);

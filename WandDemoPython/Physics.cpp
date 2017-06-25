@@ -6,67 +6,73 @@
 #include "SceneSystem/PhysicsObject.h"
 #include "SceneSystem/PhysicsSimulation.h"
 
-BOOST_PTR_MAGIC_STRUCT(game_scene::commands::AddRigidBody)
-BOOST_PTR_MAGIC_STRUCT(game_scene::commands::RemoveRigidBody)
-BOOST_PTR_MAGIC(game_scene::commands::UpdatePhysicsObject)
-
-std::auto_ptr<game_scene::commands::AddRigidBody> MakeAddRigidBody(
-	string name, std::auto_ptr<bullet::RigidBody> rigid_body_ptr) {
-	bullet::RigidBody rigid_body = std::move(*rigid_body_ptr);
-	auto add_rigid_body = std::make_unique<game_scene::commands::AddRigidBody>(name, std::move(rigid_body));
-	return std::auto_ptr<game_scene::commands::AddRigidBody>(add_rigid_body.release());
+BOOST_PTR_MAGIC_STRUCT(game_scene::AddRigidBody)
+BOOST_PTR_MAGIC_STRUCT(game_scene::RemoveRigidBody)
+BOOST_PTR_MAGIC(game_scene::UpdatePhysicsObject)
+//BOOST_PTR_MAGIC(PxScene)
+namespace boost { \
+	template <> \
+	PxScene const volatile * get_pointer<class PxScene const volatile>( \
+		class PxScene const volatile *c) \
+	{ return c; } \
 }
+BOOST_PTR_MAGIC(PxRigidActor)
 
-game_scene::commands::ModifyRigidBody::ModifyFunction MakeModifierFunction(object callback) {
-  return [callback](bullet::RigidBody& body) {
-    return static_cast<bool>(boost::python::extract<bool>(callback(body)));
-  };
-}
+/*std::auto_ptr<game_scene::AddRigidBody> MakeAddRigidBody(
+	string name, PxRigidActor* rigid_body_ptr) {
+	PxRigidActor* rigid_body = std::move(*rigid_body_ptr);
+	auto add_rigid_body = std::make_unique<game_scene::AddRigidBody>(name, std::move(rigid_body));
+	return std::auto_ptr<game_scene::AddRigidBody>(add_rigid_body.release());
+}*/
 
 void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
-	class_<game_scene::commands::PhysicsObjectCommand>("PhysicsObjectCommand")
-		.def_readonly("ADD_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::ADD_RIGID_BODY)
-		.def_readonly("REMOVE_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::REMOVE_RIGID_BODY)
-		.def_readonly("MODIFY_RIGID_BODY", &game_scene::commands::PhysicsObjectCommand::MODIFY_RIGID_BODY)
-		.def_readonly("ADD_UPDATED_CALLBACK", &game_scene::commands::PhysicsObjectCommand::ADD_UPDATED_CALLBACK);
+	class_<PxScene, boost::noncopyable>("PxScene", no_init);
+	class_<PxRigidActor, boost::noncopyable>("PxRigidActor", no_init);
 
-	class_<game_scene::queries::PhysicsObjectQuery>("PhysicsObjectQuery")
-		.def_readonly("GET_RIGID_BODIES", &game_scene::queries::PhysicsObjectQuery::GET_RIGID_BODIES)
-		.def_readonly("CHECK_COLLISION", &game_scene::queries::PhysicsObjectQuery::CHECK_COLLISION);
+	class_<game_scene::PhysicsObjectCommand>("PhysicsObjectCommand")
+		.def_readonly("ADD_RIGID_BODY", &game_scene::PhysicsObjectCommand::ADD_RIGID_BODY)
+		.def_readonly("REMOVE_RIGID_BODY", &game_scene::PhysicsObjectCommand::REMOVE_RIGID_BODY)
+		.def_readonly("ADD_UPDATED_CALLBACK", &game_scene::PhysicsObjectCommand::ADD_UPDATED_CALLBACK);
 
-  class_<game_scene::queries::CheckCollisionQuery, bases<game_scene::QueryArgs>, boost::noncopyable>("CheckCollisionQuery", init<bullet::World&, bullet::CollisionObject&>());
-  class_<game_scene::queries::CheckCollisionResult, bases<game_scene::QueryResult>, boost::noncopyable>("CheckCollisionResult", no_init)
-    .def_readonly("collision", &game_scene::queries::CheckCollisionResult::collision_);
+	class_<game_scene::PhysicsObjectQuery>("PhysicsObjectQuery")
+		.def_readonly("GET_RIGID_BODIES", &game_scene::PhysicsObjectQuery::GET_RIGID_BODIES)
+		.def_readonly("CHECK_COLLISION", &game_scene::PhysicsObjectQuery::CHECK_COLLISION);
 
-	class_<game_scene::commands::AddRigidBody, bases<game_scene::CommandArgs>,
-		std::auto_ptr<game_scene::commands::AddRigidBody>,
-		boost::noncopyable>("AddRigidBody", no_init)
-		.def("__init__", boost::python::make_constructor(MakeAddRigidBody));
+  /*class_<game_scene::CheckCollisionQuery, bases<game_scene::QueryArgs>, boost::noncopyable>("CheckCollisionQuery", init<bullet::World&, bullet::CollisionObject&>());
+  class_<game_scene::CheckCollisionResult, bases<game_scene::QueryResult>, boost::noncopyable>("CheckCollisionResult", no_init)
+    .def_readonly("collision", &game_scene::CheckCollisionResult::collision_);*/
+
+	class_<game_scene::AddRigidBody, bases<game_scene::CommandArgs>,
+		std::auto_ptr<game_scene::AddRigidBody>,
+		boost::noncopyable>("AddRigidBody", init<string, bool, PxRigidActor*>())
+		.def(init<string, PxRigidActor*>())
+		.def(init<bool, PxRigidActor*>())
+		.def(init<PxRigidActor*>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::AddRigidBody>);
+		&PyScene::MakeCommandAfter<game_scene::AddRigidBody>);
 
-	class_<game_scene::commands::RemoveRigidBody, bases<game_scene::CommandArgs>,
-		std::auto_ptr<game_scene::commands::RemoveRigidBody>,
+	class_<game_scene::RemoveRigidBody, bases<game_scene::CommandArgs>,
+		std::auto_ptr<game_scene::RemoveRigidBody>,
 		boost::noncopyable>("RemoveRigidBody", init<string>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::RemoveRigidBody>);
+		&PyScene::MakeCommandAfter<game_scene::RemoveRigidBody>);
 
-	class_<game_scene::commands::PhysicsSimulationCommand>("PhysicsSimulationCommand")
-		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::commands::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT)
-		.def_readonly("GET_WORLD", &game_scene::commands::PhysicsSimulationCommand::GET_WORLD);
+	class_<game_scene::PhysicsSimulationCommand>("PhysicsSimulationCommand")
+		.def_readonly("UPDATE_PHYSICS_OBJECT", &game_scene::PhysicsSimulationCommand::UPDATE_PHYSICS_OBJECT)
+		.def_readonly("GET_SCENE", &game_scene::PhysicsSimulationCommand::GET_SCENE);
   RegisterQueryResultWrapped<bullet::World&>("World");
 
-	enum_<game_scene::commands::UpdatePhysicsObject::UpdateType>("UpdateType")
-		.value("ADD", game_scene::commands::UpdatePhysicsObject::UpdateType::ADD)
-		.value("REMOVE", game_scene::commands::UpdatePhysicsObject::UpdateType::REMOVE);
-	class_<game_scene::commands::UpdatePhysicsObject, bases<game_scene::CommandArgs>,
-		std::auto_ptr<game_scene::commands::UpdatePhysicsObject>,
+	enum_<game_scene::UpdatePhysicsObject::UpdateType>("UpdateType")
+		.value("ADD", game_scene::UpdatePhysicsObject::UpdateType::ADD)
+		.value("REMOVE", game_scene::UpdatePhysicsObject::UpdateType::REMOVE);
+	class_<game_scene::UpdatePhysicsObject, bases<game_scene::CommandArgs>,
+		std::auto_ptr<game_scene::UpdatePhysicsObject>,
 		boost::noncopyable>(
 			"UpdatePhysicsObject",
-			init<game_scene::commands::UpdatePhysicsObject::UpdateType, game_scene::ActorId>());
+			init<game_scene::UpdatePhysicsObject::UpdateType, game_scene::ActorId>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::commands::UpdatePhysicsObject>);
+		&PyScene::MakeCommandAfter<game_scene::UpdatePhysicsObject>);
 }

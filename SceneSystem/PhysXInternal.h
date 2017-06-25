@@ -26,7 +26,8 @@ class PhysicsScene {
 public:
 	PhysicsScene(const PhysicsSystem& system);
 
-	void Step();
+	PxReal duration_leftover_ = 0.0f;
+	void Step(PxReal duration);
 
 	void DummyPhysics();
 

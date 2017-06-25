@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 
-#include "BulletInternals.h"
+#include "PhysXInternal.h"
 
 #include "CommandArgs.h"
 #include "QueryArgs.h"
@@ -14,41 +14,49 @@ namespace game_scene {
 
 namespace {
 struct PhysicsObjectComponent {
-	PhysicsObjectComponent() : body_(), enabled_(false) {}
-	PhysicsObjectComponent(bullet::RigidBody body, bool enabled) :
-		body_(std::move(body)), enabled_(enabled) {}
+	PhysicsObjectComponent() : body_(nullptr), enabled_(false) {}
+	PhysicsObjectComponent(PxRigidActor* body, bool enabled) :
+		body_(body), enabled_(enabled) {}
 
-	bullet::RigidBody body_;
+	void SetKinematicTargeting(bool targeting) { kinematic_targeting_ = targeting; }
+	void SetPose(const Pose& pose) {
+		auto body = body_->is<PxRigidDynamic>();
+		if (body && (body->getRigidBodyFlags() | PxRigidBodyFlag::eKINEMATIC) && kinematic_targeting_) {
+			body->setKinematicTarget(poses::ToTransform(pose));
+		} else {
+			body_->setGlobalPose(poses::ToTransform(pose));
+		}
+	}
+
+	PxRigidActor* body_;
+	bool kinematic_targeting_ = false;
 	bool enabled_;
 };
 }
-
-namespace commands {
 
 class PhysicsObjectCommand {
 public:
 	DECLARE_COMMAND(PhysicsObjectCommand, ADD_RIGID_BODY);
 	DECLARE_COMMAND(PhysicsObjectCommand, REMOVE_RIGID_BODY);
-	DECLARE_COMMAND(PhysicsObjectCommand, MODIFY_RIGID_BODY);
 	DECLARE_COMMAND(PhysicsObjectCommand, ADD_UPDATED_CALLBACK);
 };
 
 struct AddRigidBody : public CommandArgs {
-	AddRigidBody(string name, bool enabled, bullet::RigidBody rigid_body) :
+	AddRigidBody(string name, bool enabled, PxRigidActor* rigid_body) :
 		CommandArgs(PhysicsObjectCommand::ADD_RIGID_BODY),
 		name_(name),
 		enabled_(enabled),
 		rigid_body_(std::move(rigid_body)) {}
-	AddRigidBody(bool enabled, bullet::RigidBody rigid_body) :
+	AddRigidBody(bool enabled, PxRigidActor* rigid_body) :
 		AddRigidBody("", enabled, std::move(rigid_body)) {}
-	AddRigidBody(string name, bullet::RigidBody rigid_body) :
+	AddRigidBody(string name, PxRigidActor* rigid_body) :
 		AddRigidBody(name, true, std::move(rigid_body)) {}
-	AddRigidBody(bullet::RigidBody rigid_body) :
+	AddRigidBody(PxRigidActor* rigid_body) :
 		AddRigidBody("", true, std::move(rigid_body)) {}
 
 	string name_;
 	bool enabled_;
-	bullet::RigidBody rigid_body_;
+	PxRigidActor* rigid_body_;
 };
 
 struct RemoveRigidBody : public CommandArgs {
@@ -58,30 +66,12 @@ struct RemoveRigidBody : public CommandArgs {
 	string name_;
 };
 
-struct ModifyRigidBody : public CommandArgs {
-  typedef std::function<bool(bullet::RigidBody& body)> ModifyFunction;
-	ModifyRigidBody(ModifyFunction modifier) :
-		CommandArgs(PhysicsObjectCommand::MODIFY_RIGID_BODY), modifier_(modifier) {}
-
-	bool ApplyModifier(PhysicsObjectComponent& comp) {
-    return modifier_(comp.body_);
-	}
-
-	ModifyFunction modifier_;
-	bool modify_all_;
-	vector<string> names_to_modify_;
-};
-
 struct AddUpdatedCallback : public CommandArgs {
 	AddUpdatedCallback(game_scene::ActorCallback callback)
 		: CommandArgs(PhysicsObjectCommand::ADD_UPDATED_CALLBACK), callback_(callback) {}
 
 	game_scene::ActorCallback callback_;
 };
-
-}  // commands
-
-namespace queries {
 
 class PhysicsObjectQuery {
 public:
@@ -94,18 +84,18 @@ struct GetRigidBodies : public QueryArgs {
 };
 
 struct GetRigidBodiesResult : public QueryResult {
-	GetRigidBodiesResult(const bullet::RigidBody& rigid_body) :
+	GetRigidBodiesResult(PxRigidActor* rigid_body) :
 		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_bodies_() {
-		rigid_bodies_.push_back(&rigid_body);
+		rigid_bodies_.push_back(rigid_body);
 	}
-	GetRigidBodiesResult(vector<const bullet::RigidBody*> rigid_bodies) :
+	GetRigidBodiesResult(vector<PxRigidActor*> rigid_bodies) :
 		QueryResult(PhysicsObjectQuery::GET_RIGID_BODIES), rigid_bodies_(std::move(rigid_bodies)) {
 	}
 
-	vector<const bullet::RigidBody*> rigid_bodies_;
+	vector<PxRigidActor*> rigid_bodies_;
 };
 
-struct CheckCollisionQuery : public QueryArgs{
+/*struct CheckCollisionQuery : public QueryArgs{
   CheckCollisionQuery(const bullet::World& world, const bullet::CollisionObject& collision_object) :
     QueryArgs(PhysicsObjectQuery::CHECK_COLLISION),
     world_(world),
@@ -121,9 +111,7 @@ struct CheckCollisionResult : public QueryResult {
     collision_(collision) {}
 
   bool collision_;
-};
-
-}  // queries
+};*/
 
 namespace actors {
 
@@ -134,17 +122,15 @@ public:
 
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
-		case commands::PhysicsObjectCommand::ADD_RIGID_BODY:
-			SetRigidBody(std::move(dynamic_cast<commands::AddRigidBody&>(args)));
+		case PhysicsObjectCommand::ADD_RIGID_BODY:
+			SetRigidBody(std::move(dynamic_cast<AddRigidBody&>(args)));
 			break;
-		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
+		case PhysicsObjectCommand::REMOVE_RIGID_BODY:
 			ClearRigidBody();
 			break;
-		case commands::PhysicsObjectCommand::MODIFY_RIGID_BODY:
-			ModifyRigidBody(dynamic_cast<commands::ModifyRigidBody&>(args));
-		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
+		/*case PhysicsInteractionCommand::RIGID_BODY_MOVED:
 			RigidBodyPoseUpdated();
-			break;
+			break;*/
 		case commands::PoseableCommand::ACCEPT_NEW_POSE:
 			HandleNewPose(dynamic_cast<commands::AcceptNewPose&>(args));
 		default:
@@ -155,14 +141,12 @@ public:
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) const {
 		switch (args.Type()) {
-		case queries::PhysicsObjectQuery::GET_RIGID_BODIES:
+		case PhysicsObjectQuery::GET_RIGID_BODIES:
 			if (rigid_body_.enabled_) {
-				return make_unique<queries::GetRigidBodiesResult>(rigid_body_.body_);
+				return make_unique<GetRigidBodiesResult>(rigid_body_.body_);
 			} else {
-				return make_unique<queries::GetRigidBodiesResult>(vector<const bullet::RigidBody*>());
+				return make_unique<GetRigidBodiesResult>(vector<PxRigidActor*>());
 			}
-    case queries::PhysicsObjectQuery::CHECK_COLLISION:
-      return CheckCollision(dynamic_cast<const queries::CheckCollisionQuery&>(args));
 		default:
 			return make_unique<QueryResult>(QueryType::EMPTY);
 		}
@@ -172,19 +156,19 @@ public:
 		return "PhysicsObject-" + ActorBase::GetName();
 	}
 
-  bullet::RigidBody& GetRigidBody(string name) {
+  PxRigidActor* GetRigidBody(string name) {
     return rigid_body_.body_;
   }
 
 private:
-	bullet::RigidBody::NewPoseCallback MakeRigidBodyCallback(string name) {
+	/*PxRigidActor*::NewPoseCallback MakeRigidBodyCallback(string name) {
     return [this, name](const Pose& old_pose, const Pose& new_pose) { poseable::PushNewPose(*this, name, new_pose); };
-	}
+	}*/
 
-	void SetRigidBody(commands::AddRigidBody& args) {
+	void SetRigidBody(AddRigidBody& args) {
 		rigid_body_name_ = args.name_;
-		rigid_body_ = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
-		rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback(rigid_body_name_));
+		rigid_body_ = PhysicsObjectComponent(args.rigid_body_, args.enabled_);
+		//rigid_body_.body_.SetPoseUpdatedCallback(MakeRigidBodyCallback(rigid_body_name_));
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
@@ -197,31 +181,18 @@ private:
 		}
 	}
 
-	void ModifyRigidBody(commands::ModifyRigidBody& args) {
-		bool changed = args.ApplyModifier(rigid_body_);
-		if (changed && updated_callback_) {
-			updated_callback_(GetId());
-		}
-	}
-
 	void RigidBodyPoseUpdated() {
 		poseable::PushNewPose(
 			*this, 
 			rigid_body_name_,
-			bullet::poses::GetPose(rigid_body_.body_.GetTransform()));
+			poses::ToPose(rigid_body_.body_->getGlobalPose()));
 	}
 
 	void HandleNewPose(commands::AcceptNewPose& args) {
-		rigid_body_.body_.GetShape().shape_->setLocalScaling(bullet::poses::GetVector3(args.new_pose_.scale_));
 		if (args.pose_source_ != GetNameVirt()) {
-			rigid_body_.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
+			rigid_body_.SetPose(args.new_pose_);
 		}
 	}
-
-  unique_ptr<queries::CheckCollisionResult> CheckCollision(const queries::CheckCollisionQuery& args) const {
-    const bullet::CollisionObject& other_object = args.collision_object_;
-    return make_unique<queries::CheckCollisionResult>(rigid_body_.enabled_ && args.world_.CheckCollisionExistsPair(rigid_body_.body_, other_object));
-  }
 
 	string rigid_body_name_;
 	PhysicsObjectComponent rigid_body_;
@@ -235,16 +206,11 @@ public:
 
 	void HandleCommand(CommandArgs& args) {
 		switch (args.Type()) {
-		case commands::PhysicsObjectCommand::ADD_RIGID_BODY:
-			AddNewRigidBody(dynamic_cast<commands::AddRigidBody&>(args));
+		case PhysicsObjectCommand::ADD_RIGID_BODY:
+			AddNewRigidBody(dynamic_cast<AddRigidBody&>(args));
 			break;
-		case commands::PhysicsObjectCommand::REMOVE_RIGID_BODY:
-			RemoveExistingRigidBody(dynamic_cast<commands::RemoveRigidBody&>(args));
-			break;
-		case commands::PhysicsObjectCommand::MODIFY_RIGID_BODY:
-			ModifyRigidBody(dynamic_cast<commands::ModifyRigidBody&>(args));
-		case commands::PhysicsInteractionCommand::RIGID_BODY_MOVED:
-			RigidBodyPoseUpdated();
+		case PhysicsObjectCommand::REMOVE_RIGID_BODY:
+			RemoveExistingRigidBody(dynamic_cast<RemoveRigidBody&>(args));
 			break;
 		default:
 			break;
@@ -254,15 +220,15 @@ public:
 
 	unique_ptr<QueryResult> AnswerQuery(const QueryArgs& args) const {
 		switch (args.Type()) {
-		case queries::PhysicsObjectQuery::GET_RIGID_BODIES:
+		case PhysicsObjectQuery::GET_RIGID_BODIES:
 		{
-			vector<const bullet::RigidBody*> bodies;
+			vector<PxRigidActor*> bodies;
 			for (const auto& rigid_body : rigid_bodies_) {
 				if (rigid_body.second.enabled_) {
-					bodies.push_back(&rigid_body.second.body_);
+					bodies.push_back(rigid_body.second.body_);
 				}
 			}
-			return make_unique<queries::GetRigidBodiesResult>(bodies);
+			return make_unique<GetRigidBodiesResult>(bodies);
 		}
 		default:
 			return make_unique<QueryResult>(QueryType::EMPTY);
@@ -274,37 +240,16 @@ public:
 	}
 
 private:
-	void AddNewRigidBody(commands::AddRigidBody& args) {
-		rigid_bodies_[args.name_] = PhysicsObjectComponent(std::move(args.rigid_body_), args.enabled_);
+	void AddNewRigidBody(AddRigidBody& args) {
+		rigid_bodies_[args.name_] = PhysicsObjectComponent(args.rigid_body_, args.enabled_);
 		if (updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
 
-	void RemoveExistingRigidBody(commands::RemoveRigidBody& args) {
+	void RemoveExistingRigidBody(RemoveRigidBody& args) {
 		rigid_bodies_.erase(args.name_);
 		if (updated_callback_) {
-			updated_callback_(GetId());
-		}
-	}
-
-	void ModifyRigidBody(commands::ModifyRigidBody& args) {
-		bool changed = false;
-		if (args.modify_all_) {
-			for (auto& rigid_body : rigid_bodies_) {
-				changed |= args.ApplyModifier(rigid_body.second);
-			}
-		} else {
-			for (const string& name : args.names_to_modify_) {
-				auto rigid_body_iter = rigid_bodies_.find(name);
-				if (rigid_body_iter == rigid_bodies_.end()) {
-					std::cout << "Tried to toggle a non-existant rigid body" << std::endl;
-					continue;
-				}
-				changed |= args.ApplyModifier(rigid_body_iter->second);
-			}
-		}
-		if (changed && updated_callback_) {
 			updated_callback_(GetId());
 		}
 	}
@@ -313,7 +258,7 @@ private:
 		for (const auto& named_rigid_body : rigid_bodies_) {
 			poseable::PushNewPose(*this, 
 				named_rigid_body.first,
-				bullet::poses::GetPose(named_rigid_body.second.body_.GetTransform()));
+				poses::ToPose(named_rigid_body.second.body_->getGlobalPose()));
 		}
 	}
 
@@ -324,20 +269,9 @@ private:
 				std::cout << "Attempting to set a new pose of a rigid body that doesn't exist." << std::endl;
 				return;
 			}
-			rigid_body_iter->second.body_.SetTransform(bullet::poses::GetTransform(args.new_pose_));
+			rigid_body_iter->second.SetPose(args.new_pose_);
 		}
 	}
-
-  unique_ptr<queries::CheckCollisionResult> CheckCollision(const queries::CheckCollisionQuery& args) const {
-    const bullet::CollisionObject& other_object = args.collision_object_;
-    for (const pair<const string, PhysicsObjectComponent>& sub_component : rigid_bodies_) {
-      const PhysicsObjectComponent& rigid_body = sub_component.second;
-      if (rigid_body.enabled_ && args.world_.CheckCollisionExistsPair(rigid_body.body_, other_object)) {
-        return make_unique<queries::CheckCollisionResult>(true);
-      }
-    }
-    return make_unique<queries::CheckCollisionResult>(false);
-  }
 
 	map<string, PhysicsObjectComponent> rigid_bodies_;
 	game_scene::ActorCallback updated_callback_;
