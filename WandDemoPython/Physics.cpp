@@ -9,14 +9,6 @@
 BOOST_PTR_MAGIC_STRUCT(game_scene::AddRigidBody)
 BOOST_PTR_MAGIC_STRUCT(game_scene::RemoveRigidBody)
 BOOST_PTR_MAGIC(game_scene::UpdatePhysicsObject)
-//BOOST_PTR_MAGIC(PxScene)
-namespace boost { \
-	template <> \
-	PxScene const volatile * get_pointer<class PxScene const volatile>( \
-		class PxScene const volatile *c) \
-	{ return c; } \
-}
-BOOST_PTR_MAGIC(PxRigidActor)
 
 /*std::auto_ptr<game_scene::AddRigidBody> MakeAddRigidBody(
 	string name, PxRigidActor* rigid_body_ptr) {
@@ -26,9 +18,6 @@ BOOST_PTR_MAGIC(PxRigidActor)
 }*/
 
 void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
-	class_<PxScene, boost::noncopyable>("PxScene", no_init);
-	class_<PxRigidActor, boost::noncopyable>("PxRigidActor", no_init);
-
 	class_<game_scene::PhysicsObjectCommand>("PhysicsObjectCommand")
 		.def_readonly("ADD_RIGID_BODY", &game_scene::PhysicsObjectCommand::ADD_RIGID_BODY)
 		.def_readonly("REMOVE_RIGID_BODY", &game_scene::PhysicsObjectCommand::REMOVE_RIGID_BODY)
@@ -42,7 +31,7 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
   class_<game_scene::CheckCollisionResult, bases<game_scene::QueryResult>, boost::noncopyable>("CheckCollisionResult", no_init)
     .def_readonly("collision", &game_scene::CheckCollisionResult::collision_);*/
 
-	class_<game_scene::AddRigidBody, bases<game_scene::CommandArgs>,
+	/*class_<game_scene::AddRigidBody, bases<game_scene::CommandArgs>,
 		std::auto_ptr<game_scene::AddRigidBody>,
 		boost::noncopyable>("AddRigidBody", init<string, bool, PxRigidActor*>())
 		.def(init<string, PxRigidActor*>())
@@ -74,5 +63,5 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 			init<game_scene::UpdatePhysicsObject::UpdateType, game_scene::ActorId>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::UpdatePhysicsObject>);
+		&PyScene::MakeCommandAfter<game_scene::UpdatePhysicsObject>);*/
 }

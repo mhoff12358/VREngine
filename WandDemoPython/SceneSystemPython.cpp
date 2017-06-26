@@ -27,6 +27,7 @@
 #include "PythonClassHelpers.h"
 
 #include "StlInterface.h"
+#include "MyPhysics.h"
 #include "EntitySpecificationInterface.h"
 #include "GraphicsObjectInterface.h"
 #include "HeadsetInterface.h"
@@ -39,6 +40,7 @@
 #include "LightInterface.h"
 #include "Physics.h"
 #include "Bullet.h"
+#include "PhysX.h"
 #include "Poseable.h"
 
 BOOST_PTR_MAGIC(game_scene::ActorAdapter<PyActorImpl<game_scene::ActorImpl>>)
@@ -63,8 +65,8 @@ struct PhysicsObjectMixinHelper : public WrapActorMixin<game_scene::actors::Phys
   struct Level2 : public WrapActorMixin<game_scene::actors::PhysicsObject>::Level2<ActorImplChain> {
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
-      class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
-        .def("GetRigidBody", &WholeChain::GetRigidBody, return_value_policy<reference_existing_object>());
+			class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
+				;// .def("GetRigidBody", &WholeChain::GetRigidBody, return_value_policy<reference_existing_object>());
     }
   };
 };
@@ -86,10 +88,14 @@ struct PoseableMixinHelper : public WrapActorMixin<game_scene::actors::Poseable>
 struct PhysicsSimulationMixinHelper : public WrapActorMixin<game_scene::actors::PhysicsSimulation> {
   template<typename ActorImplChain>
   struct Level2 : public WrapActorMixin<game_scene::actors::PhysicsSimulation>::Level2<ActorImplChain> {
+		static mp::PxScene* GetPhysicsScene(WholeChain& c) {
+			return mp::Wrap(c.GetPhysicsScene());
+		}
+
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
-      class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
-        .def("GetPhysicsScene", &WholeChain::GetPhysicsScene, return_value_policy<reference_existing_object>());
+			class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
+				.def("GetPhysicsScene", &GetPhysicsScene, return_value_policy<reference_existing_object>());
     }
   };
 };
@@ -192,5 +198,6 @@ BOOST_PYTHON_MODULE(scene_system_) {
 	LightInterface();
 	Physics(scene_registration);
 	Bullet(scene_registration);
+	PhysX(scene_registration);
   Poseable(scene_registration);
 }

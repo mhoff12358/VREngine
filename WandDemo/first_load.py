@@ -66,113 +66,15 @@ def first_load(resources):
             sc.GraphicsResourceQuery.GRAPHICS_RESOURCE_REQUEST)).GetGraphicsResources()
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
-    physics_object = sc.NewGraphicsObject_PhysicsObject_Poseable_ActorImpl()
-    physics_object.RegisterNamedPose("Sphere", sc.PoseData(sc.Pose(), sc.Pose(sc.Scale(0.5)), sc.FreezeBits.SCALE))
-    scene.AddActor(physics_object)
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(physics_object.id),
-        sc.AddRigidBody(
-            "Sphere", sc.RigidBody(sc.Shape.MakeSphere(0.5), sc.Pose(sc.Location(1, 100, 3)), 1.0, sc.InteractionType(10.0))))
-    shader_details = shader_helper.ShaderHelper.Default(pixel_shader_name = "ps_solidcolor", lighting = True)
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(physics_object.id),
-        sc.CreateGraphicsObject(
-            "basic",
-            sc.VectorEntitySpecification((
-                sc.EntitySpecification("Shell")
-                .SetModel(sc.ModelDetails(
-                    sc.ModelIdentifier("sphere.obj"),
-                    sc.OutputFormat(
-                        sc.ModelModifier(
-                            sc.ArrayInt3((0, 1, 2)),
-                            sc.ArrayFloat3((1, 1, 1)),
-                            sc.ArrayBool2((False, True))),
-                        sc.VertexType.all,
-                        False)))
-                .SetShaders(shader_details)
-                .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((1, 1, 1)),)))
-                .SetComponent("Sphere"),)),
-            sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
-
-    collision_sphere = HackActor()
-    scene.AddActor(collision_sphere)
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(collision_sphere.id),
-        sc.CreateGraphicsObject(
-            "basic",
-            sc.VectorEntitySpecification((
-                sc.EntitySpecification("Shell")
-                .SetModel(sc.ModelDetails(
-                    sc.ModelIdentifier("sphere.obj"),
-                    sc.OutputFormat(
-                        sc.ModelModifier(
-                            sc.ArrayInt3((0, 1, 2)),
-                            sc.ArrayFloat3((1, 1, 1)),
-                            sc.ArrayBool2((False, True))),
-                        sc.VertexType.all,
-                        False)))
-                .SetShaders(shader_details)
-                .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat((1, 0.25, 0.25)),)))
-                .SetComponent("Sphere"),)),
-            sc.VectorComponentInfo((sc.ComponentInfo("", "Sphere"),))))
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(collision_sphere.id),
-        sc.PushNewPose(
-            "Sphere",
-            "",
-            sc.Pose(sc.Location(1, 0.1, 3), sc.Scale(0.05))))
-    scene.AddActorToGroup(collision_sphere.id, scene.FindByName("TickRegistry"))
-
-    physics_collection = sc.PhysicsObjectCollection_ActorImpl()
-    scene.AddActor(physics_collection)
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(physics_collection.id),
-        sc.AddRigidBody(
-            "Floor", sc.RigidBody(sc.Shape.MakePlane(sc.Location(0, 1, 0)), sc.Pose(sc.Location(0, 0, 0)), 1.0)))
-
-    physics_simulation = sc.PhysicsSimulation_ActorImpl()
-    physics_sim_id = scene.AddActor(physics_simulation)
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(physics_simulation.id),
-        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_object.id))
-    scene.MakeCommandAfter(
-        scene.BackOfNewCommands(),
-        sc.Target(physics_simulation.id),
-        sc.UpdatePhysicsObject(sc.UpdateType.ADD, physics_collection.id))
-    scene.AddActorToGroup(physics_simulation.id, scene.FindByName("TickRegistry"))
-    scene.RegisterByName("MainPhysicsSimulation", physics_simulation.id)
-
-    world = physics_simulation.GetWorld()
-
-    cylinder = sc.CollisionObject(sc.CollisionObjectType.NORMAL, sc.Shape.MakeCylinder(sc.Location(1, 1, 1)), sc.Pose())
-
-    def PointCheck(obj, point):
-        point_obj.SetPose(point)
-        print(point, world.CheckCollisionExistsPair(obj, point_obj))
-
-    PointCheck(cylinder, sc.Pose(sc.Location(1, 0, 0)))
-    PointCheck(cylinder, sc.Pose(sc.Location(1.1, 0, 0)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0, 1, 0)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0, 1.1, 0)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0, 0, 1)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0, 0, 1.1)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0, 0.8, 0.8)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0.8, 0, 0.8)))
-    PointCheck(cylinder, sc.Pose(sc.Location(0.8, 0.8, 0)))
+    sim = sc.PhysicsSimulation()
+    ph_scene = sim.GetPhysicsScene()
+    ph_scene.Hello()
 
     import code
     a = globals()
     a.update(locals())
-    #code.interact(local = a)
+    code.interact(local = a)
 
-    collision_sphere.SetPhysicsSim(physics_sim_id)
-    collision_sphere.SetOtherBall(physics_object.id)
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
     scene.AddActor(light)
