@@ -39,7 +39,12 @@ typename dw_trait<T>::dw_type& Wrap(T& t) { return reinterpret_cast<dw_trait<T>:
 
 DWWRAP(PxActor, DummyTop)
 DWWRAP(PxRigidActor, PxActor)
+DWWRAP(PxRigidBody, PxRigidActor)
+DWWRAP(PxRigidDynamic, PxRigidBody)
+DWWRAP(PxRigidStatic, PxRigidActor)
 
 DWWRAP(PxScene, DummyTop)
+
+DWWRAP(PxPhysics, DummyTop)
 
 }
