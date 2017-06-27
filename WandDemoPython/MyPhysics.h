@@ -30,12 +30,20 @@ struct dw_trait<::child> { typedef ::child real_type; typedef child dw_type; };
 template <typename T>
 typename dw_trait<T>::real_type* Unwrap(T* t) { return reinterpret_cast<dw_trait<T>::real_type*>(t); }
 template <typename T>
+typename const dw_trait<T>::real_type* Unwrap(const T* t) { return reinterpret_cast<const dw_trait<T>::real_type*>(t); }
+template <typename T>
 typename dw_trait<T>::real_type& Unwrap(T& t) { return reinterpret_cast<dw_trait<T>::real_type&>(t); }
+template <typename T>
+typename const dw_trait<T>::real_type& Unwrap(const T& t) { return reinterpret_cast<const dw_trait<T>::real_type&>(t); }
 
 template <typename T>
 typename dw_trait<T>::dw_type* Wrap(T* t) { return reinterpret_cast<dw_trait<T>::dw_type*>(t); }
 template <typename T>
+typename const dw_trait<T>::dw_type* Wrap(const T* t) { return reinterpret_cast<const dw_trait<T>::dw_type*>(t); }
+template <typename T>
 typename dw_trait<T>::dw_type& Wrap(T& t) { return reinterpret_cast<dw_trait<T>::dw_type&>(t); }
+template <typename T>
+typename const dw_trait<T>::dw_type& Wrap(const T& t) { return reinterpret_cast<const dw_trait<T>::dw_type&>(t); }
 
 DWWRAP(PxActor, DummyTop)
 DWWRAP(PxRigidActor, PxActor)
