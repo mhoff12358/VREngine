@@ -43,6 +43,8 @@ DWWRAP(PxRigidBody, PxRigidActor)
 DWWRAP(PxRigidDynamic, PxRigidBody)
 DWWRAP(PxRigidStatic, PxRigidActor)
 
+DWWRAP(PxMaterial, DummyTop)
+
 DWWRAP(PxScene, DummyTop)
 
 DWWRAP(PxPhysics, DummyTop)

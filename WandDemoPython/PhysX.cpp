@@ -22,6 +22,9 @@ void PhysX(class_<game_scene::Scene, boost::noncopyable>& scene_registration) {
 		.def("Hi", static_cast<void(*)(mp::PxScene&, float f)>([](mp::PxScene& w, float f) { mp::Unwrap(w).setClothInterCollisionDistance(f); }));
 
 	class_<mp::PxPhysics, boost::noncopyable>("PxPhysics", no_init)
-		.def("CreatePlane", static_cast<mp::PxRigidStatic(*)(mp::PxPhysics&, PxPlane, PxMaterial&)>(), return_value_policy<reference_existing_object>());
+		.def("CreatePlane", static_cast<mp::PxRigidStatic(*)(mp::PxPhysics&, PxPlane, PxMaterial&)>(
+			[](mp::PxPhysics& phys, PxPlane plane, mp::PxMaterial& material) {
+		return mp::Wrap(PxCreatePlane(mp::Unwrap(phys), plane, mp::Unwrap(material)));
+	}), return_value_policy<reference_existing_object>());
 
 }
