@@ -92,10 +92,20 @@ struct PhysicsSimulationMixinHelper : public WrapActorMixin<game_scene::actors::
 			return mp::Wrap(c.GetPhysicsScene());
 		}
 
+		static mp::PxPhysics* GetPhysics(WholeChain& c) {
+			return mp::Wrap(c.GetPhysics());
+		}
+
+		static const mp::PxMaterial& GetDefaultMaterial(WholeChain& c) {
+			return mp::Wrap(c.GetDefaultMaterial());
+		}
+
     static void CreateChain(string name) {
       std::cout << "CREATING BASE CLASS: " << name << std::endl;
 			class_<WholeChain, bases<SubChain>, boost::noncopyable>(name.c_str(), init<>())
-				.def("GetPhysicsScene", &GetPhysicsScene, return_value_policy<reference_existing_object>());
+				.def("GetDefaultMaterial", &GetDefaultMaterial, return_value_policy<reference_existing_object>())
+				.def("GetPhysicsScene", &GetPhysicsScene, return_value_policy<reference_existing_object>())
+				.def("GetPhysics", &GetPhysics, return_value_policy<reference_existing_object>());
     }
   };
 };

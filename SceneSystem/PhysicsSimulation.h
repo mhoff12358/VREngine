@@ -88,6 +88,14 @@ public:
 		return physics_simulation_impl_.scene_.scene_;
 	}
 
+	PxPhysics* GetPhysics() {
+		return physics_simulation_impl_.system_.physics_;
+	}
+
+	const PxMaterial& GetDefaultMaterial() {
+		return *physics_simulation_impl_.system_.default_material_;
+	}
+
 private:
 	void PhysicsObjectIsUpdated(ActorId actor_id) {
 		auto raw_result = GetScene().AskQuery(Target(actor_id), GetRigidBodies());

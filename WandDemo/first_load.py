@@ -68,7 +68,26 @@ def first_load(resources):
 
     sim = sc.PhysicsSimulation()
     ph_scene = sim.GetPhysicsScene()
-    ph_scene.Hello()
+    phys = sim.GetPhysics()
+
+    box = phys.CreateRigidDynamic(sc.Pose(sc.Location(0, 3, 0), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/3.0)))
+    box.CreateExclusiveShape(sc.PxBoxGeometry(1, 1, 1), sim.GetDefaultMaterial())
+    box.UpdateMassAndInertia(10.0)
+
+    floor_plane = phys.CreatePlane(sc.PxPlane(0, 1, 0, 0), sim.GetDefaultMaterial())
+
+    ph_scene.AddActor(box)
+    ph_scene.AddActor(floor_plane)
+
+    while True:
+        ph_scene.Simulate(1.0 / 60.0)
+        ph_scene.FetchResults()
+
+        actives = ph_scene.GetActiveActors()
+        for active in actives:
+            cast_active = active.IsPxRigidActor()
+            if cast_active:
+                print("Active:", cast_active.GetGlobalPose())
 
     import code
     a = globals()
