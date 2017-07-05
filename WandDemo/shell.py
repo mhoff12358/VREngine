@@ -75,16 +75,10 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_PrintNewPoses_PhysicsObject_
     @delegater.RegisterCommand(sc.CommandType.ADDED_TO_SCENE)
     def HandleAddedToScene(self, args):
         self.LoadGraphicsResources()
-        self.HandleCommand(sc.AddRigidBody(
-            "Cylinder", sc.RigidBody(
-                sc.Shape.MakeBox(sc.Location(1.0, 1.0, 1.0)),
-                self.starting_pose,
-                1.0,
-                sc.InteractionType(10.0)
-        )))
+        self.CreatePhysicsResources()
         self.RegisterNamedPose("Cylinder", sc.PoseData())
         self.SetSize(self.size)
-        #self.PushNewPose("Cylinder", self.starting_pose)
+        self.PushNewPose("Cylinder", self.starting_pose)
 
     @delegater.RegisterCommand(ShellCommands.LOAD)
     def HandleLoadShell(self, args: LoadShell):
@@ -130,3 +124,11 @@ class Shell(sc.DelegatingActor[sc.NewGraphicsObject_PrintNewPoses_PhysicsObject_
                     .SetShaderSettingsValue(sc.ShaderSettingsValue((sc.VectorFloat(self.shell_attributes.color),)))
                     .SetComponent("Cylinder"),)),
                 sc.VectorComponentInfo((sc.ComponentInfo("", "Cylinder"),))))
+
+    def CreatePhysicsResources(self):
+        sim = sc.GlobalPhysicsSimulation()
+        box = sim.GetPhysics().CreateRigidDynamic(self.starting_pose)
+        box.CreateExclusiveShape(sc.PxBoxGeometry(1, 1, 1), sim.GetDefaultMaterial())
+        box.UpdateMassAndInertia(10.0)
+        self.HandleCommand(sc.AddRigidBody(
+            "Cylinder", box))

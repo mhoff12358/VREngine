@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Physics.h"
+#include "MyPhysics.h"
 
 #include "PyScene.h"
 #include "PyCommandAndQuery.h"
@@ -31,12 +32,21 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
   class_<game_scene::CheckCollisionResult, bases<game_scene::QueryResult>, boost::noncopyable>("CheckCollisionResult", no_init)
     .def_readonly("collision", &game_scene::CheckCollisionResult::collision_);*/
 
-	/*class_<game_scene::AddRigidBody, bases<game_scene::CommandArgs>,
+	class_<game_scene::AddRigidBody, bases<game_scene::CommandArgs>,
 		std::auto_ptr<game_scene::AddRigidBody>,
-		boost::noncopyable>("AddRigidBody", init<string, bool, PxRigidActor*>())
-		.def(init<string, PxRigidActor*>())
-		.def(init<bool, PxRigidActor*>())
-		.def(init<PxRigidActor*>());
+		boost::noncopyable>("AddRigidBody", no_init)
+		.def("__init__", boost::python::make_constructor(static_cast<std::auto_ptr<game_scene::AddRigidBody>(*)(string, bool, mp::PxRigidBody*)>([](string name, bool enabled, mp::PxRigidBody* p) {
+		return std::auto_ptr<game_scene::AddRigidBody>(new game_scene::AddRigidBody(name, enabled, mp::Unwrap(p)));
+	})))
+		.def("__init__", boost::python::make_constructor(static_cast<std::auto_ptr<game_scene::AddRigidBody>(*)(string, mp::PxRigidBody*)>([](string name, mp::PxRigidBody* p) {
+		return std::auto_ptr<game_scene::AddRigidBody>(new game_scene::AddRigidBody(name, mp::Unwrap(p)));
+	})))
+		.def("__init__", boost::python::make_constructor(static_cast<std::auto_ptr<game_scene::AddRigidBody>(*)(bool, mp::PxRigidBody*)>([](bool enabled, mp::PxRigidBody* p) {
+		return std::auto_ptr<game_scene::AddRigidBody>(new game_scene::AddRigidBody(enabled, mp::Unwrap(p)));
+	})))
+		.def("__init__", boost::python::make_constructor(static_cast<std::auto_ptr<game_scene::AddRigidBody>(*)(mp::PxRigidBody*)>([](mp::PxRigidBody* p) {
+		return std::auto_ptr<game_scene::AddRigidBody>(new game_scene::AddRigidBody(mp::Unwrap(p)));
+	})));
 	scene_registration.def(
 		"MakeCommandAfter",
 		&PyScene::MakeCommandAfter<game_scene::AddRigidBody>);
@@ -63,5 +73,5 @@ void Physics(class_<game_scene::Scene, boost::noncopyable>& scene_registration) 
 			init<game_scene::UpdatePhysicsObject::UpdateType, game_scene::ActorId>());
 	scene_registration.def(
 		"MakeCommandAfter",
-		&PyScene::MakeCommandAfter<game_scene::UpdatePhysicsObject>);*/
+		&PyScene::MakeCommandAfter<game_scene::UpdatePhysicsObject>);
 }

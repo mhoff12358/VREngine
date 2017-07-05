@@ -67,6 +67,11 @@ def first_load(resources):
     graphics_resources.GetEntityHandler().MutableLightSystem("cockpit_lights").MutableAmbientLight().color = sc.Color(1, 1, 1, 0.2)
 
     sim = sc.PhysicsSimulation()
+    sc.SetGlobalPhysicsSimulation(sim)
+    scene.AddActor(sim)
+    scene.AddActorToGroup(sim.id, scene.FindByName("TickRegistry"))
+
+    """
     ph_scene = sim.GetPhysicsScene()
     phys = sim.GetPhysics()
 
@@ -88,11 +93,12 @@ def first_load(resources):
             cast_active = active.IsPxRigidActor()
             if cast_active:
                 print("Active:", cast_active.GetGlobalPose())
+    """
 
     import code
     a = globals()
     a.update(locals())
-    code.interact(local = a)
+    #code.interact(local = a)
 
 
     light = lightbulb.LightBulb(light_system_name = "cockpit_lights", light_number = 0, color = sc.Color(0.5, 0.5, 0.5, 4.25))
@@ -106,14 +112,14 @@ def first_load(resources):
             },
         ),
         shell_details = (
-#            {
-#                "shell_attributes" : shell.ShellAttributes(power = 0.5, color = (1, 1, 0)),
-#                "starting_pose" : sc.Pose(sc.Location(1, 1, -0.5)),
-#             },
-#            {
-#                "shell_attributes" : shell.ShellAttributes(power = 1, color = (0, 1, 1), is_flare = True),
-#                "starting_pose" : sc.Pose(sc.Location(1, 1, 0)),
-#             },
+            {
+                "shell_attributes" : shell.ShellAttributes(power = 0.5, color = (1, 1, 0)),
+                "starting_pose" : sc.Pose(sc.Location(1, 1, -0.5)),
+             },
+            {
+                "shell_attributes" : shell.ShellAttributes(power = 1, color = (0, 1, 1), is_flare = True),
+                "starting_pose" : sc.Pose(sc.Location(1, 1, 0)),
+             },
             {
                 "shell_attributes" : shell.ShellAttributes(power = 1.5, color = (1, 0, 1)),
                 "starting_pose" : sc.Pose(sc.Location(1, 1, 0.5), sc.Quaternion.RotationAboutAxis(sc.AxisID.x, 3.14/3.0)),
